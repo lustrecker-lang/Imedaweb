@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useUser, useFirestore, useDoc, setDocumentNonBlocking, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
@@ -98,12 +98,13 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
   );
 }
 
-export default function PageEditor({ params }: { params: { pageId: string } }) {
+export default function PageEditor() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const pageId = params.pageId;
+  const params = useParams();
+  const pageId = params.pageId as string;
 
   const pageRef = useMemoFirebase(() => {
     if (!firestore || !pageId) return null;
