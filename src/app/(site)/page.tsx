@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, BarChart, Users } from "lucide-react";
-import { doc, collection } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +52,7 @@ export default function Home() {
   const firestore = useFirestore();
   const contentRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return doc(collection(firestore, 'homePageContent'), 'main');
+    return doc(firestore, 'homePageContent', 'main');
   }, [firestore]);
   
   const { data: homePageContent, isLoading } = useDoc<HomePageContent>(contentRef);
