@@ -54,7 +54,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white">
           <div className="container px-4 md:px-6">
-            <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-white">
+            <h1 className="text-4xl font-normal tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-white">
               Innovate. Manage. Excel.
             </h1>
             <p className="mx-auto mt-4 max-w-[700px] text-lg text-gray-200 md:text-xl">
@@ -74,7 +74,7 @@ export default function Home() {
       <section className="py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">
+            <h2 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
               Features Designed for Growth
             </h2>
             <p className="mt-4 text-muted-foreground md:text-xl/relaxed">
@@ -98,7 +98,7 @@ export default function Home() {
                 )}
                 <CardHeader>
                     <div className="mb-4">{feature.icon}</div>
-                    <CardTitle className="font-headline">{feature.title}</CardTitle>
+                    <CardTitle className="font-headline font-normal">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>{feature.description}</CardDescription>

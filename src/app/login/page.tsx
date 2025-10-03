@@ -56,7 +56,7 @@ export default function LoginPage() {
           <CardHeader className="text-center space-y-2">
             <div className="flex justify-center items-center gap-2">
                 <Mountain className="h-8 w-8 text-primary" />
-                <CardTitle className="text-3xl font-headline">IMEDA</CardTitle>
+                <CardTitle className="text-3xl font-headline font-normal">IMEDA</CardTitle>
             </div>
             <CardDescription>Admin Login</CardDescription>
           </CardHeader>
