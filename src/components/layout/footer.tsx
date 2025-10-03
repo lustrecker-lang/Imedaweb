@@ -1,17 +1,15 @@
 'use client';
 import Link from "next/link";
-import { Linkedin, Twitter, Facebook, Mountain } from "lucide-react";
+import { Linkedin, Twitter, Facebook } from "lucide-react";
 import { useFirestore, useDoc } from "@/firebase";
 import { useMemo } from "react";
 import { doc } from "firebase/firestore";
 import Image from "next/image";
-import { Button } from "../ui/button";
 
 interface CompanyProfile {
   name?: string;
   logoUrl?: string;
 }
-
 
 export function Footer() {
   const firestore = useFirestore();
@@ -25,9 +23,45 @@ export function Footer() {
   return (
     <footer className="border-t bg-background">
       <div className="container mx-auto max-w-[1400px] px-4 py-8 md:px-6">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col gap-2">
-             <Link href="/" className="flex items-center gap-2">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+          <div>
+            <h3 className="text-xs font-semibold tracking-wider uppercase">À propos</h3>
+            <ul className="mt-4 space-y-2">
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">À propos de nous</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Carrières</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Présentation</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Références</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Notre approche</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold tracking-wider uppercase">Formations</h3>
+            <ul className="mt-4 space-y-2">
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Catalogue 2025-26</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">700+ Formations internationales</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Formations en ligne</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold tracking-wider uppercase">Campus</h3>
+            <ul className="mt-4 space-y-2">
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Dubaï</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Côte d’Azur</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Paris</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold tracking-wider uppercase">Publications</h3>
+            <ul className="mt-4 space-y-2">
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 1</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 2</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 3</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 4</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 5</Link></li>
+            </ul>
+          </div>
+          <div className="flex flex-col gap-4 items-start lg:items-end">
+            <Link href="/" className="flex items-center gap-2">
                 {companyProfile?.logoUrl ? (
                   <Image
                     src={companyProfile.logoUrl}
@@ -36,33 +70,9 @@ export function Footer() {
                     height={24}
                     className="h-6 w-auto object-contain"
                   />
-                ) : (
-                  <Mountain className="h-6 w-6 text-primary" />
-                )}
+                ) : null}
             </Link>
-            <p className="text-xs text-muted-foreground">
-              Elevate your business operations to the next level.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xs font-semibold tracking-wider uppercase">Quick Links</h3>
-            <ul className="mt-4 space-y-2">
-              <li><Link href="/" className="text-xs text-muted-foreground hover:text-foreground">Home</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">About</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Services</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Contact</Link></li>
-            </ul>
-          </div>
-          <div>
-             <h3 className="text-xs font-semibold tracking-wider uppercase">Legal</h3>
-            <ul className="mt-4 space-y-2">
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Terms of Service</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Privacy Policy</Link></li>
-            </ul>
-          </div>
-          <div>
-             <h3 className="text-xs font-semibold tracking-wider uppercase">Follow Us</h3>
-             <div className="mt-4 flex items-center gap-4">
+             <div className="flex items-center gap-4">
               <Link href="#" aria-label="Twitter">
                 <Twitter className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
               </Link>
@@ -75,14 +85,20 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <div className="mt-8 border-t pt-6 flex flex-col items-center gap-4">
-          <div className="flex gap-4">
-             <Link href="/login" className="text-sm text-muted-foreground transition-colors hover:text-primary">Editor Login</Link>
-          </div>
+        
+        <div className="mt-8 border-t pt-6 flex flex-wrap justify-center gap-x-6 gap-y-2">
+           <Link href="#" className="text-xs text-muted-foreground transition-colors hover:text-primary">Conditions d’utilisation</Link>
+           <Link href="#" className="text-xs text-muted-foreground transition-colors hover:text-primary">Politique de confidentialité</Link>
+           <Link href="#" className="text-xs text-muted-foreground transition-colors hover:text-primary">Protection de nos marques</Link>
+           <Link href="/login" className="text-xs text-muted-foreground transition-colors hover:text-primary">Login éditeur</Link>
         </div>
+
         <div className="mt-8 border-t pt-6 text-center">
             <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} {companyProfile?.name || 'IMEDA'}. All rights reserved.
+              © 2025 {companyProfile?.name || 'Imeda International – IMEDA'}.
+            </p>
+             <p className="text-xs text-muted-foreground mt-1">
+              L’institution Licences 4700-9288 (Dubaï) et 1671-3512 (Europe).
             </p>
         </div>
       </div>
