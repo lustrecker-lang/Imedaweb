@@ -101,7 +101,6 @@ export default function LoginPage() {
                 ) : (
                   <Mountain className="h-8 w-8 text-primary" />
                 )}
-                <CardTitle className="text-xl font-headline font-normal">{companyProfile?.name || 'IMEDA'}</CardTitle>
             </div>
             <CardDescription>Editor Login</CardDescription>
           </CardHeader>
