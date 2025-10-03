@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from "next/image";
@@ -60,7 +61,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      <section className="container py-12 md:py-20 lg:py-24">
+      <section className="container py-8">
         <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden rounded-xl">
             {heroImage && (
             <Image
@@ -100,7 +101,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-12 md:py-24 lg:py-32">
+      <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
