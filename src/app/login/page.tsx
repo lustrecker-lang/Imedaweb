@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +28,6 @@ import {
 import Link from "next/link";
 import { Mountain } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
-import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
@@ -62,12 +62,17 @@ export default function LoginPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-        initiateEmailSignIn(auth, values.email, values.password);
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        // The useEffect will handle the redirect on successful login
     } catch (error: any) {
+        let description = "An unexpected error occurred.";
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            description = "Invalid email or password. Please try again.";
+        }
         toast({
             variant: "destructive",
             title: "Login Failed",
-            description: error.message || "An unexpected error occurred.",
+            description: description,
         });
     }
   }
