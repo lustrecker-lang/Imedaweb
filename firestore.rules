@@ -1,40 +1,47 @@
 /**
- * @fileoverview Firestore Security Rules for the application.
+ * @fileoverview Firestore Security Rules for Prototyping.
  *
  * Core Philosophy:
- * This ruleset allows public read access to home page content, but restricts modifications (create, update, delete) to authenticated users.
+ * This ruleset prioritizes rapid prototyping by granting broad access to authenticated users while preventing unauthenticated access. Data shape validation is omitted for faster iteration.
  *
  * Data Structure:
- * The application stores home page content in the `/homePageContent/{homePageContentId}` collection.
+ * - /homePageContent/{homePageContentId}: Stores home page content. Accessible by all authenticated users.
+ * - /companyProfile/{profileId}: Stores company profile information. Accessible by all authenticated users.
  *
  * Key Security Decisions:
- * - Public read access is granted for the `/homePageContent` collection.
- * - Any authenticated user can modify home page content.
- *
- * Denormalization for Authorization:
- * - The `HomePageContent` documents include an `updatedBy` field, which is used to record the user who last modified the document. This is not used for authorization but could be expanded to implement ownership-based restrictions if needed.
+ * - Authenticated users can read and write all documents.
+ * - Unauthenticated access is denied.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows public read access to home page content, but restricts modifications to authenticated users.
+     * @description Controls read and write access to home page content.
      * @path /homePageContent/{homePageContentId}
-     * @allow (get, list) - Any user can read the home page content.
-     * @allow (create, update, delete) - Any authenticated user can modify the home page content. Example: A user with UID 'user123' creating a new home page content document.
-     * @deny (create, update, delete) - An unauthenticated user attempting to modify the home page content.
-     * @principle Allows public read access with authenticated-user-only writes.
+     * @allow (get, list): Any user can read the home page content.
+     * @allow (create, update, delete): Any authenticated user can modify the home page content.
+     * @deny (create, update, delete): An unauthenticated user cannot modify the home page content.
+     * @principle Allows any authenticated user to modify home page content for easy collaboration during prototyping.
      */
     match /homePageContent/{homePageContentId} {
-      // Allow anyone to read the home page content
       allow get, list: if true;
-
-      // Only allow authenticated users to create, update, and delete home page content
       allow create, update, delete: if isSignedIn();
     }
 
-    // Define helper functions
+    /**
+     * @description Controls read and write access to company profile information.
+     * @path /companyProfile/{profileId}
+     * @allow (get, list): Any user can read the company profile information.
+     * @allow (create, update, delete): Any authenticated user can modify the company profile information.
+     * @deny (create, update, delete): An unauthenticated user cannot modify the company profile information.
+     * @principle Allows any authenticated user to modify company profile information for easy collaboration during prototyping.
+     */
+    match /companyProfile/{profileId} {
+      allow get, list: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
     function isSignedIn() {
       return request.auth != null;
     }
