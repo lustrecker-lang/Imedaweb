@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { useUser, useFirestore, useDoc, setDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -47,7 +46,7 @@ export default function DashboardPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  const contentRef = useMemoFirebase(() => {
+  const contentRef = useMemo(() => {
     if (!firestore) return null;
     return doc(firestore, 'homePageContent', 'main');
   }, [firestore]);
@@ -83,9 +82,10 @@ export default function DashboardPage() {
   }
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (!contentRef) return;
+    if (!firestore) return;
+    const docRef = doc(firestore, 'homePageContent', 'main');
     
-    setDocumentNonBlocking(contentRef, values, { merge: true });
+    setDocumentNonBlocking(docRef, values, { merge: true });
 
     toast({
       title: 'Success!',

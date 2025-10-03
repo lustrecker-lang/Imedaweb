@@ -14,8 +14,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { useFirestore, useDoc } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo } from "react";
 
 
 const features = [
@@ -50,7 +51,7 @@ export default function Home() {
   );
 
   const firestore = useFirestore();
-  const contentRef = useMemoFirebase(() => {
+  const contentRef = useMemo(() => {
     if (!firestore) return null;
     return doc(firestore, 'homePageContent', 'main');
   }, [firestore]);
