@@ -21,31 +21,31 @@ export function Header() {
   const { user, isUserLoading } = useUser();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
           <Mountain className="h-6 w-6 text-primary" />
-          <span className="text-lg font-headline font-normal">IMEDA</span>
+          <span className="text-lg font-semibold tracking-wider font-headline">IMEDA</span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
-              className="transition-colors hover:text-primary"
+              className="text-foreground/70 transition-colors hover:text-foreground"
             >
               {link.label}
             </Link>
           ))}
            { !isUserLoading && user && (
-            <Link href="/admin/dashboard" className="transition-colors hover:text-primary">
+            <Link href="/admin/dashboard" className="text-foreground/70 transition-colors hover:text-foreground">
               Dashboard
             </Link>
           )}
         </nav>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
            { !isUserLoading && !user && (
-              <Button variant="ghost" asChild className="hidden md:inline-flex">
+              <Button variant="outline" asChild className="hidden md:inline-flex">
                 <Link href="/login">Admin Login</Link>
               </Button>
             )
@@ -58,30 +58,30 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
-              <div className="grid gap-4 py-6">
+              <div className="grid gap-4 p-6">
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
                   <Mountain className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-headline font-normal">IMEDA</span>
+                  <span className="text-lg font-semibold tracking-wider font-headline">IMEDA</span>
                 </Link>
-                <nav className="grid gap-2">
+                <nav className="grid gap-2 text-lg font-medium">
                     {navLinks.map((link) => (
                         <Link
                             key={link.label}
                             href={link.href}
-                            className="flex w-full items-center py-2 text-lg font-medium"
+                            className="block py-2 text-foreground/70 transition-colors hover:text-foreground"
                             onClick={() => setIsOpen(false)}
                         >
                             {link.label}
                         </Link>
                     ))}
                     { !isUserLoading && user && (
-                      <Link href="/admin/dashboard" className="flex w-full items-center py-2 text-lg font-medium" onClick={() => setIsOpen(false)}>
+                      <Link href="/admin/dashboard" className="block py-2 text-foreground/70 transition-colors hover:text-foreground" onClick={() => setIsOpen(false)}>
                         Dashboard
                       </Link>
                     )}
                 </nav>
                  { !isUserLoading && !user && (
-                      <Button asChild>
+                      <Button asChild className="w-full">
                         <Link href="/login" onClick={() => setIsOpen(false)}>Admin Login</Link>
                       </Button>
                     )
