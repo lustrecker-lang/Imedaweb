@@ -127,11 +127,15 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
                 </Button>
-                <p className="text-center text-sm text-muted-foreground">
+                <div className="text-center text-sm text-muted-foreground space-x-2">
                     <Link href="/" className="underline transition-colors hover:text-primary">
                         Back to Home
                     </Link>
-                </p>
+                    <span>|</span>
+                    <Link href="/make-admin" className="underline transition-colors hover:text-primary">
+                        Become Admin
+                    </Link>
+                </div>
               </CardFooter>
             </form>
           </Form>
