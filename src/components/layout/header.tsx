@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -25,7 +24,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
           <Mountain className="h-6 w-6 text-primary" />
-          <span className="text-lg font-semibold tracking-wider font-headline">IMEDA</span>
+          <span className="text-base font-semibold tracking-wider font-headline">IMEDA</span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
           {navLinks.map((link) => (
@@ -45,7 +44,7 @@ export function Header() {
         </nav>
         <div className="flex items-center gap-2">
            { !isUserLoading && !user && (
-              <Button variant="outline" asChild className="hidden md:inline-flex">
+              <Button variant="outline" size="sm" asChild className="hidden md:inline-flex">
                 <Link href="/login">Admin Login</Link>
               </Button>
             )
@@ -61,9 +60,9 @@ export function Header() {
               <div className="grid gap-4 p-6">
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
                   <Mountain className="h-6 w-6 text-primary" />
-                  <span className="text-lg font-semibold tracking-wider font-headline">IMEDA</span>
+                  <span className="text-base font-semibold tracking-wider font-headline">IMEDA</span>
                 </Link>
-                <nav className="grid gap-2 text-lg font-medium">
+                <nav className="grid gap-2 text-base font-medium">
                     {navLinks.map((link) => (
                         <Link
                             key={link.label}

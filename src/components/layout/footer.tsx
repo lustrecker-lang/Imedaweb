@@ -9,14 +9,14 @@ export function Footer() {
           <div className="flex flex-col gap-2">
              <Link href="/" className="flex items-center gap-2">
                 <Mountain className="h-6 w-6 text-primary" />
-                <span className="text-lg font-semibold tracking-wider font-headline">IMEDA</span>
+                <span className="text-base font-semibold tracking-wider font-headline">IMEDA</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Elevate your business operations to the next level.
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-semibold tracking-wider uppercase">Quick Links</h3>
+            <h3 className="text-xs font-semibold tracking-wider uppercase">Quick Links</h3>
             <ul className="mt-4 space-y-2">
               <li><Link href="/" className="text-sm text-muted-foreground hover:text-foreground">Home</Link></li>
               <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">About</Link></li>
@@ -25,14 +25,14 @@ export function Footer() {
             </ul>
           </div>
           <div>
-             <h3 className="text-sm font-semibold tracking-wider uppercase">Legal</h3>
+             <h3 className="text-xs font-semibold tracking-wider uppercase">Legal</h3>
             <ul className="mt-4 space-y-2">
               <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">Terms of Service</Link></li>
               <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">Privacy Policy</Link></li>
             </ul>
           </div>
           <div>
-             <h3 className="text-sm font-semibold tracking-wider uppercase">Follow Us</h3>
+             <h3 className="text-xs font-semibold tracking-wider uppercase">Follow Us</h3>
              <div className="mt-4 flex items-center gap-4">
               <Link href="#" aria-label="Twitter">
                 <Twitter className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
@@ -47,7 +47,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t pt-6 text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} IMEDA. All rights reserved.
             </p>
         </div>

@@ -81,10 +81,10 @@ export default function Home() {
                 </div>
                 ) : (
                 <>
-                    <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline text-white">
+                    <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
                     {homePageContent?.title || "Innovate. Manage. Excel."}
                     </h1>
-                    <p className="mx-auto mt-4 max-w-[600px] text-base text-gray-200 md:text-lg">
+                    <p className="mx-auto mt-4 max-w-[600px] text-sm text-gray-200 md:text-base">
                     {homePageContent?.content || "IMEDA provides the tools you need to elevate your business operations to the next level."}
                     </p>
                 </>
@@ -103,10 +103,10 @@ export default function Home() {
       <section className="py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline">
+            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
               Features Designed for Growth
             </h2>
-            <p className="mt-4 text-muted-foreground md:text-lg/relaxed">
+            <p className="mt-2 text-muted-foreground md:text-base/relaxed">
               Our platform is packed with powerful features to help you succeed.
             </p>
           </div>
