@@ -1,64 +1,53 @@
 /**
- * @fileoverview Firestore Security Rules for Prototyping.
+ * @file Firestore Security Rules
+ * @description This ruleset prioritizes a flexible data structure for prototyping while enforcing authentication for content editing.
  *
  * Core Philosophy:
- * This ruleset prioritizes rapid prototyping by focusing on authorization and skipping data validation.
- * It enforces access control based on user authentication.
+ *   - Allows public read access to all content, enabling a publicly accessible website.
+ *   - Restricts write access to authenticated users. This is a basic level of protection.
  *
  * Data Structure:
- * - /pages/{pageId}: Stores content for specific pages.  Authenticated users can create, read, update, and delete page content.
- * - /companyProfile/{profileId}: Stores company profile information. Authenticated users can create, read, update, and delete company profiles.
+ *   - Content is organized into two top-level collections: `/pages/{pageId}` and `/companyProfile/{profileId}`.
+ *   - The rules do NOT enforce the schema of the documents, allowing for flexible data shapes during prototyping.
  *
  * Key Security Decisions:
- * - Authenticated users can list all pages and company profiles.
+ *   - Public Read Access: All `get` and `list` operations are allowed for all users (including unauthenticated users).
+ *   - Authenticated Writes: Only authenticated users can `create`, `update`, or `delete` documents. No ownership checks are performed. This is a trade-off to simplify the rules for initial prototyping. Consider adding ownership checks once the data model stabilizes.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Controls access to the 'pages' collection.
+     * @description Allows public read access to page content, but restricts write access to authenticated users.
      * @path /pages/{pageId}
-     * @allow (list) Authenticated user listing all pages.
-     * @deny (list) Unauthenticated user listing all pages.
-     * @allow (create) Authenticated user creating a page.
-     * @deny (create) Unauthenticated user creating a page.
-     * @allow (update) Authenticated user updating a page.
-     * @deny (update) Unauthenticated user updating a page if the document does not exist.
-     * @allow (delete) Authenticated user deleting a page.
-     * @deny (delete) Unauthenticated user deleting a page.
-     * @principle Authenticated users can manage (create, read, update, delete) page content.
+     * @allow (get, list) Allow anyone to read page content.
+     * @deny (create, update, delete) Deny unauthenticated users from modifying page content.
+     * @principle Allows public read access with authenticated writes.
      */
     match /pages/{pageId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow get, list: if true;
+      allow create, update, delete: if isSignedIn();
     }
 
     /**
-     * @description Controls access to the 'companyProfile' collection.
+     * @description Allows public read access to company profile, but restricts write access to authenticated users.
      * @path /companyProfile/{profileId}
-     * @allow (list) Authenticated user listing all profiles.
-     * @deny (list) Unauthenticated user listing all profiles.
-     * @allow (create) Authenticated user creating a company profile.
-     * @deny (create) Unauthenticated user creating a company profile.
-     * @allow (update) Authenticated user updating a company profile.
-     * @deny (update) Unauthenticated user updating a company profile if the document does not exist.
-     * @allow (delete) Authenticated user deleting a company profile.
-     * @deny (delete) Unauthenticated user deleting a company profile.
-     * @principle Authenticated users can manage (create, read, update, delete) company profiles.
+     * @allow (get, list) Allow anyone to read company profile.
+     * @deny (create, update, delete) Deny unauthenticated users from modifying company profile.
+     * @principle Allows public read access with authenticated writes.
      */
     match /companyProfile/{profileId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow get, list: if true;
+      allow create, update, delete: if isSignedIn();
     }
 
-    // Helper function to check if a user is signed in.
+    // --- Helper Functions ---
+
+    /**
+     * @description Checks if the user is signed in.
+     * @return {bool} True if the user is signed in, false otherwise.
+     */
     function isSignedIn() {
       return request.auth != null;
     }
