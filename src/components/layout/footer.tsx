@@ -39,7 +39,6 @@ export function Footer() {
                 ) : (
                   <Mountain className="h-6 w-6 text-primary" />
                 )}
-                <span className="text-sm font-semibold tracking-wider font-headline">{companyProfile?.name || 'IMEDA'}</span>
             </Link>
             <p className="text-xs text-muted-foreground">
               Elevate your business operations to the next level.
@@ -78,9 +77,7 @@ export function Footer() {
         </div>
         <div className="mt-8 border-t pt-6 flex flex-col items-center gap-4">
           <div className="flex gap-4">
-             <Button variant="outline" size="sm" asChild>
-                <Link href="/login">Editor Login</Link>
-              </Button>
+             <Link href="/login" className="text-sm text-muted-foreground transition-colors hover:text-primary">Editor Login</Link>
           </div>
         </div>
         <div className="mt-8 border-t pt-6 text-center">
