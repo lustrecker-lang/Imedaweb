@@ -1,39 +1,5 @@
 {
   "entities": {
-    "HomePageContent": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "HomePageContent",
-      "type": "object",
-      "description": "Stores the content for the home page, editable by authenticated users.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the HomePageContent entity."
-        },
-        "title": {
-          "type": "string",
-          "description": "The title of the home page."
-        },
-        "content": {
-          "type": "string",
-          "description": "The main content of the home page (HTML or Markdown)."
-        },
-        "lastUpdated": {
-          "type": "string",
-          "description": "Timestamp of the last content update.",
-          "format": "date-time"
-        },
-        "updatedBy": {
-          "type": "string",
-          "description": "User ID of the user who last updated the content."
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "content"
-      ]
-    },
     "CompanyProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "CompanyProfile",
@@ -58,6 +24,45 @@
       "required": [
         "name"
       ]
+    },
+    "PageContent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PageContent",
+      "type": "object",
+      "description": "Stores the content for a specific page, broken down into sections.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the page (e.g., 'home', 'about')."
+        },
+        "title": {
+          "type": "string",
+          "description": "The user-friendly title of the page (e.g., 'Home Page')."
+        },
+        "sections": {
+          "type": "array",
+          "description": "An array of content sections for this page.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the section within the page (e.g., 'hero', 'features')."
+              },
+              "title": {
+                "type": "string",
+                "description": "The title of the section."
+              },
+              "content": {
+                "type": "string",
+                "description": "The main text content for the section."
+              }
+            },
+            "required": ["id", "title", "content"]
+          }
+        }
+      },
+      "required": ["id", "title", "sections"]
     }
   },
   "auth": {
@@ -69,17 +74,17 @@
   "firestore": {
     "structure": [
       {
-        "path": "/homePageContent/{homePageContentId}",
+        "path": "/pages/{pageId}",
         "definition": {
-          "entityName": "HomePageContent",
+          "entityName": "PageContent",
           "schema": {
-            "$ref": "#/backend/entities/HomePageContent"
+            "$ref": "#/backend/entities/PageContent"
           },
-          "description": "Stores home page content, editable by any authenticated user.",
+          "description": "Stores all content for a specific page, editable by authenticated users.",
           "params": [
             {
-              "name": "homePageContentId",
-              "description": "The unique identifier for the home page content."
+              "name": "pageId",
+              "description": "The unique identifier for the page (e.g., 'home')."
             }
           ]
         }
@@ -101,6 +106,6 @@
         }
       }
     ],
-    "reasoning": "This Firestore data structure is designed for simple content management. The home page content can be read by anyone and updated by any authenticated user. The company profile can also be updated by any authenticated user."
+    "reasoning": "This Firestore data structure allows for modular content management. Each page's content is stored in a separate document within the 'pages' collection. This makes it easy to add new pages and edit their content by section."
   }
 }
