@@ -103,7 +103,7 @@ export default function PageEditor({ params }: { params: { pageId: string } }) {
   const router = useRouter();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { pageId } = params;
+  const pageId = params.pageId;
 
   const pageRef = useMemoFirebase(() => {
     if (!firestore || !pageId) return null;
