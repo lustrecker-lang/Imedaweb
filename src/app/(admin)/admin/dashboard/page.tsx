@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useFirestore, useCollection, setDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, useCollection, setDocumentNonBlocking, useMemoFirebase } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -106,7 +106,7 @@ export default function DashboardPage() {
 
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
 
-  const pagesRef = useMemo(() => {
+  const pagesRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'pages');
   }, [firestore]);
