@@ -44,13 +44,15 @@
           "type": "string",
           "description": "The name of the company."
         },
-        "logoSvg": {
+        "logoUrl": {
           "type": "string",
-          "description": "The full SVG code for the company logo."
+          "description": "URL of the uploaded company logo.",
+          "format": "uri"
         },
-        "iconSvg": {
+        "iconUrl": {
           "type": "string",
-          "description": "The full SVG code for the company icon (e.g., for favicons)."
+          "description": "URL of the uploaded company icon (e.g., for favicons).",
+          "format": "uri"
         }
       },
       "required": [

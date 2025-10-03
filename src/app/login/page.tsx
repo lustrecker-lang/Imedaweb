@@ -6,6 +6,7 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +43,7 @@ const formSchema = z.object({
 
 interface CompanyProfile {
   name?: string;
-  iconSvg?: string;
+  iconUrl?: string;
 }
 
 export default function LoginPage() {
@@ -91,16 +92,16 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm">
         <Card>
           <CardHeader className="text-center space-y-2">
             <div className="flex justify-center items-center gap-2">
-                {companyProfile?.iconSvg ? (
-                  <div className="h-8 w-8 text-primary" dangerouslySetInnerHTML={{ __html: companyProfile.iconSvg }} />
+                {companyProfile?.iconUrl ? (
+                  <Image src={companyProfile.iconUrl} alt={companyProfile.name || 'Company Icon'} width={32} height={32} className="h-8 w-8 object-contain" />
                 ) : (
                   <Mountain className="h-8 w-8 text-primary" />
                 )}
-                <CardTitle className="text-2xl font-headline font-normal">{companyProfile?.name || 'IMEDA'}</CardTitle>
+                <CardTitle className="text-xl font-headline font-normal">{companyProfile?.name || 'IMEDA'}</CardTitle>
             </div>
             <CardDescription>Editor Login</CardDescription>
           </CardHeader>

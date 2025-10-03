@@ -18,10 +18,11 @@ import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { doc } from 'firebase/firestore';
+import Image from "next/image";
 
 interface CompanyProfile {
   name?: string;
-  iconSvg?: string;
+  iconUrl?: string;
 }
 
 export default function AdminLayout({
@@ -61,15 +62,18 @@ export default function AdminLayout({
           <div className="flex items-center gap-2">
             <SidebarTrigger />
             <Link href="/" className="flex items-center gap-2">
-              {companyProfile?.iconSvg ? (
-                <div
-                  className="h-6 w-6 text-primary"
-                  dangerouslySetInnerHTML={{ __html: companyProfile.iconSvg }}
+              {companyProfile?.iconUrl ? (
+                <Image
+                  src={companyProfile.iconUrl}
+                  alt={companyProfile.name || 'Company Icon'}
+                  width={24}
+                  height={24}
+                  className="object-contain"
                 />
               ) : (
                 <Mountain className="h-6 w-6 text-primary" />
               )}
-              <span className="text-base font-semibold tracking-wider font-headline group-data-[collapsible=icon]:hidden">{companyProfile?.name || 'IMEDA'}</span>
+              <span className="text-sm font-semibold tracking-wider font-headline group-data-[collapsible=icon]:hidden">{companyProfile?.name || 'IMEDA'}</span>
             </Link>
           </div>
         </SidebarHeader>

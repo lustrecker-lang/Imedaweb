@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useFirestore, useDoc, setDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, useDoc, setDocumentNonBlocking, useStorage } from '@/firebase';
 import { doc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -26,27 +28,31 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import Image from 'next/image';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Company name is required.'),
-  logoSvg: z.string().optional(),
-  iconSvg: z.string().optional(),
+  logoUrl: z.string().optional(),
+  iconUrl: z.string().optional(),
 });
 
 interface CompanyProfile {
   name: string;
-  logoSvg?: string;
-  iconSvg?: string;
+  logoUrl?: string;
+  iconUrl?: string;
 }
 
 export default function CompanyPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
+  const storage = useStorage();
   const { toast } = useToast();
+
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [iconFile, setIconFile] = useState<File | null>(null);
   
   const companyProfileRef = useMemo(() => {
     if (!firestore) return null;
@@ -59,8 +65,8 @@ export default function CompanyPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      logoSvg: '',
-      iconSvg: '',
+      logoUrl: '',
+      iconUrl: '',
     },
   });
 
@@ -84,16 +90,61 @@ export default function CompanyPage() {
     );
   }
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleFileUpload = async (file: File | null): Promise<string | null> => {
+    if (!file || !storage || !user) return null;
+
+    const fileExtension = file.name.split('.').pop();
+    const fileName = `${uuidv4()}.${fileExtension}`;
+    const storageRef = ref(storage, `company-assets/${fileName}`);
+    
+    try {
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    } catch (error) {
+      console.error("File upload error:", error);
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: "Could not upload the file. Please try again.",
+      });
+      return null;
+    }
+  };
+
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!firestore) return;
+    form.clearErrors();
+
+    let logoUrl = values.logoUrl;
+    if (logoFile) {
+        logoUrl = await handleFileUpload(logoFile);
+        if (!logoUrl) return; // Stop submission if upload failed
+    }
+
+    let iconUrl = values.iconUrl;
+    if (iconFile) {
+        iconUrl = await handleFileUpload(iconFile);
+        if (!iconUrl) return; // Stop submission if upload failed
+    }
+    
     const docRef = doc(firestore, 'companyProfile', 'main');
     
-    setDocumentNonBlocking(docRef, values, { merge: true });
+    const dataToSave = {
+        name: values.name,
+        logoUrl: logoUrl,
+        iconUrl: iconUrl,
+    };
+
+    setDocumentNonBlocking(docRef, dataToSave, { merge: true });
 
     toast({
       title: 'Success!',
       description: 'Company profile has been updated.',
     });
+    setLogoFile(null);
+    setIconFile(null);
   };
 
   return (
@@ -136,15 +187,25 @@ export default function CompanyPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="logoSvg"
+                    name="logoUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Logo (SVG code)</FormLabel>
+                        <FormLabel>Logo</FormLabel>
+                         {companyProfile?.logoUrl && (
+                          <div className="my-2">
+                            <Image src={companyProfile.logoUrl} alt="Current Logo" width={100} height={40} className="object-contain" />
+                          </div>
+                        )}
                         <FormControl>
-                          <Textarea
-                            placeholder='<svg>...</svg>'
-                            className="min-h-[120px] font-mono"
-                            {...field}
+                          <Input 
+                            type="file" 
+                            accept="image/svg+xml, image/png, image/jpeg"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                setLogoFile(e.target.files[0]);
+                                field.onChange(e.target.files[0].name); // To satisfy react-hook-form
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -153,15 +214,25 @@ export default function CompanyPage() {
                   />
                    <FormField
                     control={form.control}
-                    name="iconSvg"
+                    name="iconUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Icon (SVG code)</FormLabel>
+                        <FormLabel>Icon</FormLabel>
+                        {companyProfile?.iconUrl && (
+                          <div className="my-2">
+                             <Image src={companyProfile.iconUrl} alt="Current Icon" width={32} height={32} className="object-contain" />
+                          </div>
+                        )}
                         <FormControl>
-                          <Textarea
-                            placeholder='<svg>...</svg>'
-                            className="min-h-[120px] font-mono"
-                            {...field}
+                          <Input 
+                            type="file" 
+                            accept="image/svg+xml, image/png, image/jpeg"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                setIconFile(e.target.files[0]);
+                                field.onChange(e.target.files[0].name); // To satisfy react-hook-form
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormMessage />

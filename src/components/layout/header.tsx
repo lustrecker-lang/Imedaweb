@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Menu, Mountain } from "lucide-react";
 import { useMemo, useState } from "react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -18,7 +19,7 @@ const navLinks = [
 
 interface CompanyProfile {
   name?: string;
-  logoSvg?: string;
+  logoUrl?: string;
 }
 
 export function Header() {
@@ -34,27 +35,27 @@ export function Header() {
   const { data: companyProfile } = useDoc<CompanyProfile>(companyProfileRef);
 
   const LogoComponent = () => {
-    if (companyProfile?.logoSvg) {
-      return <div className="h-6 w-auto text-primary" dangerouslySetInnerHTML={{ __html: companyProfile.logoSvg }} />;
+    if (companyProfile?.logoUrl) {
+      return <Image src={companyProfile.logoUrl} alt={companyProfile.name || 'Company Logo'} width={100} height={24} className="h-6 w-auto object-contain" />;
     }
     if(companyProfile?.name) {
-      return <span className="text-base font-semibold tracking-wider font-headline">{companyProfile.name}</span>;
+      return <span className="text-sm font-semibold tracking-wider font-headline">{companyProfile.name}</span>;
     }
     return (
       <>
         <Mountain className="h-6 w-6 text-primary" />
-        <span className="text-base font-semibold tracking-wider font-headline">IMEDA</span>
+        <span className="text-sm font-semibold tracking-wider font-headline">IMEDA</span>
       </>
     )
   }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+      <div className="container flex h-16 max-w-[1400px] items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
           <LogoComponent />
         </Link>
-        <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+        <nav className="hidden items-center gap-6 text-xs font-medium md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.label}
