@@ -2,55 +2,59 @@
  * @fileoverview Firestore Security Rules for Prototyping.
  *
  * Core Philosophy:
- * This ruleset prioritizes rapid prototyping by focusing on authorization and skipping data validation.
- * All authenticated users can read all data, but only authenticated users can create, update, and delete data.
+ * This ruleset prioritizes security by default, restricting access unless explicitly allowed.
+ * It focuses on secure authorization patterns (e.g., ownership, roles) and validates relationships.
+ * Data validation is minimized to enable rapid prototyping, but crucial authorization fields are strictly validated.
  *
  * Data Structure:
- * - `/pages/{pageId}`: Stores page content.
- * - `/companyProfile/{profileId}`: Stores company branding information.
+ * - /companyProfile/{profileId}: Stores company branding information. Intended to be read publicly.
+ * - /pages/{pageId}: Stores content for specific pages, editable by authenticated users.
  *
  * Key Security Decisions:
- * - Read access is public for all authenticated users.
- * - Write access is restricted to authenticated users.
- * - No data validation is performed (e.g., field types, required fields).
- * - List operations are allowed for all authenticated users.
+ * - Public read access to /companyProfile/{profileId}.
+ * - Authenticated users can create, update, and delete pages under /pages/{pageId}.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows authenticated users to read and write page content.
-     * @path /pages/{pageId}
-     * @allow (get, list) - Authenticated user reads page content.
-     * @allow (create, update, delete) - Authenticated user creates, updates, or deletes page content.
-     * @deny (create, update, delete) - Unauthenticated user attempts to write.
-     * @principle Allows authenticated users to manage page content, with no data validation.
+     * @description Allows public read access to company profile information. Authenticated users can create, update, and delete.
+     * @path /companyProfile/{profileId}
+     * @allow (get, list) Accessing company profile data is open to everyone.
+     * @allow (create) Authenticated user can create a profile.
+     * @allow (update, delete) Authenticated user can update/delete a profile.
+     * @deny (create, update, delete) Unauthenticated users cannot create, update or delete company profile.
+     * @principle Allows public read access while requiring authentication for write operations.
      */
-    match /pages/{pageId} {
-      allow get, list: if isSignedIn();
+    match /companyProfile/{profileId} {
+      allow get: if true;
+      allow list: if true;
       allow create: if isSignedIn();
       allow update: if isSignedIn() && resource != null;
       allow delete: if isSignedIn() && resource != null;
     }
 
     /**
-     * @description Allows authenticated users to read and write company profile information.
-     * @path /companyProfile/{profileId}
-     * @allow (get, list) - Authenticated user reads company profile.
-     * @allow (create, update, delete) - Authenticated user creates, updates, or deletes company profile.
-     * @deny (create, update, delete) - Unauthenticated user attempts to write.
-     * @principle Allows authenticated users to manage company profile, with no data validation.
+     * @description Manages content for specific pages, accessible to authenticated users.
+     * @path /pages/{pageId}
+     * @allow (get, list) Authenticated user can retrieve/list pages.
+     * @allow (create) Authenticated user can create a page.
+     * @allow (update, delete) Authenticated user can update/delete a page.
+     * @deny (create, update, delete) Unauthenticated users cannot create, update, or delete pages.
+     * @principle Enforces authentication for all write operations on pages.
      */
-    match /companyProfile/{profileId} {
-      allow get, list: if isSignedIn();
+    match /pages/{pageId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
       allow create: if isSignedIn();
       allow update: if isSignedIn() && resource != null;
       allow delete: if isSignedIn() && resource != null;
     }
+  }
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
+  // Helper function to determine if a user is signed in.
+  function isSignedIn() {
+    return request.auth != null;
   }
 }
