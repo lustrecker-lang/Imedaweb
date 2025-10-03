@@ -59,22 +59,8 @@ export default function AdminLayout({
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div className="flex items-center gap-2">
-            <SidebarTrigger />
-            <Link href="/" className="flex items-center gap-2">
-              {companyProfile?.iconUrl ? (
-                <Image
-                  src={companyProfile.iconUrl}
-                  alt={companyProfile.name || 'Company Icon'}
-                  width={24}
-                  height={24}
-                  className="object-contain"
-                />
-              ) : (
-                <Mountain className="h-6 w-6 text-primary" />
-              )}
-              <span className="text-sm font-semibold tracking-wider font-headline group-data-[collapsible=icon]:hidden">{companyProfile?.name || 'IMEDA'}</span>
-            </Link>
+          <div className="flex h-[36px] items-center px-2">
+            <span className="text-lg font-semibold tracking-wider font-headline">Welcome</span>
           </div>
         </SidebarHeader>
         <SidebarContent>
