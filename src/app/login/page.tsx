@@ -68,6 +68,8 @@ export default function LoginPage() {
         let description = "An unexpected error occurred.";
         if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
             description = "Invalid email or password. Please try again.";
+        } else if (error.code === 'auth/operation-not-allowed') {
+            description = "Email/Password sign-in is not enabled. Please enable it in your Firebase project's Authentication settings.";
         }
         toast({
             variant: "destructive",
