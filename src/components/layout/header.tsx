@@ -1,0 +1,79 @@
+
+"use client";
+
+import Link from "next/link";
+import { Menu, Mountain } from "lucide-react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+
+const navLinks = [
+  { href: "#", label: "Home" },
+  { href: "#", label: "About" },
+  { href: "#", label: "Services" },
+  { href: "#", label: "Contact" },
+];
+
+export function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+        <Link href="/" className="flex items-center gap-2">
+          <Mountain className="h-6 w-6 text-primary" />
+          <span className="text-lg font-bold font-headline">IMEDA</span>
+        </Link>
+        <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="transition-colors hover:text-primary"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex items-center gap-4">
+           <Button variant="ghost" asChild className="hidden md:inline-flex">
+            <Link href="/login">Admin Login</Link>
+          </Button>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <div className="grid gap-4 py-6">
+                <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
+                  <Mountain className="h-6 w-6 text-primary" />
+                  <span className="text-lg font-bold font-headline">IMEDA</span>
+                </Link>
+                <nav className="grid gap-2">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.label}
+                            href={link.href}
+                            className="flex w-full items-center py-2 text-lg font-medium"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
+                 <Button asChild>
+                    <Link href="/login" onClick={() => setIsOpen(false)}>Admin Login</Link>
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+    </header>
+  );
+}
