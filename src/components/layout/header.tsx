@@ -65,11 +65,6 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-           { !isUserLoading && user && (
-            <Link href="/admin/dashboard" className="text-foreground/70 transition-colors hover:text-foreground">
-              Dashboard
-            </Link>
-          )}
         </nav>
         <div className="flex items-center gap-2">
            { !isUserLoading && !user && (
@@ -101,11 +96,6 @@ export function Header() {
                             {link.label}
                         </Link>
                     ))}
-                    { !isUserLoading && user && (
-                      <Link href="/admin/dashboard" className="block py-2 text-foreground/70 transition-colors hover:text-foreground" onClick={() => setIsOpen(false)}>
-                        Dashboard
-                      </Link>
-                    )}
                 </nav>
                  { !isUserLoading && !user && (
                       <Button asChild className="w-full">
