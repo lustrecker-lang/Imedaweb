@@ -27,7 +27,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { Mountain } from "lucide-react";
 import { useAuth, useUser, useDoc, useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { doc } from 'firebase/firestore';
@@ -94,15 +93,12 @@ export default function LoginPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <Card>
-          <CardHeader className="text-center space-y-2">
-            <div className="flex justify-center items-center gap-2">
-                {companyProfile?.iconUrl ? (
+          <CardHeader className="text-center space-y-4">
+            <div className="flex justify-center items-center gap-2 h-8">
+                {companyProfile?.iconUrl && (
                   <Image src={companyProfile.iconUrl} alt={companyProfile.name || 'Company Icon'} width={32} height={32} className="h-8 w-8 object-contain" />
-                ) : (
-                  <Mountain className="h-8 w-8 text-primary" />
                 )}
             </div>
-            <CardDescription>Editor Login</CardDescription>
           </CardHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -139,7 +135,7 @@ export default function LoginPage() {
                   {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
                 </Button>
                 <div className="text-center text-sm text-muted-foreground">
-                    <Link href="/" className="underline transition-colors hover:text-primary">
+                    <Link href="/" className="transition-colors hover:text-primary">
                         Back to Home
                     </Link>
                 </div>
