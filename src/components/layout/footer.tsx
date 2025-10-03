@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 
 interface CompanyProfile {
   name?: string;
-  iconUrl?: string;
+  logoUrl?: string;
 }
 
 
@@ -28,13 +28,13 @@ export function Footer() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-2">
              <Link href="/" className="flex items-center gap-2">
-                {companyProfile?.iconUrl ? (
+                {companyProfile?.logoUrl ? (
                   <Image
-                    src={companyProfile.iconUrl}
-                    alt={companyProfile.name || 'Company Icon'}
-                    width={24}
+                    src={companyProfile.logoUrl}
+                    alt={companyProfile.name || 'Company Logo'}
+                    width={100}
                     height={24}
-                    className="object-contain"
+                    className="h-6 w-auto object-contain"
                   />
                 ) : (
                   <Mountain className="h-6 w-6 text-primary" />
