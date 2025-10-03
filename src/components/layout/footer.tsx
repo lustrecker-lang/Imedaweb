@@ -1,6 +1,6 @@
 'use client';
 import Link from "next/link";
-import { Linkedin, Twitter, Facebook } from "lucide-react";
+import { X, Instagram, Youtube } from "lucide-react";
 import { useFirestore, useDoc } from "@/firebase";
 import { useMemo } from "react";
 import { doc } from "firebase/firestore";
@@ -74,13 +74,13 @@ export function Footer() {
             </Link>
              <div className="flex items-center gap-4">
               <Link href="#" aria-label="Twitter">
-                <Twitter className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
+                <X className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
               </Link>
-              <Link href="#" aria-label="LinkedIn">
-                <Linkedin className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
+              <Link href="#" aria-label="Instagram">
+                <Instagram className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
               </Link>
-              <Link href="#" aria-label="Facebook">
-                <Facebook className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
+              <Link href="#" aria-label="YouTube">
+                <Youtube className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
               </Link>
             </div>
           </div>
