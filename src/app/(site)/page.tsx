@@ -60,43 +60,43 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      <section className="relative h-[60vh] min-h-[500px] w-full">
-        {heroImage && (
-          <Image
-            src={heroImage.imageUrl}
-            alt={heroImage.description}
-            fill
-            className="object-cover"
-            data-ai-hint={heroImage.imageHint}
-            priority
-          />
-        )}
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white">
-          <div className="container px-4 md:px-6">
-            {isLoading ? (
-              <>
-                <Skeleton className="h-16 w-3/4 max-w-3xl mx-auto bg-gray-400/50" />
-                <Skeleton className="h-8 w-full max-w-2xl mx-auto mt-4 bg-gray-400/50" />
-              </>
-            ) : (
-              <>
-                <h1 className="text-4xl font-normal tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-white">
-                  {homePageContent?.title || "Innovate. Manage. Excel."}
-                </h1>
-                <p className="mx-auto mt-4 max-w-[700px] text-lg text-gray-200 md:text-xl">
-                  {homePageContent?.content || "IMEDA provides the tools you need to elevate your business operations to the next level."}
-                </p>
-              </>
+      <section className="container py-12 md:py-20 lg:py-24">
+        <div className="relative h-[60vh] min-h-[500px] w-full overflow-hidden rounded-xl">
+            {heroImage && (
+            <Image
+                src={heroImage.imageUrl}
+                alt={heroImage.description}
+                fill
+                className="object-cover"
+                data-ai-hint={heroImage.imageHint}
+                priority
+            />
             )}
-            <div className="mt-6">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-200">
-                <Link href="#">
-                  Get Started <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
+            <div className="absolute inset-0 bg-black/50" />
+            <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
+                {isLoading ? (
+                <div className="w-full max-w-3xl space-y-4">
+                    <Skeleton className="h-16 w-3/4 mx-auto bg-gray-400/50" />
+                    <Skeleton className="h-8 w-full max-w-2xl mx-auto bg-gray-400/50" />
+                </div>
+                ) : (
+                <>
+                    <h1 className="text-4xl font-normal tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-white">
+                    {homePageContent?.title || "Innovate. Manage. Excel."}
+                    </h1>
+                    <p className="mx-auto mt-4 max-w-[700px] text-lg text-gray-200 md:text-xl">
+                    {homePageContent?.content || "IMEDA provides the tools you need to elevate your business operations to the next level."}
+                    </p>
+                </>
+                )}
+                <div className="mt-6">
+                <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-200">
+                    <Link href="#">
+                    Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                </Button>
+                </div>
             </div>
-          </div>
         </div>
       </section>
 
