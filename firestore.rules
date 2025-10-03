@@ -2,47 +2,38 @@
  * @fileoverview Firestore Security Rules for Prototyping.
  *
  * Core Philosophy:
- * This ruleset prioritizes security by default, restricting access unless explicitly allowed.
- * It focuses on secure authorization patterns (e.g., ownership, roles) and validates relationships.
- * Data validation is minimized to enable rapid prototyping, but crucial authorization fields are strictly validated.
+ * This ruleset prioritizes rapid prototyping by focusing on authorization and skipping schema validation.
+ * It assumes a basic level of trust in the client and defers complex data validation to the application code.
+ * The primary goal is to prevent unauthorized data access while allowing flexible data shapes.
  *
  * Data Structure:
- * - /companyProfile/{profileId}: Stores company branding information. Intended to be read publicly.
- * - /pages/{pageId}: Stores content for specific pages, editable by authenticated users.
+ * The Firestore database contains two top-level collections: `pages` and `companyProfile`.
+ *  - `/pages/{pageId}` stores content for individual pages, accessible by authenticated users.
+ *  - `/companyProfile/{profileId}` stores company branding information.
  *
  * Key Security Decisions:
- * - Public read access to /companyProfile/{profileId}.
- * - Authenticated users can create, update, and delete pages under /pages/{pageId}.
+ * - Authenticated users can read any page.
+ * - Only authenticated users can create, update, or delete pages and company profiles.
+ * - No user listing is allowed (potential privacy concern).
+ * - Data validation is minimized to facilitate rapid iteration.
+ *
+ * Denormalization for Authorization:
+ *  - No denormalization is needed as the rules are based solely on authentication status.
+ *
+ * Structural Segregation:
+ *  - No segregation is needed, as there are no public vs. private versions of the same data.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows public read access to company profile information. Authenticated users can create, update, and delete.
-     * @path /companyProfile/{profileId}
-     * @allow (get, list) Accessing company profile data is open to everyone.
-     * @allow (create) Authenticated user can create a profile.
-     * @allow (update, delete) Authenticated user can update/delete a profile.
-     * @deny (create, update, delete) Unauthenticated users cannot create, update or delete company profile.
-     * @principle Allows public read access while requiring authentication for write operations.
-     */
-    match /companyProfile/{profileId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
-    }
-
-    /**
-     * @description Manages content for specific pages, accessible to authenticated users.
+     * @description Controls access to the 'pages' collection.
      * @path /pages/{pageId}
-     * @allow (get, list) Authenticated user can retrieve/list pages.
-     * @allow (create) Authenticated user can create a page.
-     * @allow (update, delete) Authenticated user can update/delete a page.
-     * @deny (create, update, delete) Unauthenticated users cannot create, update, or delete pages.
-     * @principle Enforces authentication for all write operations on pages.
+     * @allow get, list: Any authenticated user can read any page.
+     * @allow create, update, delete: Only authenticated users can modify pages.
+     * @deny create, update, delete: Unauthenticated users cannot modify pages.
+     * @principle Allows authenticated users to manage page content.
      */
     match /pages/{pageId} {
       allow get: if isSignedIn();
@@ -51,10 +42,31 @@ service cloud.firestore {
       allow update: if isSignedIn() && resource != null;
       allow delete: if isSignedIn() && resource != null;
     }
-  }
 
-  // Helper function to determine if a user is signed in.
-  function isSignedIn() {
-    return request.auth != null;
+    /**
+     * @description Controls access to the 'companyProfile' collection.
+     * @path /companyProfile/{profileId}
+     * @allow get, list: Any authenticated user can read any company profile.
+     * @allow create, update, delete: Only authenticated users can modify company profiles.
+     * @deny create, update, delete: Unauthenticated users cannot modify company profiles.
+     * @principle Allows authenticated users to manage company branding.
+     */
+    match /companyProfile/{profileId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
+    }
+
+    //------------------- Helper functions -----------------------
+
+    /**
+     * @description Checks if the user is signed in.
+     * @return {bool} True if the user is signed in, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
   }
 }

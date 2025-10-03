@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, BarChart, Users } from "lucide-react";
-import { collection, doc, getDocs } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMemo } from "react";
 
 const features = [
   {
@@ -57,14 +56,13 @@ export default function Home() {
   );
 
   const firestore = useFirestore();
-  const pagesRef = useMemoFirebase(() => {
+  const pageRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'pages');
+    return doc(firestore, 'pages', 'home');
   }, [firestore]);
   
-  const { data: pages, isLoading } = useCollection<Page>(pagesRef);
+  const { data: homePage, isLoading } = useDoc<Page>(pageRef);
 
-  const homePage = pages?.find(p => p.id === 'home');
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
 
