@@ -2,12 +2,23 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Mountain } from "lucide-react";
+import { Menu, Mountain, LogOut } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import { useAuth, useUser } from "@/firebase";
+import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 
 const navLinks = [
   { href: "#", label: "Home" },
@@ -18,6 +29,18 @@ const navLinks = [
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await auth.signOut();
+    router.push('/login');
+  };
+
+  const getInitials = (email: string | null | undefined) => {
+    return email ? email.substring(0, 2).toUpperCase() : 'AD';
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
@@ -38,9 +61,43 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-4">
-           <Button variant="ghost" asChild className="hidden md:inline-flex">
-            <Link href="/login">Admin Login</Link>
-          </Button>
+           { !isUserLoading && (
+             user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "Admin"} />
+                        <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">Admin</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                     <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
+                        Dashboard
+                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+             ) : (
+              <Button variant="ghost" asChild className="hidden md:inline-flex">
+                <Link href="/login">Admin Login</Link>
+              </Button>
+             )
+           ) }
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -66,9 +123,15 @@ export function Header() {
                         </Link>
                     ))}
                 </nav>
-                 <Button asChild>
-                    <Link href="/login" onClick={() => setIsOpen(false)}>Admin Login</Link>
-                </Button>
+                 { !isUserLoading && (
+                    user ? (
+                      <Button onClick={() => {handleSignOut(); setIsOpen(false);}}>Log Out</Button>
+                    ) : (
+                      <Button asChild>
+                        <Link href="/login" onClick={() => setIsOpen(false)}>Admin Login</Link>
+                      </Button>
+                    )
+                 )}
               </div>
             </SheetContent>
           </Sheet>

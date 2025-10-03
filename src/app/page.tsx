@@ -1,6 +1,9 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, BarChart, Users } from "lucide-react";
+import { doc, collection } from 'firebase/firestore';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +14,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { Skeleton } from "@/components/ui/skeleton";
+
 
 const features = [
   {
@@ -33,10 +39,23 @@ const features = [
   },
 ];
 
+interface HomePageContent {
+  title: string;
+  content: string;
+}
+
 export default function Home() {
   const heroImage = PlaceHolderImages.find(
     (img) => img.id === "hero-background"
   );
+
+  const firestore = useFirestore();
+  const contentRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(collection(firestore, 'homePageContent'), 'main');
+  }, [firestore]);
+  
+  const { data: homePageContent, isLoading } = useDoc<HomePageContent>(contentRef);
 
   return (
     <div className="flex flex-col">
@@ -54,12 +73,21 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white">
           <div className="container px-4 md:px-6">
-            <h1 className="text-4xl font-normal tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-white">
-              Innovate. Manage. Excel.
-            </h1>
-            <p className="mx-auto mt-4 max-w-[700px] text-lg text-gray-200 md:text-xl">
-              IMEDA provides the tools you need to elevate your business operations to the next level.
-            </p>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-16 w-3/4 max-w-3xl mx-auto bg-gray-400/50" />
+                <Skeleton className="h-8 w-full max-w-2xl mx-auto mt-4 bg-gray-400/50" />
+              </>
+            ) : (
+              <>
+                <h1 className="text-4xl font-normal tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline text-white">
+                  {homePageContent?.title || "Innovate. Manage. Excel."}
+                </h1>
+                <p className="mx-auto mt-4 max-w-[700px] text-lg text-gray-200 md:text-xl">
+                  {homePageContent?.content || "IMEDA provides the tools you need to elevate your business operations to the next level."}
+                </p>
+              </>
+            )}
             <div className="mt-6">
               <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-200">
                 <Link href="#">

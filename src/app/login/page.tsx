@@ -55,7 +55,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isUserLoading && user) {
-      router.push("/");
+      router.push("/admin/dashboard");
     }
   }, [user, isUserLoading, router]);
 
@@ -63,7 +63,10 @@ export default function LoginPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
         await signInWithEmailAndPassword(auth, values.email, values.password);
-        // The useEffect will handle the redirect on successful login
+        toast({
+            title: "Login Successful",
+            description: "Redirecting to your dashboard...",
+        });
     } catch (error: any) {
         let description = "An unexpected error occurred.";
         if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
