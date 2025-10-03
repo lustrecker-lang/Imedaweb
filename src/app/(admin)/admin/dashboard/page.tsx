@@ -15,7 +15,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import {
   Form,
@@ -104,7 +103,7 @@ export default function DashboardPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
 
-  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+  const [selectedPageId, setSelectedPageId] = useState<string>('');
 
   const pagesRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -120,10 +119,10 @@ export default function DashboardPage() {
   }, [user, isUserLoading, router]);
 
   useEffect(() => {
-    if (pages && pages.length > 0 && !selectedPageId) {
+    if (!arePagesLoading && pages && pages.length > 0 && !selectedPageId) {
       setSelectedPageId(pages[0].id);
     }
-  }, [pages, selectedPageId]);
+  }, [pages, arePagesLoading, selectedPageId]);
 
   if (isUserLoading || !user) {
     return <div className="flex h-screen items-center justify-center"><p>Loading...</p></div>;
@@ -169,7 +168,7 @@ export default function DashboardPage() {
             <Skeleton className="h-10 w-1/2" />
           ) : (
             <div className="max-w-xs">
-              <Select onValueChange={setSelectedPageId} value={selectedPageId || ''}>
+              <Select onValueChange={setSelectedPageId} value={selectedPageId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a page..." />
                 </SelectTrigger>
