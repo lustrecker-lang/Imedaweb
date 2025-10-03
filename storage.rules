@@ -2,14 +2,10 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    
-    // Allow public read access to all files
     match /{allPaths=**} {
+      // Allow public read access so images can be displayed on the website.
       allow read: if true;
-    }
-
-    // Allow authenticated users to write to the 'company-assets' directory
-    match /company-assets/{fileName} {
+      // Allow writes only for authenticated users.
       allow write: if request.auth != null;
     }
   }
