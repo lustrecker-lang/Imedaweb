@@ -3,6 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +26,9 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { Mountain } from "lucide-react";
+import { useAuth, useUser } from "@/firebase";
+import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -43,10 +48,28 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // This is where you would handle form submission
-    console.log(values);
-    // For now, we just log it to the console
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push("/");
+    }
+  }, [user, isUserLoading, router]);
+
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+        initiateEmailSignIn(auth, values.email, values.password);
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: error.message || "An unexpected error occurred.",
+        });
+    }
   }
 
   return (
@@ -91,8 +114,8 @@ export default function LoginPage() {
                 />
               </CardContent>
               <CardFooter className="flex flex-col gap-4">
-                <Button type="submit" className="w-full">
-                  Login
+                <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
                     <Link href="/" className="underline transition-colors hover:text-primary">
