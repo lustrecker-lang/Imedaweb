@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Checks if the current user is signed in.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the current user is an admin.
+     */
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * @description Determines if a user is the owner of the document, based on the provided userId.
+     * @param {string} userId - The user ID to check against.
+     */
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    /**
+     * @description Determines if the current user is the existing owner of the document.
+     * Combines the ownership check with a resource existence check.
+     * @param {string} userId - The user ID to compare against the resource data's ownerId.
+     */
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Rules for the admin roles collection.
+     * @path /roles_admin/{adminId}
+     * @allow (create) - An admin user can create their own admin role document.
+     * @allow (get) - An admin user can read their own admin role document.
+     * @deny (create) - A non-admin user cannot create an admin role document.
+     * @deny (update) - No one can update an admin role document.
+     * @principle Enforces admin role management by existence.
+     */
+    match /roles_admin/{adminId} {
+      allow get: if isSignedIn() && isOwner(adminId);
+      allow list: if false;
+      allow create: if isSignedIn() && isOwner(adminId) && request.auth.uid == adminId;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Rules for the homePageContent collection.
+     * @path /homePageContent/{homePageContentId}
+     * @allow (get, list) - Anyone can read the home page content.
+     * @allow (create, update, delete) - Only admin users can modify the home page content.
+     * @deny (create) - A non-admin user cannot create home page content.
+     * @deny (update) - A non-admin user cannot update home page content.
+     * @principle Enforces admin-only write access to home page content.
+     */
+    match /homePageContent/{homePageContentId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && isAdmin();
+      allow update: if isSignedIn() && isAdmin();
+      allow delete: if isSignedIn() && isAdmin();
+    }
+  }
+}
