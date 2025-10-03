@@ -12,7 +12,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -69,6 +69,12 @@ export default function AdminLayout({
               <SidebarMenuButton href="/admin/dashboard" tooltip="Dashboard">
                 <LayoutDashboard />
                 <span className="text-sm">Dashboard</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton href="/admin/seed" tooltip="Seed Data">
+                <Database />
+                <span className="text-sm">Seed Data</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
