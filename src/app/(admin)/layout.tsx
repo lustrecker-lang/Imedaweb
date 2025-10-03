@@ -71,12 +71,6 @@ export default function AdminLayout({
                 <span className="text-sm">Dashboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
-             <SidebarMenuItem>
-              <SidebarMenuButton href="/admin/company" tooltip="Company">
-                <Building />
-                <span className="text-sm">Company</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
             <SidebarMenuItem>
                <SidebarMenuButton href="/" tooltip="Back to Site">
                   <Home />

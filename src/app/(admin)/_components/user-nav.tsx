@@ -11,7 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function UserNav() {
@@ -62,8 +62,9 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>
-          Dashboard
+        <DropdownMenuItem onClick={() => router.push('/admin/company')}>
+          <Building className="mr-2 h-4 w-4" />
+          <span>Company</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
