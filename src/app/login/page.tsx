@@ -42,7 +42,7 @@ const formSchema = z.object({
 
 interface CompanyProfile {
   name?: string;
-  iconUrl?: string;
+  logoUrl?: string;
 }
 
 export default function LoginPage() {
@@ -95,8 +95,8 @@ export default function LoginPage() {
         <Card>
           <CardHeader className="text-center space-y-4">
             <div className="flex justify-center items-center gap-2 h-8">
-                {companyProfile?.iconUrl && (
-                  <Image src={companyProfile.iconUrl} alt={companyProfile.name || 'Company Icon'} width={32} height={32} className="h-8 w-8 object-contain" />
+                {companyProfile?.logoUrl && (
+                  <Image src={companyProfile.logoUrl} alt={companyProfile.name || 'Company Logo'} width={120} height={32} className="h-8 w-auto object-contain" />
                 )}
             </div>
           </CardHeader>
@@ -135,7 +135,7 @@ export default function LoginPage() {
                   {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
                 </Button>
                 <div className="text-center text-sm text-muted-foreground">
-                    <Link href="/" className="transition-colors hover:text-primary">
+                    <Link href="/" className="transition-colors hover:text-primary hover:no-underline">
                         Back to Home
                     </Link>
                 </div>
