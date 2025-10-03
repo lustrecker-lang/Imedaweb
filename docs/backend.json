@@ -4,7 +4,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "HomePageContent",
       "type": "object",
-      "description": "Stores the content for the home page, editable by admins.",
+      "description": "Stores the content for the home page, editable by authenticated users.",
       "properties": {
         "id": {
           "type": "string",
@@ -25,7 +25,7 @@
         },
         "updatedBy": {
           "type": "string",
-          "description": "Reference to AdminUser who last updated the content. (Relationship: AdminUser 1:N HomePageContent)"
+          "description": "User ID of the user who last updated the content."
         }
       },
       "required": [
@@ -34,42 +34,6 @@
         "content",
         "lastUpdated",
         "updatedBy"
-      ]
-    },
-    "AdminUser": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "AdminUser",
-      "type": "object",
-      "description": "Stores information about admin users who can modify the website content.  DO NOT store passwords directly; use an external authentication system.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the AdminUser entity."
-        },
-        "username": {
-          "type": "string",
-          "description": "Admin username for login."
-        },
-        "email": {
-          "type": "string",
-          "description": "Admin email address.",
-          "format": "email"
-        },
-        "firstName": {
-          "type": "string",
-          "description": "Admin's first name."
-        },
-        "lastName": {
-          "type": "string",
-          "description": "Admin's last name."
-        }
-      },
-      "required": [
-        "id",
-        "username",
-        "email",
-        "firstName",
-        "lastName"
       ]
     }
   },
@@ -82,29 +46,13 @@
   "firestore": {
     "structure": [
       {
-        "path": "/roles_admin/{adminId}",
-        "definition": {
-          "entityName": "AdminUser",
-          "schema": {
-            "$ref": "#/backend/entities/AdminUser"
-          },
-          "description": "Stores admin user IDs. Existence of a document indicates admin status.",
-          "params": [
-            {
-              "name": "adminId",
-              "description": "The unique identifier of the admin user."
-            }
-          ]
-        }
-      },
-      {
         "path": "/homePageContent/{homePageContentId}",
         "definition": {
           "entityName": "HomePageContent",
           "schema": {
             "$ref": "#/backend/entities/HomePageContent"
           },
-          "description": "Stores home page content, editable only by admins.",
+          "description": "Stores home page content, editable by any authenticated user.",
           "params": [
             {
               "name": "homePageContentId",
@@ -114,6 +62,6 @@
         }
       }
     ],
-    "reasoning": "This Firestore data structure is designed to support the IMEDA website project, focusing on secure content management for the home page. It separates admin user data from the home page content, ensuring clear access control and data integrity. Authorization Independence is achieved by storing admin role information in a dedicated collection (`/roles_admin/{uid}`), allowing rules to verify admin status without complex `get()` calls. \n\n**Authorization Independence & QAPs:** The structure supports straightforward Query Authorization Patterns (QAPs). Admin status is determined by the existence of a document in the `/roles_admin/{uid}` collection. The `HomePageContent` collection is secured by checking if the `request.auth.uid` corresponds to an existing admin role. This allows secure `list` operations because the rules can efficiently verify if the authenticated user has admin privileges before allowing access to the data.\n\n**Structural Segregation:** Admin users and HomePageContent are stored in separate collections, enabling different security postures for each. This prevents mixing data with different access needs in the same collection.\n\n**Access Modeling:** Admin users are managed in the `/roles_admin/{uid}` collection, leveraging existence-based role checks. HomePageContent is stored in a top-level collection, accessible only to users with admin roles."
+    "reasoning": "This Firestore data structure is designed for simple content management. The home page content can be read by anyone and updated by any authenticated user. This model prioritizes ease of use for a scenario where any logged-in user is trusted to edit content."
   }
 }

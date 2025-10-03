@@ -91,7 +91,7 @@ export default function LoginPage() {
                 <Mountain className="h-8 w-8 text-primary" />
                 <CardTitle className="text-3xl font-headline font-normal">IMEDA</CardTitle>
             </div>
-            <CardDescription>Admin Login</CardDescription>
+            <CardDescription>Editor Login</CardDescription>
           </CardHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -103,7 +103,7 @@ export default function LoginPage() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="admin@imeda.com" {...field} />
+                        <Input placeholder="editor@imeda.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -127,13 +127,9 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting ? 'Logging in...' : 'Login'}
                 </Button>
-                <div className="text-center text-sm text-muted-foreground space-x-2">
+                <div className="text-center text-sm text-muted-foreground">
                     <Link href="/" className="underline transition-colors hover:text-primary">
                         Back to Home
-                    </Link>
-                    <span>|</span>
-                    <Link href="/make-admin" className="underline transition-colors hover:text-primary">
-                        Become Admin
                     </Link>
                 </div>
               </CardFooter>
