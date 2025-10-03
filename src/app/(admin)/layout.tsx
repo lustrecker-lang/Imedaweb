@@ -44,7 +44,7 @@ export default function AdminLayout({
                   <Home />
                   <span>Back to Site</span>
                 </SidebarMenuButton>
-            </SPIdebarMenuItem>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
