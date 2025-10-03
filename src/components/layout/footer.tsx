@@ -5,6 +5,7 @@ import { useFirestore, useDoc } from "@/firebase";
 import { useMemo } from "react";
 import { doc } from "firebase/firestore";
 import Image from "next/image";
+import { Button } from "../ui/button";
 
 interface CompanyProfile {
   name?: string;
@@ -50,7 +51,7 @@ export function Footer() {
               <li><Link href="/" className="text-xs text-muted-foreground hover:text-foreground">Home</Link></li>
               <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">About</Link></li>
               <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Services</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hovertext-foreground">Contact</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Contact</Link></li>
             </ul>
           </div>
           <div>
@@ -73,6 +74,13 @@ export function Footer() {
                 <Facebook className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
               </Link>
             </div>
+          </div>
+        </div>
+        <div className="mt-8 border-t pt-6 flex flex-col items-center gap-4">
+          <div className="flex gap-4">
+             <Button variant="outline" size="sm" asChild>
+                <Link href="/login">Editor Login</Link>
+              </Button>
           </div>
         </div>
         <div className="mt-8 border-t pt-6 text-center">

@@ -24,7 +24,6 @@ interface CompanyProfile {
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
   const companyProfileRef = useMemo(() => {
@@ -67,12 +66,9 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-           { !isUserLoading && !user && (
-              <Button variant="outline" size="sm" asChild className="hidden md:inline-flex">
-                <Link href="/login">Editor Login</Link>
-              </Button>
-            )
-           }
+           <Button size="sm" asChild className="hidden md:inline-flex">
+              <Link href="#">Contact Us</Link>
+            </Button>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -97,12 +93,9 @@ export function Header() {
                         </Link>
                     ))}
                 </nav>
-                 { !isUserLoading && !user && (
-                      <Button asChild className="w-full">
-                        <Link href="/login" onClick={() => setIsOpen(false)}>Editor Login</Link>
-                      </Button>
-                    )
-                 }
+                 <Button asChild className="w-full">
+                    <Link href="#" onClick={() => setIsOpen(false)}>Contact Us</Link>
+                  </Button>
               </div>
             </SheetContent>
           </Sheet>
