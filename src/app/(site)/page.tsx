@@ -62,7 +62,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       <section className="container py-8">
-        <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden rounded-xl">
+        <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
             {heroImage && (
             <Image
                 src={heroImage.imageUrl}
