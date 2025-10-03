@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { Menu, Mountain } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useUser } from "@/firebase";
+import { useUser, useFirestore, useDoc } from "@/firebase";
+import { doc } from 'firebase/firestore';
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -15,16 +16,43 @@ const navLinks = [
   { href: "#", label: "Contact" },
 ];
 
+interface CompanyProfile {
+  name?: string;
+  logoSvg?: string;
+}
+
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+
+  const companyProfileRef = useMemo(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'companyProfile', 'main');
+  }, [firestore]);
+
+  const { data: companyProfile } = useDoc<CompanyProfile>(companyProfileRef);
+
+  const LogoComponent = () => {
+    if (companyProfile?.logoSvg) {
+      return <div className="h-6 w-auto text-primary" dangerouslySetInnerHTML={{ __html: companyProfile.logoSvg }} />;
+    }
+    if(companyProfile?.name) {
+      return <span className="text-base font-semibold tracking-wider font-headline">{companyProfile.name}</span>;
+    }
+    return (
+      <>
+        <Mountain className="h-6 w-6 text-primary" />
+        <span className="text-base font-semibold tracking-wider font-headline">IMEDA</span>
+      </>
+    )
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <Mountain className="h-6 w-6 text-primary" />
-          <span className="text-base font-semibold tracking-wider font-headline">IMEDA</span>
+          <LogoComponent />
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
           {navLinks.map((link) => (
@@ -59,8 +87,7 @@ export function Header() {
             <SheetContent side="right">
               <div className="grid gap-4 p-6">
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
-                  <Mountain className="h-6 w-6 text-primary" />
-                  <span className="text-base font-semibold tracking-wider font-headline">IMEDA</span>
+                  <LogoComponent />
                 </Link>
                 <nav className="grid gap-2 text-base font-medium">
                     {navLinks.map((link) => (

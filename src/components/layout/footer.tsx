@@ -1,15 +1,40 @@
+'use client';
 import Link from "next/link";
 import { Linkedin, Twitter, Facebook, Mountain } from "lucide-react";
+import { useFirestore, useDoc } from "@/firebase";
+import { useMemo } from "react";
+import { doc } from "firebase/firestore";
+
+interface CompanyProfile {
+  name?: string;
+  iconSvg?: string;
+}
+
 
 export function Footer() {
+  const firestore = useFirestore();
+  const companyProfileRef = useMemo(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'companyProfile', 'main');
+  }, [firestore]);
+
+  const { data: companyProfile } = useDoc<CompanyProfile>(companyProfileRef);
+
   return (
     <footer className="border-t bg-background">
       <div className="container mx-auto px-4 py-8 md:px-6">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-2">
              <Link href="/" className="flex items-center gap-2">
-                <Mountain className="h-6 w-6 text-primary" />
-                <span className="text-base font-semibold tracking-wider font-headline">IMEDA</span>
+                {companyProfile?.iconSvg ? (
+                  <div
+                    className="h-6 w-6 text-primary"
+                    dangerouslySetInnerHTML={{ __html: companyProfile.iconSvg }}
+                  />
+                ) : (
+                  <Mountain className="h-6 w-6 text-primary" />
+                )}
+                <span className="text-base font-semibold tracking-wider font-headline">{companyProfile?.name || 'IMEDA'}</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Elevate your business operations to the next level.
@@ -21,7 +46,7 @@ export function Footer() {
               <li><Link href="/" className="text-sm text-muted-foreground hover:text-foreground">Home</Link></li>
               <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">About</Link></li>
               <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">Services</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground">Contact</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hovertext-foreground">Contact</Link></li>
             </ul>
           </div>
           <div>
@@ -48,7 +73,7 @@ export function Footer() {
         </div>
         <div className="mt-8 border-t pt-6 text-center">
             <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} IMEDA. All rights reserved.
+              © {new Date().getFullYear()} {companyProfile?.name || 'IMEDA'}. All rights reserved.
             </p>
         </div>
       </div>

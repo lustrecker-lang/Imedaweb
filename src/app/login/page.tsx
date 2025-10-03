@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
@@ -27,8 +27,9 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { Mountain } from "lucide-react";
-import { useAuth, useUser } from "@/firebase";
+import { useAuth, useUser, useDoc, useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { doc } from 'firebase/firestore';
 
 const formSchema = z.object({
   email: z.string().email({
@@ -38,6 +39,11 @@ const formSchema = z.object({
     message: "Password must be at least 8 characters.",
   }),
 });
+
+interface CompanyProfile {
+  name?: string;
+  iconSvg?: string;
+}
 
 export default function LoginPage() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,13 +58,20 @@ export default function LoginPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const companyProfileRef = useMemo(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'companyProfile', 'main');
+  }, [firestore]);
+
+  const { data: companyProfile } = useDoc<CompanyProfile>(companyProfileRef);
 
   useEffect(() => {
     if (!isUserLoading && user) {
       router.push("/admin/dashboard");
     }
   }, [user, isUserLoading, router]);
-
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -68,17 +81,11 @@ export default function LoginPage() {
             description: "Redirecting to your dashboard...",
         });
     } catch (error: any) {
-        let description = "An unexpected error occurred.";
-        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-            description = "Invalid email or password. Please try again.";
-        } else if (error.code === 'auth/operation-not-allowed') {
-            description = "Email/Password sign-in is not enabled. Please enable it in your Firebase project's Authentication settings.";
-        }
-        toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: description,
-        });
+      toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: "Invalid email or password. Please try again.",
+      });
     }
   }
 
@@ -88,8 +95,12 @@ export default function LoginPage() {
         <Card>
           <CardHeader className="text-center space-y-2">
             <div className="flex justify-center items-center gap-2">
-                <Mountain className="h-8 w-8 text-primary" />
-                <CardTitle className="text-3xl font-headline font-normal">IMEDA</CardTitle>
+                {companyProfile?.iconSvg ? (
+                  <div className="h-8 w-8 text-primary" dangerouslySetInnerHTML={{ __html: companyProfile.iconSvg }} />
+                ) : (
+                  <Mountain className="h-8 w-8 text-primary" />
+                )}
+                <CardTitle className="text-2xl font-headline font-normal">{companyProfile?.name || 'IMEDA'}</CardTitle>
             </div>
             <CardDescription>Editor Login</CardDescription>
           </CardHeader>

@@ -31,9 +31,30 @@
       "required": [
         "id",
         "title",
-        "content",
-        "lastUpdated",
-        "updatedBy"
+        "content"
+      ]
+    },
+    "CompanyProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CompanyProfile",
+      "type": "object",
+      "description": "Stores company branding information like name and logos.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the company."
+        },
+        "logoSvg": {
+          "type": "string",
+          "description": "The full SVG code for the company logo."
+        },
+        "iconSvg": {
+          "type": "string",
+          "description": "The full SVG code for the company icon (e.g., for favicons)."
+        }
+      },
+      "required": [
+        "name"
       ]
     }
   },
@@ -60,8 +81,24 @@
             }
           ]
         }
+      },
+      {
+        "path": "/companyProfile/{profileId}",
+        "definition": {
+          "entityName": "CompanyProfile",
+          "schema": {
+            "$ref": "#/backend/entities/CompanyProfile"
+          },
+          "description": "Stores company branding information.",
+          "params": [
+            {
+              "name": "profileId",
+              "description": "The unique identifier for the company profile."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "This Firestore data structure is designed for simple content management. The home page content can be read by anyone and updated by any authenticated user. This model prioritizes ease of use for a scenario where any logged-in user is trusted to edit content."
+    "reasoning": "This Firestore data structure is designed for simple content management. The home page content can be read by anyone and updated by any authenticated user. The company profile can also be updated by any authenticated user."
   }
 }
