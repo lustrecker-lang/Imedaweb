@@ -181,7 +181,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 bg-muted">
+      <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="max-w-2xl">
               <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
@@ -209,7 +209,7 @@ export default function Home() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                   <div className="relative flex h-full flex-col justify-end p-6">
-                    <h3 className="text-lg font-semibold text-white font-headline">
+                    <h3 className="text-lg font-normal text-white font-headline">
                       {campus.name}
                     </h3>
                   </div>
