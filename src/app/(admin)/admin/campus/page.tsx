@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useStorage, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
-import { collection, doc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, query, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -57,8 +57,10 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
+  DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
-import { Trash2, Edit, X } from 'lucide-react';
+import { Trash2, Edit, X, Plus } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Campus name is required.'),
@@ -85,7 +87,7 @@ export default function CampusPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingCampus, setEditingCampus] = useState<Campus | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const campusesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -165,8 +167,7 @@ export default function CampusPage() {
 
     form.reset();
     setImageFile(null);
-    const fileInput = document.getElementById('campus-image-input') as HTMLInputElement;
-    if(fileInput) fileInput.value = '';
+    setIsAddDialogOpen(false);
   };
   
   const onEditSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -260,218 +261,231 @@ export default function CampusPage() {
 
   return (
     <>
-    <div className="container mx-auto px-4 py-12 md:px-6 space-y-8">
-      <header>
-        <h1 className="text-xl font-bold tracking-tight">Campus Management</h1>
-        <p className="text-sm text-muted-foreground">Add, edit, or remove school campuses.</p>
-      </header>
+      <div className="container mx-auto px-4 py-12 md:px-6 space-y-8">
+        <header>
+          <h1 className="text-xl font-bold tracking-tight">Campus Management</h1>
+          <p className="text-sm text-muted-foreground">Add, edit, or remove school campuses.</p>
+        </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Add New Campus</CardTitle>
-        </CardHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onAddSubmit)}>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Campus Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Paris" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="A short description of the campus." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormItem>
-                <FormLabel>Campus Image</FormLabel>
-                <FormControl>
-                  <Input 
-                    id="campus-image-input"
-                    type="file" 
-                    accept="image/*"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setImageFile(e.target.files[0]);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </CardContent>
-            <CardContent>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Adding...' : 'Add Campus'}
-              </Button>
-            </CardContent>
-          </form>
-        </Form>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Existing Campuses</CardTitle>
-          <CardDescription>A list of all current campuses.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {areCampusesLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-10 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-48" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
-                  </TableRow>
-                ))
-              ) : campuses && campuses.length > 0 ? (
-                campuses.map((campus) => (
-                  <TableRow key={campus.id}>
-                    <TableCell>
-                      {campus.imageUrl ? (
-                         <Image src={campus.imageUrl} alt={campus.name} width={64} height={40} className="object-cover rounded-sm" />
-                      ) : (
-                        <div className="h-10 w-16 bg-muted rounded-sm flex items-center justify-center text-xs text-muted-foreground">No Image</div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{campus.name}</TableCell>
-                    <TableCell className="text-muted-foreground truncate max-w-xs">{campus.description}</TableCell>
-                    <TableCell className="text-right">
-                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus)}>
-                          <Edit className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                      </Button>
-                       <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(campus)}>
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                          <span className="sr-only">Delete</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    No campuses found. Add one above to get started.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-
-    {/* Edit Dialog */}
-    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-                <DialogTitle>Edit Campus: {editingCampus?.name}</DialogTitle>
-            </DialogHeader>
-            <Form {...editForm}>
-                <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
-                    <FormField
-                        control={editForm.control}
-                        name="name"
-                        render={({ field }) => (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Existing Campuses</CardTitle>
+              <CardDescription>A list of all current campuses.</CardDescription>
+            </div>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button>
+                        <Plus className="h-4 w-4" />
+                        Add Campus
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Add New Campus</DialogTitle>
+                        <DialogDescription>
+                            Fill out the details for the new campus. Click save when you're done.
+                        </DialogDescription>
+                    </DialogHeader>
+                     <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Campus Name</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="e.g., Paris" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Description</FormLabel>
+                                    <FormControl>
+                                    <Textarea placeholder="A short description of the campus." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
                             <FormItem>
-                                <FormLabel>Campus Name</FormLabel>
-                                <FormControl><Input {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={editForm.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Description</FormLabel>
-                                <FormControl><Textarea {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormItem>
-                        <FormLabel>Campus Image</FormLabel>
-                        <div className="flex items-center gap-4">
-                            {editingCampus?.imageUrl && (
-                                <div className="relative">
-                                    <Image src={editingCampus.imageUrl} alt={editingCampus.name} width={80} height={50} className="object-cover rounded-sm" />
-                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={handleRemoveImage}>
-                                        <X className="h-4 w-4" />
-                                        <span className="sr-only">Remove Image</span>
-                                    </Button>
-                                </div>
-                            )}
-                            <FormControl className="flex-1">
+                                <FormLabel>Campus Image</FormLabel>
+                                <FormControl>
                                 <Input 
+                                    id="campus-image-input"
                                     type="file" 
                                     accept="image/*"
                                     onChange={(e) => {
-                                        if (e.target.files?.[0]) {
-                                            setImageFile(e.target.files[0]);
-                                        }
+                                    if (e.target.files?.[0]) {
+                                        setImageFile(e.target.files[0]);
+                                    }
                                     }}
                                 />
-                            </FormControl>
-                        </div>
-                        <FormMessage />
-                    </FormItem>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button type="button" variant="outline">Cancel</Button>
-                        </DialogClose>
-                        <Button type="submit" disabled={editForm.formState.isSubmitting}>
-                            {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                             <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button type="button" variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit" disabled={form.formState.isSubmitting}>
+                                    {form.formState.isSubmitting ? 'Saving...' : 'Save Campus'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Image</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {areCampusesLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-10 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : campuses && campuses.length > 0 ? (
+                  campuses.map((campus) => (
+                    <TableRow key={campus.id}>
+                      <TableCell>
+                        {campus.imageUrl ? (
+                           <Image src={campus.imageUrl} alt={campus.name} width={64} height={40} className="object-cover rounded-sm" />
+                        ) : (
+                          <div className="h-10 w-16 bg-muted rounded-sm flex items-center justify-center text-xs text-muted-foreground">No Image</div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">{campus.name}</TableCell>
+                      <TableCell className="text-muted-foreground truncate max-w-xs">{campus.description}</TableCell>
+                      <TableCell className="text-right">
+                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus)}>
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
                         </Button>
-                    </DialogFooter>
-                </form>
-            </Form>
-        </DialogContent>
-    </Dialog>
-    
-    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will permanently delete the campus <span className="font-semibold">{campusToDelete?.name}</span> and its associated image. This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDeleteCampus} className="bg-destructive hover:bg-destructive/90">
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+                         <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(campus)}>
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                            <span className="sr-only">Delete</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      No campuses found. Add one to get started.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                  <DialogTitle>Edit Campus: {editingCampus?.name}</DialogTitle>
+              </DialogHeader>
+              <Form {...editForm}>
+                  <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
+                      <FormField
+                          control={editForm.control}
+                          name="name"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Campus Name</FormLabel>
+                                  <FormControl><Input {...field} /></FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                      <FormField
+                          control={editForm.control}
+                          name="description"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Description</FormLabel>
+                                  <FormControl><Textarea {...field} /></FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                      <FormItem>
+                          <FormLabel>Campus Image</FormLabel>
+                          <div className="flex items-center gap-4">
+                              {editingCampus?.imageUrl && (
+                                  <div className="relative">
+                                      <Image src={editingCampus.imageUrl} alt={editingCampus.name} width={80} height={50} className="object-cover rounded-sm" />
+                                      <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={handleRemoveImage}>
+                                          <X className="h-4 w-4" />
+                                          <span className="sr-only">Remove Image</span>
+                                      </Button>
+                                  </div>
+                              )}
+                              <FormControl className="flex-1">
+                                  <Input 
+                                      type="file" 
+                                      accept="image/*"
+                                      onChange={(e) => {
+                                          if (e.target.files?.[0]) {
+                                              setImageFile(e.target.files[0]);
+                                          }
+                                      }}
+                                  />
+                              </FormControl>
+                          </div>
+                          <FormMessage />
+                      </FormItem>
+                      <DialogFooter>
+                          <DialogClose asChild>
+                              <Button type="button" variant="outline">Cancel</Button>
+                          </DialogClose>
+                          <Button type="submit" disabled={editForm.formState.isSubmitting}>
+                              {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
+                          </Button>
+                      </DialogFooter>
+                  </form>
+              </Form>
+          </DialogContent>
+      </Dialog>
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the campus <span className="font-semibold">{campusToDelete?.name}</span> and its associated image. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteCampus} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
