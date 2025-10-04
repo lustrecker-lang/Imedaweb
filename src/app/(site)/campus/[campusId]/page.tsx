@@ -2,16 +2,18 @@
 'use client';
 
 import Image from "next/image";
-import { doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, DocumentData } from 'firebase/firestore';
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { useFirestore, useMemoFirebase } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Campus {
   id: string;
   name: string;
+  slug: string;
   description?: string;
   imageUrl?: string;
 }
@@ -19,14 +21,47 @@ interface Campus {
 export default function CampusPage() {
   const firestore = useFirestore();
   const params = useParams();
-  const campusId = params.campusId as string;
+  const slug = params.slug as string;
 
-  const campusRef = useMemoFirebase(() => {
-    if (!firestore || !campusId) return null;
-    return doc(firestore, 'campuses', campusId);
-  }, [firestore, campusId]);
-  
-  const { data: campus, isLoading } = useDoc<Campus>(campusRef);
+  const [campus, setCampus] = useState<Campus | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const campusQuery = useMemoFirebase(() => {
+    if (!firestore || !slug) return null;
+    // Note: This query requires a Firestore index on the 'slug' field.
+    return query(collection(firestore, 'campuses'), where('slug', '==', slug));
+  }, [firestore, slug]);
+
+  useEffect(() => {
+    if (!campusQuery) {
+      setIsLoading(false);
+      return;
+    };
+
+    const fetchCampus = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const querySnapshot = await getDocs(campusQuery);
+        if (querySnapshot.empty) {
+          setError("No campus found for this URL.");
+          setCampus(null);
+        } else {
+          // Assuming slugs are unique, take the first result.
+          const doc = querySnapshot.docs[0];
+          setCampus({ id: doc.id, ...(doc.data() as Omit<Campus, 'id'>) });
+        }
+      } catch (e) {
+        console.error("Error fetching campus:", e);
+        setError("Failed to load campus data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCampus();
+  }, [campusQuery]);
 
   return (
     <div className="flex flex-col">
@@ -73,6 +108,8 @@ export default function CampusPage() {
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-5/6" />
                 </div>
+              ) : error ? (
+                <p className="text-destructive">{error}</p>
               ) : (
                 <p className="text-muted-foreground">{campus?.description || "More details about this campus will be available soon."}</p>
               )}

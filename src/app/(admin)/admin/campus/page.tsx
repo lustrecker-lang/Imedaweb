@@ -64,6 +64,7 @@ import { Trash2, Edit, X, Plus } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Campus name is required.'),
+  slug: z.string().min(1, 'Slug is required.'),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
 });
@@ -71,9 +72,19 @@ const formSchema = z.object({
 interface Campus {
   id: string;
   name: string;
+  slug: string;
   description?: string;
   imageUrl?: string;
 }
+
+// Function to generate a URL-friendly slug
+const generateSlug = (name: string) => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with -
+    .replace(/(^-|-$)+/g, '');   // Remove leading/trailing dashes
+};
+
 
 export default function CampusPage() {
   const { user, isUserLoading } = useUser();
@@ -98,12 +109,28 @@ export default function CampusPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: '', description: '', imageUrl: '' },
+    defaultValues: { name: '', slug: '', description: '', imageUrl: '' },
   });
 
   const editForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+
+  // Watch the name field in the "add" form to auto-generate the slug
+  const addCampusName = form.watch('name');
+  useEffect(() => {
+    if (addCampusName) {
+      form.setValue('slug', generateSlug(addCampusName), { shouldValidate: true });
+    }
+  }, [addCampusName, form]);
+
+  // Watch the name field in the "edit" form to auto-generate the slug
+  const editCampusName = editForm.watch('name');
+  useEffect(() => {
+    if (editCampusName && isEditDialogOpen) {
+      editForm.setValue('slug', generateSlug(editCampusName), { shouldValidate: true });
+    }
+  }, [editCampusName, editForm, isEditDialogOpen]);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -177,7 +204,7 @@ export default function CampusPage() {
 
     if (imageFile) {
       // If there was an old image, delete it from storage
-      if (editingCampus.imageUrl) {
+      if (editingCampus.imageUrl && storage) {
         try {
           const oldImageRef = ref(storage, editingCampus.imageUrl);
           await deleteObject(oldImageRef);
@@ -304,6 +331,19 @@ export default function CampusPage() {
                             />
                             <FormField
                                 control={form.control}
+                                name="slug"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Slug</FormLabel>
+                                    <FormControl>
+                                    <Input placeholder="e.g., paris" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
                                 name="description"
                                 render={({ field }) => (
                                 <FormItem>
@@ -350,6 +390,7 @@ export default function CampusPage() {
                 <TableRow>
                   <TableHead>Image</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>Slug</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -360,6 +401,7 @@ export default function CampusPage() {
                     <TableRow key={i}>
                       <TableCell><Skeleton className="h-10 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-48" /></TableCell>
                       <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                     </TableRow>
@@ -375,6 +417,7 @@ export default function CampusPage() {
                         )}
                       </TableCell>
                       <TableCell className="font-medium">{campus.name}</TableCell>
+                      <TableCell className="font-mono text-xs">{campus.slug}</TableCell>
                       <TableCell className="text-muted-foreground truncate max-w-xs">{campus.description}</TableCell>
                       <TableCell className="text-right">
                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus)}>
@@ -390,7 +433,7 @@ export default function CampusPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       No campuses found. Add one to get started.
                     </TableCell>
                   </TableRow>
@@ -415,6 +458,17 @@ export default function CampusPage() {
                           render={({ field }) => (
                               <FormItem>
                                   <FormLabel>Campus Name</FormLabel>
+                                  <FormControl><Input {...field} /></FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                      <FormField
+                          control={editForm.control}
+                          name="slug"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Slug</FormLabel>
                                   <FormControl><Input {...field} /></FormControl>
                                   <FormMessage />
                               </FormItem>

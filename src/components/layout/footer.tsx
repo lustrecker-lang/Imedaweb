@@ -14,6 +14,7 @@ interface CompanyProfile {
 interface Campus {
   id: string;
   name: string;
+  slug: string;
 }
 
 export function Footer() {
@@ -59,7 +60,7 @@ export function Footer() {
             <ul className="mt-4 space-y-2">
               {campuses ? (
                  campuses.map(campus => (
-                  <li key={campus.id}><Link href={`/campus/${campus.id}`} className="text-xs text-muted-foreground hover:text-foreground">{campus.name}</Link></li>
+                  <li key={campus.id}><Link href={`/campus/${campus.slug}`} className="text-xs text-muted-foreground hover:text-foreground">{campus.name}</Link></li>
                  ))
               ) : (
                 <>

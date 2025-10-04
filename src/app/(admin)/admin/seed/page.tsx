@@ -52,9 +52,9 @@ const pagesToSeed = [
 ];
 
 const campusesToSeed = [
-    { name: "Dubaï" },
-    { name: "Côte d’Azur" },
-    { name: "Paris" },
+    { name: "Dubaï", slug: "dubai", description: "Our campus in the heart of a global hub for innovation and business." },
+    { name: "Côte d’Azur", slug: "cote-dazur", description: "Study in a vibrant location on the French Riviera." },
+    { name: "Paris", slug: "paris", description: "Experience education in one of the world's most iconic cities." },
 ];
 
 export default function SeedPage() {
