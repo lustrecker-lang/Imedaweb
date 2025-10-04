@@ -86,11 +86,13 @@ export default function DashboardPage() {
             </TableHeader>
             <TableBody>
               {arePagesLoading ? (
-                <TableRow>
-                  <TableCell>
-                    <Skeleton className="h-5 w-1/4" />
-                  </TableCell>
-                </TableRow>
+                 Array.from({ length: 3 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Skeleton className="h-5 w-1/4" />
+                      </TableCell>
+                    </TableRow>
+                  ))
               ) : pages && pages.length > 0 ? (
                 pages.map((page) => (
                   <TableRow
