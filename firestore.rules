@@ -1,67 +1,52 @@
 /**
- * @fileoverview Firestore Security Rules for Prototyping.
+ * @fileoverview Firestore Security Rules for imeda.fr.
  *
  * Core Philosophy:
- * This ruleset prioritizes security by enforcing strict ownership and role-based access control.
- * It assumes a model where data is generally private unless explicitly marked as public.
+ * This ruleset provides public read access to all content while restricting write access to authenticated users.
+ * It allows any signed-in user to create, update, and delete data.
  *
  * Data Structure:
- * - /pages/{pageId}: Stores content for individual pages, accessible to authenticated users.
- * - /companyProfile/{profileId}: Stores company branding information.
+ * - `/pages/{pageId}`: Stores content for individual pages. Accessible for public reading, but requires authentication for modification.
+ * - `/companyProfile/{profileId}`: Stores company profile information, accessible for public reading and requires authentication for modification.
  *
  * Key Security Decisions:
- * - All write operations require authentication.
- * - The rules explicitly deny potentially dangerous operations like listing users or granting global access.
- * - Flexible data shapes allow for rapid iteration. Data validation is limited to authorization-critical fields.
- *
- * Denormalization for Authorization:
- * (Not applicable in this simplified example.)
- *
- * Structural Segregation:
- * (Not applicable in this simplified example.)
+ * - Public read access is granted for all collections to enable the "public home page".
+ * - No role-based access control is implemented, providing equal permissions to any authenticated user for modifications.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Controls access to page content.  Authenticated users can create, update and delete content.
+     * @description Allows public read access to page content while restricting write access to authenticated users.
      * @path /pages/{pageId}
-     * @allow (create) - An authenticated user can create a page.
-     * @deny (create) - An unauthenticated user cannot create a page.
-     * @allow (update) - An authenticated user can update a page.
-     * @deny (update) - An unauthenticated user cannot update a page.
-     * @allow (delete) - An authenticated user can delete a page.
-     * @deny (delete) - An unauthenticated user cannot delete a page.
-     * @allow (get, list) - Anyone can read a page.
-     * @principle Authenticated users can modify pages.  Public read access.
+     * @allow (get, list): Any user can read the page content.
+     * @allow (create, update, delete): Any authenticated user can modify the page content.
+     * @deny (create, update, delete): Unauthenticated users cannot modify the page content.
+     * @principle Grants read access to everyone and write access to authenticated users.
      */
     match /pages/{pageId} {
       allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource.data.id == pageId;
-      allow delete: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
     }
 
     /**
-     * @description Controls access to company profile information. Authenticated users can create, update and delete company profiles.
+     * @description Allows public read access to company profile information while restricting write access to authenticated users.
      * @path /companyProfile/{profileId}
-     * @allow (create) - An authenticated user can create a company profile.
-     * @deny (create) - An unauthenticated user cannot create a company profile.
-     * @allow (update) - An authenticated user can update a company profile.
-     * @deny (update) - An unauthenticated user cannot update a company profile.
-     * @allow (delete) - An authenticated user can delete a company profile.
-     * @deny (delete) - An unauthenticated user cannot delete a company profile.
-     * @allow (get, list) - Anyone can read a company profile.
-     * @principle Authenticated users can modify company profiles.  Public read access.
+     * @allow (get, list): Any user can read the company profile.
+     * @allow (create, update, delete): Any authenticated user can modify the company profile.
+     * @deny (create, update, delete): Unauthenticated users cannot modify the company profile.
+     * @principle Grants read access to everyone and write access to authenticated users.
      */
     match /companyProfile/{profileId} {
       allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource.data.id == profileId;
-      allow delete: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
     }
 
+    /**
+     * @description Checks if the user is signed in.
+     * @return {boolean} True if the user is signed in, false otherwise.
+     */
     function isSignedIn() {
       return request.auth != null;
     }
