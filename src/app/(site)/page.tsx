@@ -331,7 +331,7 @@ export default function Home() {
             <Carousel opts={{ align: "start", loop: false }} className="w-full">
                 <CarouselContent className="-ml-4">
                 {themesWithFormationCounts.map((theme) => (
-                    <CarouselItem key={theme.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                    <CarouselItem key={theme.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
                         <Link href={`/courses?themeId=${theme.id}`} className="block h-full">
                             <Card className="h-full flex flex-col hover:border-primary transition-colors">
                                 <CardHeader>
@@ -351,21 +351,11 @@ export default function Home() {
                 ))}
                 </CarouselContent>
                  <div className="absolute top-[-4.5rem] right-0 flex gap-2">
-                    <CarouselPrevious className="static translate-y-0 rounded-none hidden sm:inline-flex" />
-                    <CarouselNext className="static translate-y-0 rounded-none hidden sm:inline-flex" />
+                    <CarouselPrevious className="static translate-y-0 rounded-none inline-flex" />
+                    <CarouselNext className="static translate-y-0 rounded-none inline-flex" />
                  </div>
             </Carousel>
           )}
-
-           {isMobile && (
-              <div className="mt-8 text-center">
-                <Button variant="link" asChild>
-                    <Link href="/courses">
-                    Voir tout <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                </Button>
-              </div>
-            )}
         </div>
       </section>
 
