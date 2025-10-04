@@ -2,73 +2,58 @@
  * @fileoverview Firestore Security Rules for imeda.fr.
  *
  * Core Philosophy:
- * This ruleset provides public read access to all content while restricting write access to authenticated users.
- * It allows any signed-in user to create, update, and delete data.
+ * This ruleset prioritizes secure content management by allowing authenticated users to manage page content and company profiles.
+ * It assumes that all authenticated users are authorized to manage all content.
  *
  * Data Structure:
- * - `/pages/{pageId}`: Stores content for individual pages.
- * - `/companyProfile/{profileId}`: Stores company profile information.
- * - `/campuses/{campusId}`: Stores campus information.
+ * - /pages/{pageId}: Stores content for individual pages.
+ * - /companyProfile/{profileId}: Stores company branding information.
  *
  * Key Security Decisions:
- * - Public read access is granted for all collections to enable the "public home page".
- * - No role-based access control is implemented, providing equal permissions to any authenticated user for modifications.
+ * - All authenticated users have write access to all documents. This simplifies content management.
+ * - No explicit ownership is enforced, assuming a collaborative content management model.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows public read access to page content while restricting write access to authenticated users.
+     * @description Controls access to the 'pages' collection, allowing authenticated users to manage page content.
      * @path /pages/{pageId}
-     * @allow (get) Anyone can read page content.
-     * @allow (list) Anyone can list pages.
-     * @allow (create) Any signed-in user can create a page.
-     * @allow (update) Any signed-in user can update a page.
-     * @allow (delete) Any signed-in user can delete a page.
-     * @deny (create) Anonymous user attempts to create a page.
-     * @principle Allows public access to content and restricts write access to authenticated users.
+     * @allow (get, list): Any authenticated user can read page content.
+     * @allow (create, update, delete): Any authenticated user can modify page content.
+     * @deny  (create, update, delete): An unauthenticated user cannot modify page content.
+     * @principle Allows all authenticated users to create, read, update, and delete page content.
      */
     match /pages/{pageId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
     }
 
     /**
-     * @description Allows public read access to company profile information while restricting write access to authenticated users.
+     * @description Controls access to the 'companyProfile' collection, allowing authenticated users to manage company branding information.
      * @path /companyProfile/{profileId}
-     * @allow (get) Anyone can read company profile information.
-     * @allow (list) Anyone can list company profiles.
-     * @allow (create) Any signed-in user can create a company profile.
-     * @allow (update) Any signed-in user can update a company profile.
-     * @allow (delete) Any signed-in user can delete a company profile.
-     * @deny (create) Anonymous user attempts to create a company profile.
-     * @principle Allows public access to content and restricts write access to authenticated users.
+     * @allow (get, list): Any authenticated user can read company profile information.
+     * @allow (create, update, delete): Any authenticated user can modify company profile information.
+     * @deny (create, update, delete): An unauthenticated user cannot modify company profile information.
+     * @principle Allows all authenticated users to create, read, update, and delete company profile information.
      */
     match /companyProfile/{profileId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
     }
 
     /**
-     * @description Allows public read access to campus information while restricting write access to authenticated users.
-     * @path /campuses/{campusId}
+     * @description Controls access to the 'services' collection, allowing authenticated users to list services
+     * @path /services
+     * @allow (list): Any authenticated user can list services
      */
-    match /campuses/{campusId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+    match /services {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create, update, delete: if false;
     }
 
-    /**
-     * @description Checks if the user is signed in.
-     * @return {boolean} True if the user is signed in, false otherwise.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
