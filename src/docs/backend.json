@@ -73,6 +73,37 @@
         }
       },
       "required": ["id", "title", "sections"]
+    },
+    "Lead": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Lead",
+      "type": "object",
+      "description": "Represents a lead submitted through the contact form.",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "The full name of the person who submitted the form."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The email address of the lead."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The phone number of the lead (optional)."
+        },
+        "message": {
+          "type": "string",
+          "description": "The message submitted by the lead."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the lead was created."
+        }
+      },
+      "required": ["fullName", "email", "message", "createdAt"]
     }
   },
   "auth": {
@@ -111,6 +142,22 @@
             {
               "name": "profileId",
               "description": "The unique identifier for the company profile."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/leads/{leadId}",
+        "definition": {
+          "entityName": "Lead",
+          "schema": {
+            "$ref": "#/backend/entities/Lead"
+          },
+          "description": "Stores all leads submitted through the contact form.",
+          "params": [
+            {
+              "name": "leadId",
+              "description": "The unique identifier for the lead."
             }
           ]
         }

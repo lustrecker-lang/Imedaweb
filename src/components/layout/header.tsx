@@ -22,8 +22,8 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useFirestore, useDoc } from "@/firebase";
-import { doc } from 'firebase/firestore';
+import { useFirestore, useDoc, addDocumentNonBlocking } from "@/firebase";
+import { doc, collection, serverTimestamp } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -78,6 +78,7 @@ const contactFormSchema = z.object({
 
 function ContactForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   const { toast } = useToast();
+  const firestore = useFirestore();
   const form = useForm<z.infer<typeof contactFormSchema>>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -89,8 +90,21 @@ function ContactForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   });
 
   async function onSubmit(values: z.infer<typeof contactFormSchema>) {
-    // Here you would typically send the form data to a server or email service
-    console.log(values);
+    if (!firestore) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de se connecter à la base de données. Veuillez réessayer plus tard.",
+      });
+      return;
+    }
+    
+    const leadsCollection = collection(firestore, 'leads');
+    addDocumentNonBlocking(leadsCollection, {
+      ...values,
+      createdAt: serverTimestamp(),
+    });
+
     toast({
       title: "Message envoyé!",
       description: "Merci de nous avoir contactés. Nous vous répondrons bientôt.",
@@ -276,14 +290,14 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full max-w-sm">
-              <SheetHeader className="sr-only">
+              <SheetHeader className="p-6">
                   <SheetTitle className="sr-only">Menu</SheetTitle>
                   <SheetDescription className="sr-only">Main navigation menu for the website.</SheetDescription>
-              </SheetHeader>
-              <div className="grid gap-4 p-6">
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
                   <LogoComponent />
                 </Link>
+              </SheetHeader>
+              <div className="grid gap-4 px-6">
                 <nav className="grid gap-2 text-base font-normal">
                     <Accordion type="multiple" className="w-full">
                        {navStructure.map((category) => (
