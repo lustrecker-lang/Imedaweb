@@ -234,7 +234,7 @@ export default function Home() {
                 <CarouselContent className="-ml-4">
                   {campuses && campuses.map((campus) => (
                     <CarouselItem key={campus.id} className="basis-4/5 pl-4">
-                      <div className="h-[50vh] min-h-[400px] w-full">
+                      <div className="h-[40vh] min-h-[350px] w-full">
                         <CampusCard campus={campus} className="h-full w-full" />
                       </div>
                     </CarouselItem>
