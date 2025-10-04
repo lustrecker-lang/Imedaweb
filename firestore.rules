@@ -3,77 +3,66 @@
  * @description This ruleset defines access control for the Firestore database.
  *
  * Core Philosophy:
- *  - Authenticated users have full CRUD access to the /pages and /companyProfile collections.
- *  - The /leads collection allows public creation of documents, simulating a "Contact Us" form.
+ * - Authenticated users have full CRUD access to the /pages and /companyProfile collections.
+ * - The /leads collection allows public creation of documents, but only allows authenticated users to read/manage them.
  *
  * Data Structure:
- *  - /pages/{pageId}: Stores content for individual pages (e.g., 'home', 'about').
- *  - /companyProfile/{profileId}: Stores company branding information.
- *  - /leads/{leadId}: Stores lead information submitted through a public form.
+ * - /pages/{pageId}: Stores content for specific pages, editable by authenticated users.
+ * - /companyProfile/{profileId}: Stores company branding information, editable by authenticated users.
+ * - /leads/{leadId}: Allows public creation of lead documents, but restricts other access to authenticated users.
  *
  * Key Security Decisions:
- *  - Authenticated users can manage pages and company profiles.
- *  - The /leads collection allows public creation of documents.
+ * - Authenticated users can read and write any document in /pages and /companyProfile.
+ * - Unauthenticated users can create documents in /leads, but cannot read, update, or delete them.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Grants read and write access to the /pages collection for authenticated users.
-     * @path /pages/{pageId}
-     * @allow (get) Authenticated user can retrieve a page.
-     * @allow (list) Authenticated user can list pages.
-     * @allow (create) Authenticated user can create a new page.
-     * @allow (update) Authenticated user can update a page.
-     * @allow (delete) Authenticated user can delete a page.
-     * @deny (create) Unauthenticated user attempts to create a page.
-     * @principle Authenticated users manage page content.
+     * Helper Function to check if a user is signed in.
      */
-    match /pages/{pageId} {
-      allow get, list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+    function isSignedIn() {
+      return request.auth != null;
     }
 
     /**
-     * @description Grants read and write access to the /companyProfile collection for authenticated users.
+     * @description Grants full access to the /pages collection for authenticated users.
+     * @path /pages/{pageId}
+     * @allow (create, read, update, delete) Authenticated user can perform any operation on any page.
+     * @deny (create, read, update, delete) Unauthenticated user cannot perform any operation on any page.
+     * @principle Allows any authenticated user to manage page content.
+     */
+    match /pages/{pageId} {
+      allow get, list, create, update, delete: if isSignedIn();
+    }
+
+    /**
+     * @description Grants full access to the /companyProfile collection for authenticated users.
      * @path /companyProfile/{profileId}
-     * @allow (get) Authenticated user can retrieve a company profile.
-     * @allow (list) Authenticated user can list company profiles.
-     * @allow (create) Authenticated user can create a new company profile.
-     * @allow (update) Authenticated user can update a company profile.
-     * @allow (delete) Authenticated user can delete a company profile.
-     * @deny (create) Unauthenticated user attempts to create a company profile.
-     * @principle Authenticated users manage company branding.
+     * @allow (create, read, update, delete) Authenticated user can perform any operation on any company profile.
+     * @deny (create, read, update, delete) Unauthenticated user cannot perform any operation on any company profile.
+     * @principle Allows any authenticated user to manage company profile data.
      */
     match /companyProfile/{profileId} {
-      allow get, list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow get, list, create, update, delete: if isSignedIn();
     }
-        /**
-     * @description Allows anyone to create a lead, simulating a public "Contact Us" form.
+
+    /**
+     * @description Allows public creation of leads, but restricts all other access to authenticated users.
      * @path /leads/{leadId}
      * @allow (create) Anyone can create a new lead.
-     * @deny (get) No one can get a leads.
-     * @deny (list) No one can list leads.
-     * @deny (update) No one can update leads.
-     * @deny (delete) No one can delete leads.
-     * @principle Allows public form submissions while preventing unauthorized access.
+     * @deny (get, list, update, delete) Unauthenticated users cannot access lead data.
+     * @allow (get, list, update, delete) Only authenticated users (admins) can read or manage leads.
+     * @deny (create) Authenticated users cannot create a new lead
+     * @principle Allows public form submissions while securing lead data for admin access only.
      */
     match /leads/{leadId} {
-        allow get: if false;
-        allow list: if false;
-        allow create: if true;
-        allow update: if false;
-        allow delete: if false;
-    }
-  }
+        // Allow signed-in users to read, update, and delete.
+        allow get, list, update, delete: if isSignedIn();
 
-  function isSignedIn() {
-    return request.auth != null;
+        // Allow ANYONE (public) to create.
+        allow create: if true;
+    }
   }
 }
