@@ -55,6 +55,7 @@ interface Campus {
   id: string;
   name: string;
   slug: string;
+  description?: string;
   imageUrl?: string;
 }
 
@@ -212,6 +213,9 @@ export default function Home() {
                     <h3 className="text-lg font-normal text-white font-headline">
                       {campus.name}
                     </h3>
+                    {campus.description && (
+                      <p className="text-xs text-white/80 mt-1 line-clamp-2">{campus.description}</p>
+                    )}
                   </div>
                 </Link>
               ))
