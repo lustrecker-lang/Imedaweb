@@ -87,7 +87,8 @@ export default function Home() {
 
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
-  const heroImageUrl = heroSection?.imageUrl;
+  const heroMediaUrl = heroSection?.imageUrl;
+  const isHeroVideo = heroMediaUrl?.includes('video');
 
   const isLoading = isPageLoading || areCampusesLoading;
 
@@ -118,14 +119,25 @@ export default function Home() {
               {isPageLoading ? (
                 <Skeleton className="h-full w-full" />
               ) : (
-                heroImageUrl && (
-                  <Image
-                      src={heroImageUrl}
-                      alt={heroSection?.title || "Hero background"}
-                      fill
-                      className="object-cover"
-                      priority
-                  />
+                heroMediaUrl && (
+                    isHeroVideo ? (
+                        <video
+                            src={heroMediaUrl}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="absolute inset-0 h-full w-full object-cover"
+                        />
+                    ) : (
+                        <Image
+                            src={heroMediaUrl}
+                            alt={heroSection?.title || "Hero background"}
+                            fill
+                            className="object-cover"
+                            priority
+                        />
+                    )
                 )
               )}
               <div className="absolute inset-0 bg-black/50" />
@@ -222,11 +234,6 @@ export default function Home() {
                   {isMobile ? "Explore our world-class campuses" : "Explore our world-class campuses located in global hubs of innovation."}
                 </p>
             </div>
-             {isMobile && (
-              <div className="flex gap-2">
-                {/* These are moved inside the Carousel component for mobile view */}
-              </div>
-            )}
           </div>
 
           {isLoading ? (

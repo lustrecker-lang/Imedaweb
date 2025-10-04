@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -69,6 +70,8 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
     const fileInput = document.getElementById(`file-input-${section.id}`) as HTMLInputElement;
     if(fileInput) fileInput.value = '';
   };
+  
+  const isHeroSection = section.id === 'hero';
 
   return (
     <Form {...form}>
@@ -104,17 +107,21 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
             name="imageUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Image</FormLabel>
+                <FormLabel>{isHeroSection ? 'Background Media' : 'Image'}</FormLabel>
                 {section.imageUrl && !imageFile && (
                   <div className="my-2">
-                    <Image src={section.imageUrl} alt="Current Image" width={100} height={100} className="object-contain rounded-md border" />
+                    {section.imageUrl.includes('video') ? (
+                      <video src={section.imageUrl} width="100" className="object-contain rounded-md border" controls />
+                    ) : (
+                      <Image src={section.imageUrl} alt="Current Image" width={100} height={100} className="object-contain rounded-md border" />
+                    )}
                   </div>
                 )}
                 <FormControl>
                     <Input 
                         id={`file-input-${section.id}`}
                         type="file" 
-                        accept="image/svg+xml, image/png, image/jpeg, image/webp, image/gif"
+                        accept={isHeroSection ? "image/*,video/*" : "image/svg+xml, image/png, image/jpeg, image/webp, image/gif"}
                         onChange={(e) => {
                             if (e.target.files?.[0]) {
                                 setImageFile(e.target.files[0]);
