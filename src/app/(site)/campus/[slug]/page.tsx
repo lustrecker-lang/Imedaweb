@@ -159,7 +159,7 @@ export default function CampusPage() {
                                 <GraduationCap className="h-6 w-6 text-primary" />
                                 <CardTitle className="text-2xl font-headline font-normal">{campus.academicOffering?.headline || "Academic Offering"}</CardTitle>
                             </div>
-                            {campus.academicOffering?.subtitle && <CardDescription className="pt-2">{campus.academicOffering.subtitle}</CardDescription>}
+                            {campus.academicOffering?.subtitle && <CardDescription className="pt-2 text-sm">{campus.academicOffering.subtitle}</CardDescription>}
                         </CardHeader>
                         <CardContent>
                             <p className="text-muted-foreground text-sm">Course list will be displayed here soon.</p>
@@ -205,7 +205,7 @@ export default function CampusPage() {
                                 <MapPin className="h-6 w-6 text-primary" />
                                 <CardTitle className="text-xl font-headline font-normal">{campus.visitAndContact?.headline || "Visit & Contact"}</CardTitle>
                             </div>
-                            {campus.visitAndContact?.subtitle && <CardDescription className="pt-2">{campus.visitAndContact.subtitle}</CardDescription>}
+                            {campus.visitAndContact?.subtitle && <CardDescription className="pt-2 text-sm">{campus.visitAndContact.subtitle}</CardDescription>}
                         </CardHeader>
                         <CardContent>
                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campus.visitAndContact?.address}</p>
