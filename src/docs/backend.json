@@ -259,11 +259,17 @@
       "type": "object",
       "description": "Represents a specific course (formation) within a theme.",
       "properties": {
-        "name": { "type": "string" },
-        "description": { "type": "string" },
-        "themeId": { "type": "string" }
+        "name": { "type": "string", "description": "The name of the formation." },
+        "themeId": { "type": "string", "description": "The ID of the parent theme." },
+        "formationId": { "type": "string", "description": "A custom, user-defined ID for the formation." },
+        "objectifPedagogique": { "type": "string", "description": "The pedagogical objective." },
+        "preRequis": { "type": "string", "description": "Prerequisites for the course." },
+        "publicConcerne": { "type": "string", "description": "The target audience." },
+        "methodesMobilisees": { "type": "string", "description": "Methods used in the course." },
+        "moyensPedagogiques": { "type": "string", "description": "Pedagogical means." },
+        "modalitesEvaluation": { "type": "string", "description": "Evaluation modalities." }
       },
-      "required": ["name", "themeId"]
+      "required": ["name", "themeId", "formationId"]
     },
     "CourseModule": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -386,3 +392,4 @@
     "reasoning": "This Firestore data structure allows for modular content management. Each page's content is stored in a separate document within the 'pages' collection. This makes it easy to add new pages and edit their content by section."
   }
 }
+

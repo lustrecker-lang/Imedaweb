@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -75,8 +76,14 @@ const themeSchema = z.object({
 
 const formationSchema = z.object({
     name: z.string().min(1, "Formation name is required."),
-    description: z.string().optional(),
     themeId: z.string(),
+    formationId: z.string().min(1, "Formation ID is required."),
+    objectifPedagogique: z.string().optional(),
+    preRequis: z.string().optional(),
+    publicConcerne: z.string().optional(),
+    methodesMobilisees: z.string().optional(),
+    moyensPedagogiques: z.string().optional(),
+    modalitesEvaluation: z.string().optional(),
 });
 
 // Interfaces
@@ -164,7 +171,16 @@ export default function CoursesPage() {
   
   const addFormationForm = useForm<z.infer<Omit<typeof formationSchema, 'themeId'>>>({
     resolver: zodResolver(formationSchema.omit({ themeId: true })),
-    defaultValues: { name: '', description: '' },
+    defaultValues: { 
+        name: '',
+        formationId: '',
+        objectifPedagogique: '',
+        preRequis: '',
+        publicConcerne: '',
+        methodesMobilisees: '',
+        moyensPedagogiques: '',
+        modalitesEvaluation: '',
+    },
   });
 
   const editFormationForm = useForm<z.infer<Omit<typeof formationSchema, 'themeId'>>>({
@@ -194,7 +210,16 @@ export default function CoursesPage() {
 
   useEffect(() => {
     if (editingFormation) {
-      editFormationForm.reset(editingFormation);
+      editFormationForm.reset({
+        name: editingFormation.name,
+        formationId: editingFormation.formationId,
+        objectifPedagogique: editingFormation.objectifPedagogique || '',
+        preRequis: editingFormation.preRequis || '',
+        publicConcerne: editingFormation.publicConcerne || '',
+        methodesMobilisees: editingFormation.methodesMobilisees || '',
+        moyensPedagogiques: editingFormation.moyensPedagogiques || '',
+        modalitesEvaluation: editingFormation.modalitesEvaluation || '',
+      });
     }
   }, [editingFormation, editFormationForm]);
 
@@ -532,28 +557,70 @@ export default function CoursesPage() {
                   <DialogTrigger asChild>
                     <Button size="sm" disabled={!selectedTheme}><Plus className="mr-2 h-4 w-4" /> Add Formation</Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
+                  <DialogContent className="sm:max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Add New Formation</DialogTitle>
                     <DialogDescription>For theme: {selectedTheme?.name}</DialogDescription>
                   </DialogHeader>
                   <Form {...addFormationForm}>
-                    <form onSubmit={addFormationForm.handleSubmit(onAddFormationSubmit)} className="space-y-4 py-4">
+                    <form onSubmit={addFormationForm.handleSubmit(onAddFormationSubmit)} className="grid grid-cols-2 gap-4 py-4 max-h-[70vh] overflow-y-auto px-1">
                       <FormField control={addFormationForm.control} name="name" render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="col-span-2 sm:col-span-1">
                           <FormLabel>Formation Name</FormLabel>
                           <FormControl><Input placeholder="e.g., Advanced SEO" {...field} /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )} />
-                      <FormField control={addFormationForm.control} name="description" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Description</FormLabel>
-                          <FormControl><Textarea placeholder="A short description of the formation." {...field} /></FormControl>
+                      <FormField control={addFormationForm.control} name="formationId" render={({ field }) => (
+                        <FormItem className="col-span-2 sm:col-span-1">
+                          <FormLabel>Formation ID</FormLabel>
+                          <FormControl><Input placeholder="Custom ID" {...field} /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )} />
-                      <DialogFooter>
+                      <FormField control={addFormationForm.control} name="objectifPedagogique" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Objectif Pédagogique</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={addFormationForm.control} name="preRequis" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Pré-requis</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                       <FormField control={addFormationForm.control} name="publicConcerne" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Public Concerné</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={addFormationForm.control} name="methodesMobilisees" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Méthodes Mobilisées</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={addFormationForm.control} name="moyensPedagogiques" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Moyens Pédagogiques</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={addFormationForm.control} name="modalitesEvaluation" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Modalités d'Évaluation</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <DialogFooter className="col-span-2">
                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
                         <Button type="submit" disabled={addFormationForm.formState.isSubmitting}>Save</Button>
                       </DialogFooter>
@@ -572,6 +639,7 @@ export default function CoursesPage() {
                         <Table>
                             <TableHeader>
                             <TableRow>
+                                <TableHead>ID</TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -580,6 +648,7 @@ export default function CoursesPage() {
                             {areFormationsLoading ? (
                                 Array.from({ length: 2 }).map((_, i) => (
                                 <TableRow key={i}>
+                                    <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
                                     <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
                                     <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                                 </TableRow>
@@ -587,6 +656,7 @@ export default function CoursesPage() {
                             ) : formations && formations.length > 0 ? (
                                 formations.map((formation) => (
                                 <TableRow key={formation.id}>
+                                    <TableCell className="font-mono text-xs py-2">{formation.formationId}</TableCell>
                                     <TableCell className="font-medium py-2">{formation.name}</TableCell>
                                     <TableCell className="text-right py-2">
                                     <Button variant="ghost" size="icon" onClick={() => openEditFormationDialog(formation as Formation)}>
@@ -600,7 +670,7 @@ export default function CoursesPage() {
                                 ))
                             ) : (
                                 <TableRow>
-                                <TableCell colSpan={2} className="h-24 text-center">No formations found for this theme.</TableCell>
+                                <TableCell colSpan={3} className="h-24 text-center">No formations found for this theme.</TableCell>
                                 </TableRow>
                             )}
                             </TableBody>
@@ -728,31 +798,73 @@ export default function CoursesPage() {
 
        {/* Edit Formation Dialog */}
        <Dialog open={isFormationEditDialogOpen} onOpenChange={setIsFormationEditDialogOpen}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
                 <DialogTitle>Edit Formation: {editingFormation?.name}</DialogTitle>
             </DialogHeader>
             <Form {...editFormationForm}>
-                <form onSubmit={editFormationForm.handleSubmit(onEditFormationSubmit)} className="space-y-4 py-4">
-                <FormField control={editFormationForm.control} name="name" render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Formation Name</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )} />
-                <FormField control={editFormationForm.control} name="description" render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl><Textarea {...field} /></FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )} />
-                <DialogFooter>
-                    <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                    <Button type="submit" disabled={editFormationForm.formState.isSubmitting}>Save Changes</Button>
-                </DialogFooter>
-                </form>
+                 <form onSubmit={editFormationForm.handleSubmit(onEditFormationSubmit)} className="grid grid-cols-2 gap-4 py-4 max-h-[70vh] overflow-y-auto px-1">
+                      <FormField control={editFormationForm.control} name="name" render={({ field }) => (
+                        <FormItem className="col-span-2 sm:col-span-1">
+                          <FormLabel>Formation Name</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={editFormationForm.control} name="formationId" render={({ field }) => (
+                        <FormItem className="col-span-2 sm:col-span-1">
+                          <FormLabel>Formation ID</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={editFormationForm.control} name="objectifPedagogique" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Objectif Pédagogique</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={editFormationForm.control} name="preRequis" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Pré-requis</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                       <FormField control={editFormationForm.control} name="publicConcerne" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Public Concerné</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={editFormationForm.control} name="methodesMobilisees" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Méthodes Mobilisées</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={editFormationForm.control} name="moyensPedagogiques" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Moyens Pédagogiques</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={editFormationForm.control} name="modalitesEvaluation" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Modalités d'Évaluation</FormLabel>
+                          <FormControl><Textarea {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <DialogFooter className="col-span-2">
+                        <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                        <Button type="submit" disabled={editFormationForm.formState.isSubmitting}>Save Changes</Button>
+                      </DialogFooter>
+                    </form>
             </Form>
             </DialogContent>
         </Dialog>
