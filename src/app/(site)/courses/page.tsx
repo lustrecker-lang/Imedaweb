@@ -195,7 +195,7 @@ export default function CoursesPage() {
             <main>
                 <Card>
                     <CardHeader>
-                        <CardTitle className="font-headline">{dynamicCardTitle}</CardTitle>
+                        <CardTitle className="font-headline text-3xl font-normal">{dynamicCardTitle}</CardTitle>
                         <CardDescription>{dynamicCardDescription}</CardDescription>
                     </CardHeader>
                     <CardContent>
