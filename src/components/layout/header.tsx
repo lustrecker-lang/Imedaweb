@@ -8,7 +8,7 @@ import { Menu } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -129,15 +129,13 @@ export function Header() {
             </Button>
         </SheetTrigger>
         <SheetContent side="right">
-            <div className="py-6">
-              <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} />
-            </div>
+            <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} showHeader={true} />
         </SheetContent>
     </Sheet>
   );
 
   const MobileContactButton = () => (
-    <Button size="sm" className="hidden md:inline-flex" asChild>
+    <Button size="sm" className="md:hidden" asChild>
         <Link href="/contact">Contactez-nous</Link>
     </Button>
   );
@@ -181,43 +179,40 @@ export function Header() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-sm">
-              <SheetHeader className="p-6">
-                  <SheetTitle className="sr-only">Menu</SheetTitle>
-                  <SheetDescription className="sr-only">Main navigation menu for the website.</SheetDescription>
-                <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
-                  <LogoComponent />
-                </Link>
-              </SheetHeader>
-              <div className="grid gap-4 px-6">
-                <nav className="grid gap-2 text-base font-normal">
-                    <Accordion type="multiple" className="w-full">
-                       {navStructure.map((category) => (
-                         <AccordionItem key={category.title} value={category.title} className="border-b-0">
-                           <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
-                             {category.title}
-                           </AccordionTrigger>
-                           <AccordionContent className="pl-4">
-                              <div className="flex flex-col gap-2 mt-2">
-                                {category.items.map((link) => (
-                                    <Link
-                                        key={link.title}
-                                        href={link.href}
-                                        className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
-                                        onClick={() => setIsMobileNavOpen(false)}
-                                    >
-                                        {link.title}
-                                    </Link>
-                                ))}
-                              </div>
-                           </AccordionContent>
-                         </AccordionItem>
-                       ))}
-                    </Accordion>
-                </nav>
-                 <Button className="w-full" asChild onClick={() => setIsMobileNavOpen(false)}>
-                    <Link href="/contact">Contactez-nous</Link>
-                </Button>
+            <SheetContent side="right" className="w-full max-w-sm overflow-auto">
+              <div className="p-6 pt-0">
+                <div className="flex items-center justify-between h-16">
+                    <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
+                    <LogoComponent />
+                    </Link>
+                </div>
+                <div className="grid gap-4">
+                    <nav className="grid gap-2 text-base font-normal">
+                        <Accordion type="multiple" className="w-full">
+                        {navStructure.map((category) => (
+                            <AccordionItem key={category.title} value={category.title} className="border-b-0">
+                            <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
+                                {category.title}
+                            </AccordionTrigger>
+                            <AccordionContent className="pl-4">
+                                <div className="flex flex-col gap-2 mt-2">
+                                    {category.items.map((link) => (
+                                        <Link
+                                            key={link.title}
+                                            href={link.href}
+                                            className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
+                                            onClick={() => setIsMobileNavOpen(false)}
+                                        >
+                                            {link.title}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                        </Accordion>
+                    </nav>
+                </div>
               </div>
             </SheetContent>
           </Sheet>

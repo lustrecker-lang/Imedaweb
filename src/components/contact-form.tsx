@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { CheckCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { useFirestore, addDocumentNonBlocking } from "@/firebase";
 import { collection, serverTimestamp } from 'firebase/firestore';
@@ -15,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 
 const contactFormSchema = z.object({
   fullName: z.string().min(1, { message: "Le nom complet est requis." }),
@@ -74,7 +74,7 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
   
   return (
     <>
-      {(showHeader || !hasSubmitted) && (
+      {showHeader && (
         <SheetHeader>
             <SheetTitle>Contactez-nous</SheetTitle>
             <SheetDescription>
