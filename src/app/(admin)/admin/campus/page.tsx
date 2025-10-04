@@ -3,10 +3,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useFirestore, useCollection, useMemoFirebase, useStorage, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking, useStorage } from '@/firebase';
 import { collection, doc, query, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
@@ -70,20 +70,63 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { Trash2, Edit, X, Plus } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
+const featureSchema = z.object({
+    id: z.string(),
+    name: z.string().min(1, "Feature name is required"),
+    description: z.string().optional(),
+    mediaUrl: z.string().optional(),
+});
+
+const faqSchema = z.object({
+    id: z.string(),
+    question: z.string().min(1, "Question is required"),
+    answer: z.string().optional(),
+});
+
+const courseSchema = z.object({
+    id: z.string(),
+    name: z.string().min(1, "Course name is required"),
+    description: z.string().optional(),
+})
 
 const formSchema = z.object({
   name: z.string().min(1, 'Campus name is required.'),
   slug: z.string().min(1, 'Slug is required.'),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
+  hero: z.object({
+    backgroundMediaUrl: z.string().optional(),
+    title: z.string().optional(),
+    subtitle: z.string().optional(),
+  }).optional(),
+  campusDescription: z.object({
+    headline: z.string().optional(),
+    body: z.string().optional(),
+  }).optional(),
+  academicOffering: z.object({
+      headline: z.string().optional(),
+      subtitle: z.string().optional(),
+      courses: z.array(courseSchema).optional(),
+  }).optional(),
+  campusExperience: z.object({
+      headline: z.string().optional(),
+      features: z.array(featureSchema).optional(),
+  }).optional(),
+  visitAndContact: z.object({
+      headline: z.string().optional(),
+      subtitle: z.string().optional(),
+      address: z.string().optional(),
+  }).optional(),
+  faq: z.object({
+      headline: z.string().optional(),
+      faqs: z.array(faqSchema).optional(),
+  }).optional(),
 });
 
-interface Campus {
+interface Campus extends z.infer<typeof formSchema> {
   id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  imageUrl?: string;
 }
 
 // Function to generate a URL-friendly slug
@@ -114,7 +157,7 @@ export default function CampusPage() {
     return query(collection(firestore, 'campuses'), orderBy('name', 'asc'));
   }, [firestore]);
 
-  const { data: campuses, isLoading: areCampusesLoading } = useCollection<Campus>(campusesQuery);
+  const { data: campuses, isLoading: areCampusesLoading } = useCollection<Omit<Campus, 'id'>>(campusesQuery);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -123,6 +166,17 @@ export default function CampusPage() {
 
   const editForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {},
+  });
+
+  const { fields: featureFields, append: appendFeature, remove: removeFeature } = useFieldArray({
+    control: editForm.control,
+    name: "campusExperience.features",
+  });
+
+  const { fields: faqFields, append: appendFaq, remove: removeFaq } = useFieldArray({
+    control: editForm.control,
+    name: "faq.faqs",
   });
 
   // Watch the name field in the "add" form to auto-generate the slug
@@ -204,7 +258,6 @@ export default function CampusPage() {
     let imageUrl = editingCampus.imageUrl;
 
     if (imageFile) {
-      // If there was an old image, delete it from storage
       if (editingCampus.imageUrl && storage) {
         try {
           const oldImageRef = ref(storage, editingCampus.imageUrl);
@@ -215,7 +268,10 @@ export default function CampusPage() {
       }
       imageUrl = await handleFileUpload(imageFile) || editingCampus.imageUrl;
     }
-
+    
+    // This is a simplified way to handle nested file uploads. In a real app, this would be more robust.
+    // For now, we are not handling file uploads inside the feature array.
+    
     const docRef = doc(firestore, 'campuses', editingCampus.id);
     const dataToSave = { ...values, imageUrl };
     
@@ -231,13 +287,21 @@ export default function CampusPage() {
     setImageFile(null);
   };
   
-  const handleRemoveImage = async () => {
-    if (!firestore || !editingCampus || !editingCampus.imageUrl) return;
+  const handleRemoveImage = async (field: keyof Campus | `campusExperience.features.${number}.mediaUrl`, index?: number) => {
+    if (!firestore || !editingCampus) return;
 
-    // Also delete from storage
+    let imageUrl: string | undefined;
+    if (typeof index === 'number' && field.startsWith('campusExperience.features')) {
+        imageUrl = editingCampus.campusExperience?.features?.[index]?.mediaUrl;
+    } else if (field === 'imageUrl') {
+        imageUrl = editingCampus.imageUrl;
+    }
+
+    if (!imageUrl) return;
+
     if (storage) {
         try {
-            const imageRef = ref(storage, editingCampus.imageUrl);
+            const imageRef = ref(storage, imageUrl);
             await deleteObject(imageRef);
         } catch (error) {
             console.error("Error deleting image from storage: ", error);
@@ -245,13 +309,43 @@ export default function CampusPage() {
     }
     
     const docRef = doc(firestore, 'campuses', editingCampus.id);
-    setDocumentNonBlocking(docRef, { imageUrl: '' }, { merge: true });
-    
-    setEditingCampus(prev => prev ? { ...prev, imageUrl: '' } : null);
+    let updatedData = {};
+    if (typeof index === 'number' && field.startsWith('campusExperience.features')) {
+        const features = [...(editingCampus.campusExperience?.features || [])];
+        if(features[index]) {
+            features[index].mediaUrl = '';
+            updatedData = { campusExperience: { ...editingCampus.campusExperience, features } };
+        }
+    } else {
+        updatedData = { [field]: '' };
+    }
+
+    setDocumentNonBlocking(docRef, updatedData, { merge: true });
+
+    // Update local state for immediate UI feedback
+    if (typeof index === 'number' && field.startsWith('campusExperience.features')) {
+      const updatedFeatures = editForm.getValues('campusExperience.features');
+      if (updatedFeatures && updatedFeatures[index]) {
+        updatedFeatures[index].mediaUrl = '';
+        editForm.setValue('campusExperience.features', updatedFeatures);
+      }
+    } else {
+      editForm.setValue(field as 'imageUrl', '');
+    }
+
+    setEditingCampus(prev => {
+        if (!prev) return null;
+        if (typeof index === 'number' && field.startsWith('campusExperience.features')) {
+            const features = [...(prev.campusExperience?.features || [])];
+            if (features[index]) features[index].mediaUrl = '';
+            return { ...prev, campusExperience: { ...prev.campusExperience, features } };
+        }
+        return { ...prev, [field]: '' };
+    });
     
     toast({
       title: 'Image Removed',
-      description: 'The campus image has been removed.',
+      description: 'The image has been removed.',
     });
   }
 
@@ -262,6 +356,7 @@ export default function CampusPage() {
   
   const openEditDialog = (campus: Campus) => {
     setEditingCampus(campus);
+    editForm.reset(campus);
     setIsEditDialogOpen(true);
     setImageFile(null);
   };
@@ -269,7 +364,6 @@ export default function CampusPage() {
   const handleDeleteCampus = () => {
     if (!firestore || !campusToDelete) return;
     
-    // Delete image from storage if it exists
     if (campusToDelete.imageUrl && storage) {
       const imageRef = ref(storage, campusToDelete.imageUrl);
       deleteObject(imageRef).catch(error => {
@@ -348,7 +442,7 @@ export default function CampusPage() {
                                 name="description"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Description</FormLabel>
+                                    <FormLabel>Description (for menus)</FormLabel>
                                     <FormControl>
                                     <Textarea placeholder="A short description of the campus." {...field} />
                                     </FormControl>
@@ -357,7 +451,7 @@ export default function CampusPage() {
                                 )}
                             />
                             <FormItem>
-                                <FormLabel>Campus Image</FormLabel>
+                                <FormLabel>Campus Image (for listings)</FormLabel>
                                 <FormControl>
                                 <Input 
                                     id="campus-image-input"
@@ -392,7 +486,6 @@ export default function CampusPage() {
                   <TableHead>Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Slug</TableHead>
-                  <TableHead>Description</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -403,7 +496,6 @@ export default function CampusPage() {
                       <TableCell><Skeleton className="h-10 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-48" /></TableCell>
                       <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                     </TableRow>
                   ))
@@ -419,13 +511,12 @@ export default function CampusPage() {
                       </TableCell>
                       <TableCell className="font-medium">{campus.name}</TableCell>
                       <TableCell className="font-mono text-xs">{campus.slug}</TableCell>
-                      <TableCell className="text-muted-foreground truncate max-w-xs">{campus.description}</TableCell>
                       <TableCell className="text-right">
-                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus)}>
+                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus as Campus)}>
                             <Edit className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                         </Button>
-                         <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(campus)}>
+                         <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(campus as Campus)}>
                             <Trash2 className="h-4 w-4 text-red-600" />
                             <span className="sr-only">Delete</span>
                         </Button>
@@ -434,7 +525,7 @@ export default function CampusPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={4} className="h-24 text-center">
                       No campuses found. Add one to get started.
                     </TableCell>
                   </TableRow>
@@ -446,83 +537,127 @@ export default function CampusPage() {
       </div>
 
       <Sheet open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <SheetContent>
+          <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
               <SheetHeader>
                   <SheetTitle>Edit Campus: {editingCampus?.name}</SheetTitle>
                   <SheetDescription>
-                    Make changes to the campus details below. Click save when you're done.
+                    Make changes to the campus content below. Click save when you're done.
                   </SheetDescription>
               </SheetHeader>
               <div className="py-4">
                 <Form {...editForm}>
                     <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
-                        <FormField
-                            control={editForm.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Campus Name</FormLabel>
-                                    <FormControl><Input {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={editForm.control}
-                            name="slug"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Slug</FormLabel>
-                                    <FormControl><Input {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={editForm.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl><Textarea {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormItem>
-                            <FormLabel>Campus Image</FormLabel>
-                            <div className="flex items-center gap-4">
-                                {editingCampus?.imageUrl && (
-                                    <div className="relative">
-                                        <Image src={editingCampus.imageUrl} alt={editingCampus.name} width={80} height={50} className="object-cover rounded-sm" />
-                                        <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={handleRemoveImage}>
-                                            <X className="h-4 w-4" />
-                                            <span className="sr-only">Remove Image</span>
-                                        </Button>
-                                    </div>
-                                )}
-                                <FormControl className="flex-1">
-                                    <Input 
-                                        type="file" 
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            if (e.target.files?.[0]) {
-                                                setImageFile(e.target.files[0]);
-                                            }
-                                        }}
-                                    />
-                                </FormControl>
-                            </div>
-                            <FormMessage />
-                        </FormItem>
-                        <SheetFooter className="pt-4">
-                            <SheetClose asChild>
-                                <Button type="button" variant="outline">Cancel</Button>
-                            </SheetClose>
-                            <Button type="submit" disabled={editForm.formState.isSubmitting}>
-                                {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
-                            </Button>
-                        </SheetFooter>
+                      <Accordion type="multiple" defaultValue={["info"]} className="w-full">
+                        <AccordionItem value="info">
+                           <AccordionTrigger>Campus Information</AccordionTrigger>
+                           <AccordionContent className="space-y-4 p-1">
+                              <FormField control={editForm.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Campus Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                              <FormField control={editForm.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                              <FormField control={editForm.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Description (for nav menus)</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                              <FormItem>
+                                  <FormLabel>Campus Image (for listings)</FormLabel>
+                                  <div className="flex items-center gap-4">
+                                      {editForm.watch('imageUrl') && (
+                                          <div className="relative">
+                                              <Image src={editForm.watch('imageUrl')!} alt={editForm.watch('name')} width={80} height={50} className="object-cover rounded-sm" />
+                                              <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('imageUrl')}>
+                                                  <X className="h-4 w-4" />
+                                                  <span className="sr-only">Remove Image</span>
+                                              </Button>
+                                          </div>
+                                      )}
+                                      <FormControl className="flex-1">
+                                          <Input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]) } }}/>
+                                      </FormControl>
+                                  </div>
+                                  <FormMessage />
+                              </FormItem>
+                           </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="hero">
+                           <AccordionTrigger>Hero Section</AccordionTrigger>
+                           <AccordionContent className="space-y-4 p-1">
+                                <FormField control={editForm.control} name="hero.title" render={({ field }) => ( <FormItem> <FormLabel>Hero Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="hero.subtitle" render={({ field }) => ( <FormItem> <FormLabel>Hero Subtitle</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                {/* Add file upload for background media later */}
+                           </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="description-section">
+                           <AccordionTrigger>Campus Description Section</AccordionTrigger>
+                           <AccordionContent className="space-y-4 p-1">
+                                <FormField control={editForm.control} name="campusDescription.headline" render={({ field }) => ( <FormItem> <FormLabel>Headline</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="campusDescription.body" render={({ field }) => ( <FormItem> <FormLabel>Body Text</FormLabel> <FormControl><Textarea {...field} rows={5} /></FormControl> <FormMessage /> </FormItem> )}/>
+                           </AccordionContent>
+                        </AccordionItem>
+                         <AccordionItem value="academics">
+                           <AccordionTrigger>Academic Offering</AccordionTrigger>
+                           <AccordionContent className="space-y-4 p-1">
+                                <FormField control={editForm.control} name="academicOffering.headline" render={({ field }) => ( <FormItem> <FormLabel>Headline</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="academicOffering.subtitle" render={({ field }) => ( <FormItem> <FormLabel>Subtitle</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                {/* Course list management will be added later */}
+                           </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="experience">
+                           <AccordionTrigger>Campus Experience</AccordionTrigger>
+                           <AccordionContent className="space-y-4 p-1">
+                                <FormField control={editForm.control} name="campusExperience.headline" render={({ field }) => ( <FormItem> <FormLabel>Features Section Headline</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <div className="space-y-4">
+                                    <FormLabel>Features</FormLabel>
+                                    {featureFields.map((field, index) => (
+                                        <div key={field.id} className="p-4 border rounded-md space-y-2 relative">
+                                            <FormField control={editForm.control} name={`campusExperience.features.${index}.name`} render={({ field }) => ( <FormItem> <FormLabel>Feature Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={editForm.control} name={`campusExperience.features.${index}.description`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            {/* Image upload per feature to be added */}
+                                            <Button type="button" variant="destructive" size="sm" onClick={() => removeFeature(index)} className="absolute top-2 right-2">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    <Button type="button" variant="outline" size="sm" onClick={() => appendFeature({ id: uuidv4(), name: '', description: '', mediaUrl: '' })}>
+                                        <Plus className="mr-2 h-4 w-4" /> Add Feature
+                                    </Button>
+                                </div>
+                           </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="visit">
+                           <AccordionTrigger>Visit & Contact</AccordionTrigger>
+                           <AccordionContent className="space-y-4 p-1">
+                                <FormField control={editForm.control} name="visitAndContact.headline" render={({ field }) => ( <FormItem> <FormLabel>Location Headline</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="visitAndContact.subtitle" render={({ field }) => ( <FormItem> <FormLabel>Location Subtitle</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="visitAndContact.address" render={({ field }) => ( <FormItem> <FormLabel>Address</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                           </AccordionContent>
+                        </AccordionItem>
+                         <AccordionItem value="faq">
+                           <AccordionTrigger>Help & Information (FAQ)</AccordionTrigger>
+                           <AccordionContent className="space-y-4 p-1">
+                                <FormField control={editForm.control} name="faq.headline" render={({ field }) => ( <FormItem> <FormLabel>FAQ Section Headline</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <div className="space-y-4">
+                                    <FormLabel>FAQs</FormLabel>
+                                    {faqFields.map((field, index) => (
+                                        <div key={field.id} className="p-4 border rounded-md space-y-2 relative">
+                                            <FormField control={editForm.control} name={`faq.faqs.${index}.question`} render={({ field }) => ( <FormItem> <FormLabel>Question</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={editForm.control} name={`faq.faqs.${index}.answer`} render={({ field }) => ( <FormItem> <FormLabel>Answer</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <Button type="button" variant="destructive" size="sm" onClick={() => removeFaq(index)} className="absolute top-2 right-2">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    <Button type="button" variant="outline" size="sm" onClick={() => appendFaq({ id: uuidv4(), question: '', answer: '' })}>
+                                        <Plus className="mr-2 h-4 w-4" /> Add FAQ
+                                    </Button>
+                                </div>
+                           </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+
+                      <SheetFooter className="pt-4 sticky bottom-0 bg-background py-4">
+                          <SheetClose asChild>
+                              <Button type="button" variant="outline">Cancel</Button>
+                          </SheetClose>
+                          <Button type="submit" disabled={editForm.formState.isSubmitting}>
+                              {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
+                          </Button>
+                      </SheetFooter>
                     </form>
                 </Form>
               </div>
@@ -534,7 +669,7 @@ export default function CampusPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the campus <span className="font-semibold">{campusToDelete?.name}</span> and its associated image. This action cannot be undone.
+              This will permanently delete the campus <span className="font-semibold">{campusToDelete?.name}</span> and all its associated data. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -548,3 +683,5 @@ export default function CampusPage() {
     </>
   );
 }
+
+    

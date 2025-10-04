@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -52,9 +53,28 @@ const pagesToSeed = [
 ];
 
 const campusesToSeed = [
-    { name: "Dubaï", slug: "dubai", description: "Our campus in the heart of a global hub for innovation and business." },
-    { name: "Côte d’Azur", slug: "cote-dazur", description: "Study in a vibrant location on the French Riviera." },
-    { name: "Paris", slug: "paris", description: "Experience education in one of the world's most iconic cities." },
+    { 
+        name: "Dubaï", 
+        slug: "dubai", 
+        description: "Our campus in the heart of a global hub for innovation and business.",
+        hero: { title: "Welcome to our Dubaï Campus" },
+        campusDescription: { headline: "Experience Excellence in Dubaï", body: "Our state-of-the-art campus in Dubaï offers a vibrant and multicultural learning environment." },
+        faq: { headline: "Frequently Asked Questions", faqs: [{id: '1', question: 'What programs are offered?', answer: 'We offer a wide range of business and technology programs.'}] }
+    },
+    { 
+        name: "Côte d’Azur", 
+        slug: "cote-dazur", 
+        description: "Study in a vibrant location on the French Riviera.",
+        hero: { title: "Study at Côte d’Azur" },
+        campusDescription: { headline: "Innovation on the French Riviera", body: "Enjoy a unique blend of high-quality education and a stunning Mediterranean lifestyle." },
+    },
+    { 
+        name: "Paris", 
+        slug: "paris", 
+        description: "Experience education in one of the world's most iconic cities.",
+        hero: { title: "Learn in the Heart of Paris" },
+        campusDescription: { headline: "A Parisian Education", body: "Immerse yourself in the culture and history of Paris while receiving a world-class education." },
+    },
 ];
 
 export default function SeedPage() {

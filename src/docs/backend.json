@@ -109,7 +109,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Campus",
       "type": "object",
-      "description": "Represents a school campus.",
+      "description": "Represents a school campus and all its page content.",
       "properties": {
         "name": {
           "type": "string",
@@ -121,12 +121,88 @@
         },
         "description": {
           "type": "string",
-          "description": "A short description of the campus."
+          "description": "A short description of the campus for nav menus."
         },
         "imageUrl": {
           "type": "string",
-          "description": "URL for an image of the campus.",
+          "description": "A general image for the campus, used in listings.",
           "format": "uri"
+        },
+        "hero": {
+          "type": "object",
+          "properties": {
+            "backgroundMediaUrl": { "type": "string", "format": "uri" },
+            "title": { "type": "string" },
+            "subtitle": { "type": "string" }
+          }
+        },
+        "campusDescription": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "body": { "type": "string" }
+          }
+        },
+        "academicOffering": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "subtitle": { "type": "string" },
+            "courses": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "campusExperience": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "features": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "mediaUrl": { "type": "string", "format": "uri" }
+                }
+              }
+            }
+          }
+        },
+        "visitAndContact": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "subtitle": { "type": "string" },
+            "address": { "type": "string" }
+          }
+        },
+        "faq": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "faqs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "question": { "type": "string" },
+                  "answer": { "type": "string" }
+                }
+              }
+            }
+          }
         }
       },
       "required": ["name", "slug"]
