@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -136,6 +137,28 @@ const generateSlug = (name: string) => {
     .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with -
     .replace(/(^-|-$)+/g, '');   // Remove leading/trailing dashes
 };
+
+const isVideoUrl = (url?: string | null) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    try {
+      const pathname = new URL(url).pathname.split('?')[0];
+      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+    } catch (e) {
+      return false; // Invalid URL
+    }
+};
+
+const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+    if (isVideoUrl(url)) {
+        return (
+            <video src={url} width="64" height="40" className="object-cover rounded-sm bg-muted" muted playsInline />
+        );
+    }
+    return (
+        <Image src={url} alt={alt} width={64} height={40} className="object-cover rounded-sm" />
+    );
+}
 
 
 export default function CampusPage() {
@@ -522,12 +545,12 @@ export default function CampusPage() {
                                 )}
                             />
                             <FormItem>
-                                <FormLabel>Campus Image (for listings)</FormLabel>
+                                <FormLabel>Campus Media (for listings)</FormLabel>
                                 <FormControl>
                                 <Input 
                                     id="campus-image-input"
                                     type="file" 
-                                    accept="image/*"
+                                    accept="image/*,video/*,.mov"
                                     onChange={(e) => {
                                     if (e.target.files?.[0]) {
                                         setImageFile(e.target.files[0]);
@@ -554,7 +577,7 @@ export default function CampusPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Image</TableHead>
+                  <TableHead>Media</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Slug</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -575,9 +598,9 @@ export default function CampusPage() {
                     <TableRow key={campus.id}>
                       <TableCell>
                         {campus.imageUrl ? (
-                           <Image src={campus.imageUrl} alt={campus.name} width={64} height={40} className="object-cover rounded-sm" />
+                           <MediaPreview url={campus.imageUrl} alt={campus.name} />
                         ) : (
-                          <div className="h-10 w-16 bg-muted rounded-sm flex items-center justify-center text-xs text-muted-foreground">No Image</div>
+                          <div className="h-10 w-16 bg-muted rounded-sm flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                         )}
                       </TableCell>
                       <TableCell className="font-medium">{campus.name}</TableCell>
@@ -626,18 +649,18 @@ export default function CampusPage() {
                               <FormField control={editForm.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                               <FormField control={editForm.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Description (for nav menus)</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                               <FormItem>
-                                  <FormLabel>Campus Image (for listings)</FormLabel>
+                                  <FormLabel>Campus Media (for listings)</FormLabel>
                                   <div className="flex items-center gap-4">
                                       {editForm.watch('imageUrl') && (
                                           <div className="relative">
-                                              <Image src={editForm.watch('imageUrl')!} alt={editForm.watch('name')} width={80} height={50} className="object-cover rounded-sm" />
+                                              <MediaPreview url={editForm.watch('imageUrl')!} alt={editForm.watch('name')} />
                                               <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('imageUrl')}>
                                                   <X className="h-4 w-4" />
                                               </Button>
                                           </div>
                                       )}
                                       <FormControl className="flex-1">
-                                          <Input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]) } }}/>
+                                          <Input type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]) } }}/>
                                       </FormControl>
                                   </div>
                                   <FormMessage />

@@ -68,6 +68,17 @@ interface Campus {
   imageUrl?: string;
 }
 
+const isVideoUrl = (url?: string | null) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    try {
+      const pathname = new URL(url).pathname.split('?')[0];
+      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+    } catch (e) {
+      return false; // Invalid URL
+    }
+};
+
 export default function Home() {
   const firestore = useFirestore();
   const isMobile = useIsMobile();
@@ -89,38 +100,44 @@ export default function Home() {
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
   const heroMediaUrl = heroSection?.imageUrl;
   
-  const isVideoUrl = (url: string) => {
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    try {
-      const pathname = new URL(url).pathname.split('?')[0];
-      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
-    } catch (e) {
-      return false; // Invalid URL
-    }
-  };
   const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
 
   const isLoading = isPageLoading || areCampusesLoading;
 
-  const CampusCard = ({ campus, className }: { campus: Campus, className?: string }) => (
-    <Link href={`/campus/${campus.slug}`} className={`group relative block overflow-hidden rounded-lg ${className}`}>
-      <Image
-        src={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/800/600`}
-        alt={campus.name}
-        fill
-        className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
-      <div className="relative flex h-full flex-col justify-end p-6">
-        <h3 className="text-lg font-normal text-white font-headline">
-          {campus.name}
-        </h3>
-        {campus.description && (
-          <p className="text-xs text-white/80 mt-1 line-clamp-2">{campus.description}</p>
+  const CampusCard = ({ campus, className }: { campus: Campus, className?: string }) => {
+    const isCardVideo = isVideoUrl(campus.imageUrl);
+    return (
+        <Link href={`/campus/${campus.slug}`} className={`group relative block overflow-hidden rounded-lg ${className}`}>
+        {isCardVideo ? (
+             <video
+                src={campus.imageUrl}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+            />
+        ) : (
+            <Image
+                src={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/800/600`}
+                alt={campus.name}
+                fill
+                className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+            />
         )}
-      </div>
-    </Link>
-  );
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
+        <div className="relative flex h-full flex-col justify-end p-6">
+            <h3 className="text-lg font-normal text-white font-headline">
+            {campus.name}
+            </h3>
+            {campus.description && (
+            <p className="text-xs text-white/80 mt-1 line-clamp-2">{campus.description}</p>
+            )}
+        </div>
+        </Link>
+    );
+  };
+
 
   return (
     <div className="flex flex-col">
