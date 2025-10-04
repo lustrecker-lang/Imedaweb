@@ -16,6 +16,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,14 +34,6 @@ const navStructure = [
             { href: "#", title: "Présentation", description: "Une vue d'ensemble de nos activités et de notre impact." },
             { href: "#", title: "Références", description: "Voyez comment nous avons aidé nos clients à réussir." },
             { href: "#", title: "Notre approche", description: "Notre méthodologie unique pour des résultats exceptionnels." },
-        ]
-    },
-    {
-        title: "Formations",
-        items: [
-            { href: "#", title: "Catalogue 2025-26", description: "Explorez notre offre complète de formations." },
-            { href: "#", title: "700+ Formations internationales", description: "Des programmes de classe mondiale à portée de main." },
-            { href: "#", title: "Formations en ligne", description: "Apprenez à votre rythme, où que vous soyez." },
         ]
     },
     {
@@ -152,92 +145,101 @@ export function Header() {
     })) : []
   };
 
-  const finalNavStructure = [...navStructure.slice(0, 2), campusNav, ...navStructure.slice(2)];
+  const finalNavStructure = [navStructure[0], campusNav, ...navStructure.slice(1)];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
-  {/* The fix is adding px-4 md:px-6 to this line */}
-  <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-    <Link href="/" className="flex items-center gap-2">
-      <LogoComponent />
-    </Link>
-    
-    <NavigationMenu className="hidden md:flex">
-        <NavigationMenuList>
-            {finalNavStructure.map((category) => (
-                <NavigationMenuItem key={category.title}>
-                    <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                        {category.items.map((item) => (
-                            <ListItem
-                                key={item.title}
-                                href={item.href}
-                                title={item.title}
-                                description={item.description}
-                            />
-                        ))}
-                    </ul>
-                    </NavigationMenuContent>
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+        <Link href="/" className="flex items-center gap-2">
+          <LogoComponent />
+        </Link>
+        
+        <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList>
+                <NavigationMenuItem>
+                    <Link href="/courses" legacyBehavior passHref>
+                        <NavigationMenuLink className={navigationMenuTriggerStyle({ variant: 'ghost' })}>
+                        Formations
+                        </NavigationMenuLink>
+                    </Link>
                 </NavigationMenuItem>
-            ))}
-        </NavigationMenuList>
-    </NavigationMenu>
+                {finalNavStructure.map((category) => (
+                    <NavigationMenuItem key={category.title}>
+                        <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                            {category.items.map((item) => (
+                                <ListItem
+                                    key={item.title}
+                                    href={item.href}
+                                    title={item.title}
+                                    description={item.description}
+                                />
+                            ))}
+                        </ul>
+                        </NavigationMenuContent>
+                    </NavigationMenuItem>
+                ))}
+            </NavigationMenuList>
+        </NavigationMenu>
 
-    <div className="flex items-center gap-2">
-        { !isMobile && <DesktopContactButton />}
-      <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="md:hidden">
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0">
-            <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
-          <div className="p-6 pb-0">
-            <div className="flex items-center justify-between h-16 mb-4">
-                <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
-                <LogoComponent />
-                </Link>
-            </div>
-            <div className="grid gap-4">
-                <nav className="grid gap-2 text-base font-normal">
-                    <Accordion type="multiple" className="w-full">
-                    {finalNavStructure.map((category) => (
-                        <AccordionItem key={category.title} value={category.title} className="border-b-0">
-                        <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
-                            {category.title}
-                        </AccordionTrigger>
-                        <AccordionContent className="pl-4">
-                            <div className="flex flex-col gap-2 mt-2">
-                                {category.items.map((link) => (
-                                    <Link
-                                        key={link.title}
-                                        href={link.href}
-                                        className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
-                                        onClick={() => setIsMobileNavOpen(false)}
-                                    >
-                                        {link.title}
-                                    </Link>
-                                ))}
-                            </div>
-                        </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                    </Accordion>
-                </nav>
-            </div>
-          </div>
-          <div className="mt-auto p-6">
-            <Button size="sm" className="w-full" asChild>
-                <Link href="/contact" onClick={() => setIsMobileNavOpen(false)}>Contactez-nous</Link>
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
-    </div>
-  </div>
-</header>
+        <div className="flex items-center gap-2">
+            { !isMobile && <DesktopContactButton />}
+          <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="md:hidden">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0">
+                <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
+              <div className="p-6 pb-0">
+                <div className="flex items-center justify-between h-16 mb-4">
+                    <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
+                    <LogoComponent />
+                    </Link>
+                </div>
+                <div className="grid gap-4">
+                    <nav className="grid gap-2 text-base font-normal">
+                        <Link href="/courses" className="block py-2 text-foreground/70 transition-colors hover:text-foreground font-normal" onClick={() => setIsMobileNavOpen(false)}>
+                            Formations
+                        </Link>
+                        <Accordion type="multiple" className="w-full">
+                        {finalNavStructure.map((category) => (
+                            <AccordionItem key={category.title} value={category.title} className="border-b-0">
+                            <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
+                                {category.title}
+                            </AccordionTrigger>
+                            <AccordionContent className="pl-4">
+                                <div className="flex flex-col gap-2 mt-2">
+                                    {category.items.map((link) => (
+                                        <Link
+                                            key={link.title}
+                                            href={link.href}
+                                            className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
+                                            onClick={() => setIsMobileNavOpen(false)}
+                                        >
+                                            {link.title}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                        </Accordion>
+                    </nav>
+                </div>
+              </div>
+              <div className="mt-auto p-6">
+                <Button size="sm" className="w-full" asChild>
+                    <Link href="/contact" onClick={() => setIsMobileNavOpen(false)}>Contactez-nous</Link>
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+    </header>
   );
 }
