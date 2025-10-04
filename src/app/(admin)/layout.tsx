@@ -66,16 +66,28 @@ export default function AdminLayout({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/admin/dashboard" tooltip="Dashboard">
-                <LayoutDashboard />
-                <span className="text-sm">Dashboard</span>
-              </SidebarMenuButton>
+              <Link href="/admin/dashboard" legacyBehavior passHref>
+                <SidebarMenuButton tooltip="Dashboard">
+                  <LayoutDashboard />
+                  <span className="text-sm">Dashboard</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="/admin/company" legacyBehavior passHref>
+                <SidebarMenuButton tooltip="Company">
+                  <Building />
+                  <span className="text-sm">Company</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
              <SidebarMenuItem>
-              <SidebarMenuButton href="/admin/seed" tooltip="Seed Data">
-                <Database />
-                <span className="text-sm">Seed Data</span>
-              </SidebarMenuButton>
+              <Link href="/admin/seed" legacyBehavior passHref>
+                <SidebarMenuButton tooltip="Seed Data">
+                  <Database />
+                  <span className="text-sm">Seed Data</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
