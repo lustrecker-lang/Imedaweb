@@ -98,7 +98,7 @@ export default function Home() {
         fill
         className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
       />
-      <div className="relative flex h-full flex-col justify-end p-6">
+      <div className="relative flex h-full flex-col justify-end bg-gradient-to-t from-black/60 via-black/20 to-transparent p-6">
         <h3 className="text-lg font-normal text-white font-headline">
           {campus.name}
         </h3>
@@ -223,8 +223,7 @@ export default function Home() {
             </div>
             {isMobile && (
               <div className="flex gap-2">
-                <CarouselPrevious className="relative -left-0 top-0 translate-y-0" />
-                <CarouselNext className="relative -right-0 top-0 translate-y-0" />
+                {/* This is intentionally left blank, arrows are now inside carousel */}
               </div>
             )}
           </div>
@@ -236,7 +235,7 @@ export default function Home() {
               <Skeleton className="h-full w-full" />
             </div>
           ) : isMobile ? (
-             <Carousel className="w-full" opts={{ align: "start", loop: true }}>
+             <Carousel className="w-full relative" opts={{ align: "start", loop: true }}>
                 <CarouselContent className="-ml-4">
                   {campuses && campuses.map((campus) => (
                     <CarouselItem key={campus.id} className="basis-4/5 pl-4">
@@ -246,6 +245,10 @@ export default function Home() {
                     </CarouselItem>
                   ))}
                 </CarouselContent>
+                <div className="absolute top-[-3.5rem] right-0 flex gap-2">
+                  <CarouselPrevious className="relative -left-0 top-0 translate-y-0" />
+                  <CarouselNext className="relative -right-0 top-0 translate-y-0" />
+                </div>
             </Carousel>
           ) : (
             <div className="mt-12 grid h-[50vh] min-h-[400px] grid-cols-1 grid-rows-3 gap-6 md:grid-cols-2 md:grid-rows-2">
