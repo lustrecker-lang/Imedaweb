@@ -101,36 +101,43 @@ export default function CampusPage() {
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="container py-8">
-        <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-            {isLoading ? ( <Skeleton className="h-full w-full" /> ) : (
-              (campus?.hero?.backgroundMediaUrl || campus?.imageUrl) && (
-                <Image src={campus.hero?.backgroundMediaUrl || campus.imageUrl!} alt={campus.hero?.title || campus.name || "Campus background"} fill className="object-cover" priority />
-              )
+{/* Hero Section */}
+<section className="py-8">
+  {/* Apply the container and padding classes to an inner div */}
+  <div className="container px-4 md:px-6">
+    <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
+        {isLoading ? ( <Skeleton className="h-full w-full" /> ) : (
+          (campus?.hero?.backgroundMediaUrl || campus?.imageUrl) && (
+            <Image src={campus.hero?.backgroundMediaUrl || campus.imageUrl!} alt={campus.hero?.title || campus.name || "Campus background"} fill className="object-cover" priority />
+          )
+        )}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
+            {isLoading ? ( <div className="w-full max-w-3xl space-y-4"><Skeleton className="h-12 w-3/4 mx-auto bg-gray-400/50" /></div> ) : (
+            <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
+                {campus?.hero?.title || campus?.name || "Campus Details"}
+            </h1>
             )}
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
-                {isLoading ? ( <div className="w-full max-w-3xl space-y-4"><Skeleton className="h-12 w-3/4 mx-auto bg-gray-400/50" /></div> ) : (
-                <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
-                    {campus?.hero?.title || campus?.name || "Campus Details"}
-                </h1>
-                )}
-            </div>
         </div>
-      </section>
+    </div>
+  </div>
+</section>
 
-      {/* Campus Description Section */}
-      {!isLoading && (campus?.campusDescription?.headline || campus?.campusDescription?.body) && (
-        <section className="py-12 pt-0 md:pt-12">
-          <div className="container px-4 md:px-6">
-            <Card>
-              <CardHeader><CardTitle>{campus.campusDescription.headline}</CardTitle></CardHeader>
-              <CardContent><p className="text-muted-foreground whitespace-pre-wrap">{campus.campusDescription.body}</p></CardContent>
-            </Card>
-          </div>
-        </section>
-      )}
+{/* Campus Description Section */}
+{!isLoading && (campus?.campusDescription?.headline || campus?.campusDescription?.body) && (
+  <section className="py-12">
+    <div className="container px-4 md:px-6">
+      <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
+        {campus.campusDescription.headline}
+      </h2>
+      
+      {/* - `md:max-w-[50%]` now applies the max-width only on medium screens and up. */}
+      <p className="mt-2 md:max-w-[50%] text-muted-foreground md:text-base/relaxed whitespace-pre-wrap">
+        {campus.campusDescription.body}
+      </p>
+    </div>
+  </section>
+)}
 
       {/* Academic Offering Section */}
       <section className="py-12">

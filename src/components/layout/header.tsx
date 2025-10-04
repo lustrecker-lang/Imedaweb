@@ -156,87 +156,88 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <LogoComponent />
-        </Link>
-        
-        <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList>
-                {finalNavStructure.map((category) => (
-                    <NavigationMenuItem key={category.title}>
-                        <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
-                        <NavigationMenuContent>
-                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                            {category.items.map((item) => (
-                                <ListItem
-                                    key={item.title}
-                                    href={item.href}
-                                    title={item.title}
-                                    description={item.description}
-                                />
-                            ))}
-                        </ul>
-                        </NavigationMenuContent>
-                    </NavigationMenuItem>
-                ))}
-            </NavigationMenuList>
-        </NavigationMenu>
-
-        <div className="flex items-center gap-2">
-            { !isMobile && <DesktopContactButton />}
-          <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="md:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0">
-                <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
-              <div className="p-6 pb-0">
-                <div className="flex items-center justify-between h-16 mb-4">
-                    <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
-                    <LogoComponent />
-                    </Link>
-                </div>
-                <div className="grid gap-4">
-                    <nav className="grid gap-2 text-base font-normal">
-                        <Accordion type="multiple" className="w-full">
-                        {finalNavStructure.map((category) => (
-                            <AccordionItem key={category.title} value={category.title} className="border-b-0">
-                            <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
-                                {category.title}
-                            </AccordionTrigger>
-                            <AccordionContent className="pl-4">
-                                <div className="flex flex-col gap-2 mt-2">
-                                    {category.items.map((link) => (
-                                        <Link
-                                            key={link.title}
-                                            href={link.href}
-                                            className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
-                                            onClick={() => setIsMobileNavOpen(false)}
-                                        >
-                                            {link.title}
-                                        </Link>
-                                    ))}
-                                </div>
-                            </AccordionContent>
-                            </AccordionItem>
+  {/* The fix is adding px-4 md:px-6 to this line */}
+  <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+    <Link href="/" className="flex items-center gap-2">
+      <LogoComponent />
+    </Link>
+    
+    <NavigationMenu className="hidden md:flex">
+        <NavigationMenuList>
+            {finalNavStructure.map((category) => (
+                <NavigationMenuItem key={category.title}>
+                    <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                        {category.items.map((item) => (
+                            <ListItem
+                                key={item.title}
+                                href={item.href}
+                                title={item.title}
+                                description={item.description}
+                            />
                         ))}
-                        </Accordion>
-                    </nav>
-                </div>
-              </div>
-              <div className="mt-auto p-6">
-                <Button size="sm" className="w-full" asChild>
-                    <Link href="/contact" onClick={() => setIsMobileNavOpen(false)}>Contactez-nous</Link>
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </div>
-    </header>
+                    </ul>
+                    </NavigationMenuContent>
+                </NavigationMenuItem>
+            ))}
+        </NavigationMenuList>
+    </NavigationMenu>
+
+    <div className="flex items-center gap-2">
+        { !isMobile && <DesktopContactButton />}
+      <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="md:hidden">
+            <Menu className="h-6 w-6" />
+            <span className="sr-only">Toggle navigation menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0">
+            <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
+          <div className="p-6 pb-0">
+            <div className="flex items-center justify-between h-16 mb-4">
+                <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
+                <LogoComponent />
+                </Link>
+            </div>
+            <div className="grid gap-4">
+                <nav className="grid gap-2 text-base font-normal">
+                    <Accordion type="multiple" className="w-full">
+                    {finalNavStructure.map((category) => (
+                        <AccordionItem key={category.title} value={category.title} className="border-b-0">
+                        <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
+                            {category.title}
+                        </AccordionTrigger>
+                        <AccordionContent className="pl-4">
+                            <div className="flex flex-col gap-2 mt-2">
+                                {category.items.map((link) => (
+                                    <Link
+                                        key={link.title}
+                                        href={link.href}
+                                        className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
+                                        onClick={() => setIsMobileNavOpen(false)}
+                                    >
+                                        {link.title}
+                                    </Link>
+                                ))}
+                            </div>
+                        </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                    </Accordion>
+                </nav>
+            </div>
+          </div>
+          <div className="mt-auto p-6">
+            <Button size="sm" className="w-full" asChild>
+                <Link href="/contact" onClick={() => setIsMobileNavOpen(false)}>Contactez-nous</Link>
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
+  </div>
+</header>
   );
 }

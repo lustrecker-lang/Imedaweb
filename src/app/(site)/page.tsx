@@ -1,9 +1,10 @@
+
 'use client';
 
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, BarChart, Users } from "lucide-react";
-import { doc } from 'firebase/firestore';
+import { doc, collection, query, orderBy } from 'firebase/firestore';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const featuresPlaceholders = [
@@ -50,6 +51,13 @@ interface Page {
   sections: Section[];
 }
 
+interface Campus {
+  id: string;
+  name: string;
+  slug: string;
+  imageUrl?: string;
+}
+
 export default function Home() {
   const firestore = useFirestore();
   const pageRef = useMemoFirebase(() => {
@@ -57,61 +65,72 @@ export default function Home() {
     return doc(firestore, 'pages', 'home');
   }, [firestore]);
   
-  const { data: homePage, isLoading } = useDoc<Page>(pageRef);
+  const { data: homePage, isLoading: isPageLoading } = useDoc<Page>(pageRef);
+
+  const campusesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'campuses'), orderBy('name', 'asc'));
+  }, [firestore]);
+
+  const { data: campuses, isLoading: areCampusesLoading } = useCollection<Campus>(campusesQuery);
 
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
   const heroImageUrl = heroSection?.imageUrl;
 
+  const isLoading = isPageLoading || areCampusesLoading;
+
   return (
     <div className="flex flex-col">
-      <section className="container py-8">
-        <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
-            {isLoading ? (
-              <Skeleton className="h-full w-full" />
-            ) : (
-              heroImageUrl && (
-                <Image
-                    src={heroImageUrl}
-                    alt={heroSection?.title || "Hero background"}
-                    fill
-                    className="object-cover"
-                    priority
-                />
-              )
-            )}
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
-                {isLoading ? (
-                <div className="w-full max-w-3xl space-y-4">
-                    <Skeleton className="h-12 w-3/4 mx-auto bg-gray-400/50" />
-                    <Skeleton className="h-6 w-full max-w-2xl mx-auto bg-gray-400/50" />
-                </div>
-                ) : (
-                <>
-                    <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
-                    {heroSection?.title || "Innovate. Manage. Excel."}
-                    </h1>
-                    <p className="mx-auto mt-4 max-w-[600px] text-sm text-gray-200 md:text-base">
-                    {heroSection?.content || "IMEDA provides the tools you need to elevate your business operations to the next level."}
-                    </p>
-                </>
-                )}
-                <div className="mt-6">
-                <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-200">
-                    <Link href="#">
-                    Get Started <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                </Button>
-                </div>
-            </div>
+      <section className="py-8">
+        <div className="container px-4 md:px-6">
+          <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
+              {isPageLoading ? (
+                <Skeleton className="h-full w-full" />
+              ) : (
+                heroImageUrl && (
+                  <Image
+                      src={heroImageUrl}
+                      alt={heroSection?.title || "Hero background"}
+                      fill
+                      className="object-cover"
+                      priority
+                  />
+                )
+              )}
+              <div className="absolute inset-0 bg-black/50" />
+              <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
+                  {isPageLoading ? (
+                  <div className="w-full max-w-3xl space-y-4">
+                      <Skeleton className="h-12 w-3/4 mx-auto bg-gray-400/50" />
+                      <Skeleton className="h-6 w-full max-w-2xl mx-auto bg-gray-400/50" />
+                  </div>
+                  ) : (
+                  <>
+                      <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
+                      {heroSection?.title || "Innovate. Manage. Excel."}
+                      </h1>
+                      <p className="mx-auto mt-4 max-w-[600px] text-sm text-gray-200 md:text-base">
+                      {heroSection?.content || "IMEDA provides the tools you need to elevate your business operations to the next level."}
+                      </p>
+                  </>
+                  )}
+                  <div className="mt-6">
+                  <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-200">
+                      <Link href="#">
+                      Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                      </Link>
+                  </Button>
+                  </div>
+              </div>
+          </div>
         </div>
       </section>
 
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="max-w-2xl">
-            {isLoading ? (
+            {isPageLoading ? (
               <div className="space-y-2">
                 <Skeleton className="h-8 w-2/3" />
                 <Skeleton className="h-5 w-full max-w-lg" />
@@ -135,7 +154,7 @@ export default function Home() {
               return (
                 <Card key={feature.title} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2">
                   <div className="aspect-video overflow-hidden">
-                    {isLoading ? (
+                    {isPageLoading ? (
                       <Skeleton className="w-full h-full" />
                     ) : (
                       featureImageUrl && (
@@ -150,14 +169,53 @@ export default function Home() {
                     )}
                   </div>
                   <CardHeader>
-                      <CardTitle className="font-headline font-normal">{isLoading ? <Skeleton className="h-6 w-3/4" /> : (featureSection?.title || feature.title)}</CardTitle>
+                      <CardTitle className="font-headline font-normal">{isPageLoading ? <Skeleton className="h-6 w-3/4" /> : (featureSection?.title || feature.title)}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {isLoading ? <div className="space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></div> : <CardDescription>{featureSection?.content || feature.description}</CardDescription>}
+                    {isPageLoading ? <div className="space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></div> : <CardDescription>{featureSection?.content || feature.description}</CardDescription>}
                   </CardContent>
                 </Card>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-muted">
+        <div className="container px-4 md:px-6">
+          <div className="max-w-2xl">
+              <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
+                Our Campuses
+              </h2>
+              <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                Explore our world-class campuses located in global hubs of innovation.
+              </p>
+          </div>
+          <div className="mt-12 grid grid-cols-1 grid-rows-3 gap-6 md:grid-cols-2 md:grid-rows-2">
+            {isLoading ? (
+              <>
+                <Skeleton className="h-64 w-full md:row-span-2" />
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-64 w-full" />
+              </>
+            ) : (
+              campuses && campuses.map((campus, index) => (
+                <Link key={campus.id} href={`/campus/${campus.slug}`} className={`group relative block overflow-hidden rounded-lg ${index === 0 ? 'md:row-span-2' : ''}`}>
+                  <Image
+                    src={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/800/600`}
+                    alt={campus.name}
+                    fill
+                    className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                  <div className="relative flex h-full flex-col justify-end p-6">
+                    <h3 className="text-lg font-semibold text-white font-headline">
+                      {campus.name}
+                    </h3>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </section>
