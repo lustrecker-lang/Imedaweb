@@ -129,14 +129,14 @@ export function Header() {
             <NavigationMenuList>
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                        <Link href="/" className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
+                        <Link href="/" className={cn(navigationMenuTriggerStyle({variant: "ghost"}), "bg-transparent")}>
                             Accueil
                         </Link>
                     </NavigationMenuLink>
                 </NavigationMenuItem>
                 {navStructure.map((category) => (
                     <NavigationMenuItem key={category.title}>
-                        <NavigationMenuTrigger>{category.title}</NavigationMenuTrigger>
+                        <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
                         <NavigationMenuContent>
                         <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
                             {category.items.map((item) => (
