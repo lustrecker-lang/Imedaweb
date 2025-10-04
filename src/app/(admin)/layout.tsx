@@ -106,14 +106,6 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-             <SidebarMenuItem asChild>
-              <Link href="/admin/seed">
-                <SidebarMenuButton tooltip="Seed Data">
-                  <Database />
-                  <span className="text-sm">Seed Data</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
