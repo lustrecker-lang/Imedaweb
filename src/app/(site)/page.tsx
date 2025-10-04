@@ -172,7 +172,7 @@ export default function Home() {
     <div className="flex flex-col">
       <section className="py-8">
         <div className="container px-4 md:px-6">
-          <div className="relative h-[60vh] min-h-[500px] w-full overflow-hidden">
+          <div className="relative h-[60vh] min-h-[400px] md:min-h-[500px] w-full overflow-hidden">
               {isPageLoading ? (
                 <Skeleton className="h-full w-full" />
               ) : (
