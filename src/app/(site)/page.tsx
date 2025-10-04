@@ -90,7 +90,7 @@ export default function Home() {
   const heroMediaUrl = heroSection?.imageUrl;
   
   const isVideoUrl = (url: string) => {
-    const videoExtensions = ['.mp4', '.webm', '.ogg'];
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
     try {
       const pathname = new URL(url).pathname.split('?')[0];
       return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
@@ -110,6 +110,7 @@ export default function Home() {
         fill
         className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
       />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
       <div className="relative flex h-full flex-col justify-end p-6">
         <h3 className="text-lg font-normal text-white font-headline">
           {campus.name}
@@ -142,7 +143,7 @@ export default function Home() {
                     ) : (
                         <Image
                             src={heroMediaUrl}
-                            alt={heroSection?.title || "Hero background"}
+                            alt={heroSection?.title || ""}
                             fill
                             className="object-cover"
                             priority

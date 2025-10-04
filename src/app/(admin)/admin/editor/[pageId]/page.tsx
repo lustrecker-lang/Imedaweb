@@ -124,7 +124,7 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
                     <Input 
                         id={`file-input-${section.id}`}
                         type="file" 
-                        accept={isHeroSection ? "image/*,video/*" : "image/svg+xml, image/png, image/jpeg, image/webp, image/gif"}
+                        accept={isHeroSection ? "image/*,video/*,.mov" : "image/svg+xml, image/png, image/jpeg, image/webp, image/gif"}
                         onChange={(e) => {
                             if (e.target.files?.[0]) {
                                 setImageFile(e.target.files[0]);
