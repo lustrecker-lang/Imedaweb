@@ -3,9 +3,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useFirestore, useCollection, useMemoFirebase, useStorage, addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
-import { collection, doc, query, orderBy } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useUser, useFirestore, useCollection, useMemoFirebase, useStorage, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { collection, doc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -48,18 +49,27 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Trash2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import { Trash2, Edit, X } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Campus name is required.'),
+  description: z.string().optional(),
   imageUrl: z.string().optional(),
 });
 
 interface Campus {
   id: string;
   name: string;
+  description?: string;
   imageUrl?: string;
 }
 
@@ -73,6 +83,9 @@ export default function CampusPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [campusToDelete, setCampusToDelete] = useState<Campus | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingCampus, setEditingCampus] = useState<Campus | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
 
   const campusesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -83,7 +96,11 @@ export default function CampusPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: '' },
+    defaultValues: { name: '', description: '', imageUrl: '' },
+  });
+
+  const editForm = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
   });
 
   useEffect(() => {
@@ -91,6 +108,13 @@ export default function CampusPage() {
       router.push('/login');
     }
   }, [user, isUserLoading, router]);
+  
+  useEffect(() => {
+    if (editingCampus) {
+      editForm.reset(editingCampus);
+    }
+  }, [editingCampus, editForm]);
+
 
   if (isUserLoading || !user) {
     return (
@@ -121,7 +145,7 @@ export default function CampusPage() {
     }
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onAddSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!firestore) return;
 
     let imageUrl = '';
@@ -129,7 +153,7 @@ export default function CampusPage() {
         imageUrl = await handleFileUpload(imageFile) || '';
     }
 
-    const dataToSave = { name: values.name, imageUrl };
+    const dataToSave = { ...values, imageUrl };
     const campusesCollection = collection(firestore, 'campuses');
     
     addDocumentNonBlocking(campusesCollection, dataToSave);
@@ -144,14 +168,86 @@ export default function CampusPage() {
     const fileInput = document.getElementById('campus-image-input') as HTMLInputElement;
     if(fileInput) fileInput.value = '';
   };
+  
+  const onEditSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!firestore || !editingCampus) return;
+
+    let imageUrl = editingCampus.imageUrl;
+
+    if (imageFile) {
+      // If there was an old image, delete it from storage
+      if (editingCampus.imageUrl) {
+        try {
+          const oldImageRef = ref(storage, editingCampus.imageUrl);
+          await deleteObject(oldImageRef);
+        } catch (error) {
+          console.error("Error deleting old image from storage: ", error);
+        }
+      }
+      imageUrl = await handleFileUpload(imageFile) || editingCampus.imageUrl;
+    }
+
+    const docRef = doc(firestore, 'campuses', editingCampus.id);
+    const dataToSave = { ...values, imageUrl };
+    
+    setDocumentNonBlocking(docRef, dataToSave, { merge: true });
+
+    toast({
+      title: 'Success!',
+      description: `Campus "${values.name}" has been updated.`,
+    });
+
+    setIsEditDialogOpen(false);
+    setEditingCampus(null);
+    setImageFile(null);
+  };
+  
+  const handleRemoveImage = async () => {
+    if (!firestore || !editingCampus || !editingCampus.imageUrl) return;
+
+    // Also delete from storage
+    if (storage) {
+        try {
+            const imageRef = ref(storage, editingCampus.imageUrl);
+            await deleteObject(imageRef);
+        } catch (error) {
+            console.error("Error deleting image from storage: ", error);
+        }
+    }
+    
+    const docRef = doc(firestore, 'campuses', editingCampus.id);
+    setDocumentNonBlocking(docRef, { imageUrl: '' }, { merge: true });
+    
+    setEditingCampus(prev => prev ? { ...prev, imageUrl: '' } : null);
+    
+    toast({
+      title: 'Image Removed',
+      description: 'The campus image has been removed.',
+    });
+  }
 
   const openDeleteDialog = (campus: Campus) => {
     setCampusToDelete(campus);
     setIsDeleteDialogOpen(true);
   };
+  
+  const openEditDialog = (campus: Campus) => {
+    setEditingCampus(campus);
+    setIsEditDialogOpen(true);
+    setImageFile(null);
+  };
 
   const handleDeleteCampus = () => {
     if (!firestore || !campusToDelete) return;
+    
+    // Delete image from storage if it exists
+    if (campusToDelete.imageUrl && storage) {
+      const imageRef = ref(storage, campusToDelete.imageUrl);
+      deleteObject(imageRef).catch(error => {
+        console.error("Error deleting image from storage during campus deletion: ", error);
+      });
+    }
+
     const docRef = doc(firestore, 'campuses', campusToDelete.id);
     deleteDocumentNonBlocking(docRef);
     toast({
@@ -175,7 +271,7 @@ export default function CampusPage() {
           <CardTitle>Add New Campus</CardTitle>
         </CardHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(onAddSubmit)}>
             <CardContent className="space-y-4">
               <FormField
                 control={form.control}
@@ -185,6 +281,19 @@ export default function CampusPage() {
                     <FormLabel>Campus Name</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Paris" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="A short description of the campus." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -227,6 +336,7 @@ export default function CampusPage() {
               <TableRow>
                 <TableHead>Image</TableHead>
                 <TableHead>Name</TableHead>
+                <TableHead>Description</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -236,7 +346,8 @@ export default function CampusPage() {
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-10 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                   </TableRow>
                 ))
               ) : campuses && campuses.length > 0 ? (
@@ -250,7 +361,12 @@ export default function CampusPage() {
                       )}
                     </TableCell>
                     <TableCell className="font-medium">{campus.name}</TableCell>
+                    <TableCell className="text-muted-foreground truncate max-w-xs">{campus.description}</TableCell>
                     <TableCell className="text-right">
+                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus)}>
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                      </Button>
                        <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(campus)}>
                           <Trash2 className="h-4 w-4 text-red-600" />
                           <span className="sr-only">Delete</span>
@@ -260,7 +376,7 @@ export default function CampusPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
+                  <TableCell colSpan={4} className="h-24 text-center">
                     No campuses found. Add one above to get started.
                   </TableCell>
                 </TableRow>
@@ -270,13 +386,82 @@ export default function CampusPage() {
         </CardContent>
       </Card>
     </div>
+
+    {/* Edit Dialog */}
+    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Edit Campus: {editingCampus?.name}</DialogTitle>
+            </DialogHeader>
+            <Form {...editForm}>
+                <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
+                    <FormField
+                        control={editForm.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Campus Name</FormLabel>
+                                <FormControl><Input {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={editForm.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Description</FormLabel>
+                                <FormControl><Textarea {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormItem>
+                        <FormLabel>Campus Image</FormLabel>
+                        <div className="flex items-center gap-4">
+                            {editingCampus?.imageUrl && (
+                                <div className="relative">
+                                    <Image src={editingCampus.imageUrl} alt={editingCampus.name} width={80} height={50} className="object-cover rounded-sm" />
+                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={handleRemoveImage}>
+                                        <X className="h-4 w-4" />
+                                        <span className="sr-only">Remove Image</span>
+                                    </Button>
+                                </div>
+                            )}
+                            <FormControl className="flex-1">
+                                <Input 
+                                    type="file" 
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        if (e.target.files?.[0]) {
+                                            setImageFile(e.target.files[0]);
+                                        }
+                                    }}
+                                />
+                            </FormControl>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button type="button" variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <Button type="submit" disabled={editForm.formState.isSubmitting}>
+                            {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </Form>
+        </DialogContent>
+    </Dialog>
     
     <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the campus <span className="font-semibold">{campusToDelete?.name}</span>. This action cannot be undone.
+            This will permanently delete the campus <span className="font-semibold">{campusToDelete?.name}</span> and its associated image. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

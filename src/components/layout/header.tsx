@@ -62,6 +62,7 @@ interface CompanyProfile {
 interface Campus {
   id: string;
   name: string;
+  description?: string;
   imageUrl?: string;
 }
 
@@ -146,7 +147,7 @@ export function Header() {
     items: campuses ? campuses.map(campus => ({
         href: '#',
         title: campus.name,
-        description: `Découvrez notre campus à ${campus.name}.`
+        description: campus.description || `Découvrez notre campus à ${campus.name}.`
     })) : []
   };
 

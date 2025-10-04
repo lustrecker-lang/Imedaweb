@@ -115,6 +115,10 @@
           "type": "string",
           "description": "The name of the campus."
         },
+        "description": {
+          "type": "string",
+          "description": "A short description of the campus."
+        },
         "imageUrl": {
           "type": "string",
           "description": "URL for an image of the campus.",
