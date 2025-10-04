@@ -120,7 +120,7 @@ export default function CampusPage() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 max-w-4xl">
             <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline text-white">
-                {campus.hero?.title || campus.name}
+                {campus.hero?.title || "Welcome"}
             </h1>
              {campus.hero?.subtitle && (
                 <p className="mx-auto mt-4 max-w-[700px] text-gray-200 text-sm md:text-base">
@@ -137,60 +137,41 @@ export default function CampusPage() {
                 {/* Campus Description */}
                 {campus.campusDescription && (campus.campusDescription.headline || campus.campusDescription.body) && (
                     <section id="description">
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center gap-3">
-                                    <Building className="h-6 w-6 text-primary" />
-                                    <CardTitle className="text-2xl font-headline font-normal">{campus.campusDescription.headline || `About ${campus.name}`}</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campus.campusDescription.body}</p>
-                            </CardContent>
-                        </Card>
+                        <div className="max-w-2xl">
+                             <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline">{campus.campusDescription.headline || `About ${campus.name}`}</h2>
+                             <p className="mt-2 text-muted-foreground md:text-base/relaxed whitespace-pre-wrap">{campus.campusDescription.body}</p>
+                        </div>
                     </section>
                 )}
                 
                 {/* Academic Offering */}
                 <section id="academics">
-                     <Card>
-                        <CardHeader>
-                             <div className="flex items-center gap-3">
-                                <GraduationCap className="h-6 w-6 text-primary" />
-                                <CardTitle className="text-2xl font-headline font-normal">{campus.academicOffering?.headline || "Academic Offering"}</CardTitle>
-                            </div>
-                            {campus.academicOffering?.subtitle && <CardDescription className="pt-2 text-sm">{campus.academicOffering.subtitle}</CardDescription>}
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground">Course list will be displayed here soon.</p>
-                        </CardContent>
-                    </Card>
+                     <div className="max-w-2xl">
+                        <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline">{campus.academicOffering?.headline || "Academic Offering"}</h2>
+                        {campus.academicOffering?.subtitle && <p className="mt-2 text-muted-foreground md:text-base/relaxed">{campus.academicOffering.subtitle}</p>}
+                        <p className="mt-4 text-sm text-muted-foreground">Course list will be displayed here soon.</p>
+                    </div>
                 </section>
                 
                 {/* Campus Experience */}
                 {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
                     <section id="experience">
-                         <Card>
-                            <CardHeader>
-                                <div className="flex items-center gap-3">
-                                    <Sparkles className="h-6 w-6 text-primary" />
-                                    <CardTitle className="text-2xl font-headline font-normal">{campus.campusExperience.headline || "Campus Experience"}</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="grid gap-6">
-                                {campus.campusExperience.features.map(feature => (
-                                     <div key={feature.id} className="flex gap-4 items-start">
-                                        {feature.mediaUrl && (
-                                             <Image src={feature.mediaUrl} alt={feature.name} width={150} height={100} className="rounded-md object-cover hidden sm:block"/>
-                                        )}
-                                        <div>
-                                            <h3 className="font-semibold">{feature.name}</h3>
-                                            <p className="text-sm text-muted-foreground">{feature.description}</p>
-                                        </div>
-                                     </div>
-                                ))}
-                            </CardContent>
-                        </Card>
+                        <div className="max-w-2xl">
+                            <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline">{campus.campusExperience.headline || "Campus Experience"}</h2>
+                        </div>
+                        <div className="grid gap-8 mt-8">
+                            {campus.campusExperience.features.map(feature => (
+                                 <div key={feature.id} className="flex gap-6 items-start">
+                                    {feature.mediaUrl && (
+                                         <Image src={feature.mediaUrl} alt={feature.name} width={150} height={100} className="rounded-md object-cover hidden sm:block"/>
+                                    )}
+                                    <div>
+                                        <h3 className="font-semibold text-lg">{feature.name}</h3>
+                                        <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
+                                    </div>
+                                 </div>
+                            ))}
+                        </div>
                     </section>
                 )}
 
@@ -245,5 +226,3 @@ export default function CampusPage() {
     </div>
   );
 }
-
-    
