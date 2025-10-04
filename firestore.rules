@@ -6,8 +6,9 @@
  * It allows any signed-in user to create, update, and delete data.
  *
  * Data Structure:
- * - `/pages/{pageId}`: Stores content for individual pages. Accessible for public reading, but requires authentication for modification.
- * - `/companyProfile/{profileId}`: Stores company profile information, accessible for public reading and requires authentication for modification.
+ * - `/pages/{pageId}`: Stores content for individual pages.
+ * - `/companyProfile/{profileId}`: Stores company profile information.
+ * - `/campuses/{campusId}`: Stores campus information.
  *
  * Key Security Decisions:
  * - Public read access is granted for all collections to enable the "public home page".
@@ -20,27 +21,48 @@ service cloud.firestore {
     /**
      * @description Allows public read access to page content while restricting write access to authenticated users.
      * @path /pages/{pageId}
-     * @allow (get, list): Any user can read the page content.
-     * @allow (create, update, delete): Any authenticated user can modify the page content.
-     * @deny (create, update, delete): Unauthenticated users cannot modify the page content.
-     * @principle Grants read access to everyone and write access to authenticated users.
+     * @allow (get) Anyone can read page content.
+     * @allow (list) Anyone can list pages.
+     * @allow (create) Any signed-in user can create a page.
+     * @allow (update) Any signed-in user can update a page.
+     * @allow (delete) Any signed-in user can delete a page.
+     * @deny (create) Anonymous user attempts to create a page.
+     * @principle Allows public access to content and restricts write access to authenticated users.
      */
     match /pages/{pageId} {
       allow get, list: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
     }
 
     /**
      * @description Allows public read access to company profile information while restricting write access to authenticated users.
      * @path /companyProfile/{profileId}
-     * @allow (get, list): Any user can read the company profile.
-     * @allow (create, update, delete): Any authenticated user can modify the company profile.
-     * @deny (create, update, delete): Unauthenticated users cannot modify the company profile.
-     * @principle Grants read access to everyone and write access to authenticated users.
+     * @allow (get) Anyone can read company profile information.
+     * @allow (list) Anyone can list company profiles.
+     * @allow (create) Any signed-in user can create a company profile.
+     * @allow (update) Any signed-in user can update a company profile.
+     * @allow (delete) Any signed-in user can delete a company profile.
+     * @deny (create) Anonymous user attempts to create a company profile.
+     * @principle Allows public access to content and restricts write access to authenticated users.
      */
     match /companyProfile/{profileId} {
       allow get, list: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
+    }
+
+    /**
+     * @description Allows public read access to campus information while restricting write access to authenticated users.
+     * @path /campuses/{campusId}
+     */
+    match /campuses/{campusId} {
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
     }
 
     /**
