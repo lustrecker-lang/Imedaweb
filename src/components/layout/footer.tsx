@@ -1,3 +1,4 @@
+
 'use client';
 import Link from "next/link";
 import { Instagram } from "lucide-react";
@@ -34,7 +35,7 @@ export function Footer() {
   const { data: campuses } = useCollection<Campus>(campusesQuery);
 
   return (
-    <footer className="border-t bg-background">
+    <footer className="border-t bg-white">
       <div className="container mx-auto max-w-[1400px] px-4 py-8 md:px-6">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div>
@@ -51,7 +52,7 @@ export function Footer() {
             <h3 className="text-xs font-semibold tracking-wider uppercase">Formations</h3>
             <ul className="mt-4 space-y-2">
               <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Catalogue 2025-26</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">700+ Formations internationales</Link></li>
+              <li><Link href="/courses" className="text-xs text-muted-foreground hover:text-foreground">700+ Formations internationales</Link></li>
               <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Formations en ligne</Link></li>
             </ul>
           </div>
