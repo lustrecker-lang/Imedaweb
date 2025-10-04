@@ -8,7 +8,7 @@ import { Menu } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -173,6 +173,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0">
+                <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
               <div className="p-6 pb-0">
                 <div className="flex items-center justify-between h-16 mb-4">
                     <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
