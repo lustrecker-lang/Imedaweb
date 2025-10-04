@@ -150,7 +150,6 @@ export default function Home() {
                       </div>
                   )}
                   <CardHeader>
-                      <div className="mb-4">{feature.icon}</div>
                       <CardTitle className="font-headline font-normal">{isLoading ? <Skeleton className="h-6 w-3/4" /> : (featureSection?.title || feature.title)}</CardTitle>
                   </CardHeader>
                   <CardContent>
