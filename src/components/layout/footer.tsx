@@ -18,7 +18,7 @@ export function Footer() {
     return doc(firestore, 'companyProfile', 'main');
   }, [firestore]);
 
-  const { data: companyProfile } = useDoc<CompanyProfile>(companyProfileRef);
+  const { data: companyProfile, isLoading } = useDoc<CompanyProfile>(companyProfileRef);
 
   return (
     <footer className="border-t bg-background">
@@ -61,8 +61,8 @@ export function Footer() {
             </ul>
           </div>
           <div className="flex flex-col gap-4 items-start lg:items-end">
-            <Link href="/" className="flex items-center gap-2">
-                {companyProfile?.logoUrl ? (
+            <Link href="/" className="flex items-center gap-2 h-6">
+                {!isLoading && companyProfile?.logoUrl ? (
                   <Image
                     src={companyProfile.logoUrl}
                     alt={companyProfile.name || 'Company Logo'}
@@ -95,7 +95,7 @@ export function Footer() {
 
         <div className="mt-8 border-t pt-6 text-center">
             <p className="text-xs text-muted-foreground">
-              © 2025 {companyProfile?.name || 'Imeda International – IMEDA'}.
+              © 2025 {!isLoading && companyProfile?.name ? companyProfile.name : 'Imeda International – IMEDA'}.
             </p>
              <p className="text-xs text-muted-foreground mt-1">
               L’institution Licences 4700-9288 (Dubaï) et 1671-3512 (Europe).

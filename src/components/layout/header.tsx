@@ -1,18 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Mountain } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useMemo, useState } from "react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useUser, useFirestore, useDoc } from "@/firebase";
+import { useFirestore, useDoc } from "@/firebase";
 import { doc } from 'firebase/firestore';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "#", label: "About" },
+  { href: "/about", label: "About" },
   { href: "#", label: "Services" },
   { href: "#", label: "Contact" },
 ];
@@ -31,21 +32,19 @@ export function Header() {
     return doc(firestore, 'companyProfile', 'main');
   }, [firestore]);
 
-  const { data: companyProfile } = useDoc<CompanyProfile>(companyProfileRef);
+  const { data: companyProfile, isLoading } = useDoc<CompanyProfile>(companyProfileRef);
 
   const LogoComponent = () => {
+    if (isLoading) {
+      return <Skeleton className="h-6 w-24" />;
+    }
     if (companyProfile?.logoUrl) {
       return <Image src={companyProfile.logoUrl} alt={companyProfile.name || 'Company Logo'} width={100} height={24} className="h-6 w-auto object-contain" />;
     }
     if(companyProfile?.name) {
       return <span className="text-sm font-semibold tracking-wider font-headline">{companyProfile.name}</span>;
     }
-    return (
-      <>
-        <Mountain className="h-6 w-6 text-primary" />
-        <span className="text-sm font-semibold tracking-wider font-headline">IMEDA</span>
-      </>
-    )
+    return <div className="h-6 w-24" />; // Empty div as a fallback to prevent layout shift
   }
 
   return (
