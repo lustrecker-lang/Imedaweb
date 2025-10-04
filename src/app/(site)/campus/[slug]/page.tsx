@@ -158,19 +158,21 @@ export default function CampusPage() {
             <div className="md:col-span-8 space-y-12">
                 
                 {/* Campus Description */}
-                <section id="description">
-                     <Card>
-                        <CardHeader>
-                            <div className="flex items-center gap-3">
-                                <Building className="h-6 w-6 text-primary" />
-                                <CardTitle className="text-2xl font-headline font-normal">{campus.campusDescription?.headline || `About ${campus.name}`}</CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground">{campus.campusDescription?.body}</p>
-                        </CardContent>
-                    </Card>
-                </section>
+                {campus.campusDescription && (
+                    <section id="description">
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center gap-3">
+                                    <Building className="h-6 w-6 text-primary" />
+                                    <CardTitle className="text-2xl font-headline font-normal">{campus.campusDescription.headline || `About ${campus.name}`}</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-muted-foreground">{campus.campusDescription.body}</p>
+                            </CardContent>
+                        </Card>
+                    </section>
+                )}
                 
                 {/* Academic Offering */}
                 <section id="academics">
