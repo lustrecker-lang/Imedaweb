@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
+import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, query, orderBy, Timestamp, doc } from 'firebase/firestore';
 import { format } from 'date-fns';
 
 import {
@@ -22,7 +22,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -38,6 +37,19 @@ import {
   DialogTitle,
   DialogDescription
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useToast } from '@/hooks/use-toast';
+
 
 interface Lead {
   id: string;
@@ -52,9 +64,12 @@ export default function LeadsPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const leadsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -79,7 +94,24 @@ export default function LeadsPage() {
 
   const handleViewLead = (lead: Lead) => {
     setSelectedLead(lead);
-    setIsDialogOpen(true);
+    setIsViewDialogOpen(true);
+  };
+
+  const openDeleteDialog = (lead: Lead) => {
+    setLeadToDelete(lead);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteLead = () => {
+    if (!firestore || !leadToDelete) return;
+    const docRef = doc(firestore, 'leads', leadToDelete.id);
+    deleteDocumentNonBlocking(docRef);
+    toast({
+      title: "Lead Deleted",
+      description: "The lead has been permanently deleted.",
+    });
+    setIsDeleteDialogOpen(false);
+    setLeadToDelete(null);
   };
   
   return (
@@ -107,6 +139,7 @@ export default function LeadsPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
+                  <TableHead>Lead Type</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -114,25 +147,27 @@ export default function LeadsPage() {
                 {areLeadsLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
-                      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-48" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                      <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                      <TableCell className="py-2"><Skeleton className="h-5 w-24" /></TableCell>
+                      <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
+                      <TableCell className="py-2"><Skeleton className="h-5 w-48" /></TableCell>
+                      <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
+                      <TableCell className="py-2"><Skeleton className="h-5 w-24" /></TableCell>
+                      <TableCell className="py-2 text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
                   ))
                 ) : leads && leads.length > 0 ? (
                   leads.map((lead) => (
                     <TableRow key={lead.id}>
-                      <TableCell>
-                        {lead.createdAt ? format(lead.createdAt.toDate(), 'PPP p') : 'N/A'}
+                      <TableCell className="py-2">
+                        {lead.createdAt ? format(lead.createdAt.toDate(), 'PP p') : 'N/A'}
                       </TableCell>
-                      <TableCell className="font-medium">{lead.fullName}</TableCell>
-                      <TableCell>{lead.email}</TableCell>
-                      <TableCell>
-                        {lead.phone ? <Badge variant="outline">{lead.phone}</Badge> : <span className="text-muted-foreground">N/A</span>}
+                      <TableCell className="py-2 font-medium">{lead.fullName}</TableCell>
+                      <TableCell className="py-2">{lead.email}</TableCell>
+                      <TableCell className="py-2">
+                        {lead.phone ? lead.phone : <span className="text-muted-foreground">N/A</span>}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="py-2">Contact Form</TableCell>
+                      <TableCell className="py-2 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -144,6 +179,10 @@ export default function LeadsPage() {
                             <DropdownMenuItem onClick={() => handleViewLead(lead)}>
                               View Message
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openDeleteDialog(lead)} className="text-red-600 focus:text-red-600">
+                               <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -151,7 +190,7 @@ export default function LeadsPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       No leads yet.
                     </TableCell>
                   </TableRow>
@@ -162,7 +201,7 @@ export default function LeadsPage() {
         </Card>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
             <DialogTitle>Lead from: {selectedLead?.fullName}</DialogTitle>
@@ -177,6 +216,24 @@ export default function LeadsPage() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the lead from
+              your database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteLead} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
