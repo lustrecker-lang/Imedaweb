@@ -1,16 +1,18 @@
 
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking, useStorage } from '@/firebase';
 import { collection, doc, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { cn } from '@/lib/utils';
 import courseData from './importcourse.json';
+import { v4 as uuidv4 } from 'uuid';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import Image from 'next/image';
 
 import {
   Card,
@@ -67,6 +69,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 const categorySchema = z.object({
   name: z.string().min(1, "Category name is required."),
   description: z.string().optional(),
+  mediaUrl: z.string().optional(),
 });
 
 const themeSchema = z.object({
@@ -113,17 +116,41 @@ interface Module extends z.infer<typeof moduleSchema> {
     id: string;
 }
 
+const isVideoUrl = (url?: string | null) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    try {
+      const pathname = new URL(url).pathname.split('?')[0];
+      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+    } catch (e) {
+      return false; // Invalid URL
+    }
+};
+
+const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+    if (isVideoUrl(url)) {
+        return (
+            <video src={url} width="64" height="40" className="object-cover rounded-sm bg-muted" muted playsInline />
+        );
+    }
+    return (
+        <Image src={url} alt={alt} width={64} height={40} className="object-cover rounded-sm" />
+    );
+}
 
 export default function CoursesPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
+  const storage = useStorage();
   const { toast } = useToast();
 
   // State Management
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
   const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null);
+  
+  const [categoryMediaFile, setCategoryMediaFile] = useState<File | null>(null);
 
   const [isCategoryAddDialogOpen, setIsCategoryAddDialogOpen] = useState(false);
   const [isCategoryEditDialogOpen, setIsCategoryEditDialogOpen] = useState(false);
@@ -179,7 +206,7 @@ export default function CoursesPage() {
   // Forms
   const addCategoryForm = useForm<z.infer<typeof categorySchema>>({
     resolver: zodResolver(categorySchema),
-    defaultValues: { name: '', description: '' },
+    defaultValues: { name: '', description: '', mediaUrl: '' },
   });
 
   const editCategoryForm = useForm<z.infer<typeof categorySchema>>({
@@ -280,27 +307,73 @@ export default function CoursesPage() {
       </div>
     );
   }
+  
+  const handleFileUpload = async (file: File | null): Promise<string | null> => {
+    if (!file || !storage || !user) return null;
+
+    const fileExtension = file.name.split('.').pop();
+    const fileName = `${uuidv4()}.${fileExtension}`;
+    const storageRef = ref(storage, `course-assets/${fileName}`);
+    
+    try {
+      const snapshot = await uploadBytes(storageRef, file);
+      return await getDownloadURL(snapshot.ref);
+    } catch (error) {
+      console.error("File upload error:", error);
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: "Could not upload the file. Please try again.",
+      });
+      return null;
+    }
+  };
+
 
   // Handlers for Category
   const onAddCategorySubmit = async (values: z.infer<typeof categorySchema>) => {
     if (!firestore) return;
-    addDocumentNonBlocking(collection(firestore, 'course_categories'), values);
+    
+    let mediaUrl = '';
+    if (categoryMediaFile) {
+        mediaUrl = await handleFileUpload(categoryMediaFile) || '';
+    }
+
+    const dataToSave = { ...values, mediaUrl };
+    
+    addDocumentNonBlocking(collection(firestore, 'course_categories'), dataToSave);
     toast({ title: 'Success!', description: 'New category has been added.' });
     addCategoryForm.reset();
+    setCategoryMediaFile(null);
     setIsCategoryAddDialogOpen(false);
   };
 
   const onEditCategorySubmit = async (values: z.infer<typeof categorySchema>) => {
     if (!firestore || !editingCategory) return;
+    
+    let mediaUrl = editingCategory.mediaUrl;
+    if (categoryMediaFile) {
+      if (editingCategory.mediaUrl && storage) {
+        try {
+          const oldMediaRef = ref(storage, editingCategory.mediaUrl);
+          await deleteObject(oldMediaRef);
+        } catch (error) { console.error("Error deleting old media: ", error); }
+      }
+      mediaUrl = await handleFileUpload(categoryMediaFile) || editingCategory.mediaUrl;
+    }
+    const dataToSave = { ...values, mediaUrl };
+
     const docRef = doc(firestore, 'course_categories', editingCategory.id);
-    setDocumentNonBlocking(docRef, values, { merge: true });
+    setDocumentNonBlocking(docRef, dataToSave, { merge: true });
     toast({ title: 'Success!', description: 'Category has been updated.' });
     setIsCategoryEditDialogOpen(false);
     setEditingCategory(null);
+    setCategoryMediaFile(null);
   };
 
   const openEditCategoryDialog = (category: Category) => {
     setEditingCategory(category);
+    setCategoryMediaFile(null);
     setIsCategoryEditDialogOpen(true);
   };
 
@@ -311,6 +384,12 @@ export default function CoursesPage() {
 
   const handleDeleteCategory = () => {
     if (!firestore || !categoryToDelete) return;
+    
+    if (categoryToDelete.mediaUrl && storage) {
+      const mediaRef = ref(storage, categoryToDelete.mediaUrl);
+      deleteObject(mediaRef).catch(error => console.error("Error deleting media: ", error));
+    }
+
     // TODO: Add logic to delete sub-collections (themes, etc.) if required
     const docRef = doc(firestore, 'course_categories', categoryToDelete.id);
     deleteDocumentNonBlocking(docRef);
@@ -574,6 +653,21 @@ export default function CoursesPage() {
                           <FormMessage />
                         </FormItem>
                       )} />
+                      <FormItem>
+                          <FormLabel>Media</FormLabel>
+                          <FormControl>
+                          <Input 
+                              type="file" 
+                              accept="image/*,video/*,.mov"
+                              onChange={(e) => {
+                                if (e.target.files?.[0]) {
+                                    setCategoryMediaFile(e.target.files[0]);
+                                }
+                              }}
+                          />
+                          </FormControl>
+                          <FormMessage />
+                      </FormItem>
                       <DialogFooter>
                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
                         <Button type="submit" disabled={addCategoryForm.formState.isSubmitting}>Save</Button>
@@ -588,6 +682,7 @@ export default function CoursesPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Media</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -596,6 +691,7 @@ export default function CoursesPage() {
                     {areCategoriesLoading ? (
                       Array.from({ length: 3 }).map((_, i) => (
                         <TableRow key={i}>
+                          <TableCell className="py-2"><Skeleton className="h-10 w-16" /></TableCell>
                           <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
                           <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                         </TableRow>
@@ -607,6 +703,13 @@ export default function CoursesPage() {
                           onClick={() => handleSelectCategory(category as Category)}
                           className={cn("cursor-pointer", selectedCategory?.id === category.id && "bg-muted/50")}
                         >
+                          <TableCell className="py-2">
+                            {category.mediaUrl ? (
+                              <MediaPreview url={category.mediaUrl} alt={category.name} />
+                            ) : (
+                              <div className="h-10 w-16 bg-muted rounded-sm" />
+                            )}
+                          </TableCell>
                           <TableCell className="font-medium py-2">{category.name}</TableCell>
                           <TableCell className="text-right py-2">
                             <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditCategoryDialog(category as Category); }}>
@@ -620,7 +723,7 @@ export default function CoursesPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={2} className="h-24 text-center">No categories found.</TableCell>
+                        <TableCell colSpan={3} className="h-24 text-center">No categories found.</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -996,6 +1099,26 @@ export default function CoursesPage() {
                   <FormMessage />
                 </FormItem>
               )} />
+              <FormItem>
+                  <FormLabel>Media</FormLabel>
+                  {editCategoryForm.watch('mediaUrl') && (
+                    <div className="mb-2">
+                        <MediaPreview url={editCategoryForm.watch('mediaUrl')!} alt={editCategoryForm.watch('name')} />
+                    </div>
+                  )}
+                  <FormControl>
+                  <Input 
+                      type="file" 
+                      accept="image/*,video/*,.mov"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                            setCategoryMediaFile(e.target.files[0]);
+                        }
+                      }}
+                  />
+                  </FormControl>
+                  <FormMessage />
+              </FormItem>
               <DialogFooter>
                 <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
                 <Button type="submit" disabled={editCategoryForm.formState.isSubmitting}>Save Changes</Button>
@@ -1237,4 +1360,3 @@ export default function CoursesPage() {
 }
 
     
-

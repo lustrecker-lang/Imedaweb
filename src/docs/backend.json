@@ -237,7 +237,8 @@
       "description": "Represents a course category (discipline).",
       "properties": {
         "name": { "type": "string" },
-        "description": { "type": "string" }
+        "description": { "type": "string" },
+        "mediaUrl": { "type": "string", "format": "uri" }
       },
       "required": ["name"]
     },
@@ -396,3 +397,4 @@
   }
 }
 
+    
