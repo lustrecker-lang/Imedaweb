@@ -104,7 +104,7 @@ export default function CampusPage() {
   if (isLoading) {
     return (
         <div className="container py-8 space-y-12">
-            <Skeleton className="h-[40vh] w-full" />
+            <Skeleton className="h-[50vh] w-full" />
             <div className="grid md:grid-cols-3 gap-8">
                 <div className="md:col-span-2 space-y-8">
                     <Skeleton className="h-48 w-full" />
