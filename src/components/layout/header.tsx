@@ -25,6 +25,15 @@ import { doc, collection, query, orderBy } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 import { ContactForm } from "@/components/contact-form";
 
+const formationsNavStructure = {
+    title: "Formations",
+    items: [
+        { href: "#", title: "Catalogue 2025-26", description: "Téléchargez notre catalogue complet pour la saison à venir." },
+        { href: "/courses", title: "700+ Formations internationales", description: "Explorez notre catalogue complet de formations internationales." },
+        { href: "#", title: "Formations en ligne", description: "Apprenez à votre rythme avec nos cours en ligne." },
+    ]
+};
+
 const navStructure = [
     {
         title: "À propos",
@@ -145,7 +154,7 @@ export function Header() {
     })) : []
   };
 
-  const finalNavStructure = [navStructure[0], campusNav, ...navStructure.slice(1)];
+  const finalNavStructure = [formationsNavStructure, navStructure[0], campusNav, ...navStructure.slice(1)];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
@@ -156,13 +165,6 @@ export function Header() {
         
         <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
-                <NavigationMenuItem>
-                    <Link href="/courses" legacyBehavior passHref>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle({ variant: 'ghost' })}>
-                        Formations
-                        </NavigationMenuLink>
-                    </Link>
-                </NavigationMenuItem>
                 {finalNavStructure.map((category) => (
                     <NavigationMenuItem key={category.title}>
                         <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
@@ -202,9 +204,6 @@ export function Header() {
                 </div>
                 <div className="grid gap-4">
                     <nav className="grid gap-2 text-base font-normal">
-                        <Link href="/courses" className="block py-2 text-foreground/70 transition-colors hover:text-foreground font-normal" onClick={() => setIsMobileNavOpen(false)}>
-                            Formations
-                        </Link>
                         <Accordion type="multiple" className="w-full">
                         {finalNavStructure.map((category) => (
                             <AccordionItem key={category.title} value={category.title} className="border-b-0">
