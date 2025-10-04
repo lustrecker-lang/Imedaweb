@@ -229,6 +229,53 @@
         }
       },
       "required": ["name"]
+    },
+    "CourseCategory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseCategory",
+      "type": "object",
+      "description": "Represents a course category (discipline).",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "CourseTheme": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseTheme",
+      "type": "object",
+      "description": "Represents a theme within a category.",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "categoryId": { "type": "string" }
+      },
+      "required": ["name", "categoryId"]
+    },
+    "CourseFormation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseFormation",
+      "type": "object",
+      "description": "Represents a specific course (formation) within a theme.",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "themeId": { "type": "string" }
+      },
+      "required": ["name", "themeId"]
+    },
+    "CourseModule": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseModule",
+      "type": "object",
+      "description": "Represents a module within a formation.",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "formationId": { "type": "string" }
+      },
+      "required": ["name", "formationId"]
     }
   },
   "auth": {
@@ -318,8 +365,26 @@
             }
           ]
         }
+      },
+      {
+        "path": "/course_categories/{categoryId}",
+        "definition": { "entityName": "CourseCategory", "schema": { "$ref": "#/backend/entities/CourseCategory" } }
+      },
+      {
+        "path": "/course_themes/{themeId}",
+        "definition": { "entityName": "CourseTheme", "schema": { "$ref": "#/backend/entities/CourseTheme" } }
+      },
+      {
+        "path": "/course_formations/{formationId}",
+        "definition": { "entityName": "CourseFormation", "schema": { "$ref": "#/backend/entities/CourseFormation" } }
+      },
+      {
+        "path": "/course_modules/{moduleId}",
+        "definition": { "entityName": "CourseModule", "schema": { "$ref": "#/backend/entities/CourseModule" } }
       }
     ],
     "reasoning": "This Firestore data structure allows for modular content management. Each page's content is stored in a separate document within the 'pages' collection. This makes it easy to add new pages and edit their content by section."
   }
 }
+
+    

@@ -1,61 +1,47 @@
-/**
- * @fileoverview Firestore Security Rules for imeda.fr.
- *
- * Core Philosophy:
- * This ruleset prioritizes secure content management by allowing authenticated users to manage page content and company profiles.
- * It assumes that all authenticated users are authorized to manage all content.
- *
- * Data Structure:
- * - /pages/{pageId}: Stores content for individual pages.
- * - /companyProfile/{profileId}: Stores company branding information.
- *
- * Key Security Decisions:
- * - All authenticated users have write access to all documents. This simplifies content management.
- * - No explicit ownership is enforced, assuming a collaborative content management model.
- */
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Controls access to the 'pages' collection, allowing authenticated users to manage page content.
-     * @path /pages/{pageId}
-     * @allow (get, list): Any authenticated user can read page content.
-     * @allow (create, update, delete): Any authenticated user can modify page content.
-     * @deny  (create, update, delete): An unauthenticated user cannot modify page content.
-     * @principle Allows all authenticated users to create, read, update, and delete page content.
-     */
+    // Allow public read-access to pages and company profile
     match /pages/{pageId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isSignedIn();
+      allow read: if true;
+      allow write: if request.auth != null;
     }
-
-    /**
-     * @description Controls access to the 'companyProfile' collection, allowing authenticated users to manage company branding information.
-     * @path /companyProfile/{profileId}
-     * @allow (get, list): Any authenticated user can read company profile information.
-     * @allow (create, update, delete): Any authenticated user can modify company profile information.
-     * @deny (create, update, delete): An unauthenticated user cannot modify company profile information.
-     * @principle Allows all authenticated users to create, read, update, and delete company profile information.
-     */
     match /companyProfile/{profileId} {
-      allow get, list: if isSignedIn();
-      allow create, update, delete: if isSignedIn();
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /campuses/{campusId} {
+      allow read: if true;
+      allow write: if request.auth != null;
     }
 
-    /**
-     * @description Controls access to the 'services' collection, allowing authenticated users to list services
-     * @path /services
-     * @allow (list): Any authenticated user can list services
-     */
-    match /services {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create, update, delete: if false;
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Course content can be managed by authenticated users
+    match /course_categories/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    match /course_themes/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    match /course_formations/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    match /course_modules/{document=**} {
+      allow read, write: if request.auth != null;
     }
 
-    function isSignedIn() {
-      return request.auth != null;
+    // Leads can be created by anyone, but only read/deleted by authenticated users
+    match /leads/{leadId} {
+      allow create: if true;
+      allow read, delete: if request.auth != null;
     }
   }
 }
+    
