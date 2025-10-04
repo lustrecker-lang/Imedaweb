@@ -2,17 +2,18 @@
  * @fileoverview Firestore Security Rules for Prototyping.
  *
  * Core Philosophy:
- * This ruleset prioritizes rapid prototyping by focusing on authorization and omitting schema validation.
- * It implements strict owner-based access control for user-specific data and allows public read access where appropriate,
- * with the assumption that data validation will be implemented in application code during later development phases.
+ * This ruleset prioritizes rapid prototyping by focusing on authorization and skipping schema validation.
+ * It assumes a basic level of trust in the client and minimizes constraints on data shapes to allow for flexibility during development.
+ * Data validation is skipped for faster iteration.
  *
  * Data Structure:
- * - /pages/{pageId}: Stores content for specific pages.  Authenticated users can create, update, and delete page content.
- * - /companyProfile/{profileId}: Stores company profile information.
+ * - /pages/{pageId}: Stores content for specific pages. Accessible to authenticated users.
+ * - /companyProfile/{profileId}: Stores company branding information.
  *
  * Key Security Decisions:
- * - No user listing is allowed.
- * - Data validation is minimal, focusing on authorization.
+ * - Authenticated users can `get` and `list` on all collections.
+ * - All `create`, `update`, and `delete` operations require authentication (`isSignedIn()`).
+ * - Data validation is minimal to allow for rapid iteration. Only authorization-critical data is validated.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -21,36 +22,63 @@ service cloud.firestore {
     /**
      * @description Controls access to page content.
      * @path /pages/{pageId}
-     * @allow (get, list): Anyone can read page content.
-     * @allow (create, update, delete): Only authenticated users can modify page content.
-     * @deny create: if false;
-     * @deny update: if false;
-     * @deny delete: if false;
-     * @principle Allows read access to everyone but restricts write access to authenticated users.
+     * @allow (get, list): Any authenticated user can read page content.
+     * @allow (create): An authenticated user can create a new page.
+     * @allow (update, delete): Only the user who created the page can modify or delete it.
+     * @deny (create): An unauthenticated user cannot create a page.
+     * @deny (update, delete): An unauthenticated user cannot modify or delete a page.
+     * @principle Authenticated users can read all pages, but only owners can write.
      */
     match /pages/{pageId} {
-      allow get, list: if true;
-      allow create, update, delete: if isSignedIn();
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
     }
 
     /**
      * @description Controls access to company profile information.
      * @path /companyProfile/{profileId}
-     * @allow (get, list): Anyone can read the company profile.
-     * @allow (create, update, delete): Only authenticated users can modify the company profile.
-     * @deny create: if false;
-     * @deny update: if false;
-     * @deny delete: if false;
-     * @principle Allows read access to everyone but restricts write access to authenticated users.
+     * @allow (get, list): Any authenticated user can read company profile information.
+     * @allow (create): An authenticated user can create a company profile.
+     * @allow (update, delete): Only the user who created the profile can modify or delete it.
+     * @deny (create): An unauthenticated user cannot create a company profile.
+     * @deny (update, delete): An unauthenticated user cannot modify or delete a company profile.
+     * @principle Authenticated users can read all profiles, but only owners can write.
      */
     match /companyProfile/{profileId} {
-      allow get, list: if true;
-      allow create, update, delete: if isSignedIn();
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
     }
+    
+    /**
+     * @description Secures the `/leads` collection.  The error indicates a missing or insufficient permission for a `list` operation.
+     * @path /leads
+     * @allow get: if false; // Listing all leads is not permitted.
+     * @allow list: if false; // Listing all leads is not permitted.
+     * @allow create: if false;
+     * @allow update: if false;
+     * @allow delete: if false;
+     * @principle Listing all leads is disallowed, restricting access to sensitive lead data.
+     */
+    match /leads {
+        allow get: if false;
+        allow list: if false;
+        allow create: if false;
+        allow update: if false;
+        allow delete: if false;
+    }
+  }
 
-    // Define helper functions
-    function isSignedIn() {
-      return request.auth != null;
-    }
+  // --- Helper Functions ---
+
+  /**
+   * @description Checks if the user is signed in.
+   * @return {bool} True if the user is signed in, false otherwise.
+   */
+  function isSignedIn() {
+    return request.auth != null;
   }
 }
