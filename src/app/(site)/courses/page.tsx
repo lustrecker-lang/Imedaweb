@@ -10,7 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 // Interfaces
 interface Category {
@@ -33,10 +34,15 @@ interface Formation {
     format?: string;
 }
 
+type SortKey = 'formationId' | 'name';
+type SortDirection = 'ascending' | 'descending';
+
 export default function CoursesPage() {
     const firestore = useFirestore();
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'formationId', direction: 'ascending' });
+
 
     // Queries
     const categoriesQuery = useMemoFirebase(() => {
@@ -51,7 +57,9 @@ export default function CoursesPage() {
     
     const formationsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
-        return query(collection(firestore, 'course_formations'), orderBy('name', 'asc'));
+        // The default orderBy can be removed if we sort client-side, or kept for initial load.
+        // Let's remove it to ensure client-side sorting is always applied consistently.
+        return query(collection(firestore, 'course_formations'));
     }, [firestore]);
 
     // Data fetching
@@ -59,23 +67,34 @@ export default function CoursesPage() {
     const { data: themes, isLoading: areThemesLoading } = useCollection<Theme>(themesQuery);
     const { data: formations, isLoading: areFormationsLoading } = useCollection<Omit<Formation, 'id'>>(formationsQuery);
 
-    // Memoized filtering
-    const filteredThemes = useMemo(() => {
-        if (!themes || !selectedCategory) return [];
-        return themes.filter(theme => theme.categoryId === selectedCategory);
-    }, [themes, selectedCategory]);
-
-    const filteredFormations = useMemo(() => {
+    // Memoized filtering and sorting
+    const filteredAndSortedFormations = useMemo(() => {
         if (!formations) return [];
-        if (!selectedTheme) {
-            if (!selectedCategory) {
-                return formations;
-            }
+
+        // Filtering logic
+        let filtered = formations;
+        if (selectedTheme) {
+            filtered = formations.filter(f => f.themeId === selectedTheme);
+        } else if (selectedCategory) {
             const themeIdsInCategory = themes?.filter(t => t.categoryId === selectedCategory).map(t => t.id) || [];
-            return formations.filter(f => themeIdsInCategory.includes(f.themeId));
+            filtered = formations.filter(f => themeIdsInCategory.includes(f.themeId));
         }
-        return formations.filter(f => f.themeId === selectedTheme);
-    }, [formations, selectedCategory, selectedTheme, themes]);
+
+        // Sorting logic
+        const sorted = [...filtered].sort((a, b) => {
+            if (a[sortConfig.key] < b[sortConfig.key]) {
+                return sortConfig.direction === 'ascending' ? -1 : 1;
+            }
+            if (a[sortConfig.key] > b[sortConfig.key]) {
+                return sortConfig.direction === 'ascending' ? 1 : -1;
+            }
+            return 0;
+        });
+        
+        return sorted;
+
+    }, [formations, selectedCategory, selectedTheme, themes, sortConfig]);
+
 
     const handleCategoryChange = (categoryId: string) => {
         setSelectedCategory(categoryId === 'all' ? null : categoryId);
@@ -86,14 +105,34 @@ export default function CoursesPage() {
         setSelectedTheme(themeId === 'all' ? null : themeId);
     };
 
+    const handleSort = (key: SortKey) => {
+        let direction: SortDirection = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const getSortIcon = (key: SortKey) => {
+        if (sortConfig.key !== key) return null;
+        if (sortConfig.direction === 'ascending') return <ArrowUp className="ml-2 h-4 w-4" />;
+        return <ArrowDown className="ml-2 h-4 w-4" />;
+    };
+
+
     const isLoading = areCategoriesLoading || areThemesLoading || areFormationsLoading;
+
+    const filteredThemes = useMemo(() => {
+        if (!themes || !selectedCategory) return [];
+        return themes.filter(theme => theme.categoryId === selectedCategory);
+    }, [themes, selectedCategory]);
 
     const selectedThemeName = useMemo(() => {
         if (!selectedTheme || !themes) return null;
         return themes.find(t => t.id === selectedTheme)?.name || null;
     }, [selectedTheme, themes]);
 
-    const formationCount = filteredFormations?.length || 0;
+    const formationCount = filteredAndSortedFormations?.length || 0;
     
     const dynamicCardTitle = useMemo(() => {
         const formationText = formationCount !== 1 ? 'Formations' : 'Formation';
@@ -163,8 +202,16 @@ export default function CoursesPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Formation</TableHead>
-                                    <TableHead>ID</TableHead>
+                                    <TableHead className="w-[120px]">
+                                        <Button variant="ghost" onClick={() => handleSort('formationId')} className="px-0 hover:bg-transparent">
+                                            ID {getSortIcon('formationId')}
+                                        </Button>
+                                    </TableHead>
+                                    <TableHead>
+                                        <Button variant="ghost" onClick={() => handleSort('name')} className="px-0 hover:bg-transparent">
+                                            Formation {getSortIcon('name')}
+                                        </Button>
+                                    </TableHead>
                                     <TableHead className="text-right">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -172,16 +219,16 @@ export default function CoursesPage() {
                                 {isLoading ? (
                                     Array.from({ length: 10 }).map((_, i) => (
                                         <TableRow key={i}>
+                                            <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                                             <TableCell><Skeleton className="h-5 w-3/4" /></TableCell>
-                                            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                                             <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                                         </TableRow>
                                     ))
-                                ) : filteredFormations && filteredFormations.length > 0 ? (
-                                    filteredFormations.map(formation => (
+                                ) : filteredAndSortedFormations && filteredAndSortedFormations.length > 0 ? (
+                                    filteredAndSortedFormations.map(formation => (
                                         <TableRow key={formation.id}>
-                                            <TableCell className="font-medium">{formation.name}</TableCell>
                                             <TableCell className="font-mono text-xs">{formation.formationId}</TableCell>
+                                            <TableCell className="font-medium">{formation.name}</TableCell>
                                             <TableCell className="text-right">
                                                 <Link href={`/courses/${formation.id}`} className="text-sm text-primary hover:underline">
                                                     Voir les détails
