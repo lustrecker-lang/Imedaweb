@@ -318,7 +318,8 @@ export default function Home() {
                   Formations IMEDA
                 </h2>
                 <p className="mt-2 text-muted-foreground md:text-base/relaxed">
-                  Explorez nos thèmes de formation pour trouver le programme parfait pour vous.
+                  <span className="md:hidden">Explorez nos thèmes de formation</span>
+                  <span className="hidden md:inline">Explorez nos thèmes de formation pour trouver le programme parfait pour vous.</span>
                 </p>
             </div>
           </div>
@@ -328,7 +329,7 @@ export default function Home() {
                 {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-56 w-full" />)}
             </div>
           ) : (
-            <Carousel opts={{ align: "start", loop: false }} className="w-full">
+            <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
                 <CarouselContent className="-ml-4">
                 {themesWithFormationCounts.map((theme) => (
                     <CarouselItem key={theme.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
@@ -350,7 +351,7 @@ export default function Home() {
                     </CarouselItem>
                 ))}
                 </CarouselContent>
-                 <div className="absolute top-[-4.5rem] right-0 flex gap-2">
+                 <div className="absolute top-[-3.5rem] right-0 flex gap-2">
                     <CarouselPrevious className="static translate-y-0 rounded-none inline-flex" />
                     <CarouselNext className="static translate-y-0 rounded-none inline-flex" />
                  </div>
