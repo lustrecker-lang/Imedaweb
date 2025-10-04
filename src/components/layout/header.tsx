@@ -145,7 +145,7 @@ export function Header() {
   const campusNav = {
     title: "Campus",
     items: campuses ? campuses.map(campus => ({
-        href: '#',
+        href: `/campus/${campus.id}`,
         title: campus.name,
         description: campus.description || `Découvrez notre campus à ${campus.name}.`
     })) : []
