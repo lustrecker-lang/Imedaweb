@@ -2,69 +2,91 @@
  * @fileoverview Firestore Security Rules for Prototyping.
  *
  * Core Philosophy:
- * This ruleset prioritizes security by enforcing strict access control based on
- * user authentication while allowing flexible data shapes for rapid prototyping.
- * It explicitly denies potentially unsafe operations like listing all users.
+ * This ruleset prioritizes rapid prototyping by focusing on authorization and access control, while relaxing data validation.
+ * All authenticated users are treated as administrators.
  *
  * Data Structure:
- * - /pages/{pageId}: Stores content for individual pages. Accessible to authenticated users.
- * - /companyProfile/{profileId}: Stores company branding information. Accessible to authenticated users.
+ * The database stores company profiles and page content.
+ * - `/companyProfile/{profileId}`: Stores company branding information.
+ * - `/pages/{pageId}`: Stores the content for specific pages.
+ * - `/leads/{leadId}`: Stores lead data.
  *
  * Key Security Decisions:
- * - Listing all documents in the `pages` and `companyProfile` collections is allowed.
- * - Only authenticated users can create, update, and delete documents.
- * - No data validation is performed beyond authentication checks. This allows for flexibility during prototyping.
+ * - All authenticated users can read and write all data.
+ * - Only the creator of a document can update or delete it.
+ * - Data validation is minimal, focusing on relational integrity (ownership) rather than data types or schema adherence.
+ *
+ * Denormalization for Authorization:
+ * Each document in `/pages`, `/companyProfile`, and `/leads` is expected to have a `userId` field indicating the owner. This is used for write access control.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Controls access to page content.
+     * Helper Functions
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Checks if the requesting user is the owner of the document based on the 'userId' field.
+    function isOwner() {
+      return request.auth.uid == resource.data.userId;
+    }
+
+
+    /**
+     * @description Controls access to the pages collection.
      * @path /pages/{pageId}
-     * @allow (get, list) if true - Allows anyone to read page content.
-     * @allow (create, update, delete) if isSignedIn() - Allows only authenticated users to modify page content.
-     * @deny (create, update, delete) if !isSignedIn() - Denies unauthenticated users from modifying page content.
-     * @principle Authenticated users can create, update, and delete page content.
+     * @allow (get, list) Any signed-in user can read any page.
+     * @allow (create) Any signed-in user can create a page if the `userId` field matches their UID.
+     * @allow (update, delete) Any signed-in user can update or delete a page if they are the owner (based on the `userId` field).
+     * @deny (create) A user cannot create a page with a `userId` that does not match their own UID.
+     * @deny (update, delete) A user cannot update or delete a page they do not own.
+     * @principle Enforces document ownership for writes.
      */
     match /pages/{pageId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && isOwner();
     }
 
     /**
-     * @description Controls access to company profile information.
+     * @description Controls access to the companyProfile collection.
      * @path /companyProfile/{profileId}
-     * @allow (get, list) if true - Allows anyone to read company profile information.
-     * @allow (create, update, delete) if isSignedIn() - Allows only authenticated users to modify company profile information.
-     * @deny (create, update, delete) if !isSignedIn() - Denies unauthenticated users from modifying company profile information.
-     * @principle Authenticated users can create, update, and delete company profile information.
+     * @allow (get, list) Any signed-in user can read any profile.
+     * @allow (create) Any signed-in user can create a profile if the `userId` field matches their UID.
+     * @allow (update, delete) Any signed-in user can update or delete a profile if they are the owner (based on the `userId` field).
+     * @deny (create) A user cannot create a profile with a `userId` that does not match their own UID.
+     * @deny (update, delete) A user cannot update or delete a profile they do not own.
+     * @principle Enforces document ownership for writes.
      */
     match /companyProfile/{profileId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && isOwner();
     }
-
+    
     /**
-     * @description Denies access to the /leads collection, requiring server-side access via Cloud Functions.
+     * @description Controls access to the leads collection.
      * @path /leads/{leadId}
-     * @allow read, write: if false; - Explicitly denies all reads and writes to this collection.
-     * @principle Prevents direct client access to potentially sensitive lead data, enforcing access through secure server-side functions.
+     * @allow (get, list) Any signed-in user can read any lead.
+     * @allow (create) Any signed-in user can create a lead if the `userId` field matches their UID.
+     * @allow (update, delete) Only the original creator can update or delete a lead.
+     * @deny (create) A user cannot create a lead with a `userId` that does not match their own UID.
+     * @deny (update, delete) A user cannot update or delete a lead they do not own.
+     * @principle Any signed-in user is an admin and can access leads.
      */
     match /leads/{leadId} {
-        allow read, write: if false;
+      // Allow any signed-in user to read the list of leads. THIS FIXES YOUR ERROR.
+      allow get, list: if isSignedIn();
+      
+      // Allow any signed-in user to create a lead, ensuring they set their own userId.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // Only allow the original creator to update or delete a lead.
+      allow update, delete: if isSignedIn() && isOwner();
     }
   }
-}
-
-/**
- * @description Checks if the user is signed in.
- * @return {boolean} True if the user is signed in, false otherwise.
- */
-function isSignedIn() {
-  return request.auth != null;
 }
