@@ -94,13 +94,18 @@ export default function CoursesPage() {
     }, [selectedTheme, themes]);
 
     const formationCount = filteredFormations?.length || 0;
-    const dynamicCardTitle = selectedThemeName
-        ? `${formationCount} Formation${formationCount !== 1 ? 's' : ''} in ${selectedThemeName}`
-        : `${formationCount} Formation${formationCount !== 1 ? 's' : ''}`;
     
+    const dynamicCardTitle = useMemo(() => {
+        const formationText = formationCount !== 1 ? 'Formations' : 'Formation';
+        if (selectedThemeName) {
+            return `${formationCount} ${formationText} en ${selectedThemeName}`;
+        }
+        return `${formationCount} ${formationText}`;
+    }, [formationCount, selectedThemeName]);
+
     const dynamicCardDescription = selectedThemeName
-        ? `A list of available courses for the selected theme.`
-        : `A list of all available courses. Use the filters to narrow down your search.`;
+        ? `Liste des formations disponibles pour le thème sélectionné.`
+        : `Liste de toutes les formations disponibles. Utilisez les filtres pour affiner votre recherche.`;
 
 
     return (
