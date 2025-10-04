@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -72,6 +73,8 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
   };
   
   const isHeroSection = section.id === 'hero';
+  const currentMediaUrl = form.watch('imageUrl');
+  const isVideo = currentMediaUrl?.includes('video');
 
   return (
     <Form {...form}>
@@ -108,12 +111,12 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{isHeroSection ? 'Background Media' : 'Image'}</FormLabel>
-                {section.imageUrl && !imageFile && (
+                {currentMediaUrl && !imageFile && (
                   <div className="my-2">
-                    {section.imageUrl.includes('video') ? (
-                      <video src={section.imageUrl} width="100" className="object-contain rounded-md border" controls />
+                    {isVideo ? (
+                      <video src={currentMediaUrl} width="100" className="object-contain rounded-md border" controls />
                     ) : (
-                      <Image src={section.imageUrl} alt="Current Image" width={100} height={100} className="object-contain rounded-md border" />
+                      <Image src={currentMediaUrl} alt="Current Image" width={100} height={100} className="object-contain rounded-md border" />
                     )}
                   </div>
                 )}
@@ -125,7 +128,7 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
                         onChange={(e) => {
                             if (e.target.files?.[0]) {
                                 setImageFile(e.target.files[0]);
-                                field.onChange(e.target.files[0].name); 
+                                field.onChange(URL.createObjectURL(e.target.files[0])); 
                             }
                         }}
                     />
