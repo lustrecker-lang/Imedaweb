@@ -618,7 +618,7 @@ export default function CampusPage() {
               <div className="py-4">
                 <Form {...editForm}>
                     <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
-                      <Accordion type="multiple" defaultValue={["info"]} className="w-full">
+                      <Accordion type="multiple" className="w-full">
                         <AccordionItem value="info">
                            <AccordionTrigger>Campus Information</AccordionTrigger>
                            <AccordionContent className="space-y-4 p-1">
@@ -791,7 +791,3 @@ export default function CampusPage() {
     </>
   );
 }
-
-    
-
-    
