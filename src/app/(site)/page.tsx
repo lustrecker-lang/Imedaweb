@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle, BarChart, Users, Search } from "lucide-react";
 import { doc, collection, query, orderBy } from 'firebase/firestore';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import { Button } from "@/components/ui/button";
 import {
