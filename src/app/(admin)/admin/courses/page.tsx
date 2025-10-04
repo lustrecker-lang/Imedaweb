@@ -5,11 +5,12 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
-import { collection, doc, query, where, orderBy } from 'firebase/firestore';
+import { collection, doc, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { cn } from '@/lib/utils';
+import courseData from './importcourse.json';
 
 import {
   Card,
@@ -130,7 +131,7 @@ export default function CoursesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
 
-  const [isThemeAddDialogOpen, setIsThemeAddDialogOpen] useState(false);
+  const [isThemeAddDialogOpen, setIsThemeAddDialogOpen] = useState(false);
   const [isThemeEditDialogOpen, setIsThemeEditDialogOpen] = useState(false);
   const [isThemeDeleteDialogOpen, setIsThemeDeleteDialogOpen] = useState(false);
   const [editingTheme, setThemeToEdit] = useState<Theme | null>(null);
@@ -455,12 +456,90 @@ export default function CoursesPage() {
         setModuleToDelete(null);
     };
 
+    const handleSeedCourses = async () => {
+        if (!firestore) return;
+        toast({ title: "Seeding started...", description: "Please wait while the courses are being added." });
+
+        let categoriesMap = new Map<string, string>();
+        let themesMap = new Map<string, string>();
+
+        for (const course of courseData) {
+            let categoryId: string;
+            // Handle Category
+            if (categoriesMap.has(course.Category)) {
+                categoryId = categoriesMap.get(course.Category)!;
+            } else {
+                const categoryQuery = query(collection(firestore, 'course_categories'), where('name', '==', course.Category));
+                const categorySnapshot = await getDocs(categoryQuery);
+                if (!categorySnapshot.empty) {
+                    categoryId = categorySnapshot.docs[0].id;
+                } else {
+                    const categoryDoc = await addDocumentNonBlocking(collection(firestore, 'course_categories'), { name: course.Category });
+                    categoryId = categoryDoc!.id;
+                }
+                categoriesMap.set(course.Category, categoryId);
+            }
+
+            let themeId: string;
+            const themeMapKey = `${categoryId}-${course.Theme}`;
+            // Handle Theme
+            if (themesMap.has(themeMapKey)) {
+                themeId = themesMap.get(themeMapKey)!;
+            } else {
+                const themeQuery = query(collection(firestore, 'course_themes'), where('categoryId', '==', categoryId), where('name', '==', course.Theme));
+                const themeSnapshot = await getDocs(themeQuery);
+                if (!themeSnapshot.empty) {
+                    themeId = themeSnapshot.docs[0].id;
+                } else {
+                    const themeDoc = await addDocumentNonBlocking(collection(firestore, 'course_themes'), { name: course.Theme, categoryId: categoryId });
+                    themeId = themeDoc!.id;
+                }
+                themesMap.set(themeMapKey, themeId);
+            }
+
+            // Handle Formation
+            const formationData = {
+                themeId: themeId,
+                name: course.Formation,
+                formationId: course.FormationID,
+                objectifPedagogique: course['Objectif Pédagogique'],
+                preRequis: course['Pré-requis'],
+                publicConcerne: course['Public Concerné'],
+                methodesMobilisees: course['Méthodes Mobilisées'],
+                moyensPedagogiques: course['Moyens Pédagogiques'],
+                modalitesEvaluation: course['Modalités d\'Évaluation'],
+                prixAvecHebergement: course['Prix avec hebergement']?.toString() || '',
+                prixSansHebergement: course['Prix sans hebergement']?.toString() || '',
+                format: course.Format,
+            };
+            const formationDoc = await addDocumentNonBlocking(collection(firestore, 'course_formations'), formationData);
+            const formationId = formationDoc!.id;
+
+            // Handle Modules
+            for (let i = 1; i <= 7; i++) {
+                const moduleKey = `Module ${i}` as keyof typeof course;
+                if (course[moduleKey]) {
+                    const moduleData = {
+                        formationId: formationId,
+                        name: course[moduleKey] as string,
+                        description: `Module ${i} for ${course.Formation}`
+                    };
+                    addDocumentNonBlocking(collection(firestore, 'course_modules'), moduleData);
+                }
+            }
+        }
+        toast({ title: "Seeding complete!", description: "All courses have been added to the database." });
+    };
+
   return (
     <>
       <div className="container mx-auto px-4 py-12 md:px-6 space-y-8">
-        <header>
-          <h1 className="text-xl font-bold tracking-tight">Courses Management</h1>
-          <p className="text-sm text-muted-foreground">Manage your academic content hierarchy: Catégories, Thèmes, Formations, and Modules.</p>
+        <header className="flex justify-between items-start">
+            <div>
+                <h1 className="text-xl font-bold tracking-tight">Courses Management</h1>
+                <p className="text-sm text-muted-foreground">Manage your academic content hierarchy: Catégories, Thèmes, Formations, and Modules.</p>
+            </div>
+            <Button variant="outline" onClick={handleSeedCourses}>Seed Courses from JSON</Button>
         </header>
 
         <div className="grid gap-8 lg:grid-cols-2">
@@ -1158,3 +1237,4 @@ export default function CoursesPage() {
 }
 
     
+
