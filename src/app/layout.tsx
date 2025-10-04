@@ -8,6 +8,7 @@ import { DynamicIcons } from "@/components/layout/dynamic-icons";
 export const metadata: Metadata = {
   title: "IMEDA",
   description: "A clean and professional web application.",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -18,6 +19,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="application-name" content="IMEDA" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="IMEDA" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#FFFFFF" />
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
