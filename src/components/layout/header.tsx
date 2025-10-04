@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -28,8 +29,6 @@ import { cn } from "@/lib/utils";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-
 
 const navStructure = [
     {
@@ -76,10 +75,8 @@ const contactFormSchema = z.object({
   message: z.string().min(1, { message: "Le message ne peut pas être vide." }),
 });
 
-function ContactForm({ onFormSubmit }: { onFormSubmit: () => void }) {
-  const { toast } = useToast();
+function ContactForm({ onFormSubmit, setHasSubmitted }: { onFormSubmit: () => void; setHasSubmitted: (hasSubmitted: boolean) => void }) {
   const firestore = useFirestore();
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm<z.infer<typeof contactFormSchema>>({
     resolver: zodResolver(contactFormSchema),
@@ -93,11 +90,7 @@ function ContactForm({ onFormSubmit }: { onFormSubmit: () => void }) {
 
   async function onSubmit(values: z.infer<typeof contactFormSchema>) {
     if (!firestore) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de se connecter à la base de données. Veuillez réessayer plus tard.",
-      });
+      console.error("Firestore not available");
       return;
     }
     
@@ -107,27 +100,10 @@ function ContactForm({ onFormSubmit }: { onFormSubmit: () => void }) {
       createdAt: serverTimestamp(),
     });
 
-    toast({
-      title: "Message envoyé!",
-      description: "Merci de nous avoir contactés. Nous vous répondrons bientôt.",
-    });
     form.reset();
-    setIsSubmitted(true);
+    setHasSubmitted(true);
   }
-
-  if (isSubmitted) {
-    return (
-      <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
-        <CheckCircle className="h-16 w-16 text-green-500" />
-        <h3 className="text-xl font-semibold">Message envoyé!</h3>
-        <p className="text-muted-foreground">
-          Merci de nous avoir contactés. Nous reviendrons vers vous rapidement.
-        </p>
-        <Button onClick={onFormSubmit} className="w-full">Fermer</Button>
-      </div>
-    );
-  }
-
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -227,6 +203,7 @@ ListItem.displayName = "ListItem";
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const firestore = useFirestore();
 
   const companyProfileRef = useMemo(() => {
@@ -249,14 +226,12 @@ export function Header() {
     return <div className="h-6 w-24" />; // Empty div as a fallback to prevent layout shift
   }
   
-  const handleCloseContactSheet = () => {
-    setIsContactSheetOpen(false);
-    // Add a short delay to allow the sheet to close before resetting the form state
-    setTimeout(() => {
-       // This is a conceptual reset. The actual implementation is inside ContactForm.
-       // We can trigger a re-render of the form by changing a key if needed,
-       // but here we just handle the sheet visibility.
-    }, 300);
+  const handleSheetOpenChange = (open: boolean) => {
+      setIsContactSheetOpen(open);
+      if (!open) {
+          // Reset form state when sheet closes
+          setTimeout(() => setHasSubmitted(false), 300);
+      }
   }
 
   return (
@@ -289,21 +264,34 @@ export function Header() {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
-            <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+            <Sheet open={isContactSheetOpen} onOpenChange={handleSheetOpenChange}>
                 <SheetTrigger asChild>
                     <Button size="sm" className="hidden md:inline-flex">
                         Contactez-nous
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="right">
-                    <SheetHeader>
-                        <SheetTitle>Contactez-nous</SheetTitle>
-                        <SheetDescription>
-                            Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais.
-                        </SheetDescription>
-                    </SheetHeader>
+                    {!hasSubmitted && (
+                      <SheetHeader>
+                          <SheetTitle>Contactez-nous</SheetTitle>
+                          <SheetDescription>
+                              Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais.
+                          </SheetDescription>
+                      </SheetHeader>
+                    )}
                     <div className="py-6">
-                        <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} />
+                        {hasSubmitted ? (
+                             <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
+                                <CheckCircle className="h-16 w-16 text-green-500" />
+                                <h3 className="text-xl font-headline font-normal">Message envoyé!</h3>
+                                <p className="text-xs text-muted-foreground">
+                                  Merci de nous avoir contactés. Nous reviendrons vers vous rapidement.
+                                </p>
+                                <Button onClick={() => handleSheetOpenChange(false)} className="w-full">Fermer</Button>
+                            </div>
+                        ) : (
+                           <ContactForm onFormSubmit={() => handleSheetOpenChange(false)} setHasSubmitted={setHasSubmitted} />
+                        )}
                     </div>
                 </SheetContent>
             </Sheet>
@@ -348,7 +336,7 @@ export function Header() {
                        ))}
                     </Accordion>
                 </nav>
-                 <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+                 <Sheet open={isContactSheetOpen} onOpenChange={handleSheetOpenChange}>
                     <SheetTrigger asChild>
                         <Button className="w-full" onClick={() => { setIsOpen(false); setIsContactSheetOpen(true); }}>Contactez-nous</Button>
                     </SheetTrigger>
@@ -361,3 +349,5 @@ export function Header() {
     </header>
   );
 }
+
+    
