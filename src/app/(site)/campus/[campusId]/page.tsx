@@ -1,8 +1,7 @@
-
 'use client';
 
 import Image from "next/image";
-import { collection, query, where, getDocs, DocumentData } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -15,7 +14,7 @@ interface Campus {
   name: string;
   slug: string;
   description?: string;
-  imageUrl?: string; // General listing image
+  imageUrl?: string;
   hero?: {
     title?: string;
     subtitle?: string;
@@ -26,7 +25,8 @@ interface Campus {
 export default function CampusPage() {
   const firestore = useFirestore();
   const params = useParams();
-  const slug = params.slug as string;
+  // This is the corrected line
+  const slug = params.campusId as string;
 
   const [campus, setCampus] = useState<Campus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,13 +34,13 @@ export default function CampusPage() {
 
   const campusQuery = useMemoFirebase(() => {
     if (!firestore || !slug) return null;
-    // Note: This query requires a Firestore index on the 'slug' field.
     return query(collection(firestore, 'campuses'), where('slug', '==', slug));
   }, [firestore, slug]);
 
   useEffect(() => {
     if (!campusQuery) {
-      setIsLoading(false);
+      // If the query isn't ready, don't start a fetch
+      if(slug) setIsLoading(true); // Keep loading if we have a slug but no query
       return;
     };
 
@@ -53,7 +53,6 @@ export default function CampusPage() {
           setError("No campus found for this URL.");
           setCampus(null);
         } else {
-          // Assuming slugs are unique, take the first result.
           const doc = querySnapshot.docs[0];
           setCampus({ id: doc.id, ...(doc.data() as Omit<Campus, 'id'>) });
         }
@@ -66,39 +65,39 @@ export default function CampusPage() {
     };
 
     fetchCampus();
-  }, [campusQuery]);
+  }, [campusQuery, slug]);
 
   return (
     <div className="flex flex-col">
       <section className="container py-8">
-  <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-      {isLoading ? (
-        <Skeleton className="h-full w-full" />
-      ) : (
-        (campus?.hero?.backgroundMediaUrl || campus?.imageUrl) && (
-          <Image
-              src={campus.hero?.backgroundMediaUrl || campus.imageUrl!}
-              alt={campus.hero?.title || campus.name || "Campus background"}
-              fill
-              className="object-cover"
-              priority
-          />
-        )
-      )}
-      <div className="absolute inset-0 bg-black/50" />
-      <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
-          {isLoading ? (
-          <div className="w-full max-w-3xl space-y-4">
-              <Skeleton className="h-12 w-3/4 mx-auto bg-gray-400/50" />
-          </div>
-          ) : (
-          <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
-              {campus?.hero?.title || campus?.name || "Campus Details"}
-          </h1>
-          )}
-      </div>
-  </div>
-</section>
+        <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
+            {isLoading ? (
+              <Skeleton className="h-full w-full" />
+            ) : (
+              (campus?.hero?.backgroundMediaUrl || campus?.imageUrl) && (
+                <Image
+                    src={campus.hero?.backgroundMediaUrl || campus.imageUrl!}
+                    alt={campus.hero?.title || campus.name || "Campus background"}
+                    fill
+                    className="object-cover"
+                    priority
+                />
+              )
+            )}
+            <div className="absolute inset-0 bg-black/50" />
+            <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
+                {isLoading ? (
+                <div className="w-full max-w-3xl space-y-4">
+                    <Skeleton className="h-12 w-3/4 mx-auto bg-gray-400/50" />
+                </div>
+                ) : (
+                <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
+                    {campus?.hero?.title || campus?.name || "Campus Details"}
+                </h1>
+                )}
+            </div>
+        </div>
+      </section>
 
       <section className="py-12">
         <div className="container px-4 md:px-6">
