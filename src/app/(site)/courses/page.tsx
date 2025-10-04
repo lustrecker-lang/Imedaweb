@@ -1,7 +1,5 @@
 
-'use client';
-
-import { useMemo, useState, useEffect } from 'react';
+import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
@@ -53,16 +51,19 @@ interface Page {
 type SortKey = 'formationId' | 'name';
 type SortDirection = 'ascending' | 'descending';
 
-export default function CoursesPage() {
+function CoursesPageContent() {
+    'use client';
+    
     const firestore = useFirestore();
     const router = useRouter();
     const searchParams = useSearchParams();
     const themeIdFromUrl = searchParams.get('themeId');
+    const categoryIdFromUrl = searchParams.get('categoryId');
     const isMobile = useIsMobile();
 
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [selectedTheme, setSelectedTheme] = useState<string | null>(themeIdFromUrl);
-    const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'formationId', direction: 'ascending' });
+    const [selectedCategory, setSelectedCategory] = React.useState<string | null>(categoryIdFromUrl);
+    const [selectedTheme, setSelectedTheme] = React.useState<string | null>(themeIdFromUrl);
+    const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: SortDirection }>({ key: 'formationId', direction: 'ascending' });
 
     const pageRef = useMemoFirebase(() => {
         if (!firestore) return null;
@@ -96,19 +97,22 @@ export default function CoursesPage() {
     const heroImageUrl = heroSection?.imageUrl;
 
     // Effect to sync URL themeId with state
-    useEffect(() => {
-        if (themeIdFromUrl) {
+    React.useEffect(() => {
+        const theme = themes?.find(t => t.id === themeIdFromUrl);
+        if (themeIdFromUrl && theme) {
             setSelectedTheme(themeIdFromUrl);
-            // Also set the category based on the theme
-            const theme = themes?.find(t => t.id === themeIdFromUrl);
-            if (theme) {
+            if (selectedCategory !== theme.categoryId) {
                 setSelectedCategory(theme.categoryId);
             }
+        } else if (categoryIdFromUrl) {
+            setSelectedCategory(categoryIdFromUrl);
+            setSelectedTheme(null);
         }
-    }, [themeIdFromUrl, themes]);
+    }, [themeIdFromUrl, categoryIdFromUrl, themes, selectedCategory]);
+
 
     // Memoized filtering and sorting
-    const filteredAndSortedFormations = useMemo(() => {
+    const filteredAndSortedFormations = React.useMemo(() => {
         if (!formations) return [];
 
         let filtered = formations;
@@ -141,7 +145,11 @@ export default function CoursesPage() {
         const newCategoryId = categoryId === 'all' ? null : categoryId;
         setSelectedCategory(newCategoryId);
         setSelectedTheme(null); // Reset theme when category changes
-        router.push('/courses');
+        if (newCategoryId) {
+            router.push(`/courses?categoryId=${newCategoryId}`);
+        } else {
+            router.push('/courses');
+        }
     };
 
     const handleThemeChange = (themeId: string) => {
@@ -173,19 +181,20 @@ export default function CoursesPage() {
 
     const isLoading = areCategoriesLoading || areThemesLoading || areFormationsLoading || isPageLoading;
 
-    const filteredThemes = useMemo(() => {
-        if (!themes || !selectedCategory) return themes || [];
+    const filteredThemes = React.useMemo(() => {
+        if (!themes) return [];
+        if (!selectedCategory) return themes;
         return themes.filter(theme => theme.categoryId === selectedCategory);
     }, [themes, selectedCategory]);
 
-    const selectedThemeName = useMemo(() => {
+    const selectedThemeName = React.useMemo(() => {
         if (!selectedTheme || !themes) return null;
         return themes.find(t => t.id === selectedTheme)?.name || null;
     }, [selectedTheme, themes]);
 
     const formationCount = filteredAndSortedFormations?.length || 0;
     
-    const dynamicCardTitle = useMemo(() => {
+    const dynamicCardTitle = React.useMemo(() => {
         const formationText = formationCount !== 1 ? 'Formations' : 'Formation';
         if (selectedThemeName) {
             return `${formationCount} ${formationText} en ${selectedThemeName}`;
@@ -215,8 +224,10 @@ export default function CoursesPage() {
                         <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
                             {isLoading ? <Skeleton className="h-10 w-3/4 mx-auto bg-gray-400/50" /> : heroSection?.title || "Catalogue des Formations"}
                         </h1>
-                        {isLoading ? (
-                            <Skeleton className="h-6 w-full max-w-lg mx-auto bg-gray-400/50 mt-4" />
+                         {isLoading ? (
+                            <div className="mx-auto mt-4 max-w-2xl text-gray-200">
+                                <Skeleton className="h-6 w-full max-w-lg mx-auto bg-gray-400/50" />
+                            </div>
                         ) : (
                             <p className="mx-auto mt-4 max-w-2xl text-gray-200">
                                 {heroSection?.content || "Explorez notre catalogue complet de formations..."}
@@ -319,4 +330,13 @@ export default function CoursesPage() {
             </main>
         </div>
     );
+}
+
+
+export default function CoursesPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <CoursesPageContent />
+        </Suspense>
+    )
 }
