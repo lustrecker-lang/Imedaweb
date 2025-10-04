@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu } from "lucide-react";
+import { Menu, CheckCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -79,6 +79,8 @@ const contactFormSchema = z.object({
 function ContactForm({ onFormSubmit }: { onFormSubmit: () => void }) {
   const { toast } = useToast();
   const firestore = useFirestore();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const form = useForm<z.infer<typeof contactFormSchema>>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -110,7 +112,20 @@ function ContactForm({ onFormSubmit }: { onFormSubmit: () => void }) {
       description: "Merci de nous avoir contactés. Nous vous répondrons bientôt.",
     });
     form.reset();
-    onFormSubmit();
+    setIsSubmitted(true);
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
+        <CheckCircle className="h-16 w-16 text-green-500" />
+        <h3 className="text-xl font-semibold">Message envoyé!</h3>
+        <p className="text-muted-foreground">
+          Merci de nous avoir contactés. Nous reviendrons vers vous rapidement.
+        </p>
+        <Button onClick={onFormSubmit} className="w-full">Fermer</Button>
+      </div>
+    );
   }
 
   return (
@@ -233,6 +248,16 @@ export function Header() {
     }
     return <div className="h-6 w-24" />; // Empty div as a fallback to prevent layout shift
   }
+  
+  const handleCloseContactSheet = () => {
+    setIsContactSheetOpen(false);
+    // Add a short delay to allow the sheet to close before resetting the form state
+    setTimeout(() => {
+       // This is a conceptual reset. The actual implementation is inside ContactForm.
+       // We can trigger a re-render of the form by changing a key if needed,
+       // but here we just handle the sheet visibility.
+    }, 300);
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
@@ -325,7 +350,7 @@ export function Header() {
                 </nav>
                  <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
                     <SheetTrigger asChild>
-                        <Button className="w-full">Contactez-nous</Button>
+                        <Button className="w-full" onClick={() => { setIsOpen(false); setIsContactSheetOpen(true); }}>Contactez-nous</Button>
                     </SheetTrigger>
                 </Sheet>
               </div>
