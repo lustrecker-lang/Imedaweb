@@ -11,8 +11,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from '@/components/ui/badge';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 
 // Interfaces
 interface Category {
@@ -43,6 +45,7 @@ export default function CoursesPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const themeIdFromUrl = searchParams.get('themeId');
+    const isMobile = useIsMobile();
 
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedTheme, setSelectedTheme] = useState<string | null>(themeIdFromUrl);
@@ -174,7 +177,7 @@ export default function CoursesPage() {
 
     return (
         <div className="container mx-auto px-4 py-12 md:px-6">
-            <Card className="mb-8 text-center shadow-none rounded-none border-x-0 md:min-h-[250px] flex flex-col justify-center">
+            <Card className="mb-8 shadow-none rounded-none border-x-0 md:min-h-[250px] flex flex-col justify-center text-center">
                 <CardHeader>
                     <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
                         Catalogue des Formations
@@ -227,7 +230,7 @@ export default function CoursesPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[120px]">
+                                    <TableHead className="w-[120px] hidden md:table-cell">
                                         <Button variant="ghost" onClick={() => handleSort('formationId')} className="px-0 hover:bg-transparent">
                                             ID {getSortIcon('formationId')}
                                         </Button>
@@ -244,7 +247,7 @@ export default function CoursesPage() {
                                 {isLoading ? (
                                     Array.from({ length: 10 }).map((_, i) => (
                                         <TableRow key={i}>
-                                            <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
+                                            <TableCell className="py-2 hidden md:table-cell"><Skeleton className="h-5 w-16" /></TableCell>
                                             <TableCell className="py-2"><Skeleton className="h-5 w-3/4" /></TableCell>
                                             <TableCell className="text-right py-2"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                                         </TableRow>
@@ -252,12 +255,13 @@ export default function CoursesPage() {
                                 ) : filteredAndSortedFormations && filteredAndSortedFormations.length > 0 ? (
                                     filteredAndSortedFormations.map(formation => (
                                         <TableRow key={formation.id}>
-                                            <TableCell className="font-mono text-xs py-2">{formation.formationId}</TableCell>
+                                            <TableCell className="font-mono text-xs py-2 hidden md:table-cell">{formation.formationId}</TableCell>
                                             <TableCell className="font-medium py-2">{formation.name}</TableCell>
                                             <TableCell className="text-right py-2">
-                                                <Button variant="link" asChild>
-                                                    <Link href={`/courses/${formation.id}`} className="text-sm">
-                                                        Voir les détails
+                                                <Button variant={isMobile ? "ghost" : "link"} size={isMobile ? "icon" : "default"} asChild>
+                                                    <Link href={`/courses/${formation.id}`}>
+                                                        {isMobile ? <ArrowRight className="h-4 w-4" /> : 'Voir les détails'}
+                                                        <span className="sr-only">Voir les détails</span>
                                                     </Link>
                                                 </Button>
                                             </TableCell>
