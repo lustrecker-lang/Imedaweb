@@ -191,12 +191,12 @@ export default function Home() {
                 Explore our world-class campuses located in global hubs of innovation.
               </p>
           </div>
-          <div className="mt-12 grid grid-cols-1 grid-rows-3 gap-6 md:grid-cols-2 md:grid-rows-2">
+          <div className="mt-12 grid h-[50vh] min-h-[400px] grid-cols-1 grid-rows-3 gap-6 md:grid-cols-2 md:grid-rows-2">
             {isLoading ? (
               <>
-                <Skeleton className="h-64 w-full md:row-span-2" />
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-full w-full md:row-span-2" />
+                <Skeleton className="h-full w-full" />
+                <Skeleton className="h-full w-full" />
               </>
             ) : (
               campuses && campuses.map((campus, index) => (
