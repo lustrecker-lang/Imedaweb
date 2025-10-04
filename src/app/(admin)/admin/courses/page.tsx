@@ -300,7 +300,6 @@ export default function CoursesPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead className="hidden sm:table-cell">Description</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -308,8 +307,7 @@ export default function CoursesPage() {
                     {areCategoriesLoading ? (
                       Array.from({ length: 3 }).map((_, i) => (
                         <TableRow key={i}>
-                          <TableCell className="py-2"><Skeleton className="h-5 w-24" /></TableCell>
-                          <TableCell className="hidden sm:table-cell py-2"><Skeleton className="h-5 w-48" /></TableCell>
+                          <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
                           <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                         </TableRow>
                       ))
@@ -321,7 +319,6 @@ export default function CoursesPage() {
                           className={cn("cursor-pointer", selectedCategory?.id === category.id && "bg-muted/50")}
                         >
                           <TableCell className="font-medium py-2">{category.name}</TableCell>
-                          <TableCell className="text-muted-foreground hidden sm:table-cell py-2">{category.description}</TableCell>
                           <TableCell className="text-right py-2">
                             <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditCategoryDialog(category as Category); }}>
                               <Edit className="h-4 w-4" />
@@ -334,7 +331,7 @@ export default function CoursesPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={3} className="h-24 text-center">No categories found.</TableCell>
+                        <TableCell colSpan={2} className="h-24 text-center">No categories found.</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -395,7 +392,6 @@ export default function CoursesPage() {
                         <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
-                            <TableHead className="hidden sm:table-cell">Description</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                         </TableHeader>
@@ -403,8 +399,7 @@ export default function CoursesPage() {
                         {areThemesLoading ? (
                             Array.from({ length: 2 }).map((_, i) => (
                             <TableRow key={i}>
-                                <TableCell className="py-2"><Skeleton className="h-5 w-24" /></TableCell>
-                                <TableCell className="hidden sm:table-cell py-2"><Skeleton className="h-5 w-48" /></TableCell>
+                                <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
                                 <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                             </TableRow>
                             ))
@@ -412,7 +407,6 @@ export default function CoursesPage() {
                             themes.map((theme) => (
                             <TableRow key={theme.id}>
                                 <TableCell className="font-medium py-2">{theme.name}</TableCell>
-                                <TableCell className="text-muted-foreground hidden sm:table-cell py-2">{theme.description}</TableCell>
                                 <TableCell className="text-right py-2">
                                 <Button variant="ghost" size="icon" onClick={() => openEditThemeDialog(theme as Theme)}>
                                     <Edit className="h-4 w-4" />
@@ -425,7 +419,7 @@ export default function CoursesPage() {
                             ))
                         ) : (
                             <TableRow>
-                            <TableCell colSpan={3} className="h-24 text-center">No themes found for this category.</TableCell>
+                            <TableCell colSpan={2} className="h-24 text-center">No themes found for this category.</TableCell>
                             </TableRow>
                         )}
                         </TableBody>
@@ -571,3 +565,5 @@ export default function CoursesPage() {
     </>
   );
 }
+
+    
