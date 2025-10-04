@@ -118,7 +118,7 @@ export default function SeedPage() {
           <CardTitle>Database Seeding</CardTitle>
           <CardDescription>
             Click the button below to populate your Firestore database with initial content.
-            This is a one-time action.
+            This is a one-time action. If content already exists, it will be overwritten.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex gap-4">

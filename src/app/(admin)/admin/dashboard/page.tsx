@@ -105,7 +105,7 @@ export default function DashboardPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell>No pages found.</TableCell>
+                  <TableCell>No pages found. You may need to seed the database.</TableCell>
                 </TableRow>
               )}
             </TableBody>
