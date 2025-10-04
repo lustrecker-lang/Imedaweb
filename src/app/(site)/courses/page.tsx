@@ -174,7 +174,7 @@ export default function CoursesPage() {
 
     return (
         <div className="container mx-auto px-4 py-12 md:px-6">
-            <Card className="mb-12 text-center shadow-sm">
+            <Card className="mb-8 text-center shadow-none rounded-none border-x-0 md:min-h-[250px] flex flex-col justify-center">
                 <CardHeader>
                     <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
                         Catalogue des Formations
