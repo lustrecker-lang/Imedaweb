@@ -16,6 +16,14 @@ import {
 } from "@/components/ui/card";
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 const featuresPlaceholders = [
   {
@@ -61,6 +69,7 @@ interface Campus {
 
 export default function Home() {
   const firestore = useFirestore();
+  const isMobile = useIsMobile();
   const pageRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return doc(firestore, 'pages', 'home');
@@ -80,6 +89,25 @@ export default function Home() {
   const heroImageUrl = heroSection?.imageUrl;
 
   const isLoading = isPageLoading || areCampusesLoading;
+
+  const CampusCard = ({ campus, className }: { campus: Campus, className?: string }) => (
+    <Link href={`/campus/${campus.slug}`} className={`group relative block overflow-hidden rounded-lg ${className}`}>
+      <Image
+        src={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/800/600`}
+        alt={campus.name}
+        fill
+        className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+      />
+      <div className="relative flex h-full flex-col justify-end p-6">
+        <h3 className="text-lg font-normal text-white font-headline">
+          {campus.name}
+        </h3>
+        {campus.description && (
+          <p className="text-xs text-white/80 mt-1 line-clamp-2">{campus.description}</p>
+        )}
+      </div>
+    </Link>
+  );
 
   return (
     <div className="flex flex-col">
@@ -184,42 +212,48 @@ export default function Home() {
 
       <section className="py-16">
         <div className="container px-4 md:px-6">
-          <div className="max-w-2xl">
-              <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
-                Our Campuses
-              </h2>
-              <p className="mt-2 text-muted-foreground md:text-base/relaxed">
-                Explore our world-class campuses located in global hubs of innovation.
-              </p>
-          </div>
-          <div className="mt-12 grid h-[50vh] min-h-[400px] grid-cols-1 grid-rows-3 gap-6 md:grid-cols-2 md:grid-rows-2">
-            {isLoading ? (
-              <>
-                <Skeleton className="h-full w-full md:row-span-2" />
-                <Skeleton className="h-full w-full" />
-                <Skeleton className="h-full w-full" />
-              </>
-            ) : (
-              campuses && campuses.map((campus, index) => (
-                <Link key={campus.id} href={`/campus/${campus.slug}`} className={`group relative block overflow-hidden rounded-lg ${index === 0 ? 'md:row-span-2' : ''}`}>
-                  <Image
-                    src={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/800/600`}
-                    alt={campus.name}
-                    fill
-                    className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-                  />
-                  <div className="relative flex h-full flex-col justify-end p-6 bg-gradient-to-t from-black/60 via-black/0 to-transparent">
-                    <h3 className="text-lg font-normal text-white font-headline">
-                      {campus.name}
-                    </h3>
-                    {campus.description && (
-                      <p className="text-xs text-white/80 mt-1 line-clamp-2">{campus.description}</p>
-                    )}
-                  </div>
-                </Link>
-              ))
+          <div className="flex items-center justify-between mb-8">
+            <div className="max-w-2xl">
+                <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
+                  Our Campuses
+                </h2>
+                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                  Explore our world-class campuses located in global hubs of innovation.
+                </p>
+            </div>
+            {isMobile && (
+              <div className="flex gap-2">
+                <CarouselPrevious className="relative -left-0 top-0 translate-y-0" />
+                <CarouselNext className="relative -right-0 top-0 translate-y-0" />
+              </div>
             )}
           </div>
+
+          {isLoading ? (
+            <div className="mt-12 grid h-[50vh] min-h-[400px] grid-cols-1 grid-rows-3 gap-6 md:grid-cols-2 md:grid-rows-2">
+              <Skeleton className="h-full w-full md:row-span-2" />
+              <Skeleton className="h-full w-full" />
+              <Skeleton className="h-full w-full" />
+            </div>
+          ) : isMobile ? (
+             <Carousel className="w-full" opts={{ align: "start", loop: true }}>
+                <CarouselContent className="-ml-4">
+                  {campuses && campuses.map((campus) => (
+                    <CarouselItem key={campus.id} className="basis-4/5 pl-4">
+                      <div className="h-[50vh] min-h-[400px] w-full">
+                        <CampusCard campus={campus} className="h-full w-full" />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+            </Carousel>
+          ) : (
+            <div className="mt-12 grid h-[50vh] min-h-[400px] grid-cols-1 grid-rows-3 gap-6 md:grid-cols-2 md:grid-rows-2">
+              {campuses && campuses.map((campus, index) => (
+                <CampusCard key={campus.id} campus={campus} className={index === 0 ? 'md:row-span-2' : ''} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>
