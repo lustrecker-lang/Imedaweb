@@ -60,6 +60,15 @@ import {
   DialogTrigger,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetClose,
+} from '@/components/ui/sheet';
 import { Trash2, Edit, X, Plus } from 'lucide-react';
 
 const formSchema = z.object({
@@ -444,85 +453,89 @@ export default function CampusPage() {
         </Card>
       </div>
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                  <DialogTitle>Edit Campus: {editingCampus?.name}</DialogTitle>
-              </DialogHeader>
-              <Form {...editForm}>
-                  <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
-                      <FormField
-                          control={editForm.control}
-                          name="name"
-                          render={({ field }) => (
-                              <FormItem>
-                                  <FormLabel>Campus Name</FormLabel>
-                                  <FormControl><Input {...field} /></FormControl>
-                                  <FormMessage />
-                              </FormItem>
-                          )}
-                      />
-                      <FormField
-                          control={editForm.control}
-                          name="slug"
-                          render={({ field }) => (
-                              <FormItem>
-                                  <FormLabel>Slug</FormLabel>
-                                  <FormControl><Input {...field} /></FormControl>
-                                  <FormMessage />
-                              </FormItem>
-                          )}
-                      />
-                      <FormField
-                          control={editForm.control}
-                          name="description"
-                          render={({ field }) => (
-                              <FormItem>
-                                  <FormLabel>Description</FormLabel>
-                                  <FormControl><Textarea {...field} /></FormControl>
-                                  <FormMessage />
-                              </FormItem>
-                          )}
-                      />
-                      <FormItem>
-                          <FormLabel>Campus Image</FormLabel>
-                          <div className="flex items-center gap-4">
-                              {editingCampus?.imageUrl && (
-                                  <div className="relative">
-                                      <Image src={editingCampus.imageUrl} alt={editingCampus.name} width={80} height={50} className="object-cover rounded-sm" />
-                                      <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={handleRemoveImage}>
-                                          <X className="h-4 w-4" />
-                                          <span className="sr-only">Remove Image</span>
-                                      </Button>
-                                  </div>
-                              )}
-                              <FormControl className="flex-1">
-                                  <Input 
-                                      type="file" 
-                                      accept="image/*"
-                                      onChange={(e) => {
-                                          if (e.target.files?.[0]) {
-                                              setImageFile(e.target.files[0]);
-                                          }
-                                      }}
-                                  />
-                              </FormControl>
-                          </div>
-                          <FormMessage />
-                      </FormItem>
-                      <DialogFooter>
-                          <DialogClose asChild>
-                              <Button type="button" variant="outline">Cancel</Button>
-                          </DialogClose>
-                          <Button type="submit" disabled={editForm.formState.isSubmitting}>
-                              {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
-                          </Button>
-                      </DialogFooter>
-                  </form>
-              </Form>
-          </DialogContent>
-      </Dialog>
+      <Sheet open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <SheetContent>
+              <SheetHeader>
+                  <SheetTitle>Edit Campus: {editingCampus?.name}</SheetTitle>
+                  <SheetDescription>
+                    Make changes to the campus details below. Click save when you're done.
+                  </SheetDescription>
+              </SheetHeader>
+              <div className="py-4">
+                <Form {...editForm}>
+                    <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+                        <FormField
+                            control={editForm.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Campus Name</FormLabel>
+                                    <FormControl><Input {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={editForm.control}
+                            name="slug"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Slug</FormLabel>
+                                    <FormControl><Input {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={editForm.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Description</FormLabel>
+                                    <FormControl><Textarea {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormItem>
+                            <FormLabel>Campus Image</FormLabel>
+                            <div className="flex items-center gap-4">
+                                {editingCampus?.imageUrl && (
+                                    <div className="relative">
+                                        <Image src={editingCampus.imageUrl} alt={editingCampus.name} width={80} height={50} className="object-cover rounded-sm" />
+                                        <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={handleRemoveImage}>
+                                            <X className="h-4 w-4" />
+                                            <span className="sr-only">Remove Image</span>
+                                        </Button>
+                                    </div>
+                                )}
+                                <FormControl className="flex-1">
+                                    <Input 
+                                        type="file" 
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            if (e.target.files?.[0]) {
+                                                setImageFile(e.target.files[0]);
+                                            }
+                                        }}
+                                    />
+                                </FormControl>
+                            </div>
+                            <FormMessage />
+                        </FormItem>
+                        <SheetFooter className="pt-4">
+                            <SheetClose asChild>
+                                <Button type="button" variant="outline">Cancel</Button>
+                            </SheetClose>
+                            <Button type="submit" disabled={editForm.formState.isSubmitting}>
+                                {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
+                            </Button>
+                        </SheetFooter>
+                    </form>
+                </Form>
+              </div>
+          </SheetContent>
+      </Sheet>
       
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
