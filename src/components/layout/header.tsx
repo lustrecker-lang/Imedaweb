@@ -124,7 +124,7 @@ export function Header() {
       return <Skeleton className="h-6 w-24" />;
     }
     if (companyProfile?.logoUrl) {
-      return <Image src={companyProfile.logoUrl} alt={companyProfile.name || 'Company Logo'} width={100} height={24} className="h-6 w-auto object-contain" />;
+      return <Image src={companyProfile.logoUrl} alt={companyProfile.name || 'Company Logo'} width="0" height="0" sizes="100vw" className="h-6 w-auto object-contain" />;
     }
     if(companyProfile?.name) {
       return <span className="text-sm font-semibold tracking-wider font-headline">{companyProfile.name}</span>;

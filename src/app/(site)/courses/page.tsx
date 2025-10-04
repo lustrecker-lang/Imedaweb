@@ -215,9 +215,13 @@ export default function CoursesPage() {
                         <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
                             {isLoading ? <Skeleton className="h-10 w-3/4 mx-auto bg-gray-400/50" /> : heroSection?.title || "Catalogue des Formations"}
                         </h1>
-                        <p className="mx-auto mt-4 max-w-2xl text-gray-200">
-                             {isLoading ? <Skeleton className="h-6 w-full max-w-lg mx-auto bg-gray-400/50" /> : heroSection?.content || "Explorez notre catalogue complet de formations..."}
-                        </p>
+                        {isLoading ? (
+                            <Skeleton className="h-6 w-full max-w-lg mx-auto bg-gray-400/50 mt-4" />
+                        ) : (
+                            <p className="mx-auto mt-4 max-w-2xl text-gray-200">
+                                {heroSection?.content || "Explorez notre catalogue complet de formations..."}
+                            </p>
+                        )}
                     </CardHeader>
                     <CardContent>
                         <div className="mx-auto max-w-lg grid sm:grid-cols-2 gap-4">
