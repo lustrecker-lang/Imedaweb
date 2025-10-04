@@ -1,8 +1,9 @@
 
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -39,10 +40,13 @@ type SortDirection = 'ascending' | 'descending';
 
 export default function CoursesPage() {
     const firestore = useFirestore();
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-    const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'formationId', direction: 'ascending' });
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const themeIdFromUrl = searchParams.get('themeId');
 
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [selectedTheme, setSelectedTheme] = useState<string | null>(themeIdFromUrl);
+    const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'formationId', direction: 'ascending' });
 
     // Queries
     const categoriesQuery = useMemoFirebase(() => {
@@ -57,8 +61,6 @@ export default function CoursesPage() {
     
     const formationsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
-        // The default orderBy can be removed if we sort client-side, or kept for initial load.
-        // Let's remove it to ensure client-side sorting is always applied consistently.
         return query(collection(firestore, 'course_formations'));
     }, [firestore]);
 
@@ -67,11 +69,22 @@ export default function CoursesPage() {
     const { data: themes, isLoading: areThemesLoading } = useCollection<Theme>(themesQuery);
     const { data: formations, isLoading: areFormationsLoading } = useCollection<Omit<Formation, 'id'>>(formationsQuery);
 
+    // Effect to sync URL themeId with state
+    useEffect(() => {
+        if (themeIdFromUrl) {
+            setSelectedTheme(themeIdFromUrl);
+            // Also set the category based on the theme
+            const theme = themes?.find(t => t.id === themeIdFromUrl);
+            if (theme) {
+                setSelectedCategory(theme.categoryId);
+            }
+        }
+    }, [themeIdFromUrl, themes]);
+
     // Memoized filtering and sorting
     const filteredAndSortedFormations = useMemo(() => {
         if (!formations) return [];
 
-        // Filtering logic
         let filtered = formations;
         if (selectedTheme) {
             filtered = formations.filter(f => f.themeId === selectedTheme);
@@ -80,12 +93,14 @@ export default function CoursesPage() {
             filtered = formations.filter(f => themeIdsInCategory.includes(f.themeId));
         }
 
-        // Sorting logic
         const sorted = [...filtered].sort((a, b) => {
-            if (a[sortConfig.key] < b[sortConfig.key]) {
+            const key = sortConfig.key;
+            const valA = a[key] ?? '';
+            const valB = b[key] ?? '';
+            if (valA < valB) {
                 return sortConfig.direction === 'ascending' ? -1 : 1;
             }
-            if (a[sortConfig.key] > b[sortConfig.key]) {
+            if (valA > valB) {
                 return sortConfig.direction === 'ascending' ? 1 : -1;
             }
             return 0;
@@ -97,12 +112,22 @@ export default function CoursesPage() {
 
 
     const handleCategoryChange = (categoryId: string) => {
-        setSelectedCategory(categoryId === 'all' ? null : categoryId);
+        const newCategoryId = categoryId === 'all' ? null : categoryId;
+        setSelectedCategory(newCategoryId);
         setSelectedTheme(null); // Reset theme when category changes
+        router.push('/courses');
     };
 
     const handleThemeChange = (themeId: string) => {
-        setSelectedTheme(themeId === 'all' ? null : themeId);
+        const newThemeId = themeId === 'all' ? null : themeId;
+        setSelectedTheme(newThemeId);
+        if (newThemeId) {
+             router.push(`/courses?themeId=${newThemeId}`);
+        } else if (selectedCategory) {
+             router.push(`/courses?categoryId=${selectedCategory}`);
+        } else {
+             router.push('/courses');
+        }
     };
 
     const handleSort = (key: SortKey) => {
@@ -123,7 +148,7 @@ export default function CoursesPage() {
     const isLoading = areCategoriesLoading || areThemesLoading || areFormationsLoading;
 
     const filteredThemes = useMemo(() => {
-        if (!themes || !selectedCategory) return [];
+        if (!themes || !selectedCategory) return themes || [];
         return themes.filter(theme => theme.categoryId === selectedCategory);
     }, [themes, selectedCategory]);
 
@@ -176,7 +201,7 @@ export default function CoursesPage() {
                         </div>
                         <div>
                             <label className="text-sm font-medium text-muted-foreground mb-2 block text-left">Thème</label>
-                            <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!selectedCategory}>
+                            <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!themes || themes.length === 0}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Filtrer par thème" />
                                 </SelectTrigger>
@@ -230,9 +255,11 @@ export default function CoursesPage() {
                                             <TableCell className="font-mono text-xs">{formation.formationId}</TableCell>
                                             <TableCell className="font-medium">{formation.name}</TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/courses/${formation.id}`} className="text-sm text-primary hover:underline">
-                                                    Voir les détails
-                                                </Link>
+                                                <Button variant="link" asChild>
+                                                    <Link href={`/courses/${formation.id}`} className="text-sm">
+                                                        Voir les détails
+                                                    </Link>
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))

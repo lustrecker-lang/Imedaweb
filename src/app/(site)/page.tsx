@@ -4,8 +4,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, BarChart, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, CheckCircle, BarChart, Users, Search } from "lucide-react";
 import { doc, collection, query, orderBy } from 'firebase/firestore';
+import { useState } from 'react';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Combobox } from "@/components/ui/combobox";
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -68,6 +71,11 @@ interface Campus {
   imageUrl?: string;
 }
 
+interface Theme {
+  id: string;
+  name: string;
+}
+
 const isVideoUrl = (url?: string | null) => {
     if (!url) return false;
     const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
@@ -81,7 +89,10 @@ const isVideoUrl = (url?: string | null) => {
 
 export default function Home() {
   const firestore = useFirestore();
+  const router = useRouter();
   const isMobile = useIsMobile();
+  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
+
   const pageRef = useMemoFirebase(() => {
     if (!firestore) return null;
     return doc(firestore, 'pages', 'home');
@@ -96,13 +107,31 @@ export default function Home() {
 
   const { data: campuses, isLoading: areCampusesLoading } = useCollection<Campus>(campusesQuery);
 
+  const themesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'course_themes'), orderBy('name', 'asc'));
+  }, [firestore]);
+
+  const { data: themes, isLoading: areThemesLoading } = useCollection<Theme>(themesQuery);
+
+
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
   const heroMediaUrl = heroSection?.imageUrl;
   
   const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
 
-  const isLoading = isPageLoading || areCampusesLoading;
+  const isLoading = isPageLoading || areCampusesLoading || areThemesLoading;
+
+  const themeOptions = useMemo(() => {
+    return themes ? themes.map(theme => ({ value: theme.id, label: theme.name })) : [];
+  }, [themes]);
+
+  const handleSearch = () => {
+    if (selectedThemeId) {
+      router.push(`/courses?themeId=${selectedThemeId}`);
+    }
+  };
 
   const CampusCard = ({ campus, className }: { campus: Campus, className?: string }) => {
     const isCardVideo = isVideoUrl(campus.imageUrl);
@@ -143,7 +172,7 @@ export default function Home() {
     <div className="flex flex-col">
       <section className="py-8">
         <div className="container px-4 md:px-6">
-          <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
+          <div className="relative h-[60vh] min-h-[500px] w-full overflow-hidden">
               {isPageLoading ? (
                 <Skeleton className="h-full w-full" />
               ) : (
@@ -185,12 +214,21 @@ export default function Home() {
                       </p>
                   </>
                   )}
-                  <div className="mt-6">
-                  <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-200">
-                      <Link href="#">
-                      Get Started <ArrowRight className="ml-2 h-5 w-5" />
-                      </Link>
-                  </Button>
+                  <div className="mt-8 w-full max-w-2xl">
+                    <div className="flex flex-col sm:flex-row items-center gap-2 bg-white/20 backdrop-blur-sm p-3 rounded-lg border border-white/30">
+                        <Combobox
+                            items={themeOptions}
+                            value={selectedThemeId}
+                            onChange={setSelectedThemeId}
+                            placeholder="Rechercher un thème..."
+                            searchPlaceholder="Rechercher un thème..."
+                            noResultsText="Aucun thème trouvé."
+                        />
+                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90">
+                           <Search className="mr-2 h-4 w-4" />
+                           Rechercher
+                        </Button>
+                    </div>
                   </div>
               </div>
           </div>
@@ -320,5 +358,4 @@ export default function Home() {
     </div>
   );
 }
-
     
