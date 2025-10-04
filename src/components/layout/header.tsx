@@ -128,11 +128,11 @@ export function Header() {
         <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
                 <NavigationMenuItem>
-                    <Link href="/" passHref>
-                        <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
+                    <NavigationMenuLink asChild>
+                        <Link href="/" className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
                             Accueil
-                        </NavigationMenuLink>
-                    </Link>
+                        </Link>
+                    </NavigationMenuLink>
                 </NavigationMenuItem>
                 {navStructure.map((category) => (
                     <NavigationMenuItem key={category.title}>
