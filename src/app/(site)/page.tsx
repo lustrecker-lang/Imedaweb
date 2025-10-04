@@ -208,8 +208,7 @@ export default function Home() {
                     fill
                     className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                  <div className="relative flex h-full flex-col justify-end p-6">
+                  <div className="relative flex h-full flex-col justify-end p-6 bg-gradient-to-t from-black/60 via-black/0 to-transparent">
                     <h3 className="text-lg font-normal text-white font-headline">
                       {campus.name}
                     </h3>
