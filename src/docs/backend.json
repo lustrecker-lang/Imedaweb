@@ -307,7 +307,7 @@
           "params": [
             {
               "name": "pageId",
-              "description": "The unique identifier for the page (e.g., 'home')."
+              "description": "The unique identifier for the page (e.g., 'home', 'courses')."
             }
           ]
         }

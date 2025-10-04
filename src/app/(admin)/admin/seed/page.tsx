@@ -49,6 +49,17 @@ const pagesToSeed = [
                 content: "We are a team of passionate individuals dedicated to creating the best solutions for our customers."
             }
         ]
+    },
+    {
+        id: "courses",
+        title: "Courses Page",
+        sections: [
+            {
+                id: "hero",
+                title: "Catalogue des Formations",
+                content: "Explorez notre catalogue complet de formations conçues pour répondre à vos besoins de développement professionnel."
+            }
+        ]
     }
 ];
 

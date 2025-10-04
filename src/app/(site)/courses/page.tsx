@@ -4,8 +4,8 @@
 import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, where, orderBy, doc } from 'firebase/firestore';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
-
+import Image from 'next/image';
 
 // Interfaces
 interface Category {
@@ -37,6 +37,19 @@ interface Formation {
     format?: string;
 }
 
+interface Section {
+  id: string;
+  title: string;
+  content: string;
+  imageUrl?: string;
+}
+
+interface Page {
+  id: string;
+  title: string;
+  sections: Section[];
+}
+
 type SortKey = 'formationId' | 'name';
 type SortDirection = 'ascending' | 'descending';
 
@@ -50,6 +63,13 @@ export default function CoursesPage() {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedTheme, setSelectedTheme] = useState<string | null>(themeIdFromUrl);
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection }>({ key: 'formationId', direction: 'ascending' });
+
+    const pageRef = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return doc(firestore, 'pages', 'courses');
+    }, [firestore]);
+    
+    const { data: pageData, isLoading: isPageLoading } = useDoc<Page>(pageRef);
 
     // Queries
     const categoriesQuery = useMemoFirebase(() => {
@@ -71,6 +91,9 @@ export default function CoursesPage() {
     const { data: categories, isLoading: areCategoriesLoading } = useCollection<Category>(categoriesQuery);
     const { data: themes, isLoading: areThemesLoading } = useCollection<Theme>(themesQuery);
     const { data: formations, isLoading: areFormationsLoading } = useCollection<Omit<Formation, 'id'>>(formationsQuery);
+
+    const heroSection = pageData?.sections.find(s => s.id === 'hero');
+    const heroImageUrl = heroSection?.imageUrl;
 
     // Effect to sync URL themeId with state
     useEffect(() => {
@@ -148,7 +171,7 @@ export default function CoursesPage() {
     };
 
 
-    const isLoading = areCategoriesLoading || areThemesLoading || areFormationsLoading;
+    const isLoading = areCategoriesLoading || areThemesLoading || areFormationsLoading || isPageLoading;
 
     const filteredThemes = useMemo(() => {
         if (!themes || !selectedCategory) return themes || [];
@@ -177,47 +200,58 @@ export default function CoursesPage() {
 
     return (
         <div className="container mx-auto px-4 py-12 md:px-6">
-            <Card className="mb-8 shadow-none rounded-none border-x-0 md:min-h-[250px] flex flex-col justify-center text-center">
-                <CardHeader>
-                    <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
-                        Catalogue des Formations
-                    </h1>
-                    <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                        Explorez notre catalogue complet de formations conçues pour répondre à vos besoins de développement professionnel.
-                    </p>
-                </CardHeader>
-                <CardContent>
-                     <div className="mx-auto max-w-lg grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-sm font-medium text-muted-foreground mb-2 block text-left">Catégorie</label>
-                            <Select onValueChange={handleCategoryChange} value={selectedCategory || 'all'}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Filtrer par catégorie" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Toutes les catégories</SelectItem>
-                                    {categories?.map(category => (
-                                        <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+            <Card className="mb-8 rounded-none border-x-0 md:min-h-[250px] flex flex-col justify-center text-center relative overflow-hidden">
+                {heroImageUrl && (
+                  <Image
+                    src={heroImageUrl}
+                    alt={heroSection?.title || "Catalogue des Formations"}
+                    fill
+                    className="object-cover"
+                  />
+                )}
+                <div className="absolute inset-0 bg-black/50" />
+                <div className="relative z-10 p-6 text-white">
+                    <CardHeader>
+                        <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
+                            {isLoading ? <Skeleton className="h-10 w-3/4 mx-auto bg-gray-400/50" /> : heroSection?.title || "Catalogue des Formations"}
+                        </h1>
+                        <p className="mx-auto mt-4 max-w-2xl text-gray-200">
+                             {isLoading ? <Skeleton className="h-6 w-full max-w-lg mx-auto bg-gray-400/50" /> : heroSection?.content || "Explorez notre catalogue complet de formations..."}
+                        </p>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="mx-auto max-w-lg grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-sm font-medium text-gray-300 mb-2 block text-left">Catégorie</label>
+                                <Select onValueChange={handleCategoryChange} value={selectedCategory || 'all'}>
+                                    <SelectTrigger className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white">
+                                        <SelectValue placeholder="Filtrer par catégorie" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Toutes les catégories</SelectItem>
+                                        {categories?.map(category => (
+                                            <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-300 mb-2 block text-left">Thème</label>
+                                <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!themes || themes.length === 0}>
+                                    <SelectTrigger className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white">
+                                        <SelectValue placeholder="Filtrer par thème" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Tous les thèmes</SelectItem>
+                                        {filteredThemes.map(theme => (
+                                            <SelectItem key={theme.id} value={theme.id}>{theme.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div>
-                            <label className="text-sm font-medium text-muted-foreground mb-2 block text-left">Thème</label>
-                            <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!themes || themes.length === 0}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Filtrer par thème" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Tous les thèmes</SelectItem>
-                                    {filteredThemes.map(theme => (
-                                        <SelectItem key={theme.id} value={theme.id}>{theme.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                </CardContent>
+                    </CardContent>
+                </div>
             </Card>
 
             <main>

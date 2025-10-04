@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, query, orderBy } from 'firebase/firestore';
 
 import {
   Card,
@@ -41,7 +42,7 @@ export default function DashboardPage() {
 
   const pagesRef = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'pages');
+    return query(collection(firestore, 'pages'), orderBy('title', 'asc'));
   }, [firestore]);
 
   const { data: pages, isLoading: arePagesLoading } = useCollection<Page>(pagesRef);
