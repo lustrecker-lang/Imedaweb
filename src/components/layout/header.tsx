@@ -1,58 +1,61 @@
 "use client";
 
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { Menu, ChevronDown } from "lucide-react";
-import { useMemo, useState } from "react";
 import Image from "next/image";
+import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useFirestore, useDoc } from "@/firebase";
 import { doc } from 'firebase/firestore';
-import { Skeleton } from "@/components/ui/skeleton";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
 
 const navStructure = [
     {
         title: "À propos",
-        links: [
-            { href: "/about", label: "À propos de nous" },
-            { href: "#", label: "Carrières" },
-            { href: "#", label: "Présentation" },
-            { href: "#", label: "Références" },
-            { href: "#", label: "Notre approche" },
+        items: [
+            { href: "/about", title: "À propos de nous", description: "Découvrez notre histoire, notre mission et nos valeurs." },
+            { href: "#", title: "Carrières", description: "Rejoignez notre équipe et construisons l'avenir ensemble." },
+            { href: "#", title: "Présentation", description: "Une vue d'ensemble de nos activités et de notre impact." },
+            { href: "#", title: "Références", description: "Voyez comment nous avons aidé nos clients à réussir." },
+            { href: "#", title: "Notre approche", description: "Notre méthodologie unique pour des résultats exceptionnels." },
         ]
     },
     {
         title: "Formations",
-        links: [
-            { href: "#", label: "Catalogue 2025-26" },
-            { href: "#", label: "700+ Formations internationales" },
-            { href: "#", label: "Formations en ligne" },
+        items: [
+            { href: "#", title: "Catalogue 2025-26", description: "Explorez notre offre complète de formations." },
+            { href: "#", title: "700+ Formations internationales", description: "Des programmes de classe mondiale à portée de main." },
+            { href: "#", title: "Formations en ligne", description: "Apprenez à votre rythme, où que vous soyez." },
         ]
     },
     {
         title: "Campus",
-        links: [
-            { href: "#", label: "Dubaï" },
-            { href: "#", label: "Côte d’Azur" },
-            { href: "#", label: "Paris" },
+        items: [
+            { href: "#", title: "Dubaï", description: "Étudiez au carrefour de l'innovation et du commerce." },
+            { href: "#", title: "Côte d’Azur", description: "Un cadre idyllique pour l'apprentissage et la croissance." },
+            { href: "#", title: "Paris", description: "Plongez au cœur de la culture et de l'éducation européennes." },
         ]
     },
     {
         title: "Autre",
-        links: [
-            { href: "#", label: "Services" },
-            { href: "#", label: "Publications" },
-            { href: "#", label: "Partenariats d'entreprise" },
-            { href: "#", label: "Actualités et Mises à jour" },
+        items: [
+            { href: "#", title: "Services", description: "Des solutions sur mesure pour les entreprises." },
+            { href: "#", title: "Publications", description: "Nos dernières recherches, articles et livres blancs." },
+            { href: "#", title: "Partenariats d'entreprise", description: "Collaborez avec nous pour un succès mutuel." },
+            { href: "#", title: "Actualités et Mises à jour", description: "Restez informé des dernières nouvelles de notre institution." },
         ]
     }
 ];
@@ -61,6 +64,34 @@ interface CompanyProfile {
   name?: string;
   logoUrl?: string;
 }
+
+const ListItem = React.forwardRef<
+  React.ElementRef<typeof NavigationMenuLink>,
+  React.ComponentPropsWithoutRef<typeof NavigationMenuLink> & { description: string }
+>(({ className, title, description, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <Link
+          href={props.href || '#'}
+          ref={ref as any}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {description}
+          </p>
+        </Link>
+      </NavigationMenuLink>
+    </li>
+  );
+});
+ListItem.displayName = "ListItem";
+
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -92,30 +123,36 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2">
           <LogoComponent />
         </Link>
-        <nav className="hidden items-center gap-1 text-xs font-medium md:flex">
-          <Button variant="ghost" size="sm" asChild>
-              <Link href="/" className="text-foreground/70 transition-colors hover:text-foreground">
-                Accueil
-              </Link>
-          </Button>
-          {navStructure.map((category) => (
-            <DropdownMenu key={category.title}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1 text-foreground/70 transition-colors hover:text-foreground">
-                  {category.title}
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {category.links.map((link) => (
-                  <DropdownMenuItem key={link.label} asChild>
-                    <Link href={link.href}>{link.label}</Link>
-                  </DropdownMenuItem>
+        
+        <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList>
+                <NavigationMenuItem>
+                    <Link href="/" legacyBehavior passHref>
+                        <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
+                            Accueil
+                        </NavigationMenuLink>
+                    </Link>
+                </NavigationMenuItem>
+                {navStructure.map((category) => (
+                    <NavigationMenuItem key={category.title}>
+                        <NavigationMenuTrigger>{category.title}</NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                            {category.items.map((item) => (
+                                <ListItem
+                                    key={item.title}
+                                    href={item.href}
+                                    title={item.title}
+                                    description={item.description}
+                                />
+                            ))}
+                        </ul>
+                        </NavigationMenuContent>
+                    </NavigationMenuItem>
                 ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ))}
-        </nav>
+            </NavigationMenuList>
+        </NavigationMenu>
+
         <div className="flex items-center gap-2">
            <Button size="sm" asChild className="hidden md:inline-flex">
               <Link href="#">Contact Us</Link>
@@ -148,14 +185,14 @@ export function Header() {
                            </AccordionTrigger>
                            <AccordionContent className="pl-4">
                               <div className="flex flex-col gap-2 mt-2">
-                                {category.links.map((link) => (
+                                {category.items.map((link) => (
                                     <Link
-                                        key={link.label}
+                                        key={link.title}
                                         href={link.href}
                                         className="block py-1 text-foreground/70 transition-colors hover:text-foreground"
                                         onClick={() => setIsOpen(false)}
                                     >
-                                        {link.label}
+                                        {link.title}
                                     </Link>
                                 ))}
                               </div>
