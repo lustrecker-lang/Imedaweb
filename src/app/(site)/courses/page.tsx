@@ -71,11 +71,11 @@ export default function CoursesPage() {
             if (!selectedCategory) {
                 return formations;
             }
-            const themeIdsInCategory = filteredThemes.map(t => t.id);
+            const themeIdsInCategory = themes?.filter(t => t.categoryId === selectedCategory).map(t => t.id) || [];
             return formations.filter(f => themeIdsInCategory.includes(f.themeId));
         }
         return formations.filter(f => f.themeId === selectedTheme);
-    }, [formations, selectedCategory, selectedTheme, filteredThemes]);
+    }, [formations, selectedCategory, selectedTheme, themes]);
 
     const handleCategoryChange = (categoryId: string) => {
         setSelectedCategory(categoryId === 'all' ? null : categoryId);
@@ -99,13 +99,10 @@ export default function CoursesPage() {
                         Explorez notre catalogue complet de formations conçues pour répondre à vos besoins de développement professionnel.
                     </p>
                 </CardHeader>
-            </Card>
-
-             <Card className="mb-8">
-                <CardContent className="pt-6">
-                    <div className="grid sm:grid-cols-2 gap-4">
+                <CardContent>
+                     <div className="mx-auto max-w-lg grid sm:grid-cols-2 gap-4">
                         <div>
-                            <label className="text-sm font-medium text-muted-foreground mb-2 block">Catégorie</label>
+                            <label className="text-sm font-medium text-muted-foreground mb-2 block text-left">Catégorie</label>
                             <Select onValueChange={handleCategoryChange} value={selectedCategory || 'all'}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Filtrer par catégorie" />
@@ -119,8 +116,8 @@ export default function CoursesPage() {
                             </Select>
                         </div>
                         <div>
-                            <label className="text-sm font-medium text-muted-foreground mb-2 block">Thème</label>
-                            <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!selectedCategory && !filteredThemes.length}>
+                            <label className="text-sm font-medium text-muted-foreground mb-2 block text-left">Thème</label>
+                            <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!selectedCategory}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Filtrer par thème" />
                                 </SelectTrigger>
