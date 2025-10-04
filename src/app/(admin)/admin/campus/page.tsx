@@ -133,14 +133,6 @@ export default function CampusPage() {
     }
   }, [addCampusName, form]);
 
-  // Watch the name field in the "edit" form to auto-generate the slug
-  const editCampusName = editForm.watch('name');
-  useEffect(() => {
-    if (editCampusName && isEditDialogOpen) {
-      editForm.setValue('slug', generateSlug(editCampusName), { shouldValidate: true });
-    }
-  }, [editCampusName, editForm, isEditDialogOpen]);
-
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/login');
