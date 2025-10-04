@@ -4,6 +4,10 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
@@ -21,6 +25,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useFirestore, useDoc } from "@/firebase";
 import { doc } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 
 const navStructure = [
@@ -61,6 +69,99 @@ const navStructure = [
     }
 ];
 
+const contactFormSchema = z.object({
+  fullName: z.string().min(1, { message: "Le nom complet est requis." }),
+  email: z.string().email({ message: "Veuillez saisir une adresse e-mail valide." }),
+  phone: z.string().optional(),
+  message: z.string().min(1, { message: "Le message ne peut pas être vide." }),
+});
+
+function ContactForm({ onFormSubmit }: { onFormSubmit: () => void }) {
+  const { toast } = useToast();
+  const form = useForm<z.infer<typeof contactFormSchema>>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      message: "",
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof contactFormSchema>) {
+    // Here you would typically send the form data to a server or email service
+    console.log(values);
+    toast({
+      title: "Message envoyé!",
+      description: "Merci de nous avoir contactés. Nous vous répondrons bientôt.",
+    });
+    form.reset();
+    onFormSubmit();
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="fullName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom et prénom</FormLabel>
+              <FormControl>
+                <Input placeholder="Votre nom complet" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="votre.email@exemple.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Téléphone/WhatsApp</FormLabel>
+              <FormControl>
+                <Input placeholder="Votre numéro de téléphone (facultatif)" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="message"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Message</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Comment pouvons-nous vous aider?" className="min-h-[100px]" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? 'Envoi en cours...' : 'Envoyer'}
+        </Button>
+      </form>
+    </Form>
+  )
+}
+
 interface CompanyProfile {
   name?: string;
   logoUrl?: string;
@@ -96,6 +197,7 @@ ListItem.displayName = "ListItem";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
   const firestore = useFirestore();
 
   const companyProfileRef = useMemo(() => {
@@ -129,7 +231,7 @@ export function Header() {
             <NavigationMenuList>
                 <NavigationMenuItem>
                     <NavigationMenuLink asChild>
-                        <Link href="/" className={cn(navigationMenuTriggerStyle({variant: "ghost"}), "bg-transparent")}>
+                        <Link href="/" className={cn(navigationMenuTriggerStyle({variant: "ghost"}), "bg-transparent font-normal text-sm")}>
                             Accueil
                         </Link>
                     </NavigationMenuLink>
@@ -155,9 +257,24 @@ export function Header() {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
-           <Button size="sm" asChild className="hidden md:inline-flex">
-              <Link href="#">Contact Us</Link>
-            </Button>
+            <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+                <SheetTrigger asChild>
+                    <Button size="sm" className="hidden md:inline-flex">
+                        Contactez-nous
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="right">
+                    <SheetHeader>
+                        <SheetTitle>Contactez-nous</SheetTitle>
+                        <SheetDescription>
+                            Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais.
+                        </SheetDescription>
+                    </SheetHeader>
+                    <div className="py-6">
+                        <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} />
+                    </div>
+                </SheetContent>
+            </Sheet>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -167,8 +284,8 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-full max-w-sm">
               <SheetHeader className="sr-only">
-                  <SheetTitle>Menu</SheetTitle>
-                  <SheetDescription>Main navigation menu for the website.</SheetDescription>
+                  <SheetTitle className="sr-only">Menu</SheetTitle>
+                  <SheetDescription className="sr-only">Main navigation menu for the website.</SheetDescription>
               </SheetHeader>
               <div className="grid gap-4 p-6">
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
@@ -206,9 +323,11 @@ export function Header() {
                        ))}
                     </Accordion>
                 </nav>
-                 <Button asChild className="w-full">
-                    <Link href="#" onClick={() => setIsOpen(false)}>Contact Us</Link>
-                  </Button>
+                 <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+                    <SheetTrigger asChild>
+                        <Button className="w-full">Contactez-nous</Button>
+                    </SheetTrigger>
+                </Sheet>
               </div>
             </SheetContent>
           </Sheet>
