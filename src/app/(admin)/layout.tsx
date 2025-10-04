@@ -1,3 +1,4 @@
+
 'use client';
 import {
   SidebarProvider,
@@ -12,7 +13,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -86,6 +87,14 @@ export default function AdminLayout({
                 <SidebarMenuButton tooltip="Campus">
                   <School />
                   <span className="text-sm">Campus</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem asChild>
+              <Link href="/admin/services">
+                <SidebarMenuButton tooltip="Services">
+                  <Briefcase />
+                  <span className="text-sm">Services</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

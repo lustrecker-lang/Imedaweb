@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "CompanyProfile": {
@@ -206,6 +207,28 @@
         }
       },
       "required": ["name", "slug"]
+    },
+    "Service": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Service",
+      "type": "object",
+      "description": "Represents a service offered by the company.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the service."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the service."
+        },
+        "mediaUrl": {
+          "type": "string",
+          "description": "URL for an image or video representing the service.",
+          "format": "uri"
+        }
+      },
+      "required": ["name"]
     }
   },
   "auth": {
@@ -276,6 +299,22 @@
             {
               "name": "campusId",
               "description": "The unique identifier for the campus."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/services/{serviceId}",
+        "definition": {
+          "entityName": "Service",
+          "schema": {
+            "$ref": "#/backend/entities/Service"
+          },
+          "description": "Stores information about each service offered.",
+          "params": [
+            {
+              "name": "serviceId",
+              "description": "The unique identifier for the service."
             }
           ]
         }
