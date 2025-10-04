@@ -98,7 +98,7 @@ export default function Home() {
         fill
         className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
       />
-      <div className="relative flex h-full flex-col justify-end bg-gradient-to-t from-black/60 via-black/20 to-transparent p-6">
+      <div className="relative flex h-full flex-col justify-end p-6">
         <h3 className="text-lg font-normal text-white font-headline">
           {campus.name}
         </h3>
@@ -213,19 +213,14 @@ export default function Home() {
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
-            <div className="max-w-2xl">
+            <div className="max-w-[75%] md:max-w-2xl">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
                   Our Campuses
                 </h2>
                 <p className="mt-2 text-muted-foreground md:text-base/relaxed">
-                  Explore our world-class campuses located in global hubs of innovation.
+                  {isMobile ? "Explore our world-class campuses" : "Explore our world-class campuses located in global hubs of innovation."}
                 </p>
             </div>
-            {isMobile && (
-              <div className="flex gap-2">
-                {/* This is intentionally left blank, arrows are now inside carousel */}
-              </div>
-            )}
           </div>
 
           {isLoading ? (
@@ -246,8 +241,8 @@ export default function Home() {
                   ))}
                 </CarouselContent>
                 <div className="absolute top-[-3.5rem] right-0 flex gap-2">
-                  <CarouselPrevious className="relative -left-0 top-0 translate-y-0" />
-                  <CarouselNext className="relative -right-0 top-0 translate-y-0" />
+                  <CarouselPrevious className="relative -left-0 top-0 translate-y-0 rounded-none" />
+                  <CarouselNext className="relative -right-0 top-0 translate-y-0 rounded-none" />
                 </div>
             </Carousel>
           ) : (
