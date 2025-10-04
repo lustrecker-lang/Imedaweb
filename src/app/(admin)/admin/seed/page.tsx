@@ -77,6 +77,25 @@ const campusesToSeed = [
     },
 ];
 
+const servicesToSeed = [
+  { "name": "Hébergement", "description": "Des établissements soigneusement sélectionnés offrant tout le confort essentiel pour un séjour agréable." },
+  { "name": "Petits-déjeuners", "description": "Options de petit-déjeuner adaptées pour bien commencer la journée de formation." },
+  { "name": "Salle de Formation", "description": "Espaces dédiés, équipés pour offrir un cadre optimal à l’apprentissage et aux échanges." },
+  { "name": "Déjeuners", "description": "Un repas complet, savoureux et bien présenté, pour une pause agréable dans un cadre simple et chaleureux." },
+  { "name": "Ordinateur ou Tablet", "description": "Matériel informatique fourni pour faciliter l’accès aux ressources numériques et optimiser l’expérience d’apprentissage." },
+  { "name": "Chauffeur privé", "description": "Transport quotidien assuré par un chauffeur privé pour les trajets aller-retour entre l’hébergement et le lieu de formation." },
+  { "name": "Certificat IMEDA", "description": "Certificat personnalisé avec mention du programme suivi et des modules validés, accompagné d’un rapport d’évaluation." },
+  { "name": "Transfers privés aéroport", "description": "Accueil et transport privé depuis l’aéroport, assuré par un chauffeur professionnel dans un véhicule confortable." },
+  { "name": "Sortie Touristique", "description": "Une visite guidée des lieux emblématiques, pour découvrir l’essentiel de la ville en toute simplicité et convivialité." },
+  { "name": "Dîner et Soirée de Clôture", "description": "Une soirée conviviale pour célébrer la fin du programme et partager un moment chaleureux entre participants." },
+  { "name": "Carte Transport Publique", "description": "Accès illimité aux transports en commun dans toutes les zones urbaines pendant le séjour complet." },
+  { "name": "Petite restauration Formation", "description": "Offres de restauration légère conçues pour accompagner les pauses durant la formation." },
+  { "name": "Matériel pédagogique", "description": "Ensemble d’articles fournis pour accompagner les participants tout au long de la formation." },
+  { "name": "Accès aux réseau professionnel", "description": "Inscription au répertoire des anciens participants et accès à la newsletter institutionnelle." },
+  { "name": "Concierge 24/7", "description": "Un service d’assistance disponible à tout moment pour répondre aux besoins logistiques, pratiques ou personnels." },
+  { "name": "Kit de bienvenue", "description": "Ensemble d’articles sélectionnés pour accueillir les participants et faciliter l’intégration au programme." }
+];
+
 export default function SeedPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -96,9 +115,23 @@ export default function SeedPage() {
 
     toast({
         title: "Seeding Initiated",
-        description: "Your database is being populated with initial content.",
+        description: "Your database is being populated with initial content for pages and campuses.",
     });
   };
+
+  const handleSeedServices = () => {
+    if (!firestore) return;
+    
+    const servicesCollection = collection(firestore, 'services');
+    servicesToSeed.forEach(service => {
+        addDocumentNonBlocking(servicesCollection, service);
+    });
+    
+    toast({
+        title: "Service Seeding Initiated",
+        description: "Your 'services' collection is being populated.",
+    });
+  }
 
   return (
     <div className="container mx-auto px-4 py-12 md:px-6">
@@ -106,12 +139,13 @@ export default function SeedPage() {
         <CardHeader>
           <CardTitle>Database Seeding</CardTitle>
           <CardDescription>
-            Click the button below to populate your Firestore database with the initial content for your website pages and campuses. 
-            This is a one-time action.
+            Click the buttons below to populate your Firestore database with initial content.
+            This is a one-time action for each data type.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button onClick={handleSeed}>Seed Database</Button>
+        <CardContent className="flex gap-4">
+          <Button onClick={handleSeed}>Seed Pages & Campuses</Button>
+          <Button onClick={handleSeedServices} variant="secondary">Seed Services</Button>
         </CardContent>
       </Card>
     </div>
