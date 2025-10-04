@@ -138,7 +138,7 @@ export default function CampusPage() {
                 {campus.campusDescription && (campus.campusDescription.headline || campus.campusDescription.body) && (
                     <section id="description">
                         <div className="max-w-2xl">
-                             <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline">{campus.campusDescription.headline || `About ${campus.name}`}</h2>
+                             <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusDescription.headline || `About ${campus.name}`}</h2>
                              <p className="mt-2 text-muted-foreground md:text-base/relaxed whitespace-pre-wrap">{campus.campusDescription.body}</p>
                         </div>
                     </section>
@@ -147,7 +147,7 @@ export default function CampusPage() {
                 {/* Academic Offering */}
                 <section id="academics">
                      <div className="max-w-2xl">
-                        <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline">{campus.academicOffering?.headline || "Academic Offering"}</h2>
+                        <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.academicOffering?.headline || "Academic Offering"}</h2>
                         {campus.academicOffering?.subtitle && <p className="mt-2 text-muted-foreground md:text-base/relaxed">{campus.academicOffering.subtitle}</p>}
                         <p className="mt-4 text-sm text-muted-foreground">Course list will be displayed here soon.</p>
                     </div>
@@ -157,7 +157,7 @@ export default function CampusPage() {
                 {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
                     <section id="experience">
                         <div className="max-w-2xl">
-                            <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline">{campus.campusExperience.headline || "Campus Experience"}</h2>
+                            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusExperience.headline || "Campus Experience"}</h2>
                         </div>
                         <div className="grid gap-8 mt-8">
                             {campus.campusExperience.features.map(feature => (
