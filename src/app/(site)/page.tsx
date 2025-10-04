@@ -17,7 +17,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const features = [
+const featuresPlaceholders = [
   {
     icon: <CheckCircle className="h-8 w-8 text-primary" />,
     title: "Streamlined Workflow",
@@ -42,6 +42,7 @@ interface Section {
   id: string;
   title: string;
   content: string;
+  imageUrl?: string;
 }
 
 interface Page {
@@ -51,7 +52,7 @@ interface Page {
 }
 
 export default function Home() {
-  const heroImage = PlaceHolderImages.find(
+  const fallbackHeroImage = PlaceHolderImages.find(
     (img) => img.id === "hero-background"
   );
 
@@ -66,17 +67,19 @@ export default function Home() {
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
 
+  const heroImageUrl = heroSection?.imageUrl || fallbackHeroImage?.imageUrl;
+
   return (
     <div className="flex flex-col">
       <section className="container py-8">
         <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
-            {heroImage && (
+            {heroImageUrl && (
             <Image
-                src={heroImage.imageUrl}
-                alt={heroImage.description}
+                src={heroImageUrl}
+                alt={heroSection?.title || "Hero background"}
                 fill
                 className="object-cover"
-                data-ai-hint={heroImage.imageHint}
+                data-ai-hint={fallbackHeroImage?.imageHint}
                 priority
             />
             )}
@@ -128,19 +131,21 @@ export default function Home() {
             )}
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature, index) => {
+            {featuresPlaceholders.map((feature, index) => {
               const featureSection = homePage?.sections.find(s => s.id === `feature-${index + 1}`);
+              const featureImageUrl = featureSection?.imageUrl || feature.image?.imageUrl;
+
               return (
                 <Card key={feature.title} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2">
-                  {feature.image && (
+                  {featureImageUrl && (
                       <div className="aspect-video overflow-hidden">
                           <Image
-                              src={feature.image.imageUrl}
-                              alt={feature.image.description}
+                              src={featureImageUrl}
+                              alt={featureSection?.title || feature.image?.description || ""}
                               width={600}
                               height={400}
                               className="object-cover w-full h-full"
-                              data-ai-hint={feature.image.imageHint}
+                              data-ai-hint={feature.image?.imageHint}
                           />
                       </div>
                   )}

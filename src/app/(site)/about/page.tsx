@@ -11,6 +11,7 @@ interface Section {
   id: string;
   title: string;
   content: string;
+  imageUrl?: string;
 }
 
 interface Page {
@@ -20,10 +21,6 @@ interface Page {
 }
 
 export default function AboutPage() {
-  const heroImage = PlaceHolderImages.find(
-    (img) => img.id === "hero-background"
-  );
-
   const firestore = useFirestore();
   const pageRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -34,17 +31,23 @@ export default function AboutPage() {
 
   const heroSection = aboutPage?.sections.find(s => s.id === 'hero');
 
+  const fallbackHeroImage = PlaceHolderImages.find(
+    (img) => img.id === "hero-background"
+  );
+  
+  const heroImageUrl = heroSection?.imageUrl || fallbackHeroImage?.imageUrl;
+
   return (
     <div className="flex flex-col">
       <section className="container py-8">
         <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-            {heroImage && (
+            {heroImageUrl && (
             <Image
-                src={heroImage.imageUrl}
-                alt={heroImage.description}
+                src={heroImageUrl}
+                alt={heroSection?.title || "About us background"}
                 fill
                 className="object-cover"
-                data-ai-hint={heroImage.imageHint}
+                data-ai-hint={fallbackHeroImage?.imageHint}
                 priority
             />
             )}

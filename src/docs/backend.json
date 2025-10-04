@@ -1,0 +1,116 @@
+{
+  "entities": {
+    "CompanyProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CompanyProfile",
+      "type": "object",
+      "description": "Stores company branding information like name and logos.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the company."
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "URL of the uploaded company logo.",
+          "format": "uri"
+        },
+        "iconUrl": {
+          "type": "string",
+          "description": "URL of the uploaded company icon (e.g., for favicons).",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "PageContent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PageContent",
+      "type": "object",
+      "description": "Stores the content for a specific page, broken down into sections.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the page (e.g., 'home', 'about')."
+        },
+        "title": {
+          "type": "string",
+          "description": "The user-friendly title of the page (e.g., 'Home Page')."
+        },
+        "sections": {
+          "type": "array",
+          "description": "An array of content sections for this page.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the section within the page (e.g., 'hero', 'features')."
+              },
+              "title": {
+                "type": "string",
+                "description": "The title of the section."
+              },
+              "content": {
+                "type": "string",
+                "description": "The main text content for the section."
+              },
+              "imageUrl": {
+                "type": "string",
+                "description": "URL for an optional background or feature image.",
+                "format": "uri"
+              }
+            },
+            "required": ["id", "title", "content"]
+          }
+        }
+      },
+      "required": ["id", "title", "sections"]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/pages/{pageId}",
+        "definition": {
+          "entityName": "PageContent",
+          "schema": {
+            "$ref": "#/backend/entities/PageContent"
+          },
+          "description": "Stores all content for a specific page, editable by authenticated users.",
+          "params": [
+            {
+              "name": "pageId",
+              "description": "The unique identifier for the page (e.g., 'home')."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/companyProfile/{profileId}",
+        "definition": {
+          "entityName": "CompanyProfile",
+          "schema": {
+            "$ref": "#/backend/entities/CompanyProfile"
+          },
+          "description": "Stores company branding information.",
+          "params": [
+            {
+              "name": "profileId",
+              "description": "The unique identifier for the company profile."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore data structure allows for modular content management. Each page's content is stored in a separate document within the 'pages' collection. This makes it easy to add new pages and edit their content by section."
+  }
+}
