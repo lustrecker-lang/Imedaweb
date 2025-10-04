@@ -138,7 +138,7 @@ export default function CampusPage() {
                 {campus.campusDescription && (campus.campusDescription.headline || campus.campusDescription.body) && (
                     <section id="description">
                         <div className="max-w-2xl">
-                             <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusDescription.headline || `About ${campus.name}`}</h2>
+                            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusDescription.headline || `About ${campus.name}`}</h2>
                              <p className="mt-2 text-muted-foreground md:text-base/relaxed whitespace-pre-wrap">{campus.campusDescription.body}</p>
                         </div>
                     </section>
@@ -226,3 +226,4 @@ export default function CampusPage() {
     </div>
   );
 }
+
