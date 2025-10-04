@@ -1,64 +1,79 @@
 /**
  * @file Firestore Security Rules
- * @description This ruleset allows public read access to all data while restricting write access to authenticated users only.
- *
- * Core Philosophy:
- * This ruleset adopts a public-read, authenticated-write model. All data is freely readable, but any modification requires a valid user authentication.
- *
- * Data Structure:
- * - /pages/{pageId}: Stores content for individual pages.
- * - /companyProfile/{profileId}: Stores company branding information.
- *
- * Key Security Decisions:
- * - Public Read Access: All `get` and `list` operations are allowed for all users.
- * - Authenticated Writes: `create`, `update`, and `delete` operations are restricted to authenticated users.
- * - No Data Validation: In this prototyping phase, data validation is minimal, focusing only on authentication.
+ * @core_philosophy This ruleset implements a flexible content management system with authenticated user access.
+ *   It provides read and write access to authenticated users. Data shapes are not strictly enforced to allow for rapid prototyping.
+ * @data_structure
+ *   - /pages/{pageId}: Stores content for specific pages. Accessible to authenticated users.
+ *   - /companyProfile/{profileId}: Stores company branding information. Accessible to authenticated users.
+ * @key_security_decisions
+ *   - Authenticated users can read and write page content.
+ *   - Authenticated users can read and write company profile data.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Allows public read access to page content, but restricts writes to authenticated users.
+     * @description Controls read and write access to page content.
      * @path /pages/{pageId}
-     * @allow (get, list)
-     * @allow (create) - User with valid authentication creates a new page.
-     * @allow (update) - User with valid authentication updates an existing page.
-     * @allow (delete) - User with valid authentication deletes a page.
-     * @deny (create) - Unauthenticated user attempts to create a page.
-     * @deny (update) - Unauthenticated user attempts to update a page.
-     * @deny (delete) - Unauthenticated user attempts to delete a page.
-     * @principle Public read, authenticated write.
+     * @allow (get) Authenticated user can read a page: auth != null
+     * @allow (list) Authenticated user can list pages: auth != null
+     * @allow (create) Authenticated user can create a page: auth != null
+     * @allow (update) Authenticated user can update a page: auth != null
+     * @allow (delete) Authenticated user can delete a page: auth != null
+     * @deny (get) Unauthenticated user cannot read a page: auth == null
+     * @deny (list) Unauthenticated user cannot list pages: auth == null
+     * @deny (create) Unauthenticated user cannot create a page: auth == null
+     * @deny (update) Unauthenticated user cannot update a page: auth == null
+     * @deny (delete) Unauthenticated user cannot delete a page: auth == null
+     * @principle Allows authenticated users full access to page content, prototyping mode allows flexible data shapes.
      */
     match /pages/{pageId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
     }
 
     /**
-     * @description Allows public read access to company profile information, but restricts writes to authenticated users.
+     * @description Controls read and write access to company profile information.
      * @path /companyProfile/{profileId}
-     * @allow (get, list)
-     * @allow (create) - User with valid authentication creates a company profile.
-     * @allow (update) - User with valid authentication updates an existing company profile.
-     * @allow (delete) - User with valid authentication deletes a company profile.
-     * @deny (create) - Unauthenticated user attempts to create a company profile.
-     * @deny (update) - Unauthenticated user attempts to update a company profile.
-     * @deny (delete) - Unauthenticated user attempts to delete a company profile.
-     * @principle Public read, authenticated write.
+     * @allow (get) Authenticated user can read a profile: auth != null
+     * @allow (list) Authenticated user can list profiles: auth != null
+     * @allow (create) Authenticated user can create a profile: auth != null
+     * @allow (update) Authenticated user can update a profile: auth != null
+     * @allow (delete) Authenticated user can delete a profile: auth != null
+     * @deny (get) Unauthenticated user cannot read a profile: auth == null
+     * @deny (list) Unauthenticated user cannot list profiles: auth == null
+     * @deny (create) Unauthenticated user cannot create a profile: auth == null
+     * @deny (update) Unauthenticated user cannot update a profile: auth == null
+     * @deny (delete) Unauthenticated user cannot delete a profile: auth == null
+     * @principle Allows authenticated users full access to company profile, prototyping mode allows flexible data shapes.
      */
     match /companyProfile/{profileId} {
-      allow get, list: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
     }
 
-    // Helper function to check if the user is signed in.
-    function isSignedIn() {
-      return request.auth != null;
-    }
+      /**
+       * @description Leads are currently not accessible to anyone. Access will be configured later.
+       * @path /leads
+       * @allow (get) no one can get leads: if false;
+       * @allow (list) no one can list leads: if false;
+       * @allow (create) no one can create leads: if false;
+       * @allow (update) no one can update leads: if false;
+       * @allow (delete) no one can delete leads: if false;
+       * @principle Denies all access to leads until specific access rules are implemented.
+       */
+      match /leads/{leadId} {
+        allow get: if false;
+        allow list: if false;
+        allow create: if false;
+        allow update: if false;
+        allow delete: if false;
+      }
+
+  }
+
+  function isSignedIn() {
+    return request.auth != null;
   }
 }
