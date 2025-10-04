@@ -1,12 +1,28 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, where, orderBy } from 'firebase/firestore';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from '@/components/ui/badge';
+import { ArrowRight } from 'lucide-react';
+
+// Interfaces
+interface Category {
+    id: string;
+    name: string;
+}
+
+interface Theme {
+    id: string;
+    name: string;
+    categoryId: string;
+}
 
 interface Formation {
     id: string;
@@ -19,62 +35,151 @@ interface Formation {
 
 export default function CoursesPage() {
     const firestore = useFirestore();
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
 
+    // Queries
+    const categoriesQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'course_categories'), orderBy('name', 'asc'));
+    }, [firestore]);
+
+    const themesQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'course_themes'), orderBy('name', 'asc'));
+    }, [firestore]);
+    
     const formationsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         return query(collection(firestore, 'course_formations'), orderBy('name', 'asc'));
     }, [firestore]);
 
-    const { data: formations, isLoading } = useCollection<Omit<Formation, 'id'>>(formationsQuery);
+    // Data fetching
+    const { data: categories, isLoading: areCategoriesLoading } = useCollection<Category>(categoriesQuery);
+    const { data: themes, isLoading: areThemesLoading } = useCollection<Theme>(themesQuery);
+    const { data: formations, isLoading: areFormationsLoading } = useCollection<Omit<Formation, 'id'>>(formationsQuery);
+
+    // Memoized filtering
+    const filteredThemes = useMemo(() => {
+        if (!themes || !selectedCategory) return [];
+        return themes.filter(theme => theme.categoryId === selectedCategory);
+    }, [themes, selectedCategory]);
+
+    const filteredFormations = useMemo(() => {
+        if (!formations) return [];
+        if (!selectedTheme) {
+            if (!selectedCategory) {
+                return formations;
+            }
+            const themeIdsInCategory = filteredThemes.map(t => t.id);
+            return formations.filter(f => themeIdsInCategory.includes(f.themeId));
+        }
+        return formations.filter(f => f.themeId === selectedTheme);
+    }, [formations, selectedCategory, selectedTheme, filteredThemes]);
+
+    const handleCategoryChange = (categoryId: string) => {
+        setSelectedCategory(categoryId === 'all' ? null : categoryId);
+        setSelectedTheme(null); // Reset theme when category changes
+    };
+
+    const handleThemeChange = (themeId: string) => {
+        setSelectedTheme(themeId === 'all' ? null : themeId);
+    };
+
+    const isLoading = areCategoriesLoading || areThemesLoading || areFormationsLoading;
 
     return (
         <div className="container mx-auto px-4 py-12 md:px-6">
-            <header className="mb-12 text-center">
-                <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
-                    Catalogue des Formations
-                </h1>
-                <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                    Explorez notre catalogue complet de formations conçues pour répondre à vos besoins de développement professionnel.
-                </p>
-            </header>
+            <Card className="mb-12 text-center shadow-sm">
+                <CardHeader>
+                    <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
+                        Catalogue des Formations
+                    </h1>
+                    <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                        Explorez notre catalogue complet de formations conçues pour répondre à vos besoins de développement professionnel.
+                    </p>
+                </CardHeader>
+            </Card>
+
+             <Card className="mb-8">
+                <CardContent className="pt-6">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm font-medium text-muted-foreground mb-2 block">Catégorie</label>
+                            <Select onValueChange={handleCategoryChange} value={selectedCategory || 'all'}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Filtrer par catégorie" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Toutes les catégories</SelectItem>
+                                    {categories?.map(category => (
+                                        <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium text-muted-foreground mb-2 block">Thème</label>
+                            <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!selectedCategory && !filteredThemes.length}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Filtrer par thème" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tous les thèmes</SelectItem>
+                                    {filteredThemes.map(theme => (
+                                        <SelectItem key={theme.id} value={theme.id}>{theme.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             <main>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {isLoading ? (
-                        Array.from({ length: 8 }).map((_, i) => (
-                            <Card key={i} className="flex flex-col">
-                                <CardHeader>
-                                    <Skeleton className="h-6 w-3/4 mb-2" />
-                                    <Skeleton className="h-4 w-1/2" />
-                                </CardHeader>
-                                <CardContent className="flex-grow">
-                                    <Skeleton className="h-10 w-full" />
-                                </CardContent>
-                            </Card>
-                        ))
-                    ) : formations && formations.length > 0 ? (
-                        formations.map(formation => (
-                            <Link key={formation.id} href={`/courses/${formation.id}`} className="block">
-                                <Card className="h-full flex flex-col transition-shadow hover:shadow-lg">
-                                    <CardHeader>
-                                        <CardTitle className="text-base font-medium">{formation.name}</CardTitle>
-                                        <CardDescription className="text-xs">{formation.formationId}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="flex-grow">
-                                        <p className="text-xs text-muted-foreground line-clamp-3">
-                                            {formation.publicConcerne || 'Public varié'}
-                                        </p>
-                                    </CardContent>
-                                    <div className="p-6 pt-0 text-xs font-semibold text-primary">{formation.format || 'Format flexible'}</div>
-                                </Card>
-                            </Link>
-                        ))
-                    ) : (
-                        <p className="col-span-full text-center text-muted-foreground">Aucune formation disponible pour le moment.</p>
-                    )}
-                </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Formation</TableHead>
+                                    <TableHead>ID</TableHead>
+                                    <TableHead className="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                    Array.from({ length: 10 }).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell><Skeleton className="h-5 w-3/4" /></TableCell>
+                                            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                                            <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : filteredFormations && filteredFormations.length > 0 ? (
+                                    filteredFormations.map(formation => (
+                                        <TableRow key={formation.id}>
+                                            <TableCell className="font-medium">{formation.name}</TableCell>
+                                            <TableCell className="font-mono text-xs">{formation.formationId}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Link href={`/courses/${formation.id}`} className="text-sm text-primary hover:underline">
+                                                    Voir les détails
+                                                </Link>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
+                                            Aucune formation ne correspond à votre sélection.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
             </main>
         </div>
     );
 }
-
