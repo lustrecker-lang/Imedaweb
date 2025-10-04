@@ -4,10 +4,11 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
-import { collection, doc, query, orderBy } from 'firebase/firestore';
+import { collection, doc, query, where, orderBy } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { cn } from '@/lib/utils';
 
 import {
   Card,
@@ -65,8 +66,18 @@ const categorySchema = z.object({
   description: z.string().optional(),
 });
 
+const themeSchema = z.object({
+  name: z.string().min(1, "Theme name is required."),
+  description: z.string().optional(),
+  categoryId: z.string(),
+});
+
 // Interfaces
 interface Category extends z.infer<typeof categorySchema> {
+  id: string;
+}
+
+interface Theme extends z.infer<typeof themeSchema> {
   id: string;
 }
 
@@ -77,11 +88,19 @@ export default function CoursesPage() {
   const { toast } = useToast();
 
   // State Management
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
   const [isCategoryAddDialogOpen, setIsCategoryAddDialogOpen] = useState(false);
   const [isCategoryEditDialogOpen, setIsCategoryEditDialogOpen] = useState(false);
   const [isCategoryDeleteDialogOpen, setIsCategoryDeleteDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+
+  const [isThemeAddDialogOpen, setIsThemeAddDialogOpen] = useState(false);
+  const [isThemeEditDialogOpen, setIsThemeEditDialogOpen] = useState(false);
+  const [isThemeDeleteDialogOpen, setIsThemeDeleteDialogOpen] = useState(false);
+  const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
+  const [themeToDelete, setThemeToDelete] = useState<Theme | null>(null);
 
   // Firestore Queries
   const categoriesQuery = useMemoFirebase(() => {
@@ -89,7 +108,13 @@ export default function CoursesPage() {
     return query(collection(firestore, 'course_categories'), orderBy('name', 'asc'));
   }, [firestore]);
 
+  const themesQuery = useMemoFirebase(() => {
+    if (!firestore || !selectedCategory) return null;
+    return query(collection(firestore, 'course_themes'), where('categoryId', '==', selectedCategory.id), orderBy('name', 'asc'));
+  }, [firestore, selectedCategory]);
+
   const { data: categories, isLoading: areCategoriesLoading } = useCollection<Omit<Category, 'id'>>(categoriesQuery);
+  const { data: themes, isLoading: areThemesLoading } = useCollection<Omit<Theme, 'id'>>(themesQuery);
 
   // Forms
   const addCategoryForm = useForm<z.infer<typeof categorySchema>>({
@@ -99,6 +124,16 @@ export default function CoursesPage() {
 
   const editCategoryForm = useForm<z.infer<typeof categorySchema>>({
     resolver: zodResolver(categorySchema),
+    defaultValues: {},
+  });
+
+  const addThemeForm = useForm<z.infer<Omit<typeof themeSchema, 'categoryId'>>>({
+    resolver: zodResolver(themeSchema.omit({ categoryId: true })),
+    defaultValues: { name: '', description: '' },
+  });
+
+  const editThemeForm = useForm<z.infer<Omit<typeof themeSchema, 'categoryId'>>>({
+    resolver: zodResolver(themeSchema.omit({ categoryId: true })),
     defaultValues: {},
   });
 
@@ -114,6 +149,12 @@ export default function CoursesPage() {
       editCategoryForm.reset(editingCategory);
     }
   }, [editingCategory, editCategoryForm]);
+
+  useEffect(() => {
+    if (editingTheme) {
+      editThemeForm.reset(editingTheme);
+    }
+  }, [editingTheme, editThemeForm]);
 
   if (isUserLoading || !user) {
     return (
@@ -153,12 +194,55 @@ export default function CoursesPage() {
 
   const handleDeleteCategory = () => {
     if (!firestore || !categoryToDelete) return;
+    // TODO: Add logic to delete sub-collections (themes, etc.) if required
     const docRef = doc(firestore, 'course_categories', categoryToDelete.id);
     deleteDocumentNonBlocking(docRef);
     toast({ title: "Category Deleted", description: "The category has been permanently deleted." });
     setIsCategoryDeleteDialogOpen(false);
+    if(selectedCategory?.id === categoryToDelete.id) {
+        setSelectedCategory(null);
+    }
     setCategoryToDelete(null);
   };
+
+  // Handlers for Theme
+  const onAddThemeSubmit = async (values: z.infer<Omit<typeof themeSchema, 'categoryId'>>) => {
+    if (!firestore || !selectedCategory) return;
+    const dataToSave = { ...values, categoryId: selectedCategory.id };
+    addDocumentNonBlocking(collection(firestore, 'course_themes'), dataToSave);
+    toast({ title: 'Success!', description: 'New theme has been added.' });
+    addThemeForm.reset();
+    setIsThemeAddDialogOpen(false);
+  };
+
+  const onEditThemeSubmit = async (values: z.infer<Omit<typeof themeSchema, 'categoryId'>>) => {
+    if (!firestore || !editingTheme) return;
+    const docRef = doc(firestore, 'course_themes', editingTheme.id);
+    setDocumentNonBlocking(docRef, values, { merge: true });
+    toast({ title: 'Success!', description: 'Theme has been updated.' });
+    setIsThemeEditDialogOpen(false);
+    setEditingTheme(null);
+  };
+  
+  const openEditThemeDialog = (theme: Theme) => {
+    setEditingTheme(theme);
+    setIsThemeEditDialogOpen(true);
+  };
+
+  const openDeleteThemeDialog = (theme: Theme) => {
+    setThemeToDelete(theme);
+    setIsThemeDeleteDialogOpen(true);
+  };
+
+  const handleDeleteTheme = () => {
+    if (!firestore || !themeToDelete) return;
+    const docRef = doc(firestore, 'course_themes', themeToDelete.id);
+    deleteDocumentNonBlocking(docRef);
+    toast({ title: "Theme Deleted", description: "The theme has been permanently deleted." });
+    setIsThemeDeleteDialogOpen(false);
+    setThemeToDelete(null);
+  };
+
 
   return (
     <>
@@ -168,7 +252,7 @@ export default function CoursesPage() {
           <p className="text-sm text-muted-foreground">Manage your academic content hierarchy: Catégories, Thèmes, Formations, and Modules.</p>
         </header>
 
-        <div className="grid gap-8 lg:grid-cols-1">
+        <div className="grid gap-8 lg:grid-cols-2">
           {/* Categories Card */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -214,29 +298,33 @@ export default function CoursesPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Description</TableHead>
+                    <TableHead className="hidden sm:table-cell">Description</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {areCategoriesLoading ? (
-                    Array.from({ length: 2 }).map((_, i) => (
+                    Array.from({ length: 3 }).map((_, i) => (
                       <TableRow key={i}>
-                        <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                        <TableCell><Skeleton className="h-5 w-64" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                        <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-48" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                       </TableRow>
                     ))
                   ) : categories && categories.length > 0 ? (
                     categories.map((category) => (
-                      <TableRow key={category.id}>
+                      <TableRow 
+                        key={category.id} 
+                        onClick={() => setSelectedCategory(category as Category)}
+                        className={cn("cursor-pointer", selectedCategory?.id === category.id && "bg-muted/50")}
+                      >
                         <TableCell className="font-medium">{category.name}</TableCell>
-                        <TableCell className="text-muted-foreground">{category.description}</TableCell>
+                        <TableCell className="text-muted-foreground hidden sm:table-cell">{category.description}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => openEditCategoryDialog(category as Category)}>
+                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditCategoryDialog(category as Category); }}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => openDeleteCategoryDialog(category as Category)}>
+                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openDeleteCategoryDialog(category as Category); }}>
                             <Trash2 className="h-4 w-4 text-red-600" />
                           </Button>
                         </TableCell>
@@ -257,42 +345,118 @@ export default function CoursesPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Thèmes</CardTitle>
-                <CardDescription>Manage topics within categories. A theme can have multiple formations.</CardDescription>
+                <CardDescription>Manage topics for {selectedCategory ? `"${selectedCategory.name}"` : 'a selected category'}.</CardDescription>
               </div>
-              <Button size="sm" disabled><Plus className="mr-2 h-4 w-4" /> Add Theme</Button>
+              <Dialog open={isThemeAddDialogOpen} onOpenChange={setIsThemeAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" disabled={!selectedCategory}><Plus className="mr-2 h-4 w-4" /> Add Theme</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Add New Theme</DialogTitle>
+                    <DialogDescription>For category: {selectedCategory?.name}</DialogDescription>
+                  </DialogHeader>
+                  <Form {...addThemeForm}>
+                    <form onSubmit={addThemeForm.handleSubmit(onAddThemeSubmit)} className="space-y-4 py-4">
+                      <FormField control={addThemeForm.control} name="name" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Theme Name</FormLabel>
+                          <FormControl><Input placeholder="e.g., Digital Marketing" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={addThemeForm.control} name="description" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl><Textarea placeholder="A short description of the theme." {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <DialogFooter>
+                        <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                        <Button type="submit" disabled={addThemeForm.formState.isSubmitting}>Save</Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Select a category to manage its themes.</p>
+             {!selectedCategory ? (
+                <p className="text-sm text-muted-foreground h-24 flex items-center justify-center">Select a category to manage its themes.</p>
+             ) : (
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="hidden sm:table-cell">Description</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {areThemesLoading ? (
+                        Array.from({ length: 2 }).map((_, i) => (
+                        <TableRow key={i}>
+                            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                            <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-48" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                        </TableRow>
+                        ))
+                    ) : themes && themes.length > 0 ? (
+                        themes.map((theme) => (
+                        <TableRow key={theme.id}>
+                            <TableCell className="font-medium">{theme.name}</TableCell>
+                            <TableCell className="text-muted-foreground hidden sm:table-cell">{theme.description}</TableCell>
+                            <TableCell className="text-right">
+                            <Button variant="ghost" size="icon" onClick={() => openEditThemeDialog(theme as Theme)}>
+                                <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => openDeleteThemeDialog(theme as Theme)}>
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                            </TableCell>
+                        </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                        <TableCell colSpan={3} className="h-24 text-center">No themes found for this category.</TableCell>
+                        </TableRow>
+                    )}
+                    </TableBody>
+                </Table>
+             )}
             </CardContent>
           </Card>
+        </div>
 
-          {/* Formations Card */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Formations</CardTitle>
-                <CardDescription>Manage specific courses. A formation can have multiple modules.</CardDescription>
-              </div>
-              <Button size="sm" disabled><Plus className="mr-2 h-4 w-4" /> Add Formation</Button>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Select a theme to manage its formations.</p>
-            </CardContent>
-          </Card>
+        <div className="grid gap-8 lg:grid-cols-2">
+            {/* Formations Card */}
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Formations</CardTitle>
+                    <CardDescription>Manage specific courses. A formation can have multiple modules.</CardDescription>
+                </div>
+                <Button size="sm" disabled><Plus className="mr-2 h-4 w-4" /> Add Formation</Button>
+                </CardHeader>
+                <CardContent>
+                <p className="text-sm text-muted-foreground h-24 flex items-center justify-center">Select a theme to manage its formations.</p>
+                </CardContent>
+            </Card>
 
-          {/* Modules Card */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Modules</CardTitle>
-                <CardDescription>Manage learning modules.</CardDescription>
-              </div>
-              <Button size="sm" disabled><Plus className="mr-2 h-4 w-4" /> Add Module</Button>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Select a formation to manage its modules.</p>
-            </CardContent>
-          </Card>
+            {/* Modules Card */}
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Modules</CardTitle>
+                    <CardDescription>Manage learning modules.</CardDescription>
+                </div>
+                <Button size="sm" disabled><Plus className="mr-2 h-4 w-4" /> Add Module</Button>
+                </CardHeader>
+                <CardContent>
+                <p className="text-sm text-muted-foreground h-24 flex items-center justify-center">Select a formation to manage its modules.</p>
+                </CardContent>
+            </Card>
         </div>
       </div>
 
@@ -333,12 +497,61 @@ export default function CoursesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the category <span className="font-semibold">{categoryToDelete?.name}</span>. This action cannot be undone.
+              This will permanently delete the category <span className="font-semibold">{categoryToDelete?.name}</span> and all its themes. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteCategory} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+       {/* Edit Theme Dialog */}
+      <Dialog open={isThemeEditDialogOpen} onOpenChange={setIsThemeEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Theme: {editingTheme?.name}</DialogTitle>
+          </DialogHeader>
+          <Form {...editThemeForm}>
+            <form onSubmit={editThemeForm.handleSubmit(onEditThemeSubmit)} className="space-y-4 py-4">
+              <FormField control={editThemeForm.control} name="name" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Theme Name</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editThemeForm.control} name="description" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter>
+                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                <Button type="submit" disabled={editThemeForm.formState.isSubmitting}>Save Changes</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Theme Alert Dialog */}
+      <AlertDialog open={isThemeDeleteDialogOpen} onOpenChange={setIsThemeDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the theme <span className="font-semibold">{themeToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTheme} className="bg-destructive hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
