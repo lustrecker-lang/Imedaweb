@@ -19,6 +19,11 @@
           "type": "string",
           "description": "URL of the uploaded company icon (e.g., for favicons).",
           "format": "uri"
+        },
+        "faviconUrl": {
+          "type": "string",
+          "description": "URL of the uploaded company favicon.",
+          "format": "uri"
         }
       },
       "required": [

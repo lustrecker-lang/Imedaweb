@@ -36,12 +36,14 @@ const formSchema = z.object({
   name: z.string().min(1, 'Company name is required.'),
   logoUrl: z.string().optional(),
   iconUrl: z.string().optional(),
+  faviconUrl: z.string().optional(),
 });
 
 interface CompanyProfile {
   name: string;
   logoUrl?: string;
   iconUrl?: string;
+  faviconUrl?: string;
 }
 
 export default function CompanyPage() {
@@ -53,6 +55,7 @@ export default function CompanyPage() {
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [iconFile, setIconFile] = useState<File | null>(null);
+  const [faviconFile, setFaviconFile] = useState<File | null>(null);
   
   const companyProfileRef = useMemo(() => {
     if (!firestore) return null;
@@ -67,6 +70,7 @@ export default function CompanyPage() {
       name: '',
       logoUrl: '',
       iconUrl: '',
+      faviconUrl: '',
     },
   });
 
@@ -129,12 +133,19 @@ export default function CompanyPage() {
         if (!iconUrl) return; // Stop submission if upload failed
     }
     
+    let faviconUrl = values.faviconUrl;
+    if (faviconFile) {
+        faviconUrl = await handleFileUpload(faviconFile);
+        if (!faviconUrl) return; // Stop submission if upload failed
+    }
+
     const docRef = doc(firestore, 'companyProfile', 'main');
     
     const dataToSave = {
         name: values.name,
         logoUrl: logoUrl,
         iconUrl: iconUrl,
+        faviconUrl: faviconUrl,
     };
 
     setDocumentNonBlocking(docRef, dataToSave, { merge: true });
@@ -145,6 +156,7 @@ export default function CompanyPage() {
     });
     setLogoFile(null);
     setIconFile(null);
+    setFaviconFile(null);
   };
 
   return (
@@ -158,7 +170,7 @@ export default function CompanyPage() {
         <CardHeader>
           <CardTitle>Branding Details</CardTitle>
           <CardDescription>
-            Update your company name and logos. The logo will appear in the header, and the icon will be used as a favicon/shortcut icon.
+            Update your company name, logo, app icon, and favicon.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -167,6 +179,7 @@ export default function CompanyPage() {
               {isProfileLoading ? (
                 <div className="space-y-4">
                   <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
                 </div>
@@ -217,10 +230,10 @@ export default function CompanyPage() {
                     name="iconUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Icon</FormLabel>
+                        <FormLabel>App Icon</FormLabel>
                         {companyProfile?.iconUrl && (
                           <div className="my-2">
-                             <Image src={companyProfile.iconUrl} alt="Current Icon" width={32} height={32} className="object-contain" />
+                             <Image src={companyProfile.iconUrl} alt="Current App Icon" width={32} height={32} className="object-contain" />
                           </div>
                         )}
                         <FormControl>
@@ -230,6 +243,33 @@ export default function CompanyPage() {
                             onChange={(e) => {
                               if (e.target.files?.[0]) {
                                 setIconFile(e.target.files[0]);
+                                field.onChange(e.target.files[0].name); // To satisfy react-hook-form
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="faviconUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Favicon</FormLabel>
+                        {companyProfile?.faviconUrl && (
+                          <div className="my-2">
+                             <Image src={companyProfile.faviconUrl} alt="Current Favicon" width={32} height={32} className="object-contain" />
+                          </div>
+                        )}
+                        <FormControl>
+                          <Input 
+                            type="file" 
+                            accept="image/x-icon, image/vnd.microsoft.icon, image/svg+xml, image/png"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                setFaviconFile(e.target.files[0]);
                                 field.onChange(e.target.files[0].name); // To satisfy react-hook-form
                               }
                             }}

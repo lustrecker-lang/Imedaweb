@@ -7,6 +7,7 @@ import Head from 'next/head';
 
 interface CompanyProfile {
   iconUrl?: string;
+  faviconUrl?: string;
 }
 
 export function DynamicIcons() {
@@ -19,14 +20,14 @@ export function DynamicIcons() {
 
   const { data: companyProfile } = useDoc<CompanyProfile>(companyProfileRef);
 
-  if (!companyProfile?.iconUrl) {
+  if (!companyProfile) {
     return null;
   }
 
   return (
     <Head>
-      <link rel="icon" href={companyProfile.iconUrl} sizes="any" />
-      <link rel="apple-touch-icon" href={companyProfile.iconUrl} />
+      {companyProfile.faviconUrl && <link rel="icon" href={companyProfile.faviconUrl} sizes="any" />}
+      {companyProfile.iconUrl && <link rel="apple-touch-icon" href={companyProfile.iconUrl} />}
     </Head>
   );
 }
