@@ -82,7 +82,7 @@ const ListItem = React.forwardRef<
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
+          <div className="text-sm font-normal leading-none">{title}</div>
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {description}
           </p>
@@ -170,7 +170,7 @@ export function Header() {
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
                   <LogoComponent />
                 </Link>
-                <nav className="grid gap-2 text-base font-medium">
+                <nav className="grid gap-2 text-base font-normal">
                     <Link
                         href="/"
                         className="block py-2 text-foreground/70 transition-colors hover:text-foreground"
@@ -181,7 +181,7 @@ export function Header() {
                     <Accordion type="multiple" className="w-full">
                        {navStructure.map((category) => (
                          <AccordionItem key={category.title} value={category.title} className="border-b-0">
-                           <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline">
+                           <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
                              {category.title}
                            </AccordionTrigger>
                            <AccordionContent className="pl-4">
@@ -190,7 +190,7 @@ export function Header() {
                                     <Link
                                         key={link.title}
                                         href={link.href}
-                                        className="block py-1 text-foreground/70 transition-colors hover:text-foreground"
+                                        className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
                                         onClick={() => setIsOpen(false)}
                                     >
                                         {link.title}
