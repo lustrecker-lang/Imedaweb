@@ -267,7 +267,10 @@
         "publicConcerne": { "type": "string", "description": "The target audience." },
         "methodesMobilisees": { "type": "string", "description": "Methods used in the course." },
         "moyensPedagogiques": { "type": "string", "description": "Pedagogical means." },
-        "modalitesEvaluation": { "type": "string", "description": "Evaluation modalities." }
+        "modalitesEvaluation": { "type": "string", "description": "Evaluation modalities." },
+        "prixAvecHebergement": { "type": "string", "description": "Price with accommodation." },
+        "prixSansHebergement": { "type": "string", "description": "Price without accommodation." },
+        "format": { "type": "string", "description": "The format of the course (e.g., online, in-person)." }
       },
       "required": ["name", "themeId", "formationId"]
     },

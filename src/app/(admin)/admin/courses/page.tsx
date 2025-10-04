@@ -84,6 +84,9 @@ const formationSchema = z.object({
     methodesMobilisees: z.string().optional(),
     moyensPedagogiques: z.string().optional(),
     modalitesEvaluation: z.string().optional(),
+    prixAvecHebergement: z.string().optional(),
+    prixSansHebergement: z.string().optional(),
+    format: z.string().optional(),
 });
 
 const moduleSchema = z.object({
@@ -127,7 +130,7 @@ export default function CoursesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
 
-  const [isThemeAddDialogOpen, setIsThemeAddDialogOpen] = useState(false);
+  const [isThemeAddDialogOpen, setIsThemeAddDialogOpen] useState(false);
   const [isThemeEditDialogOpen, setIsThemeEditDialogOpen] = useState(false);
   const [isThemeDeleteDialogOpen, setIsThemeDeleteDialogOpen] = useState(false);
   const [editingTheme, setThemeToEdit] = useState<Theme | null>(null);
@@ -204,6 +207,9 @@ export default function CoursesPage() {
         methodesMobilisees: '',
         moyensPedagogiques: '',
         modalitesEvaluation: '',
+        prixAvecHebergement: '',
+        prixSansHebergement: '',
+        format: '',
     },
   });
 
@@ -253,6 +259,9 @@ export default function CoursesPage() {
         methodesMobilisees: editingFormation.methodesMobilisees || '',
         moyensPedagogiques: editingFormation.moyensPedagogiques || '',
         modalitesEvaluation: editingFormation.modalitesEvaluation || '',
+        prixAvecHebergement: editingFormation.prixAvecHebergement || '',
+        prixSansHebergement: editingFormation.prixSansHebergement || '',
+        format: editingFormation.format || '',
       });
     }
   }, [editingFormation, editFormationForm]);
@@ -668,6 +677,27 @@ export default function CoursesPage() {
                           <FormMessage />
                         </FormItem>
                       )} />
+                      <FormField control={addFormationForm.control} name="prixAvecHebergement" render={({ field }) => (
+                        <FormItem className="col-span-2 sm:col-span-1">
+                          <FormLabel>Prix avec hebergement</FormLabel>
+                          <FormControl><Input placeholder="e.g., 2500€" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={addFormationForm.control} name="prixSansHebergement" render={({ field }) => (
+                        <FormItem className="col-span-2 sm:col-span-1">
+                          <FormLabel>Prix sans hebergement</FormLabel>
+                          <FormControl><Input placeholder="e.g., 2000€" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={addFormationForm.control} name="format" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Format</FormLabel>
+                          <FormControl><Input placeholder="e.g., En ligne, Présentiel" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
                       <FormField control={addFormationForm.control} name="objectifPedagogique" render={({ field }) => (
                         <FormItem className="col-span-2">
                           <FormLabel>Objectif Pédagogique</FormLabel>
@@ -981,6 +1011,27 @@ export default function CoursesPage() {
                       <FormField control={editFormationForm.control} name="formationId" render={({ field }) => (
                         <FormItem className="col-span-2 sm:col-span-1">
                           <FormLabel>Formation ID</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={editFormationForm.control} name="prixAvecHebergement" render={({ field }) => (
+                        <FormItem className="col-span-2 sm:col-span-1">
+                          <FormLabel>Prix avec hebergement</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={editFormationForm.control} name="prixSansHebergement" render={({ field }) => (
+                        <FormItem className="col-span-2 sm:col-span-1">
+                          <FormLabel>Prix sans hebergement</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={editFormationForm.control} name="format" render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Format</FormLabel>
                           <FormControl><Input {...field} /></FormControl>
                           <FormMessage />
                         </FormItem>
