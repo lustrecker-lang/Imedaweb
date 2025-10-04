@@ -134,13 +134,6 @@ export function Header() {
     </Sheet>
   );
 
-  const MobileContactButton = () => (
-    <Button size="sm" className="md:hidden" asChild>
-        <Link href="/contact">Contactez-nous</Link>
-    </Button>
-  );
-
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center justify-between">
@@ -171,7 +164,7 @@ export function Header() {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
-            { isMobile ? <MobileContactButton /> : <DesktopContactButton />}
+            { !isMobile && <DesktopContactButton />}
           <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -179,9 +172,9 @@ export function Header() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-sm overflow-auto">
-              <div className="p-6 pt-0">
-                <div className="flex items-center justify-between h-16">
+            <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0">
+              <div className="p-6 pb-0">
+                <div className="flex items-center justify-between h-16 mb-4">
                     <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
                     <LogoComponent />
                     </Link>
@@ -214,6 +207,11 @@ export function Header() {
                     </nav>
                 </div>
               </div>
+              <div className="mt-auto p-6">
+                <Button size="sm" className="w-full" asChild>
+                    <Link href="/contact" onClick={() => setIsMobileNavOpen(false)}>Contactez-nous</Link>
+                </Button>
+              </div>
             </SheetContent>
           </Sheet>
         </div>
@@ -221,3 +219,5 @@ export function Header() {
     </header>
   );
 }
+
+    
