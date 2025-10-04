@@ -74,6 +74,12 @@ interface Campus {
 interface Theme {
   id: string;
   name: string;
+  description?: string;
+}
+
+interface Formation {
+    id: string;
+    themeId: string;
 }
 
 const isVideoUrl = (url?: string | null) => {
@@ -113,6 +119,13 @@ export default function Home() {
   }, [firestore]);
 
   const { data: themes, isLoading: areThemesLoading } = useCollection<Theme>(themesQuery);
+  
+  const formationsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'course_formations'));
+  }, [firestore]);
+
+  const { data: formations, isLoading: areFormationsLoading } = useCollection<Formation>(formationsQuery);
 
 
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
@@ -121,7 +134,7 @@ export default function Home() {
   
   const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
 
-  const isLoading = isPageLoading || areCampusesLoading || areThemesLoading;
+  const isLoading = isPageLoading || areCampusesLoading || areThemesLoading || areFormationsLoading;
 
   const themeOptions = useMemo(() => {
     return themes ? themes.map(theme => ({ value: theme.id, label: theme.name })) : [];
@@ -132,6 +145,14 @@ export default function Home() {
       router.push(`/courses?themeId=${selectedThemeId}`);
     }
   };
+
+  const themesWithFormationCounts = useMemo(() => {
+    if (!themes || !formations) return [];
+    return themes.map(theme => {
+        const count = formations.filter(formation => formation.themeId === theme.id).length;
+        return { ...theme, formationCount: count };
+    });
+  }, [themes, formations]);
 
   const CampusCard = ({ campus, className }: { campus: Campus, className?: string }) => {
     const isCardVideo = isVideoUrl(campus.imageUrl);
@@ -173,7 +194,7 @@ export default function Home() {
       <section className="py-8">
         <div className="container px-4 md:px-6">
           <div className="relative h-[60vh] min-h-[400px] md:min-h-[500px] w-full overflow-hidden">
-              {isPageLoading ? (
+              {isLoading ? (
                 <Skeleton className="h-full w-full" />
               ) : (
                 heroMediaUrl && (
@@ -286,6 +307,72 @@ export default function Home() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+       <section className="py-16 bg-muted/30">
+        <div className="container px-4 md:px-6">
+          <div className="flex items-center justify-between mb-8">
+            <div className="max-w-2xl">
+                <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
+                  Formations IMEDA
+                </h2>
+                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                  Explorez nos thèmes de formation pour trouver le programme parfait pour vous.
+                </p>
+            </div>
+            {!isMobile && (
+              <Button variant="link" asChild>
+                <Link href="/courses">
+                  Voir tout <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            )}
+          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-56 w-full" />)}
+            </div>
+          ) : (
+            <Carousel opts={{ align: "start", loop: false }} className="w-full">
+                <CarouselContent className="-ml-4">
+                {themesWithFormationCounts.map((theme) => (
+                    <CarouselItem key={theme.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                        <Link href={`/courses?themeId=${theme.id}`} className="block h-full">
+                            <Card className="h-full flex flex-col hover:border-primary transition-colors">
+                                <CardHeader>
+                                    <CardTitle className="font-headline font-normal">{theme.name}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                    <CardDescription className="line-clamp-3">
+                                        {theme.description || "Aucune description pour ce thème."}
+                                    </CardDescription>
+                                </CardContent>
+                                <div className="p-6 pt-0 text-xs text-muted-foreground font-semibold">
+                                    {theme.formationCount} {theme.formationCount > 1 ? 'formations' : 'formation'}
+                                </div>
+                            </Card>
+                        </Link>
+                    </CarouselItem>
+                ))}
+                </CarouselContent>
+                 <div className="absolute top-[-4.5rem] right-0 flex gap-2">
+                    <CarouselPrevious className="static translate-y-0 rounded-none hidden sm:inline-flex" />
+                    <CarouselNext className="static translate-y-0 rounded-none hidden sm:inline-flex" />
+                 </div>
+            </Carousel>
+          )}
+
+           {isMobile && (
+              <div className="mt-8 text-center">
+                <Button variant="link" asChild>
+                    <Link href="/courses">
+                    Voir tout <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+              </div>
+            )}
         </div>
       </section>
 
