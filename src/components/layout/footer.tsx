@@ -51,13 +51,12 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="text-xs font-semibold tracking-wider uppercase">Publications</h3>
+            <h3 className="text-xs font-semibold tracking-wider uppercase">Autre</h3>
             <ul className="mt-4 space-y-2">
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 1</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 2</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 3</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 4</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Thème 5</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Services</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Publications</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Partenariats d'entreprise</Link></li>
+              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Actualités et Mises à jour</Link></li>
             </ul>
           </div>
           <div className="flex flex-col gap-4 items-start lg:items-end">
