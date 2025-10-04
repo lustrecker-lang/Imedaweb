@@ -59,6 +59,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Schemas
 const categorySchema = z.object({
@@ -294,49 +295,51 @@ export default function CoursesPage() {
               </Dialog>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="hidden sm:table-cell">Description</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {areCategoriesLoading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                        <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-48" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
-                      </TableRow>
-                    ))
-                  ) : categories && categories.length > 0 ? (
-                    categories.map((category) => (
-                      <TableRow 
-                        key={category.id} 
-                        onClick={() => setSelectedCategory(category as Category)}
-                        className={cn("cursor-pointer", selectedCategory?.id === category.id && "bg-muted/50")}
-                      >
-                        <TableCell className="font-medium">{category.name}</TableCell>
-                        <TableCell className="text-muted-foreground hidden sm:table-cell">{category.description}</TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditCategoryDialog(category as Category); }}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openDeleteCategoryDialog(category as Category); }}>
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
+              <ScrollArea className="h-[400px]">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={3} className="h-24 text-center">No categories found.</TableCell>
+                      <TableHead>Name</TableHead>
+                      <TableHead className="hidden sm:table-cell">Description</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {areCategoriesLoading ? (
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="py-2"><Skeleton className="h-5 w-24" /></TableCell>
+                          <TableCell className="hidden sm:table-cell py-2"><Skeleton className="h-5 w-48" /></TableCell>
+                          <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                        </TableRow>
+                      ))
+                    ) : categories && categories.length > 0 ? (
+                      categories.map((category) => (
+                        <TableRow 
+                          key={category.id} 
+                          onClick={() => setSelectedCategory(category as Category)}
+                          className={cn("cursor-pointer", selectedCategory?.id === category.id && "bg-muted/50")}
+                        >
+                          <TableCell className="font-medium py-2">{category.name}</TableCell>
+                          <TableCell className="text-muted-foreground hidden sm:table-cell py-2">{category.description}</TableCell>
+                          <TableCell className="text-right py-2">
+                            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditCategoryDialog(category as Category); }}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openDeleteCategoryDialog(category as Category); }}>
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={3} className="h-24 text-center">No categories found.</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
             </CardContent>
           </Card>
           
@@ -383,47 +386,51 @@ export default function CoursesPage() {
             </CardHeader>
             <CardContent>
              {!selectedCategory ? (
-                <p className="text-sm text-muted-foreground h-24 flex items-center justify-center">Select a category to manage its themes.</p>
+                <div className="h-[400px] flex items-center justify-center">
+                    <p className="text-sm text-muted-foreground text-center">Select a category to manage its themes.</p>
+                </div>
              ) : (
-                <Table>
-                    <TableHeader>
-                    <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="hidden sm:table-cell">Description</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {areThemesLoading ? (
-                        Array.from({ length: 2 }).map((_, i) => (
-                        <TableRow key={i}>
-                            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                            <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-48" /></TableCell>
-                            <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
-                        </TableRow>
-                        ))
-                    ) : themes && themes.length > 0 ? (
-                        themes.map((theme) => (
-                        <TableRow key={theme.id}>
-                            <TableCell className="font-medium">{theme.name}</TableCell>
-                            <TableCell className="text-muted-foreground hidden sm:table-cell">{theme.description}</TableCell>
-                            <TableCell className="text-right">
-                            <Button variant="ghost" size="icon" onClick={() => openEditThemeDialog(theme as Theme)}>
-                                <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => openDeleteThemeDialog(theme as Theme)}>
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                            </TableCell>
-                        </TableRow>
-                        ))
-                    ) : (
+                <ScrollArea className="h-[400px]">
+                    <Table>
+                        <TableHeader>
                         <TableRow>
-                        <TableCell colSpan={3} className="h-24 text-center">No themes found for this category.</TableCell>
+                            <TableHead>Name</TableHead>
+                            <TableHead className="hidden sm:table-cell">Description</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                    )}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                        {areThemesLoading ? (
+                            Array.from({ length: 2 }).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell className="py-2"><Skeleton className="h-5 w-24" /></TableCell>
+                                <TableCell className="hidden sm:table-cell py-2"><Skeleton className="h-5 w-48" /></TableCell>
+                                <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                            </TableRow>
+                            ))
+                        ) : themes && themes.length > 0 ? (
+                            themes.map((theme) => (
+                            <TableRow key={theme.id}>
+                                <TableCell className="font-medium py-2">{theme.name}</TableCell>
+                                <TableCell className="text-muted-foreground hidden sm:table-cell py-2">{theme.description}</TableCell>
+                                <TableCell className="text-right py-2">
+                                <Button variant="ghost" size="icon" onClick={() => openEditThemeDialog(theme as Theme)}>
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" onClick={() => openDeleteThemeDialog(theme as Theme)}>
+                                    <Trash2 className="h-4 w-4 text-red-600" />
+                                </Button>
+                                </TableCell>
+                            </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                            <TableCell colSpan={3} className="h-24 text-center">No themes found for this category.</TableCell>
+                            </TableRow>
+                        )}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
              )}
             </CardContent>
           </Card>
@@ -440,7 +447,9 @@ export default function CoursesPage() {
                 <Button size="sm" disabled><Plus className="mr-2 h-4 w-4" /> Add Formation</Button>
                 </CardHeader>
                 <CardContent>
-                <p className="text-sm text-muted-foreground h-24 flex items-center justify-center">Select a theme to manage its formations.</p>
+                <div className="h-[400px] flex items-center justify-center">
+                    <p className="text-sm text-muted-foreground text-center">Select a theme to manage its formations.</p>
+                </div>
                 </CardContent>
             </Card>
 
@@ -454,7 +463,9 @@ export default function CoursesPage() {
                 <Button size="sm" disabled><Plus className="mr-2 h-4 w-4" /> Add Module</Button>
                 </CardHeader>
                 <CardContent>
-                <p className="text-sm text-muted-foreground h-24 flex items-center justify-center">Select a formation to manage its modules.</p>
+                <div className="h-[400px] flex items-center justify-center">
+                    <p className="text-sm text-muted-foreground text-center">Select a formation to manage its modules.</p>
+                </div>
                 </CardContent>
             </Card>
         </div>
