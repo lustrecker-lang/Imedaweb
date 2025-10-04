@@ -5,7 +5,6 @@ import { doc } from 'firebase/firestore';
 
 import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 interface Section {
   id: string;
@@ -30,26 +29,24 @@ export default function AboutPage() {
   const { data: aboutPage, isLoading } = useDoc<Page>(pageRef);
 
   const heroSection = aboutPage?.sections.find(s => s.id === 'hero');
-
-  const fallbackHeroImage = PlaceHolderImages.find(
-    (img) => img.id === "hero-background"
-  );
-  
-  const heroImageUrl = heroSection?.imageUrl || fallbackHeroImage?.imageUrl;
+  const heroImageUrl = heroSection?.imageUrl;
 
   return (
     <div className="flex flex-col">
       <section className="container py-8">
         <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-            {heroImageUrl && (
-            <Image
-                src={heroImageUrl}
-                alt={heroSection?.title || "About us background"}
-                fill
-                className="object-cover"
-                data-ai-hint={fallbackHeroImage?.imageHint}
-                priority
-            />
+            {isLoading ? (
+              <Skeleton className="h-full w-full" />
+            ) : (
+              heroImageUrl && (
+                <Image
+                    src={heroImageUrl}
+                    alt={heroSection?.title || "About us background"}
+                    fill
+                    className="object-cover"
+                    priority
+                />
+              )
             )}
             <div className="absolute inset-0 bg-black/50" />
             <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">

@@ -13,28 +13,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const featuresPlaceholders = [
   {
+    id: "feature-1",
     icon: <CheckCircle className="h-8 w-8 text-primary" />,
     title: "Streamlined Workflow",
     description: "Experience unparalleled efficiency with our intuitive and powerful platform, designed to simplify complex tasks.",
-    image: PlaceHolderImages.find((img) => img.id === "feature-1"),
   },
   {
+    id: "feature-2",
     icon: <BarChart className="h-8 w-8 text-primary" />,
     title: "Insightful Analytics",
     description: "Gain a competitive edge with real-time data and comprehensive analytics that drive informed decision-making.",
-    image: PlaceHolderImages.find((img) => img.id === "feature-2"),
   },
   {
+    id: "feature-3",
     icon: <Users className="h-8 w-8 text-primary" />,
     title: "Collaborative Environment",
     description: "Foster teamwork and innovation with collaborative tools that connect your team, wherever they are.",
-    image: PlaceHolderImages.find((img) => img.id === "feature-3"),
   },
 ];
 
@@ -52,10 +51,6 @@ interface Page {
 }
 
 export default function Home() {
-  const fallbackHeroImage = PlaceHolderImages.find(
-    (img) => img.id === "hero-background"
-  );
-
   const firestore = useFirestore();
   const pageRef = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -66,22 +61,24 @@ export default function Home() {
 
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
-
-  const heroImageUrl = heroSection?.imageUrl || fallbackHeroImage?.imageUrl;
+  const heroImageUrl = heroSection?.imageUrl;
 
   return (
     <div className="flex flex-col">
       <section className="container py-8">
         <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
-            {heroImageUrl && (
-            <Image
-                src={heroImageUrl}
-                alt={heroSection?.title || "Hero background"}
-                fill
-                className="object-cover"
-                data-ai-hint={fallbackHeroImage?.imageHint}
-                priority
-            />
+            {isLoading ? (
+              <Skeleton className="h-full w-full" />
+            ) : (
+              heroImageUrl && (
+                <Image
+                    src={heroImageUrl}
+                    alt={heroSection?.title || "Hero background"}
+                    fill
+                    className="object-cover"
+                    priority
+                />
+              )
             )}
             <div className="absolute inset-0 bg-black/50" />
             <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
@@ -133,22 +130,25 @@ export default function Home() {
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {featuresPlaceholders.map((feature, index) => {
               const featureSection = homePage?.sections.find(s => s.id === `feature-${index + 1}`);
-              const featureImageUrl = featureSection?.imageUrl || feature.image?.imageUrl;
+              const featureImageUrl = featureSection?.imageUrl;
 
               return (
                 <Card key={feature.title} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2">
-                  {featureImageUrl && (
-                      <div className="aspect-video overflow-hidden">
-                          <Image
-                              src={featureImageUrl}
-                              alt={featureSection?.title || feature.image?.description || ""}
-                              width={600}
-                              height={400}
-                              className="object-cover w-full h-full"
-                              data-ai-hint={feature.image?.imageHint}
-                          />
-                      </div>
-                  )}
+                  <div className="aspect-video overflow-hidden">
+                    {isLoading ? (
+                      <Skeleton className="w-full h-full" />
+                    ) : (
+                      featureImageUrl && (
+                        <Image
+                            src={featureImageUrl}
+                            alt={featureSection?.title || ""}
+                            width={600}
+                            height={400}
+                            className="object-cover w-full h-full"
+                        />
+                      )
+                    )}
+                  </div>
                   <CardHeader>
                       <CardTitle className="font-headline font-normal">{isLoading ? <Skeleton className="h-6 w-3/4" /> : (featureSection?.title || feature.title)}</CardTitle>
                   </CardHeader>
