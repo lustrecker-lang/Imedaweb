@@ -195,9 +195,9 @@ export default function CampusPage() {
   
   useEffect(() => {
     if (editingCampus) {
-      // Create a deep copy and ensure all nested properties are defined to avoid controlled/uncontrolled input errors
-      const defaultValues = {
-        ...editingCampus,
+      const defaultValues: Partial<z.infer<typeof formSchema>> = {
+        name: editingCampus.name || '',
+        slug: editingCampus.slug || '',
         description: editingCampus.description || '',
         imageUrl: editingCampus.imageUrl || '',
         hero: {
