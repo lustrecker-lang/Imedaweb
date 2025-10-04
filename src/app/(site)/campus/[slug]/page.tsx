@@ -2,10 +2,10 @@
 'use client';
 
 import Image from "next/image";
-import { collection, query, where, getDocs, DocumentData } from 'firebase/firestore';
+import { collection, query, where, DocumentData } from 'firebase/firestore';
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useFirestore, useMemoFirebase } from "@/firebase";
+import { useEffect, useState, useMemo } from "react";
+import { useFirestore, useMemoFirebase, useCollection } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -22,6 +22,12 @@ interface CampusFaq {
     id: string;
     question: string;
     answer?: string;
+}
+
+interface CampusCourse {
+    id: string;
+    name: string;
+    description?: string;
 }
 
 interface Campus {
@@ -42,6 +48,7 @@ interface Campus {
   academicOffering?: {
     headline?: string;
     subtitle?: string;
+    courses?: CampusCourse[];
   };
   campusExperience?: {
     headline?: string;
@@ -63,43 +70,13 @@ export default function CampusPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const [campus, setCampus] = useState<Campus | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const campusQuery = useMemoFirebase(() => {
     if (!firestore || !slug) return null;
     return query(collection(firestore, 'campuses'), where('slug', '==', slug));
   }, [firestore, slug]);
 
-  useEffect(() => {
-    if (!campusQuery) {
-      setIsLoading(false);
-      return;
-    };
-
-    const fetchCampus = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const querySnapshot = await getDocs(campusQuery);
-        if (querySnapshot.empty) {
-          setError("No campus found for this URL.");
-          setCampus(null);
-        } else {
-          const doc = querySnapshot.docs[0];
-          setCampus({ id: doc.id, ...(doc.data() as Omit<Campus, 'id'>) });
-        }
-      } catch (e) {
-        console.error("Error fetching campus:", e);
-        setError("Failed to load campus data.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCampus();
-  }, [campusQuery]);
+  const { data: campuses, isLoading, error } = useCollection<Campus>(campusQuery);
+  const campus = useMemo(() => (campuses && campuses.length > 0 ? campuses[0] : null), [campuses]);
   
   if (isLoading) {
     return (
@@ -119,7 +96,7 @@ export default function CampusPage() {
   }
 
   if (error) {
-    return <div className="container py-12 text-center text-destructive">{error}</div>
+    return <div className="container py-12 text-center text-destructive">{error.message}</div>
   }
 
   if (!campus) {
@@ -142,11 +119,11 @@ export default function CampusPage() {
         )}
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 max-w-4xl">
-            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl font-headline text-white">
+            <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline text-white">
                 {campus.hero?.title || campus.name}
             </h1>
              {campus.hero?.subtitle && (
-                <p className="mx-auto mt-4 max-w-[700px] text-gray-200 md:text-lg">
+                <p className="mx-auto mt-4 max-w-[700px] text-gray-200 text-sm md:text-base">
                     {campus.hero.subtitle}
                 </p>
             )}
@@ -168,7 +145,7 @@ export default function CampusPage() {
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-muted-foreground">{campus.campusDescription.body}</p>
+                                <p className="text-muted-foreground whitespace-pre-wrap text-sm">{campus.campusDescription.body}</p>
                             </CardContent>
                         </Card>
                     </section>
@@ -182,10 +159,10 @@ export default function CampusPage() {
                                 <GraduationCap className="h-6 w-6 text-primary" />
                                 <CardTitle className="text-2xl font-headline font-normal">{campus.academicOffering?.headline || "Academic Offering"}</CardTitle>
                             </div>
-                            {campus.academicOffering?.subtitle && <CardDescription>{campus.academicOffering.subtitle}</CardDescription>}
+                            {campus.academicOffering?.subtitle && <CardDescription className="pt-2">{campus.academicOffering.subtitle}</CardDescription>}
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground">Course list will be displayed here soon.</p>
+                            <p className="text-muted-foreground text-sm">Course list will be displayed here soon.</p>
                         </CardContent>
                     </Card>
                 </section>
@@ -202,7 +179,7 @@ export default function CampusPage() {
                             </CardHeader>
                             <CardContent className="grid gap-6">
                                 {campus.campusExperience.features.map(feature => (
-                                     <div key={feature.id} className="flex gap-4">
+                                     <div key={feature.id} className="flex gap-4 items-start">
                                         {feature.mediaUrl && (
                                              <Image src={feature.mediaUrl} alt={feature.name} width={150} height={100} className="rounded-md object-cover hidden sm:block"/>
                                         )}
@@ -228,7 +205,7 @@ export default function CampusPage() {
                                 <MapPin className="h-6 w-6 text-primary" />
                                 <CardTitle className="text-xl font-headline font-normal">{campus.visitAndContact?.headline || "Visit & Contact"}</CardTitle>
                             </div>
-                            {campus.visitAndContact?.subtitle && <CardDescription>{campus.visitAndContact.subtitle}</CardDescription>}
+                            {campus.visitAndContact?.subtitle && <CardDescription className="pt-2">{campus.visitAndContact.subtitle}</CardDescription>}
                         </CardHeader>
                         <CardContent>
                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campus.visitAndContact?.address}</p>
@@ -251,9 +228,8 @@ export default function CampusPage() {
                                     {campus.faq.faqs.map(faq => (
                                          <AccordionItem value={faq.id} key={faq.id}>
                                             <AccordionTrigger>{faq.question}</AccordionTrigger>
-
-<AccordionContent>
-                                            {faq.answer}
+                                            <AccordionContent className="text-sm text-muted-foreground">
+                                                {faq.answer}
                                             </AccordionContent>
                                         </AccordionItem>
                                     ))}
