@@ -1,5 +1,7 @@
 
-import React, { Suspense } from 'react';
+'use client';
+
+import React from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
@@ -51,9 +53,7 @@ interface Page {
 type SortKey = 'formationId' | 'name';
 type SortDirection = 'ascending' | 'descending';
 
-function CoursesPageContent() {
-    'use client';
-    
+export default function CoursesPage() {
     const firestore = useFirestore();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -106,6 +106,9 @@ function CoursesPageContent() {
             }
         } else if (categoryIdFromUrl) {
             setSelectedCategory(categoryIdFromUrl);
+            setSelectedTheme(null);
+        } else {
+            setSelectedCategory(null);
             setSelectedTheme(null);
         }
     }, [themeIdFromUrl, categoryIdFromUrl, themes, selectedCategory]);
@@ -332,11 +335,3 @@ function CoursesPageContent() {
     );
 }
 
-
-export default function CoursesPage() {
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <CoursesPageContent />
-        </Suspense>
-    )
-}
