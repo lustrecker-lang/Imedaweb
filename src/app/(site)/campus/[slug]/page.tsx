@@ -249,7 +249,8 @@ export default function CampusPage() {
                                     {campus.faq.faqs.map(faq => (
                                          <AccordionItem value={faq.id} key={faq.id}>
                                             <AccordionTrigger>{faq.question}</AccordionTrigger>
-                                            <AccordionContent>
+
+<AccordionContent>
                                             {faq.answer}
                                             </AccordionContent>
                                         </AccordionItem>
