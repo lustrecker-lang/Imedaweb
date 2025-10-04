@@ -195,7 +195,40 @@ export default function CampusPage() {
   
   useEffect(() => {
     if (editingCampus) {
-      editForm.reset(editingCampus);
+      // Create a deep copy and ensure all nested properties are defined to avoid controlled/uncontrolled input errors
+      const defaultValues = {
+        ...editingCampus,
+        description: editingCampus.description || '',
+        imageUrl: editingCampus.imageUrl || '',
+        hero: {
+          title: editingCampus.hero?.title || '',
+          subtitle: editingCampus.hero?.subtitle || '',
+          backgroundMediaUrl: editingCampus.hero?.backgroundMediaUrl || '',
+        },
+        campusDescription: {
+          headline: editingCampus.campusDescription?.headline || '',
+          body: editingCampus.campusDescription?.body || '',
+        },
+        academicOffering: {
+          headline: editingCampus.academicOffering?.headline || '',
+          subtitle: editingCampus.academicOffering?.subtitle || '',
+          courses: editingCampus.academicOffering?.courses || [],
+        },
+        campusExperience: {
+          headline: editingCampus.campusExperience?.headline || '',
+          features: editingCampus.campusExperience?.features || [],
+        },
+        visitAndContact: {
+          headline: editingCampus.visitAndContact?.headline || '',
+          subtitle: editingCampus.visitAndContact?.subtitle || '',
+          address: editingCampus.visitAndContact?.address || '',
+        },
+        faq: {
+          headline: editingCampus.faq?.headline || '',
+          faqs: editingCampus.faq?.faqs || [],
+        },
+      };
+      editForm.reset(defaultValues);
     }
   }, [editingCampus, editForm]);
 
@@ -340,7 +373,7 @@ export default function CampusPage() {
             if (features[index]) features[index].mediaUrl = '';
             return { ...prev, campusExperience: { ...prev.campusExperience, features } };
         }
-        return { ...prev, [field]: '' };
+        return { ...prev, [field as keyof Campus]: '' };
     });
     
     toast({
@@ -356,7 +389,6 @@ export default function CampusPage() {
   
   const openEditDialog = (campus: Campus) => {
     setEditingCampus(campus);
-    editForm.reset(campus);
     setIsEditDialogOpen(true);
     setImageFile(null);
   };
