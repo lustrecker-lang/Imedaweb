@@ -244,17 +244,17 @@ export default function CoursesPage() {
                                 {isLoading ? (
                                     Array.from({ length: 10 }).map((_, i) => (
                                         <TableRow key={i}>
-                                            <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                                            <TableCell><Skeleton className="h-5 w-3/4" /></TableCell>
-                                            <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                                            <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
+                                            <TableCell className="py-2"><Skeleton className="h-5 w-3/4" /></TableCell>
+                                            <TableCell className="text-right py-2"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                                         </TableRow>
                                     ))
                                 ) : filteredAndSortedFormations && filteredAndSortedFormations.length > 0 ? (
                                     filteredAndSortedFormations.map(formation => (
                                         <TableRow key={formation.id}>
-                                            <TableCell className="font-mono text-xs">{formation.formationId}</TableCell>
-                                            <TableCell className="font-medium">{formation.name}</TableCell>
-                                            <TableCell className="text-right">
+                                            <TableCell className="font-mono text-xs py-2">{formation.formationId}</TableCell>
+                                            <TableCell className="font-medium py-2">{formation.name}</TableCell>
+                                            <TableCell className="text-right py-2">
                                                 <Button variant="link" asChild>
                                                     <Link href={`/courses/${formation.id}`} className="text-sm">
                                                         Voir les détails
