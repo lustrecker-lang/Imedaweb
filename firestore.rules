@@ -3,17 +3,8 @@
  * @description This ruleset defines access control for the Firestore database.
  *
  * Core Philosophy:
- * - Authenticated users have full CRUD access to the /pages and /companyProfile collections.
+ * - The /pages and /companyProfile collections are publicly readable but only writable by authenticated users.
  * - The /leads collection allows public creation of documents, but only allows authenticated users to read/manage them.
- *
- * Data Structure:
- * - /pages/{pageId}: Stores content for specific pages, editable by authenticated users.
- * - /companyProfile/{profileId}: Stores company branding information, editable by authenticated users.
- * - /leads/{leadId}: Allows public creation of lead documents, but restricts other access to authenticated users.
- *
- * Key Security Decisions:
- * - Authenticated users can read and write any document in /pages and /companyProfile.
- * - Unauthenticated users can create documents in /leads, but cannot read, update, or delete them.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -27,34 +18,26 @@ service cloud.firestore {
     }
 
     /**
-     * @description Grants full access to the /pages collection for authenticated users.
-     * @path /pages/{pageId}
-     * @allow (create, read, update, delete) Authenticated user can perform any operation on any page.
-     * @deny (create, read, update, delete) Unauthenticated user cannot perform any operation on any page.
-     * @principle Allows any authenticated user to manage page content.
+     * @description Allows public read access but restricts write access to authenticated users.
      */
     match /pages/{pageId} {
-      allow get, list, create, update, delete: if isSignedIn();
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     /**
-     * @description Grants full access to the /companyProfile collection for authenticated users.
-     * @path /companyProfile/{profileId}
-     * @allow (create, read, update, delete) Authenticated user can perform any operation on any company profile.
-     * @deny (create, read, update, delete) Unauthenticated user cannot perform any operation on any company profile.
-     * @principle Allows any authenticated user to manage company profile data.
+     * @description Allows public read access but restricts write access to authenticated users.
      */
     match /companyProfile/{profileId} {
-      allow get, list, create, update, delete: if isSignedIn();
+      allow read: if true;
+      allow write: if isSignedIn();
     }
 
     /**
      * @description Allows public creation of leads, but restricts all other access to authenticated users.
      * @path /leads/{leadId}
      * @allow (create) Anyone can create a new lead.
-     * @deny (get, list, update, delete) Unauthenticated users cannot access lead data.
      * @allow (get, list, update, delete) Only authenticated users (admins) can read or manage leads.
-     * @deny (create) Authenticated users cannot create a new lead
      * @principle Allows public form submissions while securing lead data for admin access only.
      */
     match /leads/{leadId} {
