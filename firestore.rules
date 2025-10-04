@@ -1,47 +1,39 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Allow public read-access to pages and company profile
+    // Allow read access to public content
     match /pages/{pageId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
+
     match /companyProfile/{profileId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
+    
     match /campuses/{campusId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    match /services/{serviceId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    // Allow authenticated users to manage leads
+    match /leads/{leadId} {
+        allow read, write: if request.auth != null;
     }
     
-    // Course content can be managed by authenticated users
-    match /course_categories/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /course_themes/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /course_formations/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /course_modules/{document=**} {
+    match /services/{serviceId} {
       allow read, write: if request.auth != null;
     }
 
-    // Leads can be created by anyone, but only read/deleted by authenticated users
-    match /leads/{leadId} {
-      allow create: if true;
-      allow read, delete: if request.auth != null;
+    // Allow authenticated users to manage course content
+    match /course_categories/{categoryId} {
+        allow read, write: if request.auth != null;
+    }
+    match /course_themes/{themeId} {
+        allow read, write: if request.auth != null;
     }
   }
 }
-    
