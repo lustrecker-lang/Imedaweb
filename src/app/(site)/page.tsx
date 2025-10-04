@@ -92,7 +92,7 @@ export default function Home() {
   const isVideoUrl = (url: string) => {
     const videoExtensions = ['.mp4', '.webm', '.ogg'];
     try {
-      const pathname = new URL(url).pathname;
+      const pathname = new URL(url).pathname.split('?')[0];
       return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
     } catch (e) {
       return false; // Invalid URL
@@ -110,7 +110,7 @@ export default function Home() {
         fill
         className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
       />
-      <div className="relative flex h-full flex-col justify-end bg-gradient-to-t from-black/60 to-transparent p-6">
+      <div className="relative flex h-full flex-col justify-end p-6">
         <h3 className="text-lg font-normal text-white font-headline">
           {campus.name}
         </h3>
@@ -160,10 +160,10 @@ export default function Home() {
                   ) : (
                   <>
                       <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
-                      {heroSection?.title || "Innovate. Manage. Excel."}
+                      {heroSection?.title}
                       </h1>
                       <p className="mx-auto mt-4 max-w-[600px] text-sm text-gray-200 md:text-base">
-                      {heroSection?.content || "IMEDA provides the tools you need to elevate your business operations to the next level."}
+                      {heroSection?.content}
                       </p>
                   </>
                   )}
@@ -190,10 +190,10 @@ export default function Home() {
             ) : (
               <>
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
-                  {featuresSectionHeader?.title || "Features Designed for Growth"}
+                  {featuresSectionHeader?.title}
                 </h2>
                 <p className="mt-2 text-muted-foreground md:text-base/relaxed">
-                  {featuresSectionHeader?.content || "Our platform is packed with powerful features to help you succeed."}
+                  {featuresSectionHeader?.content}
                 </p>
               </>
             )}
@@ -221,10 +221,10 @@ export default function Home() {
                     )}
                   </div>
                   <CardHeader>
-                      <CardTitle className="font-headline font-normal">{isPageLoading ? <Skeleton className="h-6 w-3/4" /> : (featureSection?.title || feature.title)}</CardTitle>
+                      <CardTitle className="font-headline font-normal">{isPageLoading ? <Skeleton className="h-6 w-3/4" /> : (featureSection?.title)}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {isPageLoading ? <div className="space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></div> : <CardDescription>{featureSection?.content || feature.description}</CardDescription>}
+                    {isPageLoading ? <div className="space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></div> : <CardDescription>{featureSection?.content}</CardDescription>}
                   </CardContent>
                 </Card>
               );
@@ -244,11 +244,6 @@ export default function Home() {
                   {isMobile ? "Explore our world-class campuses" : "Explore our world-class campuses located in global hubs of innovation."}
                 </p>
             </div>
-            {isMobile && (
-                <div className="flex gap-2">
-                    {/* Placeholder for buttons, will be controlled by Carousel */}
-                </div>
-            )}
           </div>
 
           {isLoading ? (
