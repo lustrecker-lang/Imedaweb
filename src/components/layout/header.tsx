@@ -67,15 +67,15 @@ interface CompanyProfile {
 }
 
 const ListItem = React.forwardRef<
-  React.ElementRef<typeof NavigationMenuLink>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuLink> & { description: string }
->(({ className, title, description, children, ...props }, ref) => {
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a"> & { description: string }
+>(({ className, title, description, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
         <Link
           href={props.href || '#'}
-          ref={ref as any}
+          ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
@@ -128,7 +128,7 @@ export function Header() {
         <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
                 <NavigationMenuItem>
-                    <Link href="/" legacyBehavior passHref>
+                    <Link href="/" passHref>
                         <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
                             Accueil
                         </NavigationMenuLink>
