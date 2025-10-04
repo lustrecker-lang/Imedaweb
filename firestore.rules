@@ -1,51 +1,54 @@
 /**
- * @file Firestore Security Rules
- * @description This ruleset defines access control for the Firestore database.
+ * @fileOverview Firestore Security Rules for imeda.fr.
  *
  * Core Philosophy:
- * - The /pages and /companyProfile collections are publicly readable but only writable by authenticated users.
- * - The /leads collection allows public creation of documents, but only allows authenticated users to read/manage them.
+ * This ruleset focuses on securing access to page content and company profiles.
+ * All authenticated users can read all data (pages and company profiles).
+ * Write access is denied to all users.
+ *
+ * Data Structure:
+ * - /pages/{pageId}: Stores content for individual pages.
+ * - /companyProfile/{profileId}: Stores company branding information.
+ *
+ * Key Security Decisions:
+ * - Public Read Access: All authenticated users can read all page content and company profiles.
+ * - No Write Access: No users are currently authorized to create, update, or delete data.
+ * - No User Listing: Listing users is not permitted to prevent information disclosure.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * Helper Function to check if a user is signed in.
+     * @description Grants public read access to page content, but denies all write access.
+     * @path /pages/{pageId}
+     * @allow (get, list) Authenticated user reading page content.
+     * @deny (create, update, delete) Any user attempting to write page content.
+     * @principle Allows public read access but restricts all write operations.
+     */
+    match /pages/{pageId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Grants public read access to company profile information, but denies all write access.
+     * @path /companyProfile/{profileId}
+     * @allow (get, list) Authenticated user reading company profile.
+     * @deny (create, update, delete) Any user attempting to write company profile.
+     * @principle Allows public read access but restricts all write operations.
+     */
+    match /companyProfile/{profileId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Checks if the user is signed in.
+     * @returns {boolean} True if the user is signed in, false otherwise.
      */
     function isSignedIn() {
       return request.auth != null;
-    }
-
-    /**
-     * @description Allows public read access but restricts write access to authenticated users.
-     */
-    match /pages/{pageId} {
-      allow read: if true;
-      allow write: if isSignedIn();
-    }
-
-    /**
-     * @description Allows public read access but restricts write access to authenticated users.
-     */
-    match /companyProfile/{profileId} {
-      allow read: if true;
-      allow write: if isSignedIn();
-    }
-
-    /**
-     * @description Allows public creation of leads, but restricts all other access to authenticated users.
-     * @path /leads/{leadId}
-     * @allow (create) Anyone can create a new lead.
-     * @allow (get, list, update, delete) Only authenticated users (admins) can read or manage leads.
-     * @principle Allows public form submissions while securing lead data for admin access only.
-     */
-    match /leads/{leadId} {
-        // Allow signed-in users to read, update, and delete.
-        allow get, list, update, delete: if isSignedIn();
-
-        // Allow ANYONE (public) to create.
-        allow create: if true;
     }
   }
 }
