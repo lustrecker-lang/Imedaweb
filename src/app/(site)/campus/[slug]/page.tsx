@@ -145,7 +145,7 @@ export default function CampusPage() {
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-muted-foreground whitespace-pre-wrap text-sm">{campus.campusDescription.body}</p>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campus.campusDescription.body}</p>
                             </CardContent>
                         </Card>
                     </section>
@@ -162,7 +162,7 @@ export default function CampusPage() {
                             {campus.academicOffering?.subtitle && <CardDescription className="pt-2 text-sm">{campus.academicOffering.subtitle}</CardDescription>}
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground text-sm">Course list will be displayed here soon.</p>
+                            <p className="text-sm text-muted-foreground">Course list will be displayed here soon.</p>
                         </CardContent>
                     </Card>
                 </section>
@@ -245,3 +245,5 @@ export default function CampusPage() {
     </div>
   );
 }
+
+    
