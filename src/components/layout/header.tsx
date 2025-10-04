@@ -229,13 +229,6 @@ export function Header() {
         
         <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
-                <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                        <Link href="/" className={cn(navigationMenuTriggerStyle({variant: "ghost"}), "bg-transparent font-normal text-sm")}>
-                            Accueil
-                        </Link>
-                    </NavigationMenuLink>
-                </NavigationMenuItem>
                 {navStructure.map((category) => (
                     <NavigationMenuItem key={category.title}>
                         <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
@@ -292,13 +285,6 @@ export function Header() {
                   <LogoComponent />
                 </Link>
                 <nav className="grid gap-2 text-base font-normal">
-                    <Link
-                        href="/"
-                        className="block py-2 text-foreground/70 transition-colors hover:text-foreground"
-                        onClick={() => setIsOpen(false)}
-                    >
-                        Accueil
-                    </Link>
                     <Accordion type="multiple" className="w-full">
                        {navStructure.map((category) => (
                          <AccordionItem key={category.title} value={category.title} className="border-b-0">
