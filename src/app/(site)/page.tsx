@@ -88,7 +88,17 @@ export default function Home() {
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
   const heroMediaUrl = heroSection?.imageUrl;
-  const isHeroVideo = heroMediaUrl?.includes('video');
+  
+  const isVideoUrl = (url: string) => {
+    const videoExtensions = ['.mp4', '.webm', '.ogg'];
+    try {
+      const pathname = new URL(url).pathname;
+      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+    } catch (e) {
+      return false; // Invalid URL
+    }
+  };
+  const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
 
   const isLoading = isPageLoading || areCampusesLoading;
 
@@ -100,7 +110,7 @@ export default function Home() {
         fill
         className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
       />
-      <div className="relative flex h-full flex-col justify-end p-6">
+      <div className="relative flex h-full flex-col justify-end bg-gradient-to-t from-black/60 to-transparent p-6">
         <h3 className="text-lg font-normal text-white font-headline">
           {campus.name}
         </h3>
@@ -226,7 +236,7 @@ export default function Home() {
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
-            <div className="max-w-[75%] md:max-w-2xl">
+            <div className="max-w-[75%]">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
                   Our Campuses
                 </h2>
@@ -234,6 +244,11 @@ export default function Home() {
                   {isMobile ? "Explore our world-class campuses" : "Explore our world-class campuses located in global hubs of innovation."}
                 </p>
             </div>
+            {isMobile && (
+                <div className="flex gap-2">
+                    {/* Placeholder for buttons, will be controlled by Carousel */}
+                </div>
+            )}
           </div>
 
           {isLoading ? (
@@ -292,3 +307,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
