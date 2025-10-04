@@ -110,11 +110,11 @@ export default function Home() {
 
       <section className="py-16">
         <div className="container px-4 md:px-6">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="max-w-2xl">
             {isLoading ? (
               <div className="space-y-2">
-                <Skeleton className="h-8 w-2/3 mx-auto" />
-                <Skeleton className="h-5 w-full max-w-lg mx-auto" />
+                <Skeleton className="h-8 w-2/3" />
+                <Skeleton className="h-5 w-full max-w-lg" />
               </div>
             ) : (
               <>
