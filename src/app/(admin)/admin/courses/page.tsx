@@ -73,6 +73,12 @@ const themeSchema = z.object({
   categoryId: z.string(),
 });
 
+const formationSchema = z.object({
+    name: z.string().min(1, "Formation name is required."),
+    description: z.string().optional(),
+    themeId: z.string(),
+});
+
 // Interfaces
 interface Category extends z.infer<typeof categorySchema> {
   id: string;
@@ -80,6 +86,10 @@ interface Category extends z.infer<typeof categorySchema> {
 
 interface Theme extends z.infer<typeof themeSchema> {
   id: string;
+}
+
+interface Formation extends z.infer<typeof formationSchema> {
+    id: string;
 }
 
 export default function CoursesPage() {
@@ -90,6 +100,7 @@ export default function CoursesPage() {
 
   // State Management
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
 
   const [isCategoryAddDialogOpen, setIsCategoryAddDialogOpen] = useState(false);
   const [isCategoryEditDialogOpen, setIsCategoryEditDialogOpen] = useState(false);
@@ -102,6 +113,13 @@ export default function CoursesPage() {
   const [isThemeDeleteDialogOpen, setIsThemeDeleteDialogOpen] = useState(false);
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
   const [themeToDelete, setThemeToDelete] = useState<Theme | null>(null);
+  
+  const [isFormationAddDialogOpen, setIsFormationAddDialogOpen] = useState(false);
+  const [isFormationEditDialogOpen, setIsFormationEditDialogOpen] = useState(false);
+  const [isFormationDeleteDialogOpen, setIsFormationDeleteDialogOpen] = useState(false);
+  const [editingFormation, setEditingFormation] = useState<Formation | null>(null);
+  const [formationToDelete, setFormationToDelete] = useState<Formation | null>(null);
+
 
   // Firestore Queries
   const categoriesQuery = useMemoFirebase(() => {
@@ -113,9 +131,15 @@ export default function CoursesPage() {
     if (!firestore || !selectedCategory) return null;
     return query(collection(firestore, 'course_themes'), where('categoryId', '==', selectedCategory.id), orderBy('name', 'asc'));
   }, [firestore, selectedCategory]);
+  
+  const formationsQuery = useMemoFirebase(() => {
+    if (!firestore || !selectedTheme) return null;
+    return query(collection(firestore, 'course_formations'), where('themeId', '==', selectedTheme.id), orderBy('name', 'asc'));
+  }, [firestore, selectedTheme]);
 
   const { data: categories, isLoading: areCategoriesLoading } = useCollection<Omit<Category, 'id'>>(categoriesQuery);
   const { data: themes, isLoading: areThemesLoading } = useCollection<Omit<Theme, 'id'>>(themesQuery);
+  const { data: formations, isLoading: areFormationsLoading } = useCollection<Omit<Formation, 'id'>>(formationsQuery);
 
   // Forms
   const addCategoryForm = useForm<z.infer<typeof categorySchema>>({
@@ -137,6 +161,17 @@ export default function CoursesPage() {
     resolver: zodResolver(themeSchema.omit({ categoryId: true })),
     defaultValues: {},
   });
+  
+  const addFormationForm = useForm<z.infer<Omit<typeof formationSchema, 'themeId'>>>({
+    resolver: zodResolver(formationSchema.omit({ themeId: true })),
+    defaultValues: { name: '', description: '' },
+  });
+
+  const editFormationForm = useForm<z.infer<Omit<typeof formationSchema, 'themeId'>>>({
+    resolver: zodResolver(formationSchema.omit({ themeId: true })),
+    defaultValues: {},
+  });
+
 
   // Effects
   useEffect(() => {
@@ -156,6 +191,12 @@ export default function CoursesPage() {
       editThemeForm.reset(editingTheme);
     }
   }, [editingTheme, editThemeForm]);
+
+  useEffect(() => {
+    if (editingFormation) {
+      editFormationForm.reset(editingFormation);
+    }
+  }, [editingFormation, editFormationForm]);
 
   if (isUserLoading || !user) {
     return (
@@ -205,6 +246,11 @@ export default function CoursesPage() {
     }
     setCategoryToDelete(null);
   };
+  
+  const handleSelectCategory = (category: Category) => {
+    setSelectedCategory(category);
+    setSelectedTheme(null);
+  }
 
   // Handlers for Theme
   const onAddThemeSubmit = async (values: z.infer<Omit<typeof themeSchema, 'categoryId'>>) => {
@@ -241,9 +287,49 @@ export default function CoursesPage() {
     deleteDocumentNonBlocking(docRef);
     toast({ title: "Theme Deleted", description: "The theme has been permanently deleted." });
     setIsThemeDeleteDialogOpen(false);
+     if(selectedTheme?.id === themeToDelete.id) {
+        setSelectedTheme(null);
+    }
     setThemeToDelete(null);
   };
 
+  // Handlers for Formation
+    const onAddFormationSubmit = async (values: z.infer<Omit<typeof formationSchema, 'themeId'>>) => {
+        if (!firestore || !selectedTheme) return;
+        const dataToSave = { ...values, themeId: selectedTheme.id };
+        addDocumentNonBlocking(collection(firestore, 'course_formations'), dataToSave);
+        toast({ title: 'Success!', description: 'New formation has been added.' });
+        addFormationForm.reset();
+        setIsFormationAddDialogOpen(false);
+    };
+
+    const onEditFormationSubmit = async (values: z.infer<Omit<typeof formationSchema, 'themeId'>>) => {
+        if (!firestore || !editingFormation) return;
+        const docRef = doc(firestore, 'course_formations', editingFormation.id);
+        setDocumentNonBlocking(docRef, values, { merge: true });
+        toast({ title: 'Success!', description: 'Formation has been updated.' });
+        setIsFormationEditDialogOpen(false);
+        setEditingFormation(null);
+    };
+
+    const openEditFormationDialog = (formation: Formation) => {
+        setEditingFormation(formation);
+        setIsFormationEditDialogOpen(true);
+    };
+
+    const openDeleteFormationDialog = (formation: Formation) => {
+        setFormationToDelete(formation);
+        setIsFormationDeleteDialogOpen(true);
+    };
+
+    const handleDeleteFormation = () => {
+        if (!firestore || !formationToDelete) return;
+        const docRef = doc(firestore, 'course_formations', formationToDelete.id);
+        deleteDocumentNonBlocking(docRef);
+        toast({ title: "Formation Deleted", description: "The formation has been permanently deleted." });
+        setIsFormationDeleteDialogOpen(false);
+        setFormationToDelete(null);
+    };
 
   return (
     <>
@@ -315,7 +401,7 @@ export default function CoursesPage() {
                       categories.map((category) => (
                         <TableRow 
                           key={category.id} 
-                          onClick={() => setSelectedCategory(category as Category)}
+                          onClick={() => handleSelectCategory(category as Category)}
                           className={cn("cursor-pointer", selectedCategory?.id === category.id && "bg-muted/50")}
                         >
                           <TableCell className="font-medium py-2">{category.name}</TableCell>
@@ -405,13 +491,17 @@ export default function CoursesPage() {
                             ))
                         ) : themes && themes.length > 0 ? (
                             themes.map((theme) => (
-                            <TableRow key={theme.id}>
+                            <TableRow 
+                                key={theme.id}
+                                onClick={() => setSelectedTheme(theme as Theme)}
+                                className={cn("cursor-pointer", selectedTheme?.id === theme.id && "bg-muted/50")}
+                            >
                                 <TableCell className="font-medium py-2">{theme.name}</TableCell>
                                 <TableCell className="text-right py-2">
-                                <Button variant="ghost" size="icon" onClick={() => openEditThemeDialog(theme as Theme)}>
+                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditThemeDialog(theme as Theme);}}>
                                     <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="icon" onClick={() => openDeleteThemeDialog(theme as Theme)}>
+                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openDeleteThemeDialog(theme as Theme);}}>
                                     <Trash2 className="h-4 w-4 text-red-600" />
                                 </Button>
                                 </TableCell>
@@ -436,14 +526,87 @@ export default function CoursesPage() {
                 <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                     <CardTitle>Formations</CardTitle>
-                    <CardDescription>Manage specific courses. A formation can have multiple modules.</CardDescription>
+                    <CardDescription>Manage courses for {selectedTheme ? `"${selectedTheme.name}"` : 'a selected theme'}.</CardDescription>
                 </div>
-                <Button size="sm" disabled><Plus className="mr-2 h-4 w-4" /> Add Formation</Button>
+                <Dialog open={isFormationAddDialogOpen} onOpenChange={setIsFormationAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" disabled={!selectedTheme}><Plus className="mr-2 h-4 w-4" /> Add Formation</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Add New Formation</DialogTitle>
+                    <DialogDescription>For theme: {selectedTheme?.name}</DialogDescription>
+                  </DialogHeader>
+                  <Form {...addFormationForm}>
+                    <form onSubmit={addFormationForm.handleSubmit(onAddFormationSubmit)} className="space-y-4 py-4">
+                      <FormField control={addFormationForm.control} name="name" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Formation Name</FormLabel>
+                          <FormControl><Input placeholder="e.g., Advanced SEO" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={addFormationForm.control} name="description" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl><Textarea placeholder="A short description of the formation." {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <DialogFooter>
+                        <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                        <Button type="submit" disabled={addFormationForm.formState.isSubmitting}>Save</Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
                 </CardHeader>
                 <CardContent>
-                <div className="h-[400px] flex items-center justify-center">
-                    <p className="text-sm text-muted-foreground text-center">Select a theme to manage its formations.</p>
-                </div>
+                {!selectedTheme ? (
+                    <div className="h-[400px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground text-center">Select a theme to manage its formations.</p>
+                    </div>
+                ) : (
+                    <ScrollArea className="h-[400px]">
+                        <Table>
+                            <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                            {areFormationsLoading ? (
+                                Array.from({ length: 2 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
+                                    <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                                </TableRow>
+                                ))
+                            ) : formations && formations.length > 0 ? (
+                                formations.map((formation) => (
+                                <TableRow key={formation.id}>
+                                    <TableCell className="font-medium py-2">{formation.name}</TableCell>
+                                    <TableCell className="text-right py-2">
+                                    <Button variant="ghost" size="icon" onClick={() => openEditFormationDialog(formation as Formation)}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" onClick={() => openDeleteFormationDialog(formation as Formation)}>
+                                        <Trash2 className="h-4 w-4 text-red-600" />
+                                    </Button>
+                                    </TableCell>
+                                </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                <TableCell colSpan={2} className="h-24 text-center">No formations found for this theme.</TableCell>
+                                </TableRow>
+                            )}
+                            </TableBody>
+                        </Table>
+                    </ScrollArea>
+                )}
                 </CardContent>
             </Card>
 
@@ -562,6 +725,55 @@ export default function CoursesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+       {/* Edit Formation Dialog */}
+       <Dialog open={isFormationEditDialogOpen} onOpenChange={setIsFormationEditDialogOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Edit Formation: {editingFormation?.name}</DialogTitle>
+            </DialogHeader>
+            <Form {...editFormationForm}>
+                <form onSubmit={editFormationForm.handleSubmit(onEditFormationSubmit)} className="space-y-4 py-4">
+                <FormField control={editFormationForm.control} name="name" render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Formation Name</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )} />
+                <FormField control={editFormationForm.control} name="description" render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl><Textarea {...field} /></FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )} />
+                <DialogFooter>
+                    <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                    <Button type="submit" disabled={editFormationForm.formState.isSubmitting}>Save Changes</Button>
+                </DialogFooter>
+                </form>
+            </Form>
+            </DialogContent>
+        </Dialog>
+
+        {/* Delete Formation Alert Dialog */}
+        <AlertDialog open={isFormationDeleteDialogOpen} onOpenChange={setIsFormationDeleteDialogOpen}>
+            <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                This will permanently delete the formation <span className="font-semibold">{formationToDelete?.name}</span>. This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteFormation} className="bg-destructive hover:bg-destructive/90">
+                Delete
+                </AlertDialogAction>
+            </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </>
   );
 }
