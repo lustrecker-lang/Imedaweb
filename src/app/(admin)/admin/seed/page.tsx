@@ -1,8 +1,8 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useFirestore, setDocumentNonBlocking } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore, setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
+import { doc, collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -51,6 +51,12 @@ const pagesToSeed = [
     }
 ];
 
+const campusesToSeed = [
+    { name: "Dubaï" },
+    { name: "Côte d’Azur" },
+    { name: "Paris" },
+];
+
 export default function SeedPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -58,18 +64,20 @@ export default function SeedPage() {
   const handleSeed = () => {
     if (!firestore) return;
 
-    const seedPromises = pagesToSeed.map(page => {
+    pagesToSeed.forEach(page => {
         const pageRef = doc(firestore, 'pages', page.id);
-        return setDocumentNonBlocking(pageRef, page, {});
+        setDocumentNonBlocking(pageRef, page, {});
+    });
+
+    const campusCollection = collection(firestore, 'campuses');
+    campusesToSeed.forEach(campus => {
+        addDocumentNonBlocking(campusCollection, campus);
     });
 
     toast({
         title: "Seeding Initiated",
-        description: "Your database is being populated with initial page content.",
+        description: "Your database is being populated with initial content.",
     });
-
-    // We are not awaiting the promises here, as the updates are non-blocking.
-    // The user will be notified that the process has started.
   };
 
   return (
@@ -78,7 +86,7 @@ export default function SeedPage() {
         <CardHeader>
           <CardTitle>Database Seeding</CardTitle>
           <CardDescription>
-            Click the button below to populate your Firestore database with the initial content for your website pages (Home and About). 
+            Click the button below to populate your Firestore database with the initial content for your website pages and campuses. 
             This is a one-time action.
           </CardDescription>
         </CardHeader>

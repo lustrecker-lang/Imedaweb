@@ -104,6 +104,24 @@
         }
       },
       "required": ["fullName", "email", "message", "createdAt"]
+    },
+    "Campus": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Campus",
+      "type": "object",
+      "description": "Represents a school campus.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the campus."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL for an image of the campus.",
+          "format": "uri"
+        }
+      },
+      "required": ["name"]
     }
   },
   "auth": {
@@ -158,6 +176,22 @@
             {
               "name": "leadId",
               "description": "The unique identifier for the lead."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/campuses/{campusId}",
+        "definition": {
+          "entityName": "Campus",
+          "schema": {
+            "$ref": "#/backend/entities/Campus"
+          },
+          "description": "Stores information about each school campus.",
+          "params": [
+            {
+              "name": "campusId",
+              "description": "The unique identifier for the campus."
             }
           ]
         }

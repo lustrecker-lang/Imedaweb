@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useFirestore, useDoc } from "@/firebase";
-import { doc } from 'firebase/firestore';
+import { useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
+import { doc, collection, query, orderBy } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 import { ContactForm } from "@/components/contact-form";
 
@@ -44,14 +44,6 @@ const navStructure = [
         ]
     },
     {
-        title: "Campus",
-        items: [
-            { href: "#", title: "Dubaï", description: "Étudiez au carrefour de l'innovation et du commerce." },
-            { href: "#", title: "Côte d’Azur", description: "Un cadre idyllique pour l'apprentissage et la croissance." },
-            { href: "#", title: "Paris", description: "Plongez au cœur de la culture et de l'éducation européennes." },
-        ]
-    },
-    {
         title: "Autre",
         items: [
             { href: "#", title: "Services", description: "Des solutions sur mesure pour les entreprises." },
@@ -67,9 +59,15 @@ interface CompanyProfile {
   logoUrl?: string;
 }
 
+interface Campus {
+  id: string;
+  name: string;
+  imageUrl?: string;
+}
+
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a"> & { description: string }
+  React.ComponentPropsWithoutRef<"a"> & { description?: string }
 >(({ className, title, description, ...props }, ref) => {
   return (
     <li>
@@ -84,9 +82,11 @@ const ListItem = React.forwardRef<
           {...props}
         >
           <div className="text-sm font-normal leading-none">{title}</div>
-          <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
-            {description}
-          </p>
+          {description && (
+            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+              {description}
+            </p>
+          )}
         </Link>
       </NavigationMenuLink>
     </li>
@@ -107,6 +107,13 @@ export function Header() {
   }, [firestore]);
 
   const { data: companyProfile, isLoading } = useDoc<CompanyProfile>(companyProfileRef);
+
+  const campusesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'campuses'), orderBy('name', 'asc'));
+  }, [firestore]);
+
+  const { data: campuses } = useCollection<Campus>(campusesQuery);
 
   const LogoComponent = () => {
     if (isLoading) {
@@ -134,6 +141,17 @@ export function Header() {
     </Sheet>
   );
 
+  const campusNav = {
+    title: "Campus",
+    items: campuses ? campuses.map(campus => ({
+        href: '#',
+        title: campus.name,
+        description: `Découvrez notre campus à ${campus.name}.`
+    })) : []
+  };
+
+  const finalNavStructure = [...navStructure.slice(0, 2), campusNav, ...navStructure.slice(2)];
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center justify-between">
@@ -143,7 +161,7 @@ export function Header() {
         
         <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
-                {navStructure.map((category) => (
+                {finalNavStructure.map((category) => (
                     <NavigationMenuItem key={category.title}>
                         <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
                         <NavigationMenuContent>
@@ -183,7 +201,7 @@ export function Header() {
                 <div className="grid gap-4">
                     <nav className="grid gap-2 text-base font-normal">
                         <Accordion type="multiple" className="w-full">
-                        {navStructure.map((category) => (
+                        {finalNavStructure.map((category) => (
                             <AccordionItem key={category.title} value={category.title} className="border-b-0">
                             <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
                                 {category.title}

@@ -1,14 +1,19 @@
 'use client';
 import Link from "next/link";
 import { Instagram, Youtube } from "lucide-react";
-import { useFirestore, useDoc } from "@/firebase";
+import { useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { useMemo } from "react";
-import { doc } from "firebase/firestore";
+import { doc, collection, query, orderBy } from "firebase/firestore";
 import Image from "next/image";
 
 interface CompanyProfile {
   name?: string;
   logoUrl?: string;
+}
+
+interface Campus {
+  id: string;
+  name: string;
 }
 
 export function Footer() {
@@ -19,6 +24,13 @@ export function Footer() {
   }, [firestore]);
 
   const { data: companyProfile, isLoading } = useDoc<CompanyProfile>(companyProfileRef);
+
+  const campusesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'campuses'), orderBy('name', 'asc'));
+  }, [firestore]);
+
+  const { data: campuses } = useCollection<Campus>(campusesQuery);
 
   return (
     <footer className="border-t bg-background">
@@ -45,9 +57,17 @@ export function Footer() {
           <div>
             <h3 className="text-xs font-semibold tracking-wider uppercase">Campus</h3>
             <ul className="mt-4 space-y-2">
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Dubaï</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Côte d’Azur</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Paris</Link></li>
+              {campuses ? (
+                 campuses.map(campus => (
+                  <li key={campus.id}><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">{campus.name}</Link></li>
+                 ))
+              ) : (
+                <>
+                  <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Dubaï</Link></li>
+                  <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Côte d’Azur</Link></li>
+                  <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Paris</Link></li>
+                </>
+              )}
             </ul>
           </div>
           <div>
