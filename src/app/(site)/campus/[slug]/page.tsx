@@ -158,7 +158,7 @@ export default function CampusPage() {
             <div className="md:col-span-8 space-y-12">
                 
                 {/* Campus Description */}
-                {campus.campusDescription && (
+                {campus.campusDescription && (campus.campusDescription.headline || campus.campusDescription.body) && (
                     <section id="description">
                         <Card>
                             <CardHeader>
