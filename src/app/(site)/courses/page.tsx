@@ -88,6 +88,21 @@ export default function CoursesPage() {
 
     const isLoading = areCategoriesLoading || areThemesLoading || areFormationsLoading;
 
+    const selectedThemeName = useMemo(() => {
+        if (!selectedTheme || !themes) return null;
+        return themes.find(t => t.id === selectedTheme)?.name || null;
+    }, [selectedTheme, themes]);
+
+    const formationCount = filteredFormations?.length || 0;
+    const dynamicCardTitle = selectedThemeName
+        ? `${formationCount} Formation${formationCount !== 1 ? 's' : ''} in ${selectedThemeName}`
+        : `${formationCount} Formation${formationCount !== 1 ? 's' : ''}`;
+    
+    const dynamicCardDescription = selectedThemeName
+        ? `A list of available courses for the selected theme.`
+        : `A list of all available courses. Use the filters to narrow down your search.`;
+
+
     return (
         <div className="container mx-auto px-4 py-12 md:px-6">
             <Card className="mb-12 text-center shadow-sm">
@@ -135,7 +150,11 @@ export default function CoursesPage() {
 
             <main>
                 <Card>
-                    <CardContent className="pt-6">
+                    <CardHeader>
+                        <CardTitle>{dynamicCardTitle}</CardTitle>
+                        <CardDescription>{dynamicCardDescription}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
                         <Table>
                             <TableHeader>
                                 <TableRow>
