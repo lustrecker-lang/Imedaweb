@@ -321,13 +321,6 @@ export default function Home() {
                   Explorez nos thèmes de formation pour trouver le programme parfait pour vous.
                 </p>
             </div>
-            {!isMobile && (
-              <Button variant="link" asChild>
-                <Link href="/courses">
-                  Voir tout <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            )}
           </div>
 
           {isLoading ? (
