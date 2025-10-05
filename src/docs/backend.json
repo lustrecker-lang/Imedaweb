@@ -1,5 +1,41 @@
+
 {
   "entities": {
+    "Article": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Article",
+      "type": "object",
+      "description": "Represents a single publication or article.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the article."
+        },
+        "author": {
+          "type": "string",
+          "description": "The author of the article."
+        },
+        "publicationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the article was published."
+        },
+        "summary": {
+          "type": "string",
+          "description": "A short summary of the article."
+        },
+        "content": {
+          "type": "string",
+          "description": "The full content of the article."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL for the article's feature image.",
+          "format": "uri"
+        }
+      },
+      "required": ["title", "author", "publicationDate"]
+    },
     "CompanyProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "CompanyProfile",
@@ -376,6 +412,22 @@
             {
               "name": "pageId",
               "description": "The unique identifier for the page (e.g., 'home', 'courses')."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/articles/{articleId}",
+        "definition": {
+          "entityName": "Article",
+          "schema": {
+            "$ref": "#/backend/entities/Article"
+          },
+          "description": "Stores individual articles for the publications page.",
+          "params": [
+            {
+              "name": "articleId",
+              "description": "The unique identifier for the article."
             }
           ]
         }

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { DocumentData } from 'firebase-admin/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import CourseDetailView from './CourseDetailView';
+import { Metadata } from 'next';
 
 // Interfaces for server-side data fetching
 interface Formation {
@@ -25,6 +26,14 @@ interface Formation {
 interface Theme {
     id: string;
     name: string;
+    categoryId: string;
+}
+
+interface CourseCategory {
+  id: string;
+  name: string;
+  description?: string;
+  mediaUrl?: string;
 }
 
 interface Module {
@@ -53,9 +62,10 @@ interface CourseDetailPageContent {
   contact: { name: string; title: string; description: string; francePhone: string; uaePhone: string; email: string; imageUrl: string };
 }
 
-// 1. Dynamic Metadata Generation for SEO using firebase-admin
+
+// Dynamic Metadata Generation for SEO using firebase-admin
 // This is a server function that runs once for each request.
-export async function generateMetadata({ params }: { params: { formationId: string } }) {
+export async function generateMetadata({ params }: { params: { formationId: string } }): Promise<Metadata> {
   const formationId = params.formationId;
 
   try {
@@ -63,10 +73,35 @@ export async function generateMetadata({ params }: { params: { formationId: stri
     const docSnap = await formationRef.get();
 
     if (docSnap.exists) {
-      const formationData = docSnap.data() as DocumentData;
+      const formationData = docSnap.data() as Formation;
+      const title = formationData.name;
+      const description = formationData.objectifPedagogique || 'Détails d’une formation professionnelle.';
+
+      const themeRef = adminDb.collection('course_themes').doc(formationData.themeId);
+      const themeSnap = await themeRef.get();
+
+      let categoryOgImage = null;
+      if (themeSnap.exists) {
+        const themeData = themeSnap.data() as Theme;
+        const categoryRef = adminDb.collection('course_categories').doc(themeData.categoryId);
+        const categorySnap = await categoryRef.get();
+
+        if (categorySnap.exists) {
+          categoryOgImage = (categorySnap.data() as CourseCategory).mediaUrl;
+        }
+      }
+
+      const ogImage = categoryOgImage || null;
+      const openGraphImages = ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: title }] : [];
+
       return {
-        title: formationData.name,
-        description: formationData.objectifPedagogique || 'Détails d’une formation professionnelle.',
+        title: title,
+        description: description,
+        openGraph: {
+          title: title,
+          description: description,
+          images: openGraphImages,
+        },
       };
     } else {
       return {
@@ -95,7 +130,6 @@ async function getCourseDetails(formationId: string) {
 
         const formationData = { id: formationSnap.id, ...formationSnap.data() } as Formation;
 
-        // Fetch related data in parallel
         const [themeSnap, modulesSnap, campusesSnap, servicesSnap, coursePageContentSnap] = await Promise.all([
             formationData.themeId ? adminDb.collection('course_themes').doc(formationData.themeId).get() : Promise.resolve(null),
             adminDb.collection('course_modules').where('formationId', '==', formationId).get(),
@@ -109,7 +143,6 @@ async function getCourseDetails(formationId: string) {
         const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
         const coursePageContent = coursePageContentSnap.exists ? coursePageContentSnap.data() as CourseDetailPageContent : null;
         
-        // Sort all services by name on the server
         const allServices = servicesSnap.docs
             .map(doc => ({ id: doc.id, ...doc.data() }) as Service)
             .sort((a, b) => a.name.localeCompare(b.name));
@@ -129,7 +162,6 @@ async function getCourseDetails(formationId: string) {
     }
 }
 
-// Loading Skeleton
 const CourseDetailPageSkeleton = () => {
     return (
         <div className="container mx-auto px-4 py-12 md:px-6">
@@ -152,11 +184,9 @@ const CourseDetailPageSkeleton = () => {
     );
 }
 
-// The Page component is now a Server Component
 export default async function FormationDetailPage({ params }: { params: { formationId: string } }) {
   const courseData = await getCourseDetails(params.formationId);
   
-  // 2. Handle 404 Not Found case
   if (!courseData.formation) {
     notFound();
   }
