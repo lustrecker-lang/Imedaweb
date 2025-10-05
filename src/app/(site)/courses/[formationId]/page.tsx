@@ -208,12 +208,11 @@ export default function FormationDetailPage() {
                         {areModulesLoading ? <Skeleton className="h-48 w-full" /> : modules && modules.length > 0 && (
                             <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
-                                <div className="space-y-6 border-l-2 border-primary/20 pl-6">
-                                    {modules.sort((a,b) => (a.name || '').localeCompare(b.name || '', undefined, {numeric: true})).map((module, index) => (
+                                <div className="space-y-4 border-l-2 border-primary/20 pl-6">
+                                    {modules.sort((a,b) => (a.description || '').localeCompare(b.description || '', undefined, {numeric: true})).map((module) => (
                                         <div key={module.id} className="relative">
                                             <div className="absolute -left-[29px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                            <h4 className="font-semibold text-sm">{module.description}</h4>
-                                            <p className="text-sm mt-1">
+                                            <p className="text-sm">
                                                 {module.name}
                                             </p>
                                         </div>
@@ -221,7 +220,7 @@ export default function FormationDetailPage() {
                                 </div>
                             </section>
                         )}
-
+                        
                         <section id="availability">
                             <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
                              <div className="space-y-2 max-w-sm">
@@ -241,6 +240,7 @@ export default function FormationDetailPage() {
                                 )}
                             </div>
                         </section>
+
                          <section id="informations">
                             <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Info size={24}/>Informations</h2>
                              <div className="space-y-8">
@@ -249,8 +249,8 @@ export default function FormationDetailPage() {
                                     <div className="flex flex-wrap gap-4">
                                         {campuses && campuses.map(campus => (
                                              <div key={campus.id} className="group">
-                                                <div className="w-32 text-center">
-                                                    <div className="relative w-32 h-24 rounded-md overflow-hidden border">
+                                                <div className="w-36 text-center">
+                                                    <div className="relative w-36 h-28 rounded-md overflow-hidden border">
                                                          {campus.imageUrl ? (
                                                             <MediaPreview url={campus.imageUrl} alt={campus.name} />
                                                           ) : (
