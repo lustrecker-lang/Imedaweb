@@ -316,7 +316,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionContent>
                                     <div className="pt-4">
                                         <div className="relative pl-3.5">
-                                            <div className="absolute left-0 top-0 h-full w-0.5 bg-border translate-x-1.5" aria-hidden="true" />
+                                            <div className="absolute left-[7px] top-0 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
                                             <div className="space-y-6">
                                                 {sortedModules.map((module) => (
                                                 <div key={module.id} className="relative pl-8">
@@ -371,7 +371,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <div className="flex flex-wrap gap-4 pt-4">
                                         {availability.length > 0 ? (
                                             availability.map((month) => (
-                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm flex-1 basis-[28%] md:basis-auto md:w-32 md:h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
                                                     <div className="text-center">
                                                         <p className="font-semibold capitalize">{month.month}</p>
                                                         <p className="text-xs">{month.year}</p>
