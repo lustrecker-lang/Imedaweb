@@ -3,7 +3,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
-import { DynamicIcons } from "@/components/layout/dynamic-icons";
+import { ClientDynamicIcons } from "@/components/layout/client-dynamic-icons";
 
 export const metadata: Metadata = {
   title: "IMEDA",
@@ -48,7 +48,7 @@ export default function RootLayout({
         )}
       >
         <FirebaseClientProvider>
-          <DynamicIcons />
+          <ClientDynamicIcons />
           {children}
           <Toaster />
         </FirebaseClientProvider>
