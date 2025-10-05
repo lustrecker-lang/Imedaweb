@@ -93,7 +93,7 @@ export default function FormationDetailPage() {
             months.push({
                 month: format(date, 'MMMM', { locale: fr }),
                 year: format(date, 'yyyy', { locale: fr }),
-                isAvailable: i !== 3,
+                isAvailable: i !== 4 && i !== 6,
             });
         }
         setAvailability(months);
@@ -210,10 +210,10 @@ export default function FormationDetailPage() {
                              <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 <div className="space-y-4 border-l-2 border-primary/20 pl-6">
-                                    {modules.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true })).map((module, index) => (
+                                    {modules.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true })).map((module) => (
                                         <div key={module.id} className="relative">
                                             <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                            <p className="text-sm">
+                                            <p className="">
                                                 {module.name}
                                             </p>
                                         </div>
@@ -311,4 +311,5 @@ export default function FormationDetailPage() {
             </main>
         </div>
     );
-}
+
+    
