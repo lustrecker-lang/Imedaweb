@@ -1,3 +1,4 @@
+
 // src/app/(site)/home-client.tsx
 'use client';
 
@@ -8,7 +9,7 @@ import { Search, ArrowRight } from "lucide-react";
 import { useState, useMemo } from 'react';
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Combobox } from "@/components/ui/combobox";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -142,9 +143,6 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
                   <span className="hidden md:inline">Explorez nos thèmes de formation pour trouver le programme parfait pour vous.</span>
                 </p>
             </div>
-            <div className="hidden sm:inline-flex">
-              <Button variant="link" asChild><Link href="/courses">Voir tout<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
-            </div>
           </div>
           <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
           <CarouselContent className="-ml-4">
@@ -165,28 +163,20 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
                                    <CardDescription>{`${category.formationCount} formations`}</CardDescription>
                               </CardHeader>
                               <CardContent className="flex-grow text-left">
-                                  {category.themes && category.themes.length > 0 ? (
-                                      <ul className="text-sm text-muted-foreground space-y-1">
-                                          {category.themes.map(theme => (
-                                              <li key={theme.id} className="truncate">{theme.name}</li>
-                                          ))}
-                                      </ul>
-                                  ) : (
-                                    <p className="text-sm text-muted-foreground">Aucun thème disponible.</p>
-                                  )}
+                                  <ul className="text-sm text-muted-foreground space-y-1">
+                                      {category.themes.map(theme => (
+                                          <li key={theme.id} className="truncate">{theme.name}</li>
+                                      ))}
+                                  </ul>
                               </CardContent>
                           </Card>
                       </Link>
                   </CarouselItem>
               ))}
           </CarouselContent>
-            <div className="absolute top-[-3.5rem] right-0 flex gap-2 sm:hidden">
+            <div className="absolute top-[-3.5rem] right-0 flex gap-2">
               <CarouselPrevious className="static translate-y-0 rounded-none inline-flex" />
               <CarouselNext className="static translate-y-0 rounded-none inline-flex" />
-            </div>
-            <div className="absolute top-[-4.5rem] right-0 hidden sm:inline-flex gap-2">
-              <CarouselPrevious className="static translate-y-0 rounded-none" />
-              <CarouselNext className="static translate-y-0 rounded-none" />
             </div>
           </Carousel>
         </div>
