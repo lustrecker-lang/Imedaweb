@@ -185,7 +185,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionContent>
                                     <div className="space-y-8 pt-4">
                                         <div>
-                                            <h3 className="font-semibold flex items-center gap-2 mb-3">Ce cours est disponible dans tous ces campus.</h3>
+                                            <h3 className="font-semibold flex items-center gap-2 mb-3">Cette formation est disponible dans tous ces campus.</h3>
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
                                                       <div key={campus.id} className="w-48 group">
@@ -203,16 +203,16 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                                             <div>
-                                                <h3 className="font-semibold flex items-center gap-2 mb-2">Durée</h3>
+                                                <h3 className="font-normal">Durée</h3>
                                                 <p className="text-sm text-muted-foreground">Deux semaines (14 jours)</p>
                                             </div>
                                             <div>
-                                                <h3 className="font-semibold flex items-center gap-2 mb-2">Heures de cours</h3>
+                                                <h3 className="font-normal">Heures de cours</h3>
                                                 <p className="text-sm text-muted-foreground">55 heures</p>
                                             </div>
                                              {formation.format && (
                                                 <div>
-                                                    <h3 className="font-semibold flex items-center gap-2 mb-2">Format</h3>
+                                                    <h3 className="font-normal">Format</h3>
                                                     <Badge variant="outline">{formation.format}</Badge>
                                                 </div>
                                              )}
@@ -234,7 +234,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-                            <AccordionItem value="item-2">
+                             <AccordionItem value="item-2">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
                                 </AccordionTrigger>
@@ -294,12 +294,12 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="relative pl-8 pt-4">
-                                        <div className="absolute top-4 bottom-0 left-[31px] w-0.5 bg-primary/20" />
+                                    <div className="relative pl-6 pt-4">
+                                        <div className="absolute top-4 bottom-0 left-[29.5px] w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
                                             <div key={module.id} className="relative mb-4 last:mb-0">
-                                                <div className="absolute -left-[1px] h-3 w-3 rounded-full bg-primary top-1.5" />
-                                                <p className="text-foreground ml-4">{module.name}</p>
+                                                <div className="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                                <p className="text-foreground ml-6">{module.name}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -328,10 +328,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     {!service.isOptional ? (
                                                         <>
                                                             <Check size={16} className="text-green-600" />
-                                                            <span>Included</span>
+                                                            <span>Inclus</span>
                                                         </>
                                                     ) : (
-                                                        <span>Optional</span>
+                                                        <span>Optionnel</span>
                                                     )}
                                                 </div>
                                             </div>
