@@ -278,7 +278,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                         </div>
                                                         <div className="text-center">
                                                             <p className="text-xs text-muted-foreground">à partir de</p>
-                                                            <p className="font-semibold text-xl sm:text-2xl mt-1">{calculatePrice(formation.prixSansHebergement)}</p>
+                                                            <p className="font-semibold text-lg sm:text-2xl mt-1">{calculatePrice(formation.prixSansHebergement)}</p>
                                                             <p className="text-xs text-muted-foreground mt-2">Par personne</p>
                                                         </div>
                                                     </CardContent>
@@ -293,7 +293,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                         </div>
                                                         <div className="text-center">
                                                             <p className="text-xs text-muted-foreground">à partir de</p>
-                                                            <p className="font-semibold text-xl sm:text-2xl mt-1">{calculatePrice(formation.prixAvecHebergement)}</p>
+                                                            <p className="font-semibold text-lg sm:text-2xl mt-1">{calculatePrice(formation.prixAvecHebergement)}</p>
                                                             <p className="text-xs text-muted-foreground mt-2">Par personne</p>
                                                         </div>
                                                     </CardContent>
@@ -315,13 +315,13 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="pt-4">
-                                        <div className="relative pl-3.5">
-                                            <div className="absolute left-0 top-0 h-full w-0.5 bg-border translate-x-[7px]" aria-hidden="true" />
-                                            <div className="space-y-6">
+                                        <div className="relative pl-3">
+                                            <div className="absolute left-1/2 top-0 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
+                                            <div className="space-y-8">
                                                 {sortedModules.map((module) => (
-                                                <div key={module.id} className="relative pl-8">
-                                                    <div className="absolute left-0 top-1 h-4 w-4 rounded-full bg-primary border-4 border-background" />
-                                                    <p className="font-medium text-foreground">{module.name}</p>
+                                                <div key={module.id} className="relative flex items-start gap-4">
+                                                    <div className="flex-shrink-0 w-4 h-4 rounded-full bg-primary border-4 border-background absolute left-1/2 top-1 -translate-x-1/2" />
+                                                    <p className="font-medium text-foreground ml-6">{module.name}</p>
                                                 </div>
                                                 ))}
                                             </div>
@@ -368,23 +368,23 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="grid grid-cols-3 lg:grid-cols-6 gap-4 pt-4">
+                                    <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-4">
                                         {availability.length > 0 ? (
                                             availability.map((month) => (
-                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg border text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
                                                     <div className="text-center">
-                                                        <p className="font-semibold capitalize">{month.month}</p>
+                                                        <p className="font-semibold capitalize text-xs sm:text-sm">{month.month}</p>
                                                         <p className="text-xs">{month.year}</p>
                                                     </div>
                                                     {month.isAvailable ? (
-                                                        <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800">Disponible</Badge>
+                                                        <Badge variant="secondary" className="mt-2 text-xs bg-green-100 text-green-800">Disponible</Badge>
                                                     ) : (
-                                                        <Badge variant="secondary" className="mt-2 bg-red-100 text-red-800">Complet</Badge>
+                                                        <Badge variant="secondary" className="mt-2 text-xs bg-red-100 text-red-800">Complet</Badge>
                                                     )}
                                                 </div>
                                             ))
                                         ) : (
-                                            Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)
+                                            Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)
                                         )}
                                     </div>
                                 </AccordionContent>
@@ -457,7 +457,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto md:mx-0">
                                                {coursePageContent.contact.description}
                                             </p>
-                                            <div className="flex flex-col items-center md:items-start gap-2 mt-4">
+                                            <div className="flex flex-col items-center md:items-start gap-4 mt-4">
                                                 <a href={`tel:${coursePageContent.contact.francePhone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
                                                     <Phone size={16} />
                                                     <span>France: {coursePageContent.contact.francePhone}</span>
