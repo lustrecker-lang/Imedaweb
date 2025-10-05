@@ -292,8 +292,8 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Programme de la Formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="relative pl-6 pt-4">
-                                        <div className="absolute top-4 bottom-0 left-3 w-0.5 bg-primary/20" />
+                                    <div className="relative pl-3 pt-4">
+                                        <div className="absolute top-4 bottom-0 left-[0.30rem] w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
                                             <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
                                                 <div className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full bg-primary" />
@@ -360,6 +360,30 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         ) : (
                                             Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-32 w-32" />)
                                         )}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-7">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Valeur IMEDA</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
+                                        <div className="relative h-64 rounded-lg overflow-hidden">
+                                            <Image 
+                                                src="https://picsum.photos/seed/imeda-value/800/600"
+                                                alt="Valeur IMEDA"
+                                                fill
+                                                className="object-cover"
+                                                data-ai-hint="network growth"
+                                            />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold">Un Réseau International d'Excellence</h3>
+                                            <p className="text-sm text-muted-foreground mt-2">
+                                                En rejoignant IMEDA, vous accédez à un écosystème dynamique d'acteurs influents, d'experts sectoriels et de décideurs africains et européens. Nos programmes sont conçus pour favoriser les connexions, le partage d'expériences et la création d'opportunités professionnelles durables.
+                                            </p>
+                                        </div>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
