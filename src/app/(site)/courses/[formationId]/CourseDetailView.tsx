@@ -316,12 +316,12 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionContent>
                                     <div className="pt-4">
                                         <div className="relative pl-3">
-                                            <div className="absolute left-1/2 top-0 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
+                                            <div className="absolute left-3 top-1 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
                                             <div className="space-y-8">
                                                 {sortedModules.map((module) => (
-                                                <div key={module.id} className="relative flex items-start gap-4">
-                                                    <div className="flex-shrink-0 w-4 h-4 rounded-full bg-primary border-4 border-background absolute left-1/2 top-1 -translate-x-1/2" />
-                                                    <p className="font-medium text-foreground ml-6">{module.name}</p>
+                                                <div key={module.id} className="relative flex items-start gap-4 pl-6">
+                                                    <div className="flex-shrink-0 w-3 h-3 rounded-full bg-primary absolute left-0 top-1.5" />
+                                                    <p className="font-medium text-foreground">{module.name}</p>
                                                 </div>
                                                 ))}
                                             </div>
@@ -335,9 +335,9 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Services</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 pt-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 pt-4">
                                         {allServices.map((service) => (
-                                            <div key={service.id} className="flex items-center justify-between gap-4 p-3 rounded-md border bg-muted/30">
+                                            <div key={service.id} className="flex items-center justify-between gap-4 py-2 border-b">
                                                 <div className="flex items-center gap-4">
                                                      {service.mediaUrl ? (
                                                         <div className="relative h-10 w-10 shrink-0 rounded-sm overflow-hidden">
@@ -491,3 +491,5 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
+
+    
