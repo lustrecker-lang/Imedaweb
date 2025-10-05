@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Calendar, Clock, Laptop, Check, Building, GraduationCap } from 'lucide-react';
+import { ChevronRight, GraduationCap, Phone, Mail } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -195,8 +195,9 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                             ) : (
                                                                 <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                             )}
+                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                                            <p className="absolute bottom-2 left-3 text-sm font-semibold text-white">{campus.name}</p>
                                                         </div>
-                                                        <p className="absolute bottom-2 left-3 text-sm font-semibold text-white">{campus.name}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -277,7 +278,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <Card className="border-primary/50 bg-primary/5">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
-                                                             <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18}/></div>
+                                                             <div className="flex items-center justify-center gap-2 text-muted-foreground"><GraduationCap size={18}/></div>
                                                             <h4 className="font-semibold mt-2">Forfait avec hébergement</h4>
                                                         </div>
                                                         <div className="text-center">
@@ -299,10 +300,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="relative pl-3 pt-4">
-                                        <div className="absolute top-4 bottom-0 left-1 w-0.5 bg-primary/20" />
+                                        <div className="absolute top-4 bottom-0 left-[0.32rem] w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
                                             <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
-                                                <div className="absolute left-[-0.30rem] top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                                <div className="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-primary" />
                                                 <p className="text-foreground">{module.name}</p>
                                             </div>
                                         ))}
@@ -331,7 +332,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     {!service.isOptional ? (
                                                         <>
-                                                            <Check size={16} className="text-green-600" />
+                                                            <GraduationCap size={16} className="text-green-600" />
                                                             <span>Inclus</span>
                                                         </>
                                                     ) : (
@@ -426,6 +427,45 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </Accordion>
                                 </AccordionContent>
                             </AccordionItem>
+                            <AccordionItem value="item-contact">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Contactez-nous</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="grid md:grid-cols-3 gap-8 items-center pt-4">
+                                        <div className="relative h-40 w-40 mx-auto md:mx-0 rounded-full overflow-hidden">
+                                            <Image 
+                                                src="https://picsum.photos/seed/rep/400/400"
+                                                alt="Amel K."
+                                                fill
+                                                className="object-cover"
+                                                data-ai-hint="professional woman portrait"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2 text-center md:text-left">
+                                            <h3 className="text-lg font-headline font-normal">Amel K.</h3>
+                                            <p className="text-sm text-muted-foreground">Représentante de la formation</p>
+                                            <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto md:mx-0">
+                                               Que vous soyez un particulier ou une organisation/un groupe à la recherche d'un programme, contactez-nous et nous vous aiderons à trouver la meilleure solution pour vous.
+                                            </p>
+                                            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 mt-4">
+                                                <a href="tel:+33189169308" className="flex items-center gap-2 text-sm text-primary hover:underline">
+                                                    <Phone size={16} />
+                                                    <span>France: +33 1 89 16 93 08</span>
+                                                </a>
+                                                <a href="tel:+97145656157" className="flex items-center gap-2 text-sm text-primary hover:underline">
+                                                    <Phone size={16} />
+                                                    <span>EAU: +971 4 565 61 57</span>
+                                                </a>
+                                                 <a href="mailto:amel@imeda.fr" className="flex items-center gap-2 text-sm text-primary hover:underline">
+                                                    <Mail size={16} />
+                                                    <span>amel@imeda.fr</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                          </Accordion>
                     </div>
                     
@@ -441,3 +481,5 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
+
+    
