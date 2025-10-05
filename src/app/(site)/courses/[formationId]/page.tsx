@@ -48,6 +48,28 @@ interface Campus {
     slug: string;
 }
 
+const isVideoUrl = (url?: string | null) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    try {
+      const pathname = new URL(url).pathname.split('?')[0];
+      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+    } catch (e) {
+      return false; // Invalid URL
+    }
+};
+
+const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+    if (isVideoUrl(url)) {
+        return (
+            <video src={url} autoPlay loop muted playsInline className="h-full w-full object-cover"/>
+        );
+    }
+    return (
+        <Image src={url} alt={alt} fill className="object-cover" />
+    );
+}
+
 export default function FormationDetailPage() {
     const firestore = useFirestore();
     const params = useParams();
@@ -169,7 +191,7 @@ export default function FormationDetailPage() {
                                             <Link href={`/campus/${campus.slug}`} key={campus.id} className="group">
                                                 <div className="w-24 text-center">
                                                     <div className="relative w-24 h-16 rounded-md overflow-hidden border transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2">
-                                                        <Image src={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/100/75`} alt={campus.name} fill className="object-cover" />
+                                                        <MediaPreview url={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/100/75`} alt={campus.name} />
                                                     </div>
                                                     <p className="text-xs font-medium mt-2">{campus.name}</p>
                                                 </div>
