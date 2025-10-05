@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Check } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -86,7 +86,7 @@ const isVideoUrl = (url?: string | null) => {
 const MediaPreview = ({ url, alt, className }: { url: string; alt: string; className?: string }) => {
     if (isVideoUrl(url)) {
         return (
-            <video src={url} autoPlay loop muted playsInline className={cn("h-full w-full object-cover", className)}/>
+            <video src={url} autoPlay loop muted playsInline className={cn("absolute inset-0 h-full w-full object-cover", className)}/>
         );
     }
     return (
@@ -329,7 +329,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     {!service.isOptional ? (
                                                         <>
-                                                            <Check size={16} className="text-green-600" />
                                                             <span>Inclus</span>
                                                         </>
                                                     ) : (
@@ -383,7 +382,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             />
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold">Un Réseau International d'Excellence</h3>
+                                            <h3 className="text-lg font-headline font-normal">Un Réseau International d'Excellence</h3>
                                             <p className="text-sm text-muted-foreground mt-2">
                                                 En rejoignant IMEDA, vous accédez à un écosystème dynamique d'acteurs influents, d'experts sectoriels et de décideurs africains et européens. Nos programmes sont conçus pour favoriser les connexions, le partage d'expériences et la création d'opportunités professionnelles durables.
                                             </p>
@@ -406,5 +405,3 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
-
-    
