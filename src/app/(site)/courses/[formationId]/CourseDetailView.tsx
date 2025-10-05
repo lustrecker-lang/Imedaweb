@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 
 interface Formation {
@@ -315,17 +316,24 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="pt-4">
-                                        <div className="relative pl-3">
-                                            <div className="absolute left-[0.375rem] top-1 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
-                                            <div className="space-y-8">
-                                                {sortedModules.map((module) => (
-                                                <div key={module.id} className="relative flex items-start gap-4 pl-6">
-                                                    <div className="flex-shrink-0 w-3 h-3 rounded-full bg-primary absolute left-0 top-1.5" />
-                                                    <p className="font-medium text-foreground">{module.name}</p>
-                                                </div>
+                                         <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Module</TableHead>
+                                                    <TableHead>Contenu</TableHead>
+                                                    <TableHead className="text-right">Durée</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {sortedModules.map((module, index) => (
+                                                    <TableRow key={module.id}>
+                                                        <TableCell className="font-medium">Module {index + 1}</TableCell>
+                                                        <TableCell>{module.name}</TableCell>
+                                                        <TableCell className="text-right">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
+                                                    </TableRow>
                                                 ))}
-                                            </div>
-                                        </div>
+                                            </TableBody>
+                                        </Table>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -335,11 +343,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Services</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 pt-4">
+                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 pt-4">
                                         {allServices.map((service, index) => (
                                             <div key={service.id} className={cn(
                                                 "flex items-center justify-between gap-4 py-3",
-                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1)) && "border-b"
+                                                (index < allServices.length - 2) && "border-b"
                                             )}>
                                                 <div className="flex items-center gap-4">
                                                      {service.mediaUrl ? (
