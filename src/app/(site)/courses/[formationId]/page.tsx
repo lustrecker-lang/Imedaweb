@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { CourseInquiryForm } from '@/components/course-inquiry-form';
 
 
 interface Formation {
@@ -119,6 +120,26 @@ export default function FormationDetailPage() {
                             </div>
                         </section>
                         
+                        {(formation.prixSansHebergement || formation.prixAvecHebergement) && (
+                             <section>
+                                <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
+                                <div className="space-y-4 max-w-sm">
+                                    {formation.prixSansHebergement && (
+                                        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
+                                            <span className="flex items-center gap-2 text-sm"><Banknote size={16}/>Formation seule</span>
+                                            <span className="font-semibold">{formation.prixSansHebergement}</span>
+                                        </div>
+                                    )}
+                                    {formation.prixAvecHebergement && (
+                                        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-md">
+                                            <span className="flex items-center gap-2 text-sm"><Building size={16}/>Forfait avec hébergement</span>
+                                            <span className="font-semibold">{formation.prixAvecHebergement}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+                        )}
+                        
                         {areModulesLoading ? <Skeleton className="h-48 w-full" /> : modules && modules.length > 0 && (
                             <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
@@ -138,21 +159,7 @@ export default function FormationDetailPage() {
                     
                     <aside className="sticky top-24 self-start">
                          <div className="bg-muted/30 p-6 rounded-lg border">
-                            <h3 className="text-xl font-headline font-normal text-primary mb-4">Tarifs</h3>
-                             <div className="space-y-4">
-                                {formation.prixSansHebergement && (
-                                    <div className="flex items-center justify-between">
-                                        <span className="flex items-center gap-2 text-sm text-muted-foreground"><Banknote size={16}/>Formation seule</span>
-                                        <span className="font-semibold">{formation.prixSansHebergement}</span>
-                                    </div>
-                                )}
-                                {formation.prixAvecHebergement && (
-                                    <div className="flex items-center justify-between">
-                                        <span className="flex items-center gap-2 text-sm text-muted-foreground"><Building size={16}/>Forfait avec hébergement</span>
-                                        <span className="font-semibold">{formation.prixAvecHebergement}</span>
-                                    </div>
-                                )}
-                            </div>
+                           <CourseInquiryForm courseName={formation.name} />
                          </div>
                     </aside>
                 </div>
@@ -160,4 +167,3 @@ export default function FormationDetailPage() {
         </div>
     );
 }
-
