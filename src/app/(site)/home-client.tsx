@@ -146,37 +146,53 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
           </div>
           <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
           <CarouselContent className="-ml-4">
-              {categoriesWithThemes.map((category) => (
+            {categoriesWithThemes.map((category) => {
+                const cardContent = (
+                    <Card className="h-full flex flex-col hover:border-primary transition-colors overflow-hidden">
+                        <div className="aspect-video relative w-full">
+                          <Image 
+                            src={category.mediaUrl || `https://picsum.photos/seed/${category.id}/400/225`}
+                            alt={category.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <CardHeader className="text-left">
+                            <CardTitle className="font-headline font-normal">{category.name}</CardTitle>
+                             <CardDescription>{`${category.formationCount} formations`}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-grow text-left">
+                            <ul className="text-sm text-muted-foreground space-y-1">
+                                {category.themes.map(theme => (
+                                    <li key={theme.id} className="truncate">
+                                      {isMobile ? theme.name : (
+                                        <Link href={`/courses?themeId=${theme.id}`} className="hover:text-primary hover:underline">{theme.name}</Link>
+                                      )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                );
+
+                return (
                   <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3 flex flex-col">
+                    {isMobile ? (
                       <Link href={`/courses?categoryId=${category.id}`} className="block h-full">
-                          <Card className="h-full flex flex-col hover:border-primary transition-colors overflow-hidden">
-                              <div className="aspect-video relative w-full">
-                                <Image 
-                                  src={category.mediaUrl || `https://picsum.photos/seed/${category.id}/400/225`}
-                                  alt={category.name}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                              <CardHeader className="text-left">
-                                  <CardTitle className="font-headline font-normal">{category.name}</CardTitle>
-                                   <CardDescription>{`${category.formationCount} formations`}</CardDescription>
-                              </CardHeader>
-                              <CardContent className="flex-grow text-left">
-                                  <ul className="text-sm text-muted-foreground space-y-1">
-                                      {category.themes.map(theme => (
-                                          <li key={theme.id} className="truncate">{theme.name}</li>
-                                      ))}
-                                  </ul>
-                              </CardContent>
-                          </Card>
+                        {cardContent}
                       </Link>
+                    ) : (
+                      <div className="h-full">
+                        {cardContent}
+                      </div>
+                    )}
                   </CarouselItem>
-              ))}
+                );
+            })}
           </CarouselContent>
             <div className="absolute top-[-3.5rem] right-0 flex gap-2">
-              <CarouselPrevious className="static translate-y-0 rounded-none inline-flex" />
-              <CarouselNext className="static translate-y-0 rounded-none inline-flex" />
+              <CarouselPrevious className="static translate-y-0 rounded-none sm:inline-flex" />
+              <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
             </div>
           </Carousel>
         </div>
