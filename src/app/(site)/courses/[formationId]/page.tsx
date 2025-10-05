@@ -51,7 +51,8 @@ interface Campus {
 }
 
 interface MonthAvailability {
-  name: string;
+  month: string;
+  year: string;
   isAvailable: boolean;
 }
 
@@ -88,12 +89,12 @@ export default function FormationDetailPage() {
         const today = new Date();
         const months: MonthAvailability[] = [];
         for (let i = 0; i < 7; i++) {
-        const date = addMonths(today, i);
-        months.push({
-            name: format(date, 'MMMM yyyy', { locale: fr }),
-            // The 4th month (index 3) is unavailable
-            isAvailable: i !== 3,
-        });
+            const date = addMonths(today, i);
+            months.push({
+                month: format(date, 'MMMM', { locale: fr }),
+                year: format(date, 'yyyy', { locale: fr }),
+                isAvailable: i !== 3,
+            });
         }
         setAvailability(months);
     }, []);
@@ -209,7 +210,7 @@ export default function FormationDetailPage() {
                              <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 <div className="space-y-4 border-l-2 border-primary/20 pl-6">
-                                    {modules.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true })).map((module) => (
+                                    {modules.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true })).map((module, index) => (
                                         <div key={module.id} className="relative">
                                             <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-primary" />
                                             <p className="text-sm">
@@ -226,8 +227,11 @@ export default function FormationDetailPage() {
                              <div className="flex flex-wrap gap-4">
                                 {availability.length > 0 ? (
                                     availability.map((month) => (
-                                        <div key={month.name} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-28", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
-                                            <span className="font-semibold capitalize text-center">{month.name}</span>
+                                        <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-28", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                            <div className="text-center">
+                                                <p className="font-semibold capitalize">{month.month}</p>
+                                                <p className="text-xs">{month.year}</p>
+                                            </div>
                                             {month.isAvailable ? (
                                                 <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800"><Check size={14} className="mr-1"/>Disponible</Badge>
                                             ) : (
@@ -307,6 +311,4 @@ export default function FormationDetailPage() {
             </main>
         </div>
     );
-
-    
-
+}
