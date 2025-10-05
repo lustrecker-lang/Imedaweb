@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, Info, BookOpen, Banknote, ListTree, Briefcase } from 'lucide-react';
+import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, HelpCircle } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -196,6 +196,9 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
                                                     <div key={campus.id} className="w-48 group relative overflow-hidden rounded-lg">
+                                                        <Link href={`/campus/${campus.slug}`} className="absolute inset-0 z-10">
+                                                            <span className="sr-only">View {campus.name}</span>
+                                                        </Link>
                                                         <div className="relative w-48 h-32">
                                                             {campus.imageUrl ? (
                                                                 <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
@@ -297,6 +300,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 </Card>
                                             )}
                                         </div>
+                                        <div className="text-center mt-6">
+                                            <p className="text-xs text-muted-foreground">
+                                                Les prix sont approximatifs et peuvent varier en fonction du mois, du nombre de personnes, de la disponibilité et de nombreux autres facteurs.
+                                            </p>
+                                        </div>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -380,11 +388,13 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             {coursePageContent?.valeurImeda && (
                             <AccordionItem value="item-7">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">Valeur IMEDA</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">
+                                        {coursePageContent.valeurImeda.title}
+                                    </h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
-                                        <div className="relative aspect-square md:aspect-auto h-full min-h-[250px] w-full overflow-hidden">
+                                        <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full overflow-hidden">
                                             <Image 
                                                 src={coursePageContent.valeurImeda.imageUrl}
                                                 alt={coursePageContent.valeurImeda.title}
@@ -394,7 +404,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             />
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-headline font-normal">{coursePageContent.valeurImeda.title}</h3>
                                             <p className="text-sm text-muted-foreground mt-2">
                                                {coursePageContent.valeurImeda.content}
                                             </p>
@@ -478,3 +487,5 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
+
+    
