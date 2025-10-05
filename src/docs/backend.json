@@ -79,7 +79,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Lead",
       "type": "object",
-      "description": "Represents a lead submitted through the contact form.",
+      "description": "Represents a lead submitted through a contact form.",
       "properties": {
         "fullName": {
           "type": "string",
@@ -102,9 +102,17 @@
           "type": "string",
           "format": "date-time",
           "description": "The timestamp when the lead was created."
+        },
+        "leadType": {
+            "type": "string",
+            "description": "Type of lead, e.g., 'Contact Form' or 'Course Inquiry'."
+        },
+        "courseName": {
+            "type": "string",
+            "description": "Name of the course if the lead is a course inquiry."
         }
       },
-      "required": ["fullName", "email", "message", "createdAt"]
+      "required": ["fullName", "email", "createdAt"]
     },
     "Campus": {
       "$schema": "http://json-schema.org/draft-07/schema#",
