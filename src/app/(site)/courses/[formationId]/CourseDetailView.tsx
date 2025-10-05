@@ -223,8 +223,23 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
+                            
+                            <AccordionItem value="item-3">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><BookOpen size={24}/>Détails de la Formation</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="space-y-6 pt-4">
+                                        <DetailCard icon={<Target size={20} />} title="Public Concerné" content={formation.publicConcerne} />
+                                        <DetailCard icon={<CheckCircle size={20} />} title="Pré-requis" content={formation.preRequis} />
+                                        <DetailCard icon={<Award size={20} />} title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
+                                        <DetailCard icon={<Users size={20} />} title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
+                                        <DetailCard icon={<BookOpen size={20} />} title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
 
-                             <AccordionItem value="item-2">
+                            <AccordionItem value="item-2">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
                                 </AccordionTrigger>
@@ -278,21 +293,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-                            
-                            <AccordionItem value="item-3">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><BookOpen size={24}/>Détails de la Formation</h2>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="space-y-6 pt-4">
-                                        <DetailCard icon={<Target size={20} />} title="Public Concerné" content={formation.publicConcerne} />
-                                        <DetailCard icon={<CheckCircle size={20} />} title="Pré-requis" content={formation.preRequis} />
-                                        <DetailCard icon={<Award size={20} />} title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
-                                        <DetailCard icon={<Users size={20} />} title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
-                                        <DetailCard icon={<BookOpen size={20} />} title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
 
                             {sortedModules && sortedModules.length > 0 && (
                                 <AccordionItem value="item-4">
@@ -300,11 +300,12 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="relative pl-8 pt-4 border-l-2 border-primary/20 ml-2">
+                                     <div className="relative pl-8 pt-4">
+                                        <div className="absolute top-4 bottom-0 left-[39px] w-0.5 bg-primary/20"></div>
                                         <div className="space-y-4">
                                             {sortedModules.map((module) => (
-                                                <div key={module.id} className="relative">
-                                                    <div className="absolute -left-[39px] h-3 w-3 rounded-full bg-primary top-1.5" />
+                                                <div key={module.id} className="relative pl-4">
+                                                    <div className="absolute -left-[9px] h-3 w-3 rounded-full bg-primary top-1.5" />
                                                     <p className="text-foreground">{module.name}</p>
                                                 </div>
                                             ))}
