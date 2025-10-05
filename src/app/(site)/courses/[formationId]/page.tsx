@@ -8,7 +8,7 @@ import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase
 import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, MapPin } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -136,8 +136,8 @@ export default function FormationDetailPage() {
     const sortedModules = useMemo(() => {
         if (!modules) return [];
         return [...modules].sort((a, b) => {
-            const numA = parseInt(a.name.match(/\d+/)?.toString() || '0');
-            const numB = parseInt(b.name.match(/\d+/)?.toString() || '0');
+            const numA = parseInt(a.name.match(/\d+/)?.[0] || '0');
+            const numB = parseInt(b.name.match(/\d+/)?.[0] || '0');
             return numA - numB;
         });
     }, [modules]);
@@ -363,3 +363,5 @@ export default function FormationDetailPage() {
         </div>
     );
 }
+
+    
