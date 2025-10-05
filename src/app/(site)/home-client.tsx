@@ -48,15 +48,6 @@ export function HomeClient({ homePage, campuses, themes, formations }: HomeClien
     if (selectedThemeId) router.push(`/courses?themeId=${selectedThemeId}`);
   };
 
-  const themesWithFormationCounts = useMemo(() => {
-    if (!themes || !formations) return [];
-    const counts: Record<string, number> = formations.reduce((acc, f) => {
-        acc[f.themeId] = (acc[f.themeId] || 0) + 1;
-        return acc;
-    }, {});
-    return themes.map(theme => ({ ...theme, formationCount: counts[theme.id] || 0 }));
-  }, [themes, formations]);
-
   const CampusCard = ({ campus, className }: { campus: Campus, className?: string }) => {
     const isCardVideo = isVideoUrl(campus.imageUrl);
     return (
@@ -79,7 +70,7 @@ export function HomeClient({ homePage, campuses, themes, formations }: HomeClien
     <div className="flex flex-col">
       <section className="py-8">
         <div className="container px-4 md:px-6">
-          <div className="relative h-[60vh] min-h-[400px] md:min-h-[500px] w-full overflow-hidden">
+          <div className="relative h-[50vh] min-h-[350px] md:min-h-[400px] w-full overflow-hidden">
               {heroMediaUrl && ( isHeroVideo ? 
                   (<video src={heroMediaUrl} autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover"/>) : 
                   (<Image src={heroMediaUrl} alt={heroSection?.title || ""} fill className="object-cover" priority/>)
@@ -125,25 +116,31 @@ export function HomeClient({ homePage, campuses, themes, formations }: HomeClien
        <section className="py-16 bg-muted/30">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
-            <div className="max-w-2xl">
+            <div className="max-w-[75%]">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Formations IMEDA</h2>
                 <p className="mt-2 text-muted-foreground md:text-base/relaxed"><span className="md:hidden">Explorez nos thèmes de formation</span><span className="hidden md:inline">Explorez nos thèmes de formation pour trouver le programme parfait pour vous.</span></p>
             </div>
           </div>
           <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
-              <CarouselContent className="-ml-4">
-              {themesWithFormationCounts.map((theme) => (
-                  <CarouselItem key={theme.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
-                      <Link href={`/courses?themeId=${theme.id}`} className="block h-full">
-                          <Card className="h-full flex flex-col hover:border-primary transition-colors">
-                              <CardHeader><CardTitle className="font-headline font-normal">{theme.name}</CardTitle></CardHeader>
-                              <CardContent className="flex-grow"><CardDescription className="line-clamp-3">{theme.description || "Aucune description pour ce thème."}</CardDescription></CardContent>
-                              <div className="p-6 pt-0 text-xs text-muted-foreground font-semibold">{theme.formationCount} {theme.formationCount > 1 ? 'formations' : 'formation'}</div>
-                          </Card>
-                      </Link>
-                  </CarouselItem>
-              ))}
-              </CarouselContent>
+          <CarouselContent className="-ml-4">
+  {themes.map((theme) => (
+      <CarouselItem key={theme.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
+          <Link href={`/courses?themeId=${theme.id}`} className="block h-full">
+              <Card className="h-full flex flex-col hover:border-primary transition-colors">
+                  <CardHeader>
+                      <CardTitle className="font-headline font-normal">{theme.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                      <CardDescription className="line-clamp-3">
+                          {theme.description || "Aucune description pour ce thème."}
+                      </CardDescription>
+                  </CardContent>
+                  {/* The count div is now gone */}
+              </Card>
+          </Link>
+      </CarouselItem>
+  ))}
+</CarouselContent>
                 <div className="absolute top-[-3.5rem] right-0 flex gap-2">
                   <CarouselPrevious className="static translate-y-0 rounded-none inline-flex" />
                   <CarouselNext className="static translate-y-0 rounded-none inline-flex" />
