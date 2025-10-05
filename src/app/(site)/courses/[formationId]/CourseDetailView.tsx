@@ -180,7 +180,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             <main className="container mx-auto px-4 py-12 md:px-6">
                 <div className="grid lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
-                         <Accordion type="multiple" defaultValue={['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6']} className="w-full">
+                         <Accordion type="multiple" defaultValue={['item-1', 'item-3']} className="w-full">
                             <AccordionItem value="item-1">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Info size={24}/>Informations</h2>
@@ -191,16 +191,16 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             <h3 className="font-semibold flex items-center gap-2 mb-3">Ce cours est disponible dans tous ces campus.</h3>
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
-                                                     <Link href={`/campus/${campus.slug}`} key={campus.id} className="w-48 group">
+                                                     <div key={campus.id} className="w-48 group relative">
                                                         <div className="relative w-48 h-32 rounded-lg overflow-hidden border">
                                                              {campus.imageUrl ? (
                                                                 <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
                                                             ) : (
                                                                 <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                             )}
-                                                            <p className="absolute bottom-2 left-3 text-sm font-medium text-white">{campus.name}</p>
+                                                            <p className="absolute bottom-2 left-3 text-sm font-semibold text-white">{campus.name}</p>
                                                         </div>
-                                                    </Link>
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>
@@ -382,3 +382,5 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
+
+    
