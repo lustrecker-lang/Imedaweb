@@ -184,7 +184,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             <main className="container mx-auto px-4 py-12 md:px-6">
                 <div className="grid lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
-                         <Accordion type="multiple" defaultValue={['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7']} className="w-full">
+                         <Accordion type="multiple" defaultValue={['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'faq', 'item-contact']} className="w-full">
                             <AccordionItem value="item-1">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Informations</h2>
@@ -316,11 +316,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionContent>
                                     <div className="pt-4">
                                         <div className="relative pl-3.5">
-                                            <div className="absolute left-[7px] top-0 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
+                                            <div className="absolute left-0 top-0 h-full w-0.5 bg-border translate-x-[7px]" aria-hidden="true" />
                                             <div className="space-y-6">
                                                 {sortedModules.map((module) => (
                                                 <div key={module.id} className="relative pl-8">
-                                                    <div className="absolute left-[1px] top-1 h-3 w-3 rounded-full bg-primary" />
+                                                    <div className="absolute left-0 top-1 h-4 w-4 rounded-full bg-primary border-4 border-background" />
                                                     <p className="font-medium text-foreground">{module.name}</p>
                                                 </div>
                                                 ))}
@@ -368,10 +368,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="grid grid-cols-3 md:flex md:flex-wrap gap-4 pt-4">
+                                    <div className="grid grid-cols-3 gap-4 pt-4">
                                         {availability.length > 0 ? (
                                             availability.map((month) => (
-                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm aspect-square md:w-32 md:h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
                                                     <div className="text-center">
                                                         <p className="font-semibold capitalize">{month.month}</p>
                                                         <p className="text-xs">{month.year}</p>
@@ -384,7 +384,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 </div>
                                             ))
                                         ) : (
-                                            Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-32 w-32" />)
+                                            Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)
                                         )}
                                     </div>
                                 </AccordionContent>
@@ -426,7 +426,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         {coursePageContent.faq.map(item => (
                                             <AccordionItem value={item.id} key={item.id}>
                                                 <AccordionTrigger>{item.question}</AccordionTrigger>
-                                                <AccordionContent className="text-sm text-muted-foreground">
+                                                <AccordionContent className="text-sm text-muted-foreground whitespace-pre-wrap">
                                                     {item.answer}
                                                 </AccordionContent>
                                             </AccordionItem>
