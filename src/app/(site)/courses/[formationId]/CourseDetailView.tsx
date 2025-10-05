@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, MapPin, Briefcase } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, MapPin, Briefcase, Check } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -308,7 +308,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     <h4 className="font-semibold mt-2">Forfait avec hébergement</h4>
                                                 </div>
                                                 <div className="text-center">
-                                                    <p className="text-xs text-muted-foreground mb-4">Par personne</p>
+                                                     <p className="text-xs text-muted-foreground mb-4">Par personne</p>
                                                      <p className="text-sm text-muted-foreground">à partir de</p>
                                                     <p className="font-semibold text-2xl">{calculatePrice(formation.prixAvecHebergement)}</p>
                                                 </div>
@@ -319,7 +319,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </section>
                         )}
                         
-                         {allServices && allServices.length > 0 && (
+                        {allServices && allServices.length > 0 && (
                             <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Briefcase size={24}/>Services</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
@@ -335,15 +335,21 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 )}
                                                 <span className="text-sm font-medium">{service.name}</span>
                                             </div>
-                                            <Badge variant={service.isOptional ? 'outline' : 'default'}>
-                                                {service.isOptional ? 'Optional' : 'Included'}
-                                            </Badge>
+                                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                {!service.isOptional ? (
+                                                    <>
+                                                        <Check size={16} className="text-green-600" />
+                                                        <span>Included</span>
+                                                    </>
+                                                ) : (
+                                                    <span>Optional</span>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </section>
                         )}
-
                     </div>
                     
                     <aside className="sticky top-24 self-start">
