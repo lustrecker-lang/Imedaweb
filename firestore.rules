@@ -1,18 +1,17 @@
 /**
- * @fileoverview Firestore Security Rules for Prototyping.
+ * @fileoverview Firestore Security Rules for the application.
  *
  * Core Philosophy:
- * This ruleset prioritizes rapid prototyping by granting broad access while maintaining basic authorization.
- * It focuses on preventing unauthorized data access and modification, but deliberately avoids strict data validation.
+ * This ruleset prioritizes authenticated access to all data.
+ * It does not enforce strict schema validation during this prototyping phase.
  *
  * Data Structure:
- * - `/pages/{pageId}`: Stores content for individual pages.
- * - `/companyProfile/{profileId}`: Stores company branding information.
+ * - /pages/{pageId}: Stores content for specific pages. Accessible by authenticated users.
+ * - /companyProfile/{profileId}: Stores company branding information. Accessible by authenticated users.
  *
  * Key Security Decisions:
- * - Authenticated users can create, update, and delete page content and company profiles.
- * - Data shape validation is skipped to facilitate rapid schema iteration during prototyping.
- * - Listing of documents is enabled for all collections to allow initial exploration.
+ * - All read and write operations require authentication.
+ * - No data is publicly accessible without authentication.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -21,33 +20,39 @@ service cloud.firestore {
     /**
      * @description Controls access to page content.
      * @path /pages/{pageId}
-     * @allow (create, update, delete) Authenticated user creating or modifying page content.
-     * @deny (create, update, delete) Unauthenticated user attempting to create, update, or delete page content.
-     * @principle Allows authenticated users to manage page content.
+     * @allow (get, list) if isSignedIn() - Allows any authenticated user to read the page content.
+     * @allow (create, update, delete) if isSignedIn() - Allows any authenticated user to modify the page content.
+     * @deny (create) if !isSignedIn() - Denies unauthenticated users from creating new pages.
+     * @deny (update) if !isSignedIn() - Denies unauthenticated users from updating pages.
+     * @deny (delete) if !isSignedIn() - Denies unauthenticated users from deleting pages.
+     * @principle Requires authentication for all operations.
      */
     match /pages/{pageId} {
-      allow get, list: if true;
-      allow create, update, delete: if isSignedIn();
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn();
     }
 
     /**
      * @description Controls access to company profile information.
      * @path /companyProfile/{profileId}
-     * @allow (create, update, delete) Authenticated user creating or modifying company profile.
-     * @deny (create, update, delete) Unauthenticated user attempting to create, update, or delete company profile.
-     * @principle Allows authenticated users to manage company profile information.
+     * @allow (get, list) if isSignedIn() - Allows any authenticated user to read the company profile.
+     * @allow (create, update, delete) if isSignedIn() - Allows any authenticated user to modify the company profile.
+     * @deny (create) if !isSignedIn() - Denies unauthenticated users from creating new profiles.
+     * @deny (update) if !isSignedIn() - Denies unauthenticated users from updating profiles.
+     * @deny (delete) if !isSignedIn() - Denies unauthenticated users from deleting profiles.
+     * @principle Requires authentication for all operations.
      */
     match /companyProfile/{profileId} {
-      allow get, list: if true;
-      allow create, update, delete: if isSignedIn();
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn();
     }
 
-    // ========================= HELPER FUNCTIONS =========================
-
-    /**
-     * @description Checks if the user is signed in.
-     * @return {bool} True if the user is signed in, false otherwise.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
