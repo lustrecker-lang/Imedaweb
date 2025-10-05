@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, Check, Briefcase } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, ChevronRight, Info, Calendar, Clock, Laptop, Check, Briefcase } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -140,15 +140,12 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
         return <div className="container py-12 text-center text-muted-foreground">Formation not found.</div>;
     }
 
-    const DetailCard = ({ icon, title, content }: { icon: React.ReactNode, title: string, content?: string }) => {
+    const DetailCard = ({ title, content }: { title: string, content?: string }) => {
         if (!content) return null;
         return (
-            <div className="flex items-start gap-4">
-                <div className="text-primary">{icon}</div>
-                <div>
-                    <h3 className="font-semibold">{title}</h3>
-                    <p className="text-sm text-muted-foreground">{content}</p>
-                </div>
+            <div>
+                <h3 className="font-normal">{title}</h3>
+                <p className="text-sm text-muted-foreground">{content}</p>
             </div>
         )
     };
@@ -191,7 +188,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             <h3 className="font-semibold flex items-center gap-2 mb-3">Ce cours est disponible dans tous ces campus.</h3>
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
-                                                     <div key={campus.id} className="w-48 group relative">
+                                                     <div key={campus.id} className="w-48 group">
                                                         <div className="relative w-48 h-32 rounded-lg overflow-hidden border">
                                                              {campus.imageUrl ? (
                                                                 <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
@@ -225,19 +222,19 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
                              <AccordionItem value="item-3">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><BookOpen size={24}/>Détails de la Formation</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><BookOpen size={24}/>Détails de la formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="space-y-6 pt-4">
-                                        <DetailCard icon={<Target size={20} />} title="Public Concerné" content={formation.publicConcerne} />
-                                        <DetailCard icon={<CheckCircle size={20} />} title="Pré-requis" content={formation.preRequis} />
-                                        <DetailCard icon={<Award size={20} />} title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
-                                        <DetailCard icon={<Users size={20} />} title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
-                                        <DetailCard icon={<BookOpen size={20} />} title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
+                                        <DetailCard title="Public Concerné" content={formation.publicConcerne} />
+                                        <DetailCard title="Pré-requis" content={formation.preRequis} />
+                                        <DetailCard title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
+                                        <DetailCard title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
+                                        <DetailCard title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-                            <AccordionItem value="item-2">
+                             <AccordionItem value="item-2">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
                                 </AccordionTrigger>
@@ -297,11 +294,12 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent className="pt-4 pl-4">
-                                    <div className="relative border-l-2 border-primary/20 space-y-4">
+                                    <div className="relative pl-8">
+                                        <div className="absolute top-0 left-[31px] h-full w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
-                                            <div key={module.id} className="relative pl-8">
-                                                <div className="absolute -left-[7px] h-3 w-3 rounded-full bg-primary top-1.5" />
-                                                <p className="text-foreground">{module.name}</p>
+                                            <div key={module.id} className="relative mb-4 last:mb-0">
+                                                <div className="absolute -left-[1px] h-3 w-3 rounded-full bg-primary top-1.5" />
+                                                <p className="text-foreground ml-4">{module.name}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -382,5 +380,3 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
-
-    
