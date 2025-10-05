@@ -119,7 +119,7 @@ export function CourseInquiryForm({ courseName }: CourseInquiryFormProps) {
                 <FormItem>
                   <FormLabel>Message</FormLabel>
                   <FormControl>
-                    <Textarea className="min-h-[100px]" {...field} />
+                    <Textarea placeholder="Votre message" className="min-h-[100px]" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
