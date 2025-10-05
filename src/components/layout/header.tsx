@@ -1,14 +1,13 @@
-
 "use client";
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -120,16 +119,30 @@ export function Header() {
   const { data: campuses } = useCollection<Campus>(campusesQuery);
 
   const LogoComponent = () => {
+    const fixedWidth = 'w-[96px]';
+    const fixedHeight = 'h-6';
+    
     if (isLoading) {
-      return <Skeleton className="h-6 w-24" />;
+      return <Skeleton className={`${fixedHeight} ${fixedWidth}`} />;
     }
     if (companyProfile?.logoUrl) {
-      return <Image src={companyProfile.logoUrl} alt={companyProfile.name || 'Company Logo'} width="0" height="0" sizes="100vw" className="h-6 w-auto object-contain" />;
+      return (
+        <div className={`relative ${fixedHeight} ${fixedWidth}`}>
+          <Image
+            src={companyProfile.logoUrl}
+            alt={companyProfile.name || 'Company Logo'}
+            fill
+            className="object-contain"
+            priority={true}
+            sizes="96px"
+          />
+        </div>
+      );
     }
     if(companyProfile?.name) {
-      return <span className="text-sm font-semibold tracking-wider font-headline">{companyProfile.name}</span>;
+      return <span className={`text-sm font-semibold tracking-wider font-headline ${fixedHeight} leading-6`}>{companyProfile.name}</span>;
     }
-    return <div className="h-6 w-24" />; // Empty div as a fallback to prevent layout shift
+    return <Skeleton className={`${fixedHeight} ${fixedWidth}`} />;
   }
   
   const DesktopContactButton = () => (
@@ -194,14 +207,21 @@ export function Header() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0">
+            <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0" hideClose>              {/* Corrected mobile header structure */}
+              <div className="flex h-16 items-center justify-between border-b px-6">
                 <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
-              <div className="p-6 pb-0">
-                <div className="flex items-center justify-between h-16 mb-4">
-                    <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
-                    <LogoComponent />
-                    </Link>
-                </div>
+                <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
+                  <LogoComponent />
+                </Link>
+                <SheetClose asChild>
+                  <Button variant="ghost" size="icon">
+                    <X className="h-6 w-6" />
+                    <span className="sr-only">Close menu</span>
+                  </Button>
+                </SheetClose>
+              </div>
+
+              <div className="p-6 pb-0 flex-grow overflow-y-auto">
                 <div className="grid gap-4">
                     <nav className="grid gap-2 text-base font-normal">
                         <Accordion type="multiple" className="w-full">
@@ -230,9 +250,9 @@ export function Header() {
                     </nav>
                 </div>
               </div>
-              <div className="mt-auto p-6">
+              <div className="mt-auto p-6 border-t">
                 <Button size="sm" className="w-full" asChild>
-                    <Link href="/contact" onClick={() => setIsMobileNavOpen(false)}>Contactez-nous</Link>
+                    <Link href="/contact" onClick={() => setIsContactSheetOpen(false)}>Contactez-nous</Link>
                 </Button>
               </div>
             </SheetContent>

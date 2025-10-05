@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -23,6 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { Trash2, Edit, Plus } from 'lucide-react';
 
 const formSchema = z.object({
@@ -50,7 +50,7 @@ export default function PublicationsPage() {
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const articlesQuery = useMemoFirebase(() => {
@@ -140,7 +140,7 @@ export default function PublicationsPage() {
     const docRef = doc(firestore, 'articles', editingArticle.id);
     setDocumentNonBlocking(docRef, dataToSave, { merge: true });
     toast({ title: 'Success!', description: `Article "${values.title}" has been updated.` });
-    setIsEditDialogOpen(false);
+    setIsEditSheetOpen(false);
     setEditingArticle(null);
     setImageFile(null);
   };
@@ -153,7 +153,7 @@ export default function PublicationsPage() {
   const openEditDialog = (article: Article) => {
     setEditingArticle(article);
     setImageFile(null);
-    setIsEditDialogOpen(true);
+    setIsEditSheetOpen(true);
   };
 
   const handleDeleteArticle = () => {
@@ -254,30 +254,37 @@ export default function PublicationsPage() {
           </CardContent>
         </Card>
       </div>
-
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-xl">
-          <DialogHeader><DialogTitle>Edit Article: {editingArticle?.title}</DialogTitle></DialogHeader>
-          <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
-              <FormField control={editForm.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-              <FormField control={editForm.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-              <FormField control={editForm.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
-              <FormField control={editForm.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-              <FormField control={editForm.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={10} {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-              <FormItem>
-                <FormLabel>Image</FormLabel>
-                {editForm.watch('imageUrl') && <Image src={editForm.watch('imageUrl')!} alt="Current Image" width={100} height={60} className="rounded-sm object-cover" />}
-                <FormControl><Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} /></FormControl>
-              </FormItem>
-              <DialogFooter>
-                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                <Button type="submit" disabled={editForm.formState.isSubmitting}>Save Changes</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      
+      {/* Replaced Dialog with Sheet */}
+      <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
+        <SheetContent className="flex flex-col sm:max-w-xl">
+          <SheetHeader>
+            <SheetTitle>Edit Article: {editingArticle?.title}</SheetTitle>
+          </SheetHeader>
+          {/* Made the form content scrollable */}
+          <div className="flex-grow overflow-y-auto pr-4">
+            <Form {...editForm}>
+              <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
+                <FormField control={editForm.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={10} {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormItem>
+                  <FormLabel>Image</FormLabel>
+                  {editForm.watch('imageUrl') && <Image src={editForm.watch('imageUrl')!} alt="Current Image" width={100} height={60} className="rounded-sm object-cover" />}
+                  <FormControl><Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} /></FormControl>
+                </FormItem>
+              </form>
+            </Form>
+          </div>
+          {/* Made the footer sticky */}
+          <SheetFooter className="mt-auto border-t py-4">
+            <SheetClose asChild><Button type="button" variant="outline">Cancel</Button></SheetClose>
+            <Button type="button" onClick={editForm.handleSubmit(onEditSubmit)} disabled={editForm.formState.isSubmitting}>Save Changes</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
       
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
