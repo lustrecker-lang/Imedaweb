@@ -22,8 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose, SheetTrigger } from '@/components/ui/sheet';
 import { Trash2, Edit, Plus } from 'lucide-react';
 
 const formSchema = z.object({
@@ -52,7 +51,7 @@ export default function PublicationsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
 
   const articlesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -122,7 +121,7 @@ export default function PublicationsPage() {
     toast({ title: 'Success!', description: 'New article has been added.' });
     form.reset();
     setImageFile(null);
-    setIsAddDialogOpen(false);
+    setIsAddSheetOpen(false);
   };
 
   const onEditSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -184,31 +183,33 @@ export default function PublicationsPage() {
               <CardTitle>Existing Articles</CardTitle>
               <CardDescription>A list of all current articles.</CardDescription>
             </div>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild><Button><Plus className="h-4 w-4" /> Add Article</Button></DialogTrigger>
-              <DialogContent className="sm:max-w-xl">
-                <DialogHeader>
-                  <DialogTitle>Add New Article</DialogTitle>
-                </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
-                    <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                    <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                    <FormField control={form.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
-                    <FormField control={form.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                    <FormField control={form.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={10} {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                    <FormItem>
-                        <FormLabel>Image</FormLabel>
-                        <FormControl><Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} /></FormControl>
-                    </FormItem>
-                    <DialogFooter>
-                      <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                      <Button type="submit" disabled={form.formState.isSubmitting}>Save Article</Button>
-                    </DialogFooter>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
+            <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
+              <SheetTrigger asChild><Button><Plus className="h-4 w-4" /> Add Article</Button></SheetTrigger>
+              <SheetContent className="flex flex-col sm:max-w-xl">
+                <SheetHeader>
+                  <SheetTitle>Add New Article</SheetTitle>
+                </SheetHeader>
+                <div className="flex-grow overflow-y-auto pr-4">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
+                      <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={10} {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormItem>
+                          <FormLabel>Image</FormLabel>
+                          <FormControl><Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} /></FormControl>
+                      </FormItem>
+                    </form>
+                  </Form>
+                </div>
+                <SheetFooter className="mt-auto border-t py-4">
+                  <SheetClose asChild><Button type="button" variant="outline">Cancel</Button></SheetClose>
+                  <Button type="button" onClick={form.handleSubmit(onAddSubmit)} disabled={form.formState.isSubmitting}>Save Article</Button>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </CardHeader>
           <CardContent>
             <Table>
