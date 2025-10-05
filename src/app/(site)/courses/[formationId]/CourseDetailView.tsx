@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Building, Check, HelpCircle } from 'lucide-react';
+import { ChevronRight, Calendar, Clock, Laptop, Check, Building, GraduationCap } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -262,6 +262,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <Card className="border-primary/50">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
+                                                            <div className="flex items-center justify-center gap-2 text-muted-foreground"><GraduationCap size={18}/></div>
                                                             <h4 className="font-semibold mt-2">Formation seule</h4>
                                                         </div>
                                                         <div className="text-center">
@@ -298,10 +299,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="relative pl-3 pt-4">
-                                        <div className="absolute top-4 bottom-0 left-[0.30rem] w-0.5 bg-primary/20" />
+                                        <div className="absolute top-4 bottom-0 left-1 w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
                                             <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
-                                                <div className="absolute left-[-0.4rem] top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                                <div className="absolute left-[-0.30rem] top-1.5 h-3 w-3 rounded-full bg-primary" />
                                                 <p className="text-foreground">{module.name}</p>
                                             </div>
                                         ))}
@@ -370,7 +371,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
                             <AccordionItem value="item-7">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-normal font-headline text-primary">Valeur IMEDA</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Valeur IMEDA</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
@@ -394,10 +395,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
                             <AccordionItem value="faq">
                                 <AccordionTrigger>
-                                     <div className="flex items-center gap-3">
-                                        <HelpCircle className="h-6 w-6 text-primary" />
-                                        <h2 className="text-2xl font-headline font-normal text-primary">FAQ</h2>
-                                    </div>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">FAQ</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <Accordion type="single" collapsible className="w-full">
