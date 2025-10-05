@@ -314,13 +314,9 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Programme de la formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="relative pl-6 pt-4">
-                                        <div className="absolute left-3 top-7 bottom-7 w-px bg-primary/20" />
+                                    <div className="space-y-2 pt-4 text-foreground">
                                         {sortedModules.map((module) => (
-                                             <div key={module.id} className="relative pl-8 mb-6 last:mb-0">
-                                                <div className="absolute left-3 top-1.5 h-3 w-3 -translate-x-1/2 rounded-full bg-primary ring-4 ring-background" />
-                                                <p className="text-foreground">{module.name}</p>
-                                            </div>
+                                            <p key={module.id}>{module.name}</p>
                                         ))}
                                     </div>
                                 </AccordionContent>

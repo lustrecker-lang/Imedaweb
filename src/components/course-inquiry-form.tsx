@@ -35,7 +35,7 @@ export function CourseInquiryForm({ courseName }: CourseInquiryFormProps) {
       fullName: "",
       email: "",
       phone: "",
-      message: `Bonjour, je souhaiterais recevoir plus d'informations concernant la formation "${courseName}".`,
+      message: "",
     },
   });
 
@@ -106,7 +106,7 @@ export function CourseInquiryForm({ courseName }: CourseInquiryFormProps) {
                 <FormItem>
                   <FormLabel>Téléphone/WhatsApp</FormLabel>
                   <FormControl>
-                    <Input placeholder="Votre numéro (facultatif)" {...field} />
+                    <Input placeholder="Votre numéro" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
