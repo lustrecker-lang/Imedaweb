@@ -314,11 +314,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Programme de la formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="relative pl-3 pt-4">
-                                        <div className="absolute left-3 top-4 bottom-4 w-0.5 bg-primary/20" />
+                                    <div className="relative pl-6 pt-4">
+                                        <div className="absolute left-3 top-7 bottom-7 w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
                                              <div key={module.id} className="relative pl-8 mb-6 last:mb-0">
-                                                <div className="absolute left-[-0.125rem] top-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
+                                                <div className="absolute left-[0.375rem] top-1.5 h-3 w-3 -translate-x-1/2 rounded-full bg-primary ring-4 ring-background" />
                                                 <p className="text-foreground">{module.name}</p>
                                             </div>
                                         ))}
@@ -448,8 +448,8 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             />
                                         </div>
                                         <div className="md:col-span-2 text-center md:text-left">
-                                            <h3 className="text-xl font-headline font-normal">{coursePageContent.contact.name}</h3>
-                                            <p className="text-sm text-foreground">{coursePageContent.contact.title}</p>
+                                            <h3 className="text-xl font-headline font-normal text-foreground">{coursePageContent.contact.name}</h3>
+                                            <p className="text-sm text-primary">{coursePageContent.contact.title}</p>
                                             <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto md:mx-0">
                                                {coursePageContent.contact.description}
                                             </p>
