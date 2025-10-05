@@ -204,14 +204,14 @@ export default function FormationDetailPage() {
                                 <DetailCard icon={<BookOpen size={20} />} title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
                             </div>
                         </section>
-
+                        
                         {areModulesLoading ? <Skeleton className="h-48 w-full" /> : modules && modules.length > 0 && (
-                            <section>
+                             <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 <div className="space-y-4 border-l-2 border-primary/20 pl-6">
-                                    {modules.sort((a,b) => (a.description || '').localeCompare(b.description || '', undefined, {numeric: true})).map((module) => (
+                                    {modules.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true })).map((module) => (
                                         <div key={module.id} className="relative">
-                                            <div className="absolute -left-[29px] top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                            <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-primary" />
                                             <p className="text-sm">
                                                 {module.name}
                                             </p>
@@ -220,23 +220,23 @@ export default function FormationDetailPage() {
                                 </div>
                             </section>
                         )}
-                        
+
                         <section id="availability">
                             <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
-                             <div className="space-y-2 max-w-sm">
+                             <div className="flex flex-wrap gap-4">
                                 {availability.length > 0 ? (
                                     availability.map((month) => (
-                                        <div key={month.name} className={cn("flex justify-between items-center p-3 rounded-md text-sm", month.isAvailable ? "bg-green-50" : "bg-red-50 text-muted-foreground")}>
-                                            <span className="font-medium capitalize">{month.name}</span>
+                                        <div key={month.name} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-28", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                            <span className="font-semibold capitalize text-center">{month.name}</span>
                                             {month.isAvailable ? (
-                                                <Badge variant="secondary" className="bg-green-100 text-green-800"><Check size={14} className="mr-1"/>Disponible</Badge>
+                                                <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800"><Check size={14} className="mr-1"/>Disponible</Badge>
                                             ) : (
-                                                <Badge variant="secondary" className="bg-red-100 text-red-800"><XCircle size={14} className="mr-1"/>Complet</Badge>
+                                                <Badge variant="secondary" className="mt-2 bg-red-100 text-red-800"><XCircle size={14} className="mr-1"/>Complet</Badge>
                                             )}
                                         </div>
                                     ))
                                 ) : (
-                                    Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)
+                                    Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-28 w-32" />)
                                 )}
                             </div>
                         </section>
@@ -249,15 +249,15 @@ export default function FormationDetailPage() {
                                     <div className="flex flex-wrap gap-4">
                                         {campuses && campuses.map(campus => (
                                              <div key={campus.id} className="group">
-                                                <div className="w-36 text-center">
-                                                    <div className="relative w-36 h-28 rounded-md overflow-hidden border">
+                                                <div className="w-40 text-center">
+                                                    <div className="relative w-40 h-32 rounded-md overflow-hidden border">
                                                          {campus.imageUrl ? (
                                                             <MediaPreview url={campus.imageUrl} alt={campus.name} />
                                                           ) : (
                                                             <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                           )}
                                                     </div>
-                                                    <p className="text-xs font-medium mt-2">{campus.name}</p>
+                                                    <p className="text-sm font-medium mt-2">{campus.name}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -309,3 +309,4 @@ export default function FormationDetailPage() {
     );
 
     
+
