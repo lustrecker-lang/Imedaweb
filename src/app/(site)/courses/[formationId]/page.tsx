@@ -44,6 +44,7 @@ interface Service {
     id: string;
     name: string;
     isOptional: boolean;
+    mediaUrl?: string;
 }
 
 // Data fetching function on the server
@@ -53,7 +54,7 @@ async function getCourseDetails(formationId: string) {
         const formationSnap = await formationRef.get();
 
         if (!formationSnap.exists) {
-            return { formation: null, theme: null, modules: [], campuses: [], includedServices: [] };
+            return { formation: null, theme: null, modules: [], campuses: [], allServices: [] };
         }
 
         const formationData = { id: formationSnap.id, ...formationSnap.data() } as Formation;
@@ -70,10 +71,9 @@ async function getCourseDetails(formationId: string) {
         const modules = modulesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Module[];
         const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
         
-        // Filter and sort services on the server
-        const includedServices = servicesSnap.docs
+        // Sort all services by name on the server
+        const allServices = servicesSnap.docs
             .map(doc => ({ id: doc.id, ...doc.data() }) as Service)
-            .filter(service => service.isOptional === false)
             .sort((a, b) => a.name.localeCompare(b.name));
         
         return {
@@ -81,12 +81,12 @@ async function getCourseDetails(formationId: string) {
             theme,
             modules,
             campuses,
-            includedServices,
+            allServices,
         };
 
     } catch (error) {
         console.error("Error fetching course details:", error);
-        return { formation: null, theme: null, modules: [], campuses: [], includedServices: [] };
+        return { formation: null, theme: null, modules: [], campuses: [], allServices: [] };
     }
 }
 

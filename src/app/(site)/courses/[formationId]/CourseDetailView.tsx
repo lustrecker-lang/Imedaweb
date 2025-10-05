@@ -60,6 +60,7 @@ interface Service {
     id: string;
     name: string;
     isOptional: boolean;
+    mediaUrl?: string;
 }
 
 interface CourseDetailViewProps {
@@ -67,7 +68,7 @@ interface CourseDetailViewProps {
     theme: Theme | null;
     modules: Module[];
     campuses: Campus[];
-    includedServices: Service[];
+    allServices: Service[];
 }
 
 const isVideoUrl = (url?: string | null) => {
@@ -92,7 +93,7 @@ const MediaPreview = ({ url, alt, className }: { url: string; alt: string; class
     );
 }
 
-export default function CourseDetailView({ formation, theme, modules, campuses, includedServices }: CourseDetailViewProps) {
+export default function CourseDetailView({ formation, theme, modules, campuses, allServices }: CourseDetailViewProps) {
     const [availability, setAvailability] = useState<MonthAvailability[]>([]);
     const [numberOfPeople, setNumberOfPeople] = useState(3);
 
@@ -318,17 +319,28 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </section>
                         )}
                         
-                         {includedServices && includedServices.length > 0 && (
+                         {allServices && allServices.length > 0 && (
                             <section>
-                                <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Briefcase size={24}/>Services Inclus</h2>
-                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
-                                    {includedServices.map((service) => (
-                                        <li key={service.id} className="flex items-center gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-600" />
-                                            <span className="text-sm">{service.name}</span>
-                                        </li>
+                                <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Briefcase size={24}/>Services</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                                    {allServices.map((service) => (
+                                        <div key={service.id} className="flex items-center justify-between gap-4 p-3 rounded-md border bg-muted/30">
+                                            <div className="flex items-center gap-4">
+                                                 {service.mediaUrl ? (
+                                                    <div className="relative h-10 w-10 shrink-0 rounded-sm overflow-hidden">
+                                                        <MediaPreview url={service.mediaUrl} alt={service.name} />
+                                                    </div>
+                                                ) : (
+                                                    <div className="h-10 w-10 shrink-0 rounded-sm bg-muted-foreground/20" />
+                                                )}
+                                                <span className="text-sm font-medium">{service.name}</span>
+                                            </div>
+                                            <Badge variant={service.isOptional ? 'outline' : 'default'}>
+                                                {service.isOptional ? 'Optional' : 'Included'}
+                                            </Badge>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
                             </section>
                         )}
 
