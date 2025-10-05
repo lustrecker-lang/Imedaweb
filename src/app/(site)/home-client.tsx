@@ -17,7 +17,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
 interface Page { id: string; title: string; sections: Section[]; }
 interface Campus { id: string; name: string; slug: string; description?: string; imageUrl?: string; }
-interface Category { id: string; name: string; description?: string; }
+interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
 
@@ -76,18 +76,20 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
   const categoriesWithThemes = useMemo(() => {
     return categories.map(category => {
       const categoryThemes = themes.filter(theme => theme.categoryId === category.id);
+      const formationCount = formations.filter(formation => categoryThemes.some(theme => theme.id === formation.themeId)).length;
       return {
         ...category,
         themes: categoryThemes,
+        formationCount: formationCount
       };
     });
-  }, [categories, themes]);
+  }, [categories, themes, formations]);
 
   return (
     <div className="flex flex-col">
       <section className="py-8">
         <div className="container px-4 md:px-6">
-          <div className="relative h-[50vh] min-h-[400px] md:min-h-[500px] w-full overflow-hidden">
+          <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
               {heroMediaUrl && ( isHeroVideo ? 
                   (<video src={heroMediaUrl} autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover"/>) : 
                   (<Image src={heroMediaUrl} alt={heroSection?.title || ""} fill className="object-cover" priority/>)
@@ -141,27 +143,33 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
                 </p>
             </div>
             <div className="hidden sm:inline-flex">
-              <Button variant="link" asChild><Link href="/courses">Voir tout <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+              <Button variant="link" asChild><Link href="/courses">Voir tout<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
             </div>
           </div>
           <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
           <CarouselContent className="-ml-4">
               {categoriesWithThemes.map((category) => (
-                  <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3 flex flex-col">
                       <Link href={`/courses?categoryId=${category.id}`} className="block h-full">
-                          <Card className="h-full flex flex-col hover:border-primary transition-colors">
-                              <CardHeader>
+                          <Card className="h-full flex flex-col hover:border-primary transition-colors overflow-hidden">
+                              <div className="aspect-video relative w-full">
+                                <Image 
+                                  src={category.mediaUrl || `https://picsum.photos/seed/${category.id}/400/225`}
+                                  alt={category.name}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                              <CardHeader className="text-left">
                                   <CardTitle className="font-headline font-normal">{category.name}</CardTitle>
+                                   <CardDescription>{`${category.formationCount} formations`}</CardDescription>
                               </CardHeader>
-                              <CardContent className="flex-grow">
+                              <CardContent className="flex-grow text-left">
                                   {category.themes && category.themes.length > 0 ? (
-                                      <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
-                                          {category.themes.slice(0, 3).map(theme => (
+                                      <ul className="text-sm text-muted-foreground space-y-1">
+                                          {category.themes.map(theme => (
                                               <li key={theme.id} className="truncate">{theme.name}</li>
                                           ))}
-                                          {category.themes.length > 3 && (
-                                            <li className="font-semibold">et {category.themes.length - 3} autres...</li>
-                                          )}
                                       </ul>
                                   ) : (
                                     <p className="text-sm text-muted-foreground">Aucun thème disponible.</p>

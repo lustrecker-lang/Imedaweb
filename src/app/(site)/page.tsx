@@ -6,7 +6,7 @@ import { HomeClient } from './home-client';
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
 interface Page { id: string; title: string; sections: Section[]; }
 interface Campus { id: string; name: string; slug: string; description?: string; imageUrl?: string; }
-interface Category { id: string; name: string; description?: string; }
+interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
 
