@@ -184,7 +184,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             <main className="container mx-auto px-4 py-12 md:px-6">
                 <div className="grid lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
-                         <Accordion type="multiple" defaultValue={['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'faq', 'item-contact']} className="w-full">
+                         <Accordion type="multiple" defaultValue={['item-1', 'item-3', 'item-contact']} className="w-full">
                             <AccordionItem value="item-1">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Informations</h2>
@@ -339,7 +339,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         {allServices.map((service, index) => (
                                             <div key={service.id} className={cn(
                                                 "flex items-center justify-between gap-4 py-3",
-                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1) && allServices.length > 1) && "border-b"
+                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1)) && "border-b"
                                             )}>
                                                 <div className="flex items-center gap-4">
                                                      {service.mediaUrl ? (
@@ -494,5 +494,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
+
+    
 
     
