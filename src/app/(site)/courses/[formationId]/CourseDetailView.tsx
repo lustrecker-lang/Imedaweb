@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, HelpCircle } from 'lucide-react';
+import { ChevronRight, Phone, Mail, GraduationCap, Building, Check } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -315,10 +315,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="relative pl-3 pt-4">
-                                        <div className="absolute left-[0.32rem] top-4 bottom-4 w-0.5 bg-primary/20" />
+                                        <div className="absolute left-3 top-4 bottom-4 w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
-                                             <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
-                                                <div className="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                             <div key={module.id} className="relative pl-8 mb-6 last:mb-0">
+                                                <div className="absolute left-[-0.125rem] top-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
                                                 <p className="text-foreground">{module.name}</p>
                                             </div>
                                         ))}
@@ -487,5 +487,3 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
-
-    
