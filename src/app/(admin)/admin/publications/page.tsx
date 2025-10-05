@@ -25,8 +25,18 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose, SheetTrigger } from '@/components/ui/sheet';
 import { Trash2, Edit, Plus } from 'lucide-react';
 
+const generateSlug = (title: string) => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric characters
+    .replace(/\s+/g, '-') // replace spaces with hyphens
+    .replace(/-+/g, '-') // remove consecutive hyphens
+    .trim();
+};
+
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required.'),
+  slug: z.string().min(1, 'Slug is required.'),
   author: z.string().min(1, 'Author is required.'),
   publicationDate: z.date(),
   summary: z.string().optional(),
@@ -64,6 +74,7 @@ export default function PublicationsPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
+      slug: '',
       author: '',
       publicationDate: new Date(),
       summary: '',
@@ -76,6 +87,21 @@ export default function PublicationsPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {},
   });
+
+  const addTitle = form.watch("title");
+  useEffect(() => {
+    if (addTitle) {
+      form.setValue('slug', generateSlug(addTitle));
+    }
+  }, [addTitle, form]);
+
+  const editTitle = editForm.watch("title");
+  useEffect(() => {
+    if (editTitle && editForm.formState.isDirty) {
+      editForm.setValue('slug', generateSlug(editTitle));
+    }
+  }, [editTitle, editForm]);
+
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -193,6 +219,7 @@ export default function PublicationsPage() {
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
                       <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
@@ -266,6 +293,7 @@ export default function PublicationsPage() {
             <Form {...editForm}>
               <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
                 <FormField control={editForm.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />

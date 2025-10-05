@@ -11,6 +11,10 @@
           "type": "string",
           "description": "The title of the article."
         },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly version of the article title."
+        },
         "author": {
           "type": "string",
           "description": "The author of the article."
@@ -34,7 +38,7 @@
           "format": "uri"
         }
       },
-      "required": ["title", "author", "publicationDate"]
+      "required": ["title", "slug", "author", "publicationDate"]
     },
     "CompanyProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
