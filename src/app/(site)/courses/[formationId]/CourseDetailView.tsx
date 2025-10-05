@@ -113,7 +113,8 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const referrer = document.referrer;
-            if (referrer.includes('/courses')) {
+            // A more robust check to see if the user came from the courses page.
+            if (referrer && new URL(referrer).pathname === '/courses') {
                 setShowBackButton(true);
             }
         }
@@ -237,7 +238,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-y-4">
-                                            <div>
+                                            <div className="sm:pl-0">
                                                 <h3 className="font-normal">Durée</h3>
                                                 <p className="text-sm text-muted-foreground">14 jours</p>
                                             </div>
@@ -260,20 +261,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <p className="text-sm text-muted-foreground">{formation.formationId}</p>
                                             </div>
                                         </div>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-3">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">Détails de la formation</h2>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="space-y-6 pt-4 whitespace-pre-wrap">
-                                        <DetailCard title="Public Concerné" content={formation.publicConcerne} />
-                                        <DetailCard title="Pré-requis" content={formation.preRequis} />
-                                        <DetailCard title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
-                                        <DetailCard title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
-                                        <DetailCard title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -349,11 +336,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     <TableRow 
                                                         key={module.id} 
                                                         className={cn(
-                                                            "flex flex-col md:table-row hover:bg-transparent",
-                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b"
+                                                            "flex flex-col md:table-row",
+                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b md:border-b"
                                                         )}
                                                     >
-                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-2 md:py-4 border-b md:border-b-0 md:border-r">
+                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-3 md:py-4 border-b md:border-b-0 md:border-r">
                                                             <div className="flex items-start gap-4">
                                                                 <div className="w-[100px] shrink-0">
                                                                     <div className="font-semibold text-sm">Module {index + 1}</div>
@@ -362,8 +349,8 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                                 <div className="md:hidden flex-1 text-sm">{module.name}</div>
                                                             </div>
                                                         </TableCell>
-                                                        <TableCell className="hidden md:table-cell py-2 md:py-4 text-sm">{module.name}</TableCell>
-                                                        <TableCell className="hidden md:table-cell text-right py-2 md:py-4">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
+                                                        <TableCell className="hidden md:table-cell py-3 md:py-4 text-sm">{module.name}</TableCell>
+                                                        <TableCell className="hidden md:table-cell text-right py-3 md:py-4">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>
@@ -434,8 +421,22 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
+                            <AccordionItem value="item-details">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Détails de la formation</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="space-y-6 pt-4 whitespace-pre-wrap">
+                                        <DetailCard title="Public Concerné" content={formation.publicConcerne} />
+                                        <DetailCard title="Pré-requis" content={formation.preRequis} />
+                                        <DetailCard title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
+                                        <DetailCard title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
+                                        <DetailCard title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                             {coursePageContent?.valeurImeda && (
-                            <AccordionItem value="item-7">
+                            <AccordionItem value="item-valeur">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">
                                         {coursePageContent.valeurImeda.title}
