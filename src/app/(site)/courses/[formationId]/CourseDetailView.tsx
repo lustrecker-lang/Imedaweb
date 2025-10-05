@@ -258,7 +258,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         <div className="flex items-center gap-2 mb-6">
                                             <Label htmlFor="people-select">Personnes:</Label>
                                             <Select value={String(numberOfPeople)} onValueChange={(val) => setNumberOfPeople(Number(val))}>
-                                                <SelectTrigger id="people-select" className="w-[80px]">
+                                                <SelectTrigger id="people-select" className="w-full sm:w-[80px]">
                                                     <SelectValue placeholder="3" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -268,7 +268,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="grid sm:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-2 gap-6">
                                             {formation.prixSansHebergement && (
                                                 <Card className="border-primary/50">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
@@ -315,12 +315,12 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="pt-4">
-                                        <div className="relative">
-                                            <div className="absolute left-3 top-0 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
+                                        <div className="relative pl-3.5">
+                                            <div className="absolute left-[17.5px] top-0 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
                                             <div className="space-y-6">
                                                 {sortedModules.map((module) => (
                                                 <div key={module.id} className="relative pl-8">
-                                                    <div className="absolute left-3 top-1 h-3 w-3 -translate-x-1/2 rounded-full bg-primary" />
+                                                    <div className="absolute left-[17.5px] top-1 h-3 w-3 -translate-x-1/2 rounded-full bg-primary" />
                                                     <p className="font-medium text-foreground">{module.name}</p>
                                                 </div>
                                                 ))}
