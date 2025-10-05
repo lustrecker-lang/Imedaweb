@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, Check, MapPin, Briefcase } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, Check, Briefcase } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -188,7 +188,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionContent>
                                     <div className="space-y-8 pt-4">
                                         <div>
-                                            <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Ce cours est disponible dans tous ces campus.</h3>
+                                            <h3 className="font-semibold flex items-center gap-2 mb-3">Ce cours est disponible dans tous ces campus.</h3>
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
                                                      <Link href={`/campus/${campus.slug}`} key={campus.id} className="w-48 group">
@@ -198,7 +198,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                             ) : (
                                                                 <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                             )}
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                                                             <p className="absolute bottom-2 left-3 text-sm font-medium text-white">{campus.name}</p>
                                                         </div>
                                                     </Link>
@@ -297,55 +296,51 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 </AccordionTrigger>
-                                <AccordionContent className="pt-4 pl-8">
-                                    <div className="relative border-l-2 border-primary/20">
-                                        <div className="space-y-4">
-                                            {sortedModules.map((module) => (
-                                                <div key={module.id} className="relative pl-8">
-                                                    <div className="absolute -left-[7px] h-3 w-3 rounded-full bg-primary top-1.5" />
-                                                    <p className="text-foreground">{module.name}</p>
-                                                </div>
-                                            ))}
-                                        </div>
+                                <AccordionContent className="pt-4 pl-4">
+                                    <div className="relative border-l-2 border-primary/20 space-y-4">
+                                        {sortedModules.map((module) => (
+                                            <div key={module.id} className="relative pl-8">
+                                                <div className="absolute -left-[7px] h-3 w-3 rounded-full bg-primary top-1.5" />
+                                                <p className="text-foreground">{module.name}</p>
+                                            </div>
+                                        ))}
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
                             )}
-                             {allServices && allServices.length > 0 && (
-                                <AccordionItem value="item-6">
-                                    <AccordionTrigger>
-                                        <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Briefcase size={24}/>Services</h2>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 pt-4">
-                                            {allServices.map((service) => (
-                                                <div key={service.id} className="flex items-center justify-between gap-4 p-3 rounded-md border bg-muted/30">
-                                                    <div className="flex items-center gap-4">
-                                                         {service.mediaUrl ? (
-                                                            <div className="relative h-10 w-10 shrink-0 rounded-sm overflow-hidden">
-                                                                <MediaPreview url={service.mediaUrl} alt={service.name} />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="h-10 w-10 shrink-0 rounded-sm bg-muted-foreground/20" />
-                                                        )}
-                                                        <span className="text-sm font-medium">{service.name}</span>
-                                                    </div>
-                                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                        {!service.isOptional ? (
-                                                            <>
-                                                                <Check size={16} className="text-green-600" />
-                                                                <span>Included</span>
-                                                            </>
-                                                        ) : (
-                                                            <span>Optional</span>
-                                                        )}
-                                                    </div>
+                             <AccordionItem value="item-6">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Briefcase size={24}/>Services</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 pt-4">
+                                        {allServices.map((service) => (
+                                            <div key={service.id} className="flex items-center justify-between gap-4 p-3 rounded-md border bg-muted/30">
+                                                <div className="flex items-center gap-4">
+                                                     {service.mediaUrl ? (
+                                                        <div className="relative h-10 w-10 shrink-0 rounded-sm overflow-hidden">
+                                                            <MediaPreview url={service.mediaUrl} alt={service.name} />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="h-10 w-10 shrink-0 rounded-sm bg-muted-foreground/20" />
+                                                    )}
+                                                    <span className="text-sm font-medium">{service.name}</span>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            )}
+                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    {!service.isOptional ? (
+                                                        <>
+                                                            <Check size={16} className="text-green-600" />
+                                                            <span>Included</span>
+                                                        </>
+                                                    ) : (
+                                                        <span>Optional</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                              <AccordionItem value="item-5">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
@@ -386,3 +381,4 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
     );
 
     
+}
