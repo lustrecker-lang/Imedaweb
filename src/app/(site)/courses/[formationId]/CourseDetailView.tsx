@@ -213,26 +213,26 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-8">
+                                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-y-4">
                                             <div>
                                                 <h3 className="font-normal">Durée</h3>
-                                                <p className="text-sm text-muted-foreground">Deux semaines (14 jours)</p>
+                                                <p className="text-sm text-muted-foreground">14 jours</p>
                                             </div>
-                                            <div>
+                                            <div className="sm:border-l sm:pl-4">
                                                 <h3 className="font-normal">Heures de cours</h3>
                                                 <p className="text-sm text-muted-foreground">55 heures</p>
                                             </div>
                                              {formation.format && (
-                                                <div>
+                                                <div className="sm:border-l sm:pl-4">
                                                     <h3 className="font-normal">Format</h3>
-                                                    <Badge variant="outline">{formation.format}</Badge>
+                                                    <p className="text-sm text-muted-foreground">{formation.format}</p>
                                                 </div>
                                              )}
-                                             <div>
+                                             <div className="sm:border-l sm:pl-4">
                                                 <h3 className="font-normal">Langue</h3>
                                                 <p className="text-sm text-muted-foreground">Français</p>
                                             </div>
-                                            <div>
+                                            <div className="sm:border-l sm:pl-4">
                                                 <h3 className="font-normal">Course ID</h3>
                                                 <p className="text-sm text-muted-foreground">{formation.formationId}</p>
                                             </div>
@@ -326,7 +326,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     <TableRow 
                                                         key={module.id} 
                                                         className={cn(
-                                                            "flex flex-col md:table-row hover:bg-transparent",
+                                                            "flex flex-col md:table-row",
                                                             index === sortedModules.length - 1 ? "border-b-0" : "border-b"
                                                         )}
                                                     >
@@ -358,7 +358,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         {allServices.map((service, index) => (
                                             <div key={service.id} className={cn(
                                                 "flex items-center justify-between gap-4 py-3",
-                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1)) && "border-b"
+                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1)) && "sm:border-b"
                                             )}>
                                                 <div className="flex items-center gap-4">
                                                      {service.mediaUrl ? (
@@ -390,7 +390,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-4">
+                                    <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pt-4">
                                         {availability.length > 0 ? (
                                             availability.map((month) => (
                                                 <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg border text-center text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
