@@ -188,7 +188,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionContent>
                                     <div className="space-y-8 pt-4">
                                         <div>
-                                            <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Lieux</h3>
+                                            <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Ce cours est disponible dans tous ces campus.</h3>
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
                                                     <Link href={`/campus/${campus.slug}`} key={campus.id} className="w-48 text-center group">
@@ -207,7 +207,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                                             <div>
                                                 <h3 className="font-semibold flex items-center gap-2 mb-2"><Calendar size={20} /> Durée</h3>
-                                                <p className="text-sm text-muted-foreground">Deux semaines</p>
+                                                <p className="text-sm text-muted-foreground">Deux semaines (14 jours)</p>
                                             </div>
                                             <div>
                                                 <h3 className="font-semibold flex items-center gap-2 mb-2"><Clock size={20} /> Heures de cours</h3>
@@ -223,8 +223,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-                            
-                            <AccordionItem value="item-3">
+                             <AccordionItem value="item-3">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><BookOpen size={24}/>Détails de la Formation</h2>
                                 </AccordionTrigger>
@@ -238,7 +237,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-
                             <AccordionItem value="item-2">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
@@ -293,14 +291,13 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-
                             {sortedModules && sortedModules.length > 0 && (
                                 <AccordionItem value="item-4">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                     <div className="relative pl-8 pt-4">
+                                    <div className="relative pl-8 pt-4">
                                         <div className="absolute top-4 bottom-0 left-[39px] w-0.5 bg-primary/20"></div>
                                         <div className="space-y-4">
                                             {sortedModules.map((module) => (
@@ -314,7 +311,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionContent>
                             </AccordionItem>
                             )}
-
                              {allServices && allServices.length > 0 && (
                                 <AccordionItem value="item-6">
                                     <AccordionTrigger>
@@ -350,7 +346,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </AccordionContent>
                                 </AccordionItem>
                             )}
-
                              <AccordionItem value="item-5">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
