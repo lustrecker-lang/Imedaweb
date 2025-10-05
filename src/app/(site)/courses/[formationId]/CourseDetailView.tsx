@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, ChevronRight, Info, Calendar, Clock, Laptop, Check, Briefcase, Building } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, ChevronRight, Info, Check, Briefcase, Building } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -188,7 +188,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             <h3 className="font-semibold flex items-center gap-2 mb-3">Ce cours est disponible dans tous ces campus.</h3>
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
-                                                     <div key={campus.id} className="w-48 group">
+                                                      <div key={campus.id} className="w-48 group">
                                                         <div className="relative w-48 h-32 rounded-lg overflow-hidden border">
                                                              {campus.imageUrl ? (
                                                                 <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
@@ -203,16 +203,16 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                                             <div>
-                                                <h3 className="font-semibold flex items-center gap-2 mb-2"><Calendar size={20} /> Durée</h3>
+                                                <h3 className="font-semibold flex items-center gap-2 mb-2">Durée</h3>
                                                 <p className="text-sm text-muted-foreground">Deux semaines (14 jours)</p>
                                             </div>
                                             <div>
-                                                <h3 className="font-semibold flex items-center gap-2 mb-2"><Clock size={20} /> Heures de cours</h3>
+                                                <h3 className="font-semibold flex items-center gap-2 mb-2">Heures de cours</h3>
                                                 <p className="text-sm text-muted-foreground">55 heures</p>
                                             </div>
                                              {formation.format && (
                                                 <div>
-                                                    <h3 className="font-semibold flex items-center gap-2 mb-2"><Laptop size={20} /> Format</h3>
+                                                    <h3 className="font-semibold flex items-center gap-2 mb-2">Format</h3>
                                                     <Badge variant="outline">{formation.format}</Badge>
                                                 </div>
                                              )}
@@ -293,9 +293,9 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 </AccordionTrigger>
-                                <AccordionContent className="pt-4 pl-4">
-                                    <div className="relative pl-8">
-                                        <div className="absolute top-0 left-[31px] h-full w-0.5 bg-primary/20" />
+                                <AccordionContent>
+                                    <div className="relative pl-8 pt-4">
+                                        <div className="absolute top-4 bottom-0 left-[31px] w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
                                             <div key={module.id} className="relative mb-4 last:mb-0">
                                                 <div className="absolute -left-[1px] h-3 w-3 rounded-full bg-primary top-1.5" />
@@ -341,7 +341,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
                              <AccordionItem value="item-5">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3">Disponibilité</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="flex flex-wrap gap-4 pt-4">
