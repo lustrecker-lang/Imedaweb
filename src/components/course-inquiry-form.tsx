@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 const inquiryFormSchema = z.object({
   fullName: z.string().min(1, { message: "Le nom complet est requis." }),
@@ -70,7 +71,12 @@ export function CourseInquiryForm({ courseName }: CourseInquiryFormProps) {
   
   return (
     <>
-        <h3 className="text-xl font-headline font-normal text-primary mb-4">Se renseigner</h3>
+        <SheetHeader className="mb-4 text-left">
+            <SheetTitle className="font-headline text-2xl font-normal">Se renseigner</SheetTitle>
+            <SheetDescription>
+                Remplissez le formulaire pour le cours : <span className="font-semibold">{courseName}</span>.
+            </SheetDescription>
+        </SheetHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -117,9 +123,9 @@ export function CourseInquiryForm({ courseName }: CourseInquiryFormProps) {
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Message</FormLabel>
+                  <FormLabel>Message (facultatif)</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Votre message" className="min-h-[100px]" {...field} />
+                    <Textarea placeholder="Votre message..." className="min-h-[100px]" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
