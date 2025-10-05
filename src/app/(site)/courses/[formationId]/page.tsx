@@ -8,7 +8,7 @@ import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase
 import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, MapPin } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, MapPin, Briefcase } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -57,6 +57,12 @@ interface MonthAvailability {
   month: string;
   year: string;
   isAvailable: boolean;
+}
+
+interface Service {
+    id: string;
+    name: string;
+    isOptional: boolean;
 }
 
 
@@ -128,10 +134,16 @@ export default function FormationDetailPage() {
         return query(collection(firestore, 'campuses'), orderBy('name', 'asc'));
     }, [firestore]);
 
+    const servicesQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'services'), where('isOptional', '==', false), orderBy('name', 'asc'));
+    }, [firestore]);
+
     const { data: modules, isLoading: areModulesLoading } = useCollection<Module>(modulesQuery);
     const { data: campuses, isLoading: areCampusesLoading } = useCollection<Campus>(campusesQuery);
+    const { data: includedServices, isLoading: areServicesLoading } = useCollection<Service>(servicesQuery);
     
-    const isLoading = isFormationLoading || isThemeLoading || areCampusesLoading;
+    const isLoading = isFormationLoading || isThemeLoading || areCampusesLoading || areServicesLoading;
 
     const sortedModules = useMemo(() => {
         if (!modules) return [];
@@ -241,7 +253,7 @@ export default function FormationDetailPage() {
                                     {sortedModules.map((module, index) => (
                                         <div key={module.id} className="relative">
                                             <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                            <p className="font-semibold text-foreground">{module.name}</p>
+                                            <p className="text-foreground">{module.name}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -363,6 +375,20 @@ export default function FormationDetailPage() {
                             </section>
                         )}
                         
+                         {includedServices && includedServices.length > 0 && (
+                            <section>
+                                <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Briefcase size={24}/>Services Inclus</h2>
+                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+                                    {includedServices.map((service) => (
+                                        <li key={service.id} className="flex items-center gap-3">
+                                            <CheckCircle className="h-5 w-5 text-green-600" />
+                                            <span className="text-sm">{service.name}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </section>
+                        )}
+
                     </div>
                     
                     <aside className="sticky top-24 self-start">
@@ -375,4 +401,3 @@ export default function FormationDetailPage() {
         </div>
     );
 }
-
