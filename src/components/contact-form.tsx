@@ -1,21 +1,21 @@
-
 'use client';
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import { useFirestore, addDocumentNonBlocking } from "@/firebase";
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { useFirestore } from "@/firebase";
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+
 
 const contactFormSchema = z.object({
   fullName: z.string().min(1, { message: "Le nom complet est requis." }),
@@ -48,15 +48,22 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
       console.error("Firestore not available");
       return;
     }
-    
-    const leadsCollection = collection(firestore, 'leads');
-    addDocumentNonBlocking(leadsCollection, {
-      ...values,
-      createdAt: serverTimestamp(),
-    });
 
-    form.reset();
-    setHasSubmitted(true);
+    try {
+      const leadsCollection = collection(firestore, 'leads');
+      // Here is the key change: adding the leadType field
+      await addDoc(leadsCollection, {
+        ...values,
+        leadType: "Contact Form",
+        createdAt: serverTimestamp(),
+      });
+
+      form.reset();
+      setHasSubmitted(true);
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du message:", error);
+      // You can add a more visible error message here if needed.
+    }
   }
 
   if (hasSubmitted) {
@@ -138,7 +145,12 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
               )}
             />
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Envoi en cours...' : 'Envoyer'}
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Envoi en cours...
+                </>
+              ) : 'Envoyer'}
             </Button>
           </form>
         </Form>

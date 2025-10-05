@@ -1,9 +1,11 @@
+// src/app/layout.tsx
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
-import { FirebaseClientProvider } from "@/firebase/client-provider";
-import { ClientDynamicIcons } from "@/components/layout/client-dynamic-icons";
+import { FirebaseClientProvider } from "@/firebase";
+import { DynamicHeadContent } from "@/components/layout/dynamic-head-content"; // Import the new component
 
 export const metadata: Metadata = {
   title: "IMEDA",
@@ -48,7 +50,7 @@ export default function RootLayout({
         )}
       >
         <FirebaseClientProvider>
-          <ClientDynamicIcons />
+          <DynamicHeadContent />
           {children}
           <Toaster />
         </FirebaseClientProvider>

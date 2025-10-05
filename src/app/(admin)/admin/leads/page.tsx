@@ -1,3 +1,5 @@
+// src/app/admin/leads/page.tsx
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -29,13 +31,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Trash2, Copy } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -46,10 +50,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
-
+import { Badge } from '@/components/ui/badge';
 
 interface Lead {
   id: string;
@@ -58,6 +61,8 @@ interface Lead {
   phone?: string;
   message: string;
   createdAt: Timestamp;
+  leadType?: string;
+  courseName?: string;
 }
 
 export default function LeadsPage() {
@@ -97,6 +102,33 @@ export default function LeadsPage() {
     setIsViewDialogOpen(true);
   };
 
+  const handleCopyToClipboard = () => {
+    if (!selectedLead) return;
+
+    const leadDetails = [
+      `Name: ${selectedLead.fullName}`,
+      `Email: ${selectedLead.email}`,
+      selectedLead.phone ? `Phone: ${selectedLead.phone}` : null,
+      `Received: ${format(selectedLead.createdAt.toDate(), 'PP p')}`,
+      `Type: ${selectedLead.leadType || 'Contact Form'}`,
+      selectedLead.courseName ? `Course: ${selectedLead.courseName}` : null,
+      `\nMessage:\n${selectedLead.message}`
+    ].filter(Boolean).join('\n');
+
+    navigator.clipboard.writeText(leadDetails).then(() => {
+      toast({
+        title: "Copied to Clipboard",
+        description: "Lead details have been copied successfully.",
+      });
+    }, (err) => {
+      toast({
+        variant: 'destructive',
+        title: "Copy Failed",
+        description: "Could not copy lead details to clipboard.",
+      });
+    });
+  };
+
   const openDeleteDialog = (lead: Lead) => {
     setLeadToDelete(lead);
     setIsDeleteDialogOpen(true);
@@ -113,14 +145,14 @@ export default function LeadsPage() {
     setIsDeleteDialogOpen(false);
     setLeadToDelete(null);
   };
-  
+
   return (
     <>
       <div className="container mx-auto px-4 py-12 md:px-6">
         <header className="mb-8">
           <h1 className="text-xl font-bold tracking-tight">Leads</h1>
           <p className="text-sm text-muted-foreground">
-            Submissions from the website contact form.
+            Submissions from the website contact forms.
           </p>
         </header>
 
@@ -128,7 +160,7 @@ export default function LeadsPage() {
           <CardHeader>
             <CardTitle>Incoming Leads</CardTitle>
             <CardDescription>
-              Here are all the leads captured from your contact form.
+              Here are all the leads captured from your website.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -138,7 +170,6 @@ export default function LeadsPage() {
                   <TableHead>Received</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
                   <TableHead>Lead Type</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -150,7 +181,6 @@ export default function LeadsPage() {
                       <TableCell className="py-2"><Skeleton className="h-5 w-24" /></TableCell>
                       <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
                       <TableCell className="py-2"><Skeleton className="h-5 w-48" /></TableCell>
-                      <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
                       <TableCell className="py-2"><Skeleton className="h-5 w-24" /></TableCell>
                       <TableCell className="py-2 text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
@@ -164,9 +194,10 @@ export default function LeadsPage() {
                       <TableCell className="py-2 font-medium">{lead.fullName}</TableCell>
                       <TableCell className="py-2">{lead.email}</TableCell>
                       <TableCell className="py-2">
-                        {lead.phone ? lead.phone : <span className="text-muted-foreground">N/A</span>}
+                        <Badge variant={lead.leadType === 'Course Inquiry' ? 'default' : 'secondary'}>
+                          {lead.leadType || 'Contact Form'}
+                        </Badge>
                       </TableCell>
-                      <TableCell className="py-2">Contact Form</TableCell>
                       <TableCell className="py-2 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -190,7 +221,7 @@ export default function LeadsPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       No leads yet.
                     </TableCell>
                   </TableRow>
@@ -202,21 +233,64 @@ export default function LeadsPage() {
       </div>
 
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Lead from: {selectedLead?.fullName}</DialogTitle>
-            <DialogDescription>
-              {selectedLead?.email} {selectedLead?.phone && `· ${selectedLead.phone}`}
+            <DialogTitle>Lead Details</DialogTitle>
+             <DialogDescription>
+              Received on {selectedLead?.createdAt ? format(selectedLead.createdAt.toDate(), 'PP p') : 'N/A'}
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border">
-              {selectedLead?.message}
-            </p>
+          <div className="py-4 grid gap-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <h4 className="font-semibold">Name</h4>
+                    <p className="text-muted-foreground">{selectedLead?.fullName}</p>
+                </div>
+                 <div>
+                    <h4 className="font-semibold">Email</h4>
+                    <p className="text-muted-foreground">{selectedLead?.email}</p>
+                </div>
+                {selectedLead?.phone && (
+                  <div>
+                      <h4 className="font-semibold">Phone</h4>
+                      <p className="text-muted-foreground">{selectedLead.phone}</p>
+                  </div>
+                )}
+                <div>
+                  <h4 className="font-semibold">Lead Type</h4>
+                  {/* FIX IS HERE: Changed p to div */}
+                  <div className="text-muted-foreground">
+                    <Badge variant={selectedLead?.leadType === 'Course Inquiry' ? 'default' : 'secondary'}>
+                      {selectedLead?.leadType || 'Contact Form'}
+                    </Badge>
+                  </div>
+                </div>
+                 {selectedLead?.leadType === 'Course Inquiry' && selectedLead?.courseName && (
+                  <div className="col-span-2">
+                    <h4 className="font-semibold">Course Inquiry</h4>
+                    <p className="text-muted-foreground">{selectedLead.courseName}</p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <h4 className="font-semibold">Message</h4>
+                <p className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border mt-2 whitespace-pre-wrap">
+                  {selectedLead?.message}
+                </p>
+              </div>
           </div>
+          <DialogFooter>
+             <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+            <Button onClick={handleCopyToClipboard}>
+              <Copy className="mr-2 h-4 w-4"/>
+              Copy to Clipboard
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

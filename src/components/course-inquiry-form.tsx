@@ -5,9 +5,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CheckCircle } from "lucide-react";
-import { useFirestore, addDocumentNonBlocking } from "@/firebase";
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { CheckCircle, Loader2 } from "lucide-react";
+import { useFirestore } from "@/firebase";
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -48,15 +48,21 @@ export function CourseInquiryForm({ courseName, showHeader = false }: CourseInqu
       return;
     }
     
-    const leadsCollection = collection(firestore, 'leads');
-    addDocumentNonBlocking(leadsCollection, {
-      ...values,
-      leadType: "Course Inquiry",
-      courseName: courseName,
-      createdAt: serverTimestamp(),
-    });
-
-    setHasSubmitted(true);
+    try {
+      const leadsCollection = collection(firestore, 'leads');
+      await addDoc(leadsCollection, {
+        ...values,
+        leadType: "Course Inquiry",
+        courseName: courseName,
+        createdAt: serverTimestamp(),
+      });
+      
+      setHasSubmitted(true);
+      form.reset();
+      
+    } catch (error) {
+      console.error("Erreur lors de l'envoi de la demande:", error);
+    }
   }
 
   if (hasSubmitted) {
@@ -136,7 +142,7 @@ export function CourseInquiryForm({ courseName, showHeader = false }: CourseInqu
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Message (facultatif)</FormLabel>
+                  <FormLabel>Message</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Votre message..." className="min-h-[100px]" {...field} />
                   </FormControl>
@@ -145,11 +151,16 @@ export function CourseInquiryForm({ courseName, showHeader = false }: CourseInqu
               )}
             />
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Envoi en cours...' : 'Se renseigner'}
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Envoi en cours...
+                </>
+              ) : 'Se renseigner'}
             </Button>
           </form>
         </Form>
       </div>
     </>
-  )
+  );
 }
