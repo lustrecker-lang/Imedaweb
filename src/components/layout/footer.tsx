@@ -93,6 +93,9 @@ export function Footer() {
                   />
                 ) : null}
             </Link>
+            <p className="text-xs text-muted-foreground text-left lg:text-right">
+              Institut de Management, Économie et Développement Appliqué.
+            </p>
              <div className="flex items-center gap-4">
               <Link href="#" aria-label="Instagram">
                 <Instagram className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />

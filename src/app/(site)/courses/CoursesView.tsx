@@ -1,11 +1,8 @@
-
 'use client';
 
 import React from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, where, orderBy, doc } from 'firebase/firestore';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -16,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Image from 'next/image';
 
-// Interfaces
+// Interfaces for component props
 interface Category {
     id: string;
     name: string;
@@ -50,11 +47,17 @@ interface Page {
   sections: Section[];
 }
 
+interface CoursesViewProps {
+  formations: Formation[];
+  themes: Theme[];
+  categories: Category[];
+  pageData: Page | null;
+}
+
 type SortKey = 'formationId' | 'name';
 type SortDirection = 'ascending' | 'descending';
 
-export default function CoursesView() {
-    const firestore = useFirestore();
+export default function CoursesView({ formations, themes, categories, pageData }: CoursesViewProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const themeIdFromUrl = searchParams.get('themeId');
@@ -64,36 +67,9 @@ export default function CoursesView() {
     const [selectedCategory, setSelectedCategory] = React.useState<string | null>(categoryIdFromUrl);
     const [selectedTheme, setSelectedTheme] = React.useState<string | null>(themeIdFromUrl);
     const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: SortDirection }>({ key: 'formationId', direction: 'ascending' });
-
-    const pageRef = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return doc(firestore, 'pages', 'courses');
-    }, [firestore]);
     
-    const { data: pageData, isLoading: isPageLoading } = useDoc<Page>(pageRef);
-
-    // Queries
-    const categoriesQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return query(collection(firestore, 'course_categories'), orderBy('name', 'asc'));
-    }, [firestore]);
-
-    const themesQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return query(collection(firestore, 'course_themes'), orderBy('name', 'asc'));
-    }, [firestore]);
-    
-    const formationsQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return query(collection(firestore, 'course_formations'));
-    }, [firestore]);
-
-    // Data fetching
-    const { data: categories, isLoading: areCategoriesLoading } = useCollection<Category>(categoriesQuery);
-    const { data: themes, isLoading: areThemesLoading } = useCollection<Theme>(themesQuery);
-    const { data: formations, isLoading: areFormationsLoading } = useCollection<Omit<Formation, 'id'>>(formationsQuery);
-
-    const heroSection = pageData?.sections.find(s => s.id === 'hero');
+    // Use the data from the prop instead of fetching it
+    const heroSection = pageData?.sections?.find(s => s.id === 'hero');
     const heroImageUrl = heroSection?.imageUrl;
 
     // Effect to sync URL themeId with state
@@ -182,7 +158,7 @@ export default function CoursesView() {
     };
 
 
-    const isLoading = areCategoriesLoading || areThemesLoading || areFormationsLoading || isPageLoading;
+    const isLoading = false; // Data is now loaded on the server
 
     const filteredThemes = React.useMemo(() => {
         if (!themes) return [];
@@ -225,17 +201,11 @@ export default function CoursesView() {
                 <div className="relative z-10 p-6 text-white">
                     <CardHeader>
                         <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
-                            {isLoading ? <Skeleton className="h-10 w-3/4 mx-auto bg-gray-400/50" /> : heroSection?.title || "Catalogue des Formations"}
+                             {heroSection?.title || "Catalogue des Formations"}
                         </h1>
-                         {isLoading ? (
-                            <div className="mx-auto mt-4 max-w-2xl text-gray-200">
-                                <Skeleton className="h-6 w-full max-w-lg mx-auto bg-gray-400/50" />
-                            </div>
-                        ) : (
-                            <p className="mx-auto mt-4 max-w-2xl text-gray-200">
-                                {heroSection?.content || "Explorez notre catalogue complet de formations..."}
-                            </p>
-                        )}
+                         <p className="mx-auto mt-4 max-w-2xl text-gray-200">
+                             {heroSection?.content || "Explorez notre catalogue complet de formations..."}
+                         </p>
                     </CardHeader>
                     <CardContent>
                         <div className="mx-auto max-w-lg grid sm:grid-cols-2 gap-4">
@@ -296,15 +266,7 @@ export default function CoursesView() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {isLoading ? (
-                                    Array.from({ length: 10 }).map((_, i) => (
-                                        <TableRow key={i}>
-                                            <TableCell className="py-2 hidden md:table-cell"><Skeleton className="h-5 w-16" /></TableCell>
-                                            <TableCell className="py-2"><Skeleton className="h-5 w-3/4" /></TableCell>
-                                            <TableCell className="text-right py-2"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : filteredAndSortedFormations && filteredAndSortedFormations.length > 0 ? (
+                                {filteredAndSortedFormations && filteredAndSortedFormations.length > 0 ? (
                                     filteredAndSortedFormations.map(formation => (
                                         <TableRow key={formation.id}>
                                             <TableCell className="font-mono text-xs py-2 hidden md:table-cell">{formation.formationId}</TableCell>
@@ -334,5 +296,3 @@ export default function CoursesView() {
         </div>
     );
 }
-
-    

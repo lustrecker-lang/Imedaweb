@@ -1,6 +1,6 @@
-
 import { Suspense } from 'react';
 import { adminDb } from '@/firebase/admin';
+import { notFound } from 'next/navigation';
 import { DocumentData } from 'firebase-admin/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import CourseDetailView from './CourseDetailView';
@@ -53,6 +53,35 @@ interface CourseDetailPageContent {
   contact: { name: string; title: string; description: string; francePhone: string; uaePhone: string; email: string; imageUrl: string };
 }
 
+// 1. Dynamic Metadata Generation for SEO using firebase-admin
+// This is a server function that runs once for each request.
+export async function generateMetadata({ params }: { params: { formationId: string } }) {
+  const formationId = params.formationId;
+
+  try {
+    const formationRef = adminDb.collection('course_formations').doc(formationId);
+    const docSnap = await formationRef.get();
+
+    if (docSnap.exists) {
+      const formationData = docSnap.data() as DocumentData;
+      return {
+        title: formationData.name,
+        description: formationData.objectifPedagogique || 'Détails d’une formation professionnelle.',
+      };
+    } else {
+      return {
+        title: 'Formation introuvable',
+        description: 'La formation demandée n’a pas pu être trouvée.',
+      };
+    }
+  } catch (error) {
+    console.error("Erreur lors de la récupération des métadonnées pour la formation:", error);
+    return {
+      title: 'Détails de la formation',
+      description: 'Découvrez les détails de nos formations professionnelles.',
+    };
+  }
+}
 
 // Data fetching function on the server
 async function getCourseDetails(formationId: string) {
@@ -127,6 +156,11 @@ const CourseDetailPageSkeleton = () => {
 export default async function FormationDetailPage({ params }: { params: { formationId: string } }) {
   const courseData = await getCourseDetails(params.formationId);
   
+  // 2. Handle 404 Not Found case
+  if (!courseData.formation) {
+    notFound();
+  }
+
   return (
     <Suspense fallback={<CourseDetailPageSkeleton />}>
       <CourseDetailView {...courseData} />

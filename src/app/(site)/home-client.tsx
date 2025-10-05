@@ -1,4 +1,3 @@
-
 // src/app/(site)/home-client.tsx
 'use client';
 
@@ -13,6 +12,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Combobox } from "@/components/ui/combobox";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { cn } from "@/lib/utils"; // Import cn to use with the video component
 
 // Interfaces
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
@@ -40,15 +40,46 @@ const isVideoUrl = (url?: string | null) => {
     } catch (e) { return false; }
 };
 
+// Component for a campus card
+const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: string }) => {
+    const isCardVideo = isVideoUrl(campus.imageUrl);
+    return (
+        <Link href={`/campus/${campus.slug}`} className={`group relative block overflow-hidden rounded-lg ${className}`}>
+        {isCardVideo ? (
+             <video src={campus.imageUrl} autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"/>
+        ) : (
+            <Image src={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/800/600`} alt={campus.name} fill className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"/>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
+        <div className="relative flex h-full flex-col justify-end p-6">
+            <h3 className="text-lg font-normal text-white font-headline">{campus.name}</h3>
+            {campus.description && (<p className="text-xs text-white/80 mt-1 line-clamp-2">{campus.description}</p>)}
+        </div>
+        </Link>
+    );
+  };
+
+
 export function HomeClient({ homePage, campuses, categories, themes, formations }: HomeClientProps) {
   const router = useRouter();
   const isMobile = useIsMobile();
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
 
+  // Directly access the sections from the homePage prop
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
   const heroMediaUrl = heroSection?.imageUrl;
   const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
+  
+  // Find the three feature sections dynamically
+  const featureSections = useMemo(() => {
+    const sections = [];
+    for (let i = 1; i <= 3; i++) {
+        const section = homePage?.sections.find(s => s.id === `feature-${i}`);
+        if (section) sections.push(section);
+    }
+    return sections;
+  }, [homePage]);
 
   const themeOptions = useMemo(() => themes.map(theme => ({ value: theme.id, label: theme.name })), [themes]);
 
@@ -67,24 +98,6 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
       };
     });
   }, [categories, themes, formations]);
-
-  const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: string }) => {
-    const isCardVideo = isVideoUrl(campus.imageUrl);
-    return (
-        <Link href={`/campus/${campus.slug}`} className={`group relative block overflow-hidden rounded-lg ${className}`}>
-        {isCardVideo ? (
-             <video src={campus.imageUrl} autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"/>
-        ) : (
-            <Image src={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/800/600`} alt={campus.name} fill className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"/>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
-        <div className="relative flex h-full flex-col justify-end p-6">
-            <h3 className="text-lg font-normal text-white font-headline">{campus.name}</h3>
-            {campus.description && (<p className="text-xs text-white/80 mt-1 line-clamp-2">{campus.description}</p>)}
-        </div>
-        </Link>
-    );
-  };
 
 
   return (
@@ -118,18 +131,15 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
             <p className="mt-2 text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, index) => {
-              const featureSection = homePage?.sections.find(s => s.id === `feature-${index + 1}`);
-              return (
-                <Card key={featureSection?.id || `feature-${index}`} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2">
-                  <div className="aspect-video overflow-hidden">
-                    {featureSection?.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection?.title || ""} width={600} height={400} className="object-cover w-full h-full"/>)}
+            {featureSections.map((featureSection) => (
+                <Card key={featureSection.id} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2">
+                  <div className="aspect-video relative overflow-hidden">
+                    {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} width={600} height={400} className="object-cover w-full h-full"/>)}
                   </div>
-                  <CardHeader><CardTitle className="font-headline font-normal">{featureSection?.title}</CardTitle></CardHeader>
-                  <CardContent><CardDescription>{featureSection?.content}</CardDescription></CardContent>
+                  <CardHeader><CardTitle className="font-headline font-normal">{featureSection.title}</CardTitle></CardHeader>
+                  <CardContent><CardDescription>{featureSection.content}</CardDescription></CardContent>
                 </Card>
-              );
-            })}
+              ))}
           </div>
         </div>
       </section>

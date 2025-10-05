@@ -1,5 +1,4 @@
 // src/components/layout/dynamic-head-content.tsx
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -10,6 +9,7 @@ import { doc } from 'firebase/firestore';
 export function DynamicHeadContent() {
   const firestore = useFirestore();
   const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
+  const [iconUrl, setIconUrl] = useState<string | null>(null);
 
   const companyProfileRef = useMemo(() => {
     if (!firestore) return null;
@@ -22,6 +22,9 @@ export function DynamicHeadContent() {
     if (companyProfile?.faviconUrl) {
       setFaviconUrl(companyProfile.faviconUrl);
     }
+    if (companyProfile?.iconUrl) {
+      setIconUrl(companyProfile.iconUrl);
+    }
   }, [companyProfile]);
   
   return (
@@ -31,6 +34,9 @@ export function DynamicHeadContent() {
           <link rel="icon" href={faviconUrl} sizes="any" />
           <link rel="shortcut icon" href={faviconUrl} />
         </>
+      )}
+      {iconUrl && (
+        <link rel="apple-touch-icon" href={iconUrl} />
       )}
     </Head>
   );

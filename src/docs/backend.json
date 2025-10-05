@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "CompanyProfile": {
@@ -71,6 +70,19 @@
             },
             "required": ["id", "title", "content"]
           }
+        },
+        "ogTitle": {
+          "type": "string",
+          "description": "The Open Graph title for social media sharing."
+        },
+        "ogDescription": {
+          "type": "string",
+          "description": "The Open Graph description for social media sharing."
+        },
+        "ogImage": {
+          "type": "string",
+          "description": "The Open Graph image URL for social media sharing.",
+          "format": "uri"
         }
       },
       "required": ["id", "title", "sections"]
@@ -423,7 +435,7 @@
           "schema": {
             "$ref": "#/backend/entities/Campus"
           },
-          "description": "Stores information about each school campus.",
+          "description": "Represents a school campus and all its page content.",
           "params": [
             {
               "name": "campusId",
@@ -468,5 +480,3 @@
     "reasoning": "This Firestore data structure allows for modular content management. Each page's content is stored in a separate document within the 'pages' collection. This makes it easy to add new pages and edit their content by section."
   }
 }
-
-    
