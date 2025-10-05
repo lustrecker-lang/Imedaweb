@@ -3,6 +3,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, ArrowLeft } from 'lucide-react';
@@ -105,20 +106,13 @@ const MediaPreview = ({ url, alt, className }: { url: string; alt: string; class
 }
 
 export default function CourseDetailView({ formation, theme, modules, campuses, allServices, coursePageContent }: CourseDetailViewProps) {
+    const searchParams = useSearchParams();
     const [availability, setAvailability] = useState<MonthAvailability[]>([]);
     const [numberOfPeople, setNumberOfPeople] = useState(3);
-    const [showBackButton, setShowBackButton] = useState(false);
     const isMobile = useIsMobile();
+    const fromCatalog = searchParams.get('from') === 'catalog';
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const referrer = document.referrer;
-            // A more robust check to see if the user came from the courses page.
-            if (referrer && new URL(referrer).pathname === '/courses') {
-                setShowBackButton(true);
-            }
-        }
-
         const today = new Date();
         const months: MonthAvailability[] = [];
         for (let i = 0; i < 7; i++) {
@@ -172,7 +166,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     return (
         <div className="bg-background">
-             {isMobile && showBackButton && (
+             {isMobile && fromCatalog && (
                 <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b md:hidden">
                     <div className="container px-4 h-12 flex items-center">
                         <Button variant="ghost" size="sm" asChild>
@@ -209,7 +203,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             <main className="container mx-auto px-4 py-12 md:px-6">
                 <div className="grid lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
-                         <Accordion type="multiple" defaultValue={['item-1', 'item-3', 'item-contact']} className="w-full">
+                         <Accordion type="multiple" defaultValue={['item-1', 'item-details', 'item-contact']} className="w-full">
                             <AccordionItem value="item-1">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Informations</h2>
@@ -336,8 +330,8 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     <TableRow 
                                                         key={module.id} 
                                                         className={cn(
-                                                            "flex flex-col md:table-row",
-                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b md:border-b"
+                                                            "flex flex-col md:table-row hover:bg-transparent",
+                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b"
                                                         )}
                                                     >
                                                         <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-3 md:py-4 border-b md:border-b-0 md:border-r">
@@ -537,5 +531,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
+
+    
 
     

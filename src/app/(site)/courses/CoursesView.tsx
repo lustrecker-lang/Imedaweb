@@ -311,7 +311,7 @@ export default function CoursesView() {
                                             <TableCell className="font-medium py-2">{formation.name}</TableCell>
                                             <TableCell className="text-right py-2">
                                                 <Button variant={isMobile ? "ghost" : "link"} size={isMobile ? "icon" : "default"} asChild>
-                                                    <Link href={`/courses/${formation.id}`}>
+                                                    <Link href={`/courses/${formation.id}?from=catalog`}>
                                                         {isMobile ? <ArrowRight className="h-4 w-4" /> : 'Voir les détails'}
                                                         <span className="sr-only">Voir les détails</span>
                                                     </Link>
@@ -335,3 +335,4 @@ export default function CoursesView() {
     );
 }
 
+    
