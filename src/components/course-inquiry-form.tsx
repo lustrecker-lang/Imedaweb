@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 const inquiryFormSchema = z.object({
   fullName: z.string().min(1, { message: "Le nom complet est requis." }),
@@ -24,9 +25,10 @@ const inquiryFormSchema = z.object({
 
 interface CourseInquiryFormProps {
   courseName: string;
+  showHeader?: boolean;
 }
 
-export function CourseInquiryForm({ courseName }: CourseInquiryFormProps) {
+export function CourseInquiryForm({ courseName, showHeader = false }: CourseInquiryFormProps) {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const firestore = useFirestore();
 
@@ -71,12 +73,23 @@ export function CourseInquiryForm({ courseName }: CourseInquiryFormProps) {
   
   return (
     <>
+      {showHeader && (
         <SheetHeader className="mb-4 text-left">
-            <SheetTitle className="font-headline text-2xl font-normal">Se renseigner</SheetTitle>
-            <SheetDescription>
-                Remplissez le formulaire pour le cours : <span className="font-semibold">{courseName}</span>.
-            </SheetDescription>
+          <SheetTitle className="font-headline text-2xl font-normal">Se renseigner</SheetTitle>
+          <SheetDescription>
+              Remplissez le formulaire pour le cours : <span className="font-semibold">{courseName}</span>.
+          </SheetDescription>
         </SheetHeader>
+      )}
+      <div className={cn(!showHeader && "py-6")}>
+        {!showHeader && (
+          <div className="mb-4 text-left">
+            <h3 className="font-headline text-2xl font-normal">Se renseigner</h3>
+            <p className="text-sm text-muted-foreground">
+              Remplissez le formulaire pour le cours: <span className="font-semibold">{courseName}</span>.
+            </p>
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -136,6 +149,7 @@ export function CourseInquiryForm({ courseName }: CourseInquiryFormProps) {
             </Button>
           </form>
         </Form>
+      </div>
     </>
   )
 }

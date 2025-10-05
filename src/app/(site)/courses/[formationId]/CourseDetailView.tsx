@@ -3,6 +3,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, ArrowLeft } from 'lucide-react';
@@ -106,10 +107,13 @@ const MediaPreview = ({ url, alt, className }: { url: string; alt: string; class
 }
 
 export default function CourseDetailView({ formation, theme, modules, campuses, allServices, coursePageContent }: CourseDetailViewProps) {
+    const searchParams = useSearchParams();
     const [availability, setAvailability] = useState<MonthAvailability[]>([]);
     const [numberOfPeople, setNumberOfPeople] = useState(3);
     const isMobile = useIsMobile();
     const [isEnquirySheetOpen, setIsEnquirySheetOpen] = useState(false);
+    
+    const cameFromCatalog = useMemo(() => searchParams.get('from') === 'catalog', [searchParams]);
 
     useEffect(() => {
         const today = new Date();
@@ -330,20 +334,20 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                         key={module.id} 
                                                         className={cn(
                                                             "flex flex-col md:table-row hover:bg-transparent",
-                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b-[1px] md:border-b"
+                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b-[0.5px] md:border-b"
                                                         )}
                                                     >
-                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-3 md:py-4 border-b-[1px] border-b-border/50 md:border-b-0 md:border-r">
+                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-3 md:py-4 border-b-[0.5px] border-b-border/50 md:border-b-0 md:border-r">
                                                             <div className="flex items-start gap-4">
                                                                 <div className="w-[100px] shrink-0">
-                                                                    <div className="font-semibold text-sm">Module {index + 1}</div>
-                                                                    <div className="text-xs text-muted-foreground md:hidden">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</div>
+                                                                    <div className="font-semibold text-xs">Module {index + 1}</div>
+                                                                    <div className="text-xs text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</div>
                                                                 </div>
                                                                 <div className="md:hidden flex-1 text-sm">{module.name}</div>
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="hidden md:table-cell py-3 md:py-4 text-sm">{module.name}</TableCell>
-                                                        <TableCell className="hidden md:table-cell text-right py-3 md:py-4">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
+                                                        <TableCell className="hidden md:table-cell text-right py-3 md:py-4 text-sm text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>
@@ -520,7 +524,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                     
                     <aside className="sticky top-24 self-start hidden lg:block">
                          <div className="bg-white p-6 rounded-lg border">
-                           <CourseInquiryForm courseName={formation.name} />
+                           <CourseInquiryForm courseName={formation.name} showHeader={false} />
                          </div>
                     </aside>
                 </div>
@@ -532,8 +536,8 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             <Button className="w-full">En Savoir plus</Button>
                         </SheetTrigger>
                         <SheetContent side="bottom" className="h-[90vh] flex flex-col">
-                           <div className="overflow-y-auto p-6">
-                             <CourseInquiryForm courseName={formation.name} />
+                           <div className="overflow-y-auto p-2">
+                             <CourseInquiryForm courseName={formation.name} showHeader={true} />
                            </div>
                         </SheetContent>
                     </Sheet>
@@ -542,5 +546,3 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
         </div>
     );
 }
-
-    
