@@ -319,8 +319,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         <Table>
                                             <TableBody>
                                                 {sortedModules.map((module, index) => (
-                                                    <TableRow key={module.id} className="flex flex-col md:table-row">
-                                                        <TableCell className="w-full md:w-auto font-medium py-2 md:py-4 border-b-0 md:border-b">
+                                                    <TableRow key={module.id} className={cn(
+                                                        "flex flex-col md:table-row hover:bg-transparent",
+                                                        index === sortedModules.length - 1 ? "border-b-0" : "border-b md:border-b"
+                                                    )}>
+                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-2 md:py-4 border-b md:border-b-0">
                                                             <div className="flex items-start gap-4">
                                                                 <div className="w-[100px] shrink-0">
                                                                     <div className="font-semibold text-sm">Module {index + 1}</div>
@@ -329,7 +332,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                                 <div className="md:hidden flex-1 text-sm">{module.name}</div>
                                                             </div>
                                                         </TableCell>
-                                                        <TableCell className="hidden md:table-cell py-2 md:py-4">{module.name}</TableCell>
+                                                        <TableCell className="hidden md:table-cell py-2 md:py-4 text-sm">{module.name}</TableCell>
                                                         <TableCell className="hidden md:table-cell text-right py-2 md:py-4">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
                                                     </TableRow>
                                                 ))}
@@ -348,7 +351,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         {allServices.map((service, index) => (
                                             <div key={service.id} className={cn(
                                                 "flex items-center justify-between gap-4 py-3",
-                                                (index < allServices.length - (allServices.length % 2 === 0 && index >= allServices.length - 2 ? 0 : 1)) && "border-b"
+                                                (index < allServices.length - (allServices.length % 2 !== 0 && index === allServices.length - 1 ? 1 : 2)) && "border-b"
                                             )}>
                                                 <div className="flex items-center gap-4">
                                                      {service.mediaUrl ? (
