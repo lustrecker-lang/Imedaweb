@@ -1,3 +1,4 @@
+
 import { Suspense } from 'react';
 import { adminDb } from '@/firebase/admin';
 import { DocumentData } from 'firebase-admin/firestore';
@@ -62,13 +63,18 @@ async function getCourseDetails(formationId: string) {
             formationData.themeId ? adminDb.collection('course_themes').doc(formationData.themeId).get() : Promise.resolve(null),
             adminDb.collection('course_modules').where('formationId', '==', formationId).get(),
             adminDb.collection('campuses').orderBy('name', 'asc').get(),
-            adminDb.collection('services').where('isOptional', '==', false).orderBy('name', 'asc').get()
+            adminDb.collection('services').get() // Fetch all services
         ]);
 
         const theme = themeSnap?.exists ? { id: themeSnap.id, ...themeSnap.data() } as Theme : null;
         const modules = modulesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Module[];
         const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
-        const includedServices = servicesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Service[];
+        
+        // Filter and sort services on the server
+        const includedServices = servicesSnap.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }) as Service)
+            .filter(service => service.isOptional === false)
+            .sort((a, b) => a.name.localeCompare(b.name));
         
         return {
             formation: formationData,

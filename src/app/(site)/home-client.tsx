@@ -56,7 +56,19 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
     if (selectedThemeId) router.push(`/courses?themeId=${selectedThemeId}`);
   };
 
-  const CampusCard = ({ campus, className }: { campus: Campus, className?: string }) => {
+  const categoriesWithThemes = useMemo(() => {
+    return categories.map(category => {
+      const categoryThemes = themes.filter(theme => theme.categoryId === category.id);
+      const formationCount = formations.filter(formation => categoryThemes.some(theme => theme.id === formation.themeId)).length;
+      return {
+        ...category,
+        themes: categoryThemes,
+        formationCount: formationCount
+      };
+    });
+  }, [categories, themes, formations]);
+
+  const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: string }) => {
     const isCardVideo = isVideoUrl(campus.imageUrl);
     return (
         <Link href={`/campus/${campus.slug}`} className={`group relative block overflow-hidden rounded-lg ${className}`}>
@@ -74,17 +86,6 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
     );
   };
 
-  const categoriesWithThemes = useMemo(() => {
-    return categories.map(category => {
-      const categoryThemes = themes.filter(theme => theme.categoryId === category.id);
-      const formationCount = formations.filter(formation => categoryThemes.some(theme => theme.id === formation.themeId)).length;
-      return {
-        ...category,
-        themes: categoryThemes,
-        formationCount: formationCount
-      };
-    });
-  }, [categories, themes, formations]);
 
   return (
     <div className="flex flex-col">
@@ -215,7 +216,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
                   {campuses.map((campus) => (
                     <CarouselItem key={campus.id} className="basis-4/5 pl-4">
                       <div className="h-[40vh] min-h-[350px] w-full">
-                        <CampusCard campus={campus} className="h-full w-full" />
+                        <CampusCardDisplay campus={campus} className="h-full w-full" />
                       </div>
                     </CarouselItem>
                   ))}
@@ -226,7 +227,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
             </Carousel>
           ) : (
             <div className="mt-12 grid h-[50vh] min-h-[400px] grid-cols-1 grid-rows-3 gap-6 md:grid-cols-2 md:grid-rows-2">
-              {campuses.map((campus, index) => (<CampusCard key={campus.id} campus={campus} className={index === 0 ? 'md:row-span-2' : ''} />))}
+              {campuses.map((campus, index) => (<CampusCardDisplay key={campus.id} campus={campus} className={index === 0 ? 'md:row-span-2' : ''} />))}
             </div>
           )}
         </div>
