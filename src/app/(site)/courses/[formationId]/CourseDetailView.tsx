@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 
 
 interface Formation {
@@ -200,7 +200,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                         <Link href={`/campus/${campus.slug}`} className="absolute inset-0 z-10">
                                                             <span className="sr-only">View {campus.name}</span>
                                                         </Link>
-                                                        <div className="relative w-full h-full">
+                                                        <div className="relative w-full h-full min-h-[120px]">
                                                             {campus.imageUrl ? (
                                                                 <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
                                                             ) : (
@@ -317,19 +317,20 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionContent>
                                     <div className="pt-4">
                                          <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Module</TableHead>
-                                                    <TableHead>Contenu</TableHead>
-                                                    <TableHead className="text-right">Durée</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
                                             <TableBody>
                                                 {sortedModules.map((module, index) => (
-                                                    <TableRow key={module.id}>
-                                                        <TableCell className="font-medium">Module {index + 1}</TableCell>
-                                                        <TableCell>{module.name}</TableCell>
-                                                        <TableCell className="text-right">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
+                                                    <TableRow key={module.id} className="flex flex-col md:table-row">
+                                                        <TableCell className="w-full md:w-auto font-medium py-2 md:py-4 border-b md:border-b-0">
+                                                            <div className="flex items-start gap-4">
+                                                                <div className="w-[100px] shrink-0">
+                                                                    <div className="font-semibold">Module {index + 1}</div>
+                                                                    <div className="text-xs text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</div>
+                                                                </div>
+                                                                <div className="md:hidden flex-1">{module.name}</div>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="hidden md:table-cell py-2 md:py-4">{module.name}</TableCell>
+                                                        <TableCell className="hidden md:table-cell text-right py-2 md:py-4">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>
@@ -347,7 +348,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         {allServices.map((service, index) => (
                                             <div key={service.id} className={cn(
                                                 "flex items-center justify-between gap-4 py-3",
-                                                (index < allServices.length - 2) && "border-b"
+                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1)) && "border-b"
                                             )}>
                                                 <div className="flex items-center gap-4">
                                                      {service.mediaUrl ? (
