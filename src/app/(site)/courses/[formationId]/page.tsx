@@ -238,8 +238,7 @@ export default function FormationDetailPage() {
                                     {modules.sort((a,b) => (a.description || '').localeCompare(b.description || '', undefined, {numeric: true})).map((module, index) => (
                                         <div key={module.id} className="relative">
                                           <div className="absolute -left-[29px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                          <h4 className="font-semibold">{(module.description || "").split(" ")[0]} {(module.description || "").split(" ")[1]}</h4>
-                                          <p className="text-sm text-muted-foreground mt-1">
+                                          <p className="text-sm mt-1">
                                             {module.name}
                                           </p>
                                         </div>
@@ -259,3 +258,5 @@ export default function FormationDetailPage() {
         </div>
     );
 }
+
+    
