@@ -27,13 +27,21 @@ import { Trash2, Edit, Plus } from 'lucide-react';
 
 const generateSlug = (title: string) => {
   if (!title) return '';
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric characters
-    .replace(/\s+/g, '-') // replace spaces with hyphens
-    .replace(/-+/g, '-') // remove consecutive hyphens
-    .trim();
+
+  const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;';
+  const b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------';
+  const p = new RegExp(a.split('').join('|'), 'g');
+
+  return title.toString().toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
+    .replace(/&/g, '-and-') // Replace & with 'and'
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars except for -
+    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+    .replace(/^-+/, '') // Trim - from start of text
+    .replace(/-+$/, ''); // Trim - from end of text
 };
+
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required.'),
@@ -106,7 +114,6 @@ export default function PublicationsPage() {
 
   const editTitle = editForm.watch("title");
   useEffect(() => {
-    // Only auto-generate slug if the title is being changed by the user
     if (editTitle && editForm.formState.isDirty) {
       editForm.setValue('slug', generateSlug(editTitle));
     }
