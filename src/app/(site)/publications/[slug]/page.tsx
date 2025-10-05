@@ -11,6 +11,8 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+export const dynamic = 'force-dynamic';
+
 interface Article {
   id: string; // Added id
   title: string;
@@ -23,7 +25,7 @@ interface Article {
 }
 
 export async function generateStaticParams() {
-  const articlesSnap = await adminDb.collection('articles').get();
+  const articlesSnap = await adminDb.collection('articles').limit(20).get(); // Limit to a reasonable number for build time
   return articlesSnap.docs.map((doc) => ({
     slug: doc.data().slug || doc.id,
   }));
