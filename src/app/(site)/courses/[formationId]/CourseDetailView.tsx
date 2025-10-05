@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Building, Check, HelpCircle } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -276,6 +276,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <Card className="border-primary/50 bg-primary/5">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
+                                                             <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18}/></div>
                                                             <h4 className="font-semibold mt-2">Forfait avec hébergement</h4>
                                                         </div>
                                                         <div className="text-center">
@@ -297,7 +298,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="relative pl-3 pt-4">
-                                        <div className="absolute top-4 bottom-0 left-1 w-0.5 bg-primary/20" />
+                                        <div className="absolute top-4 bottom-0 left-[0.30rem] w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
                                             <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
                                                 <div className="absolute left-[-0.4rem] top-1.5 h-3 w-3 rounded-full bg-primary" />
@@ -329,6 +330,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     {!service.isOptional ? (
                                                         <>
+                                                            <Check size={16} className="text-green-600" />
                                                             <span>Inclus</span>
                                                         </>
                                                     ) : (
@@ -368,7 +370,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
                             <AccordionItem value="item-7">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">Valeur IMEDA</h2>
+                                    <h2 className="text-2xl font-normal font-headline text-primary">Valeur IMEDA</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
@@ -388,6 +390,42 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             </p>
                                         </div>
                                     </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="faq">
+                                <AccordionTrigger>
+                                     <div className="flex items-center gap-3">
+                                        <HelpCircle className="h-6 w-6 text-primary" />
+                                        <h2 className="text-2xl font-headline font-normal text-primary">FAQ</h2>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <Accordion type="single" collapsible className="w-full">
+                                        <AccordionItem value="faq-1">
+                                            <AccordionTrigger>When should I apply?</AccordionTrigger>
+                                            <AccordionContent className="text-sm text-muted-foreground">
+                                            We recommend applying at least three months in advance to secure your spot, as our programs often fill up quickly.
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                        <AccordionItem value="faq-2">
+                                            <AccordionTrigger>How do I reserve a space?</AccordionTrigger>
+                                            <AccordionContent className="text-sm text-muted-foreground">
+                                            You can reserve your space by filling out the inquiry form on this page. Our advisors will then guide you through the enrollment process.
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                        <AccordionItem value="faq-3">
+                                            <AccordionTrigger>Do you make a custom course for me?</AccordionTrigger>
+                                            <AccordionContent className="text-sm text-muted-foreground">
+                                            Yes, we offer customized corporate training solutions. Please contact us to discuss your specific needs.
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                        <AccordionItem value="faq-4">
+                                            <AccordionTrigger>How does the full process work?</AccordionTrigger>
+                                            <AccordionContent className="text-sm text-muted-foreground">
+                                            The process is simple: 1. Inquire about the course. 2. Our advisor contacts you. 3. Finalize your enrollment and payment. 4. Receive your pre-course materials and get ready to learn!
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    </Accordion>
                                 </AccordionContent>
                             </AccordionItem>
                          </Accordion>
