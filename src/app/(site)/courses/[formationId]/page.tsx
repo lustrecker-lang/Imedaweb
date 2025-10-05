@@ -8,7 +8,7 @@ import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase
 import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, MapPin, XCircle, Check, Clock, Laptop } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -16,6 +16,7 @@ import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 
 
 interface Formation {
@@ -73,7 +74,7 @@ const isVideoUrl = (url?: string | null) => {
 const MediaPreview = ({ url, alt, className }: { url: string; alt: string; className?: string }) => {
     if (isVideoUrl(url)) {
         return (
-            <video src={url} autoPlay loop muted playsInline className={cn("absolute inset-0 h-full w-full object-cover", className)}/>
+            <video src={url} autoPlay loop muted playsInline className={cn("h-full w-full object-cover", className)}/>
         );
     }
     return (
@@ -134,7 +135,11 @@ export default function FormationDetailPage() {
 
     const sortedModules = useMemo(() => {
         if (!modules) return [];
-        return [...modules].sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true }));
+        return [...modules].sort((a, b) => {
+            const numA = parseInt(a.name.match(/\d+/)?.toString() || '0');
+            const numB = parseInt(b.name.match(/\d+/)?.toString() || '0');
+            return numA - numB;
+        });
     }, [modules]);
     
     const calculatePrice = (basePrice: string | undefined) => {
@@ -248,9 +253,9 @@ export default function FormationDetailPage() {
                                                 <p className="text-xs">{month.year}</p>
                                             </div>
                                             {month.isAvailable ? (
-                                                <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800"><Check size={14} className="mr-1"/>Disponible</Badge>
+                                                <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800">Disponible</Badge>
                                             ) : (
-                                                <Badge variant="secondary" className="mt-2 bg-red-100 text-red-800"><XCircle size={14} className="mr-1"/>Complet</Badge>
+                                                <Badge variant="secondary" className="mt-2 bg-red-100 text-red-800">Complet</Badge>
                                             )}
                                         </div>
                                     ))
@@ -267,10 +272,10 @@ export default function FormationDetailPage() {
                                     <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Lieux</h3>
                                     <div className="flex flex-wrap gap-4">
                                         {campuses && campuses.map(campus => (
-                                             <div key={campus.id} className="group w-40 text-center">
-                                                <div className="relative w-40 h-32 rounded-lg overflow-hidden border">
+                                            <div key={campus.id} className="w-48 text-center">
+                                                <div className="relative w-48 h-32 rounded-lg overflow-hidden border">
                                                     {campus.imageUrl ? (
-                                                        <MediaPreview url={campus.imageUrl} alt={campus.name} className="group-hover:scale-105 transition-transform duration-300" />
+                                                        <MediaPreview url={campus.imageUrl} alt={campus.name} />
                                                     ) : (
                                                         <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                     )}
@@ -304,7 +309,7 @@ export default function FormationDetailPage() {
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
                                     <div className="flex items-center gap-2 mt-4 sm:mt-0">
-                                        <FormLabel>Personnes:</FormLabel>
+                                        <Label>Personnes:</Label>
                                         <Select value={String(numberOfPeople)} onValueChange={(val) => setNumberOfPeople(Number(val))}>
                                             <SelectTrigger className="w-[80px]">
                                                 <SelectValue placeholder="1" />
