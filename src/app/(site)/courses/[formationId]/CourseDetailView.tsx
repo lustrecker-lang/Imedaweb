@@ -201,7 +201,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
                                             <div>
                                                 <h3 className="font-normal">Durée</h3>
                                                 <p className="text-sm text-muted-foreground">Deux semaines (14 jours)</p>
@@ -216,6 +216,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     <Badge variant="outline">{formation.format}</Badge>
                                                 </div>
                                              )}
+                                             <div>
+                                                <h3 className="font-normal">Langue</h3>
+                                                <p className="text-sm text-muted-foreground">Français</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </AccordionContent>
@@ -293,10 +297,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="relative pl-3 pt-4">
-                                        <div className="absolute top-4 bottom-0 left-[0.30rem] w-0.5 bg-primary/20" />
+                                        <div className="absolute top-4 bottom-0 left-1 w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
                                             <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
-                                                <div className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                                <div className="absolute left-[-0.4rem] top-1.5 h-3 w-3 rounded-full bg-primary" />
                                                 <p className="text-foreground">{module.name}</p>
                                             </div>
                                         ))}
@@ -369,7 +373,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
-                                        <div className="relative h-64 rounded-lg overflow-hidden">
+                                        <div className="relative h-64 overflow-hidden">
                                             <Image 
                                                 src="https://picsum.photos/seed/imeda-value/800/600"
                                                 alt="Valeur IMEDA"
@@ -402,3 +406,5 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
+
+    
