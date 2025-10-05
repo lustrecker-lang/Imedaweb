@@ -190,7 +190,7 @@ export default function FormationDetailPage() {
                     </div>
                     
                     <aside className="sticky top-24 self-start">
-                         <div className="bg-muted/30 p-6 rounded-lg border">
+                         <div className="bg-white p-6 rounded-lg border">
                            <CourseInquiryForm courseName={formation.name} />
                          </div>
                     </aside>
