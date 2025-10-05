@@ -1,16 +1,19 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, MapPin } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, MapPin, XCircle, Check } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
+import { addMonths, format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 
 interface Formation {
@@ -47,6 +50,12 @@ interface Campus {
     slug: string;
 }
 
+interface MonthAvailability {
+  name: string;
+  isAvailable: boolean;
+}
+
+
 const isVideoUrl = (url?: string | null) => {
     if (!url) return false;
     const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
@@ -73,6 +82,22 @@ export default function FormationDetailPage() {
     const firestore = useFirestore();
     const params = useParams();
     const formationId = params.formationId as string;
+    const [availability, setAvailability] = useState<MonthAvailability[]>([]);
+
+    useEffect(() => {
+        const today = new Date();
+        const months: MonthAvailability[] = [];
+        for (let i = 0; i < 7; i++) {
+        const date = addMonths(today, i);
+        months.push({
+            name: format(date, 'MMMM yyyy', { locale: fr }),
+            // The 4th month (index 3) is unavailable
+            isAvailable: i !== 3,
+        });
+        }
+        setAvailability(months);
+    }, []);
+
 
     const formationRef = useMemoFirebase(() => {
         if (!firestore || !formationId) return null;
@@ -180,6 +205,42 @@ export default function FormationDetailPage() {
                             </div>
                         </section>
 
+                        {areModulesLoading ? <Skeleton className="h-48 w-full" /> : modules && modules.length > 0 && (
+                            <section>
+                                <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
+                                <div className="space-y-6 border-l-2 border-primary/20 pl-6">
+                                    {modules.sort((a,b) => (a.name || '').localeCompare(b.name || '', undefined, {numeric: true})).map((module, index) => (
+                                        <div key={module.id} className="relative">
+                                            <div className="absolute -left-[29px] top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                            <h4 className="font-semibold text-sm">{module.description}</h4>
+                                            <p className="text-sm mt-1">
+                                                {module.name}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        <section id="availability">
+                            <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
+                             <div className="space-y-2 max-w-sm">
+                                {availability.length > 0 ? (
+                                    availability.map((month) => (
+                                        <div key={month.name} className={cn("flex justify-between items-center p-3 rounded-md text-sm", month.isAvailable ? "bg-green-50" : "bg-red-50 text-muted-foreground")}>
+                                            <span className="font-medium capitalize">{month.name}</span>
+                                            {month.isAvailable ? (
+                                                <Badge variant="secondary" className="bg-green-100 text-green-800"><Check size={14} className="mr-1"/>Disponible</Badge>
+                                            ) : (
+                                                <Badge variant="secondary" className="bg-red-100 text-red-800"><XCircle size={14} className="mr-1"/>Complet</Badge>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)
+                                )}
+                            </div>
+                        </section>
                          <section id="informations">
                             <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Info size={24}/>Informations</h2>
                              <div className="space-y-8">
@@ -190,7 +251,11 @@ export default function FormationDetailPage() {
                                              <div key={campus.id} className="group">
                                                 <div className="w-32 text-center">
                                                     <div className="relative w-32 h-24 rounded-md overflow-hidden border">
-                                                        <MediaPreview url={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/128/96`} alt={campus.name} />
+                                                         {campus.imageUrl ? (
+                                                            <MediaPreview url={campus.imageUrl} alt={campus.name} />
+                                                          ) : (
+                                                            <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
+                                                          )}
                                                     </div>
                                                     <p className="text-xs font-medium mt-2">{campus.name}</p>
                                                 </div>
@@ -231,21 +296,6 @@ export default function FormationDetailPage() {
                             </section>
                         )}
                         
-                        {areModulesLoading ? <Skeleton className="h-48 w-full" /> : modules && modules.length > 0 && (
-                            <section>
-                                <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
-                                <div className="space-y-6 border-l-2 border-primary/20 pl-6">
-                                    {modules.sort((a,b) => (a.description || '').localeCompare(b.description || '', undefined, {numeric: true})).map((module, index) => (
-                                        <div key={module.id} className="relative">
-                                          <div className="absolute -left-[29px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                          <p className="text-sm mt-1">
-                                            {module.name}
-                                          </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
                     </div>
                     
                     <aside className="sticky top-24 self-start">
@@ -257,6 +307,5 @@ export default function FormationDetailPage() {
             </main>
         </div>
     );
-}
 
     
