@@ -26,6 +26,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 import { Trash2, Edit, Plus } from 'lucide-react';
 
 const generateSlug = (title: string) => {
+  if (!title) return '';
   return title
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric characters
@@ -68,7 +69,7 @@ export default function PublicationsPage() {
     return query(collection(firestore, 'articles'), orderBy('publicationDate', 'desc'));
   }, [firestore]);
 
-  const { data: articles, isLoading: areArticlesLoading } = useCollection<Omit<Article, 'id'>>(articlesQuery);
+  const { data: articles, isLoading: areArticlesLoading } = useCollection<Article>(articlesQuery);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,7 +86,15 @@ export default function PublicationsPage() {
 
   const editForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      title: '',
+      slug: '',
+      author: '',
+      publicationDate: new Date(),
+      summary: '',
+      content: '',
+      imageUrl: '',
+    },
   });
 
   const addTitle = form.watch("title");
@@ -97,6 +106,7 @@ export default function PublicationsPage() {
 
   const editTitle = editForm.watch("title");
   useEffect(() => {
+    // Only auto-generate slug if the title is being changed by the user
     if (editTitle && editForm.formState.isDirty) {
       editForm.setValue('slug', generateSlug(editTitle));
     }
@@ -113,6 +123,9 @@ export default function PublicationsPage() {
     if (editingArticle) {
       editForm.reset({
         ...editingArticle,
+        summary: editingArticle.summary || '',
+        content: editingArticle.content || '',
+        imageUrl: editingArticle.imageUrl || '',
         publicationDate: editingArticle.publicationDate.toDate(),
       });
     }
