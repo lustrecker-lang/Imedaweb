@@ -181,67 +181,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                 <div className="grid lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
                          <Accordion type="multiple" defaultValue={['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6']} className="w-full">
-                            <AccordionItem value="item-1">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><BookOpen size={24}/>Détails de la Formation</h2>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="space-y-6 pt-4">
-                                        <DetailCard icon={<Target size={20} />} title="Public Concerné" content={formation.publicConcerne} />
-                                        <DetailCard icon={<CheckCircle size={20} />} title="Pré-requis" content={formation.preRequis} />
-                                        <DetailCard icon={<Award size={20} />} title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
-                                        <DetailCard icon={<Users size={20} />} title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
-                                        <DetailCard icon={<BookOpen size={20} />} title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-
-                            {sortedModules && sortedModules.length > 0 && (
-                                <AccordionItem value="item-2">
-                                    <AccordionTrigger>
-                                        <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="space-y-4 border-l-2 border-primary/20 pl-6 pt-4">
-                                            {sortedModules.map((module) => (
-                                                <div key={module.id} className="relative">
-                                                    <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                                    <p className="text-foreground">{module.name}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            )}
-                            
                             <AccordionItem value="item-3">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="flex flex-wrap gap-4 pt-4">
-                                        {availability.length > 0 ? (
-                                            availability.map((month) => (
-                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
-                                                    <div className="text-center">
-                                                        <p className="font-semibold capitalize">{month.month}</p>
-                                                        <p className="text-xs">{month.year}</p>
-                                                    </div>
-                                                    {month.isAvailable ? (
-                                                        <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800">Disponible</Badge>
-                                                    ) : (
-                                                        <Badge variant="secondary" className="mt-2 bg-red-100 text-red-800">Complet</Badge>
-                                                    )}
-                                                </div>
-                                            ))
-                                        ) : (
-                                            Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-32 w-32" />)
-                                        )}
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                            
-                            <AccordionItem value="item-4">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Info size={24}/>Informations</h2>
                                 </AccordionTrigger>
@@ -283,9 +223,9 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-
-                            {(formation.prixSansHebergement || formation.prixAvecHebergement) && (
-                                <AccordionItem value="item-5">
+                            
+                             {(formation.prixSansHebergement || formation.prixAvecHebergement) && (
+                                <AccordionItem value="item-4">
                                     <AccordionTrigger>
                                         <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
                                     </AccordionTrigger>
@@ -340,6 +280,66 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </AccordionContent>
                                 </AccordionItem>
                             )}
+
+                            <AccordionItem value="item-1">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><BookOpen size={24}/>Détails de la Formation</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="space-y-6 pt-4">
+                                        <DetailCard icon={<Target size={20} />} title="Public Concerné" content={formation.publicConcerne} />
+                                        <DetailCard icon={<CheckCircle size={20} />} title="Pré-requis" content={formation.preRequis} />
+                                        <DetailCard icon={<Award size={20} />} title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
+                                        <DetailCard icon={<Users size={20} />} title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
+                                        <DetailCard icon={<BookOpen size={20} />} title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            {sortedModules && sortedModules.length > 0 && (
+                                <AccordionItem value="item-2">
+                                    <AccordionTrigger>
+                                        <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="space-y-4 border-l-2 border-primary/20 pl-6 pt-4">
+                                            {sortedModules.map((module) => (
+                                                <div key={module.id} className="relative pl-6">
+                                                    <div className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                                    <p className="text-foreground">{module.name}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            )}
+                            
+                            <AccordionItem value="item-5">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="flex flex-wrap gap-4 pt-4">
+                                        {availability.length > 0 ? (
+                                            availability.map((month) => (
+                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                                    <div className="text-center">
+                                                        <p className="font-semibold capitalize">{month.month}</p>
+                                                        <p className="text-xs">{month.year}</p>
+                                                    </div>
+                                                    {month.isAvailable ? (
+                                                        <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800">Disponible</Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary" className="mt-2 bg-red-100 text-red-800">Complet</Badge>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-32 w-32" />)
+                                        )}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                             
                             {allServices && allServices.length > 0 && (
                                 <AccordionItem value="item-6">
