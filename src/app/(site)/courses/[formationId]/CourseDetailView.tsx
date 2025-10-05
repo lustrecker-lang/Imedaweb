@@ -339,7 +339,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         {allServices.map((service, index) => (
                                             <div key={service.id} className={cn(
                                                 "flex items-center justify-between gap-4 py-3",
-                                                (index < allServices.length - (allServices.length % 2 !== 0 && index === allServices.length - 1 ? 1 : 2)) && "border-b"
+                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1) && allServices.length > 1) && "border-b"
                                             )}>
                                                 <div className="flex items-center gap-4">
                                                      {service.mediaUrl ? (
@@ -494,7 +494,5 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
-
-    
 
     
