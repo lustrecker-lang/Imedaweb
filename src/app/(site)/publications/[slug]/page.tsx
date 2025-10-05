@@ -24,13 +24,6 @@ interface Article {
   imageUrl?: string;
 }
 
-export async function generateStaticParams() {
-  const articlesSnap = await adminDb.collection('articles').limit(20).get(); // Limit to a reasonable number for build time
-  return articlesSnap.docs.map((doc) => ({
-    slug: doc.data().slug || doc.id,
-  }));
-}
-
 async function getArticle(slug: string): Promise<Article | null> {
   try {
     const articlesRef = adminDb.collection('articles');
