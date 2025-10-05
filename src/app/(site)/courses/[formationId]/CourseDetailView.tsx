@@ -191,15 +191,16 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Ce cours est disponible dans tous ces campus.</h3>
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
-                                                    <Link href={`/campus/${campus.slug}`} key={campus.id} className="w-48 text-center group">
+                                                     <Link href={`/campus/${campus.slug}`} key={campus.id} className="w-48 group">
                                                         <div className="relative w-48 h-32 rounded-lg overflow-hidden border">
-                                                            {campus.imageUrl ? (
+                                                             {campus.imageUrl ? (
                                                                 <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
                                                             ) : (
                                                                 <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                             )}
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                                            <p className="absolute bottom-2 left-3 text-sm font-medium text-white">{campus.name}</p>
                                                         </div>
-                                                        <p className="text-sm font-medium mt-2 group-hover:text-primary">{campus.name}</p>
                                                     </Link>
                                                 ))}
                                             </div>
@@ -296,13 +297,12 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="relative pl-8 pt-4">
-                                        <div className="absolute top-4 bottom-0 left-[39px] w-0.5 bg-primary/20"></div>
+                                <AccordionContent className="pt-4 pl-8">
+                                    <div className="relative border-l-2 border-primary/20">
                                         <div className="space-y-4">
                                             {sortedModules.map((module) => (
-                                                <div key={module.id} className="relative pl-4">
-                                                    <div className="absolute -left-[9px] h-3 w-3 rounded-full bg-primary top-1.5" />
+                                                <div key={module.id} className="relative pl-8">
+                                                    <div className="absolute -left-[7px] h-3 w-3 rounded-full bg-primary top-1.5" />
                                                     <p className="text-foreground">{module.name}</p>
                                                 </div>
                                             ))}
@@ -384,4 +384,5 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             </main>
         </div>
     );
-}
+
+    
