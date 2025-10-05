@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Check } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -188,15 +188,15 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             <h3 className="font-normal mb-3">Cette formation est disponible dans tous ces campus.</h3>
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
-                                                      <div key={campus.id} className="w-48 group">
-                                                        <div className="relative w-48 h-32 rounded-lg overflow-hidden border">
-                                                             {campus.imageUrl ? (
+                                                    <div key={campus.id} className="w-48 group relative overflow-hidden rounded-lg">
+                                                        <div className="relative w-48 h-32">
+                                                            {campus.imageUrl ? (
                                                                 <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
                                                             ) : (
                                                                 <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                             )}
-                                                            <p className="absolute bottom-2 left-3 text-sm font-semibold text-white">{campus.name}</p>
                                                         </div>
+                                                        <p className="absolute bottom-2 left-3 text-sm font-semibold text-white">{campus.name}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -220,7 +220,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-                             <AccordionItem value="item-3">
+                            <AccordionItem value="item-3">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Détails de la formation</h2>
                                 </AccordionTrigger>
@@ -293,11 +293,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="relative pl-6 pt-4">
-                                        <div className="absolute top-4 bottom-0 left-[29.5px] w-0.5 bg-primary/20" />
+                                        <div className="absolute top-4 bottom-0 left-3 w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
-                                            <div key={module.id} className="relative mb-4 last:mb-0">
-                                                <div className="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                                <p className="text-foreground ml-6">{module.name}</p>
+                                            <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
+                                                <div className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                                <p className="text-foreground">{module.name}</p>
                                             </div>
                                         ))}
                                     </div>
