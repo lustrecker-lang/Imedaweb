@@ -90,7 +90,7 @@ export default function FormationDetailPage() {
 
     const modulesQuery = useMemoFirebase(() => {
         if (!firestore || !formationId) return null;
-        return query(collection(firestore, 'course_modules'), where('formationId', '==', formationId), orderBy('name', 'asc'));
+        return query(collection(firestore, 'course_modules'), where('formationId', '==', formationId));
     }, [firestore, formationId]);
     
     const campusesQuery = useMemoFirebase(() => {
@@ -180,17 +180,17 @@ export default function FormationDetailPage() {
                             </div>
                         </section>
 
-                        <section>
+                         <section id="informations">
                             <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Info size={24}/>Informations</h2>
-                             <div className="space-y-6">
+                             <div className="space-y-8">
                                 <div>
                                     <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Lieux</h3>
                                     <div className="flex flex-wrap gap-4">
                                         {campuses && campuses.map(campus => (
-                                            <div key={campus.id} className="group">
-                                                <div className="w-28 text-center">
-                                                    <div className="relative w-28 h-20 rounded-md overflow-hidden border">
-                                                        <MediaPreview url={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/112/80`} alt={campus.name} />
+                                             <div key={campus.id} className="group">
+                                                <div className="w-32 text-center">
+                                                    <div className="relative w-32 h-24 rounded-md overflow-hidden border">
+                                                        <MediaPreview url={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/128/96`} alt={campus.name} />
                                                     </div>
                                                     <p className="text-xs font-medium mt-2">{campus.name}</p>
                                                 </div>
@@ -235,12 +235,12 @@ export default function FormationDetailPage() {
                             <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 <div className="space-y-6 border-l-2 border-primary/20 pl-6">
-                                    {modules.sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric: true})).map((module, index) => (
+                                    {modules.sort((a,b) => a.description!.localeCompare(b.description!, undefined, {numeric: true})).map((module, index) => (
                                         <div key={module.id} className="relative">
                                           <div className="absolute -left-[29px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                          <h4 className="font-semibold">{module.name}</h4>
+                                          <h4 className="font-semibold">{module.description || `Module ${index + 1}`}</h4>
                                           <p className="text-sm text-muted-foreground mt-1">
-                                            {module.description || "Aucune description détaillée disponible pour ce module."}
+                                            {module.name}
                                           </p>
                                         </div>
                                     ))}
