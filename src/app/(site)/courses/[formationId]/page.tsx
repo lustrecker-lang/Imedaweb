@@ -241,7 +241,7 @@ export default function FormationDetailPage() {
                                     {sortedModules.map((module, index) => (
                                         <div key={module.id} className="relative">
                                             <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                            <p className="font-semibold text-foreground">{`Module ${index + 1}: ${module.name}`}</p>
+                                            <p className="font-semibold text-foreground">{module.name}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -331,30 +331,30 @@ export default function FormationDetailPage() {
                                 <div className="grid sm:grid-cols-2 gap-6">
                                     {formation.prixSansHebergement && (
                                         <Card className="border-primary/50">
-                                            <CardContent className="pt-6">
-                                                <div className="flex flex-col items-center text-center">
-                                                    <div className="flex items-center gap-2 text-muted-foreground"><Banknote size={18}/></div>
+                                            <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
+                                                <div className="text-center">
+                                                    <div className="flex items-center justify-center gap-2 text-muted-foreground"><Banknote size={18}/></div>
                                                     <h4 className="font-semibold mt-2">Formation seule</h4>
-                                                    <p className="text-xs text-muted-foreground mt-1">Par personne</p>
-                                                    <div className="flex items-baseline justify-center gap-2 mt-2">
-                                                        <span className="text-sm text-muted-foreground">à partir de</span>
-                                                        <p className="font-semibold text-2xl">{calculatePrice(formation.prixSansHebergement)}</p>
-                                                    </div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-xs text-muted-foreground mb-4">Par personne</p>
+                                                    <p className="text-sm text-muted-foreground">à partir de</p>
+                                                    <p className="font-semibold text-2xl">{calculatePrice(formation.prixSansHebergement)}</p>
                                                 </div>
                                             </CardContent>
                                         </Card>
                                     )}
                                     {formation.prixAvecHebergement && (
                                         <Card className="border-primary/50 bg-primary/5">
-                                            <CardContent className="pt-6">
-                                                <div className="flex flex-col items-center text-center">
-                                                    <div className="flex items-center gap-2 text-muted-foreground"><Building size={18}/></div>
+                                            <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
+                                                <div className="text-center">
+                                                    <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18}/></div>
                                                     <h4 className="font-semibold mt-2">Forfait avec hébergement</h4>
-                                                    <p className="text-xs text-muted-foreground mt-1">Par personne</p>
-                                                    <div className="flex items-baseline justify-center gap-2 mt-2">
-                                                        <span className="text-sm text-muted-foreground">à partir de</span>
-                                                        <p className="font-semibold text-2xl">{calculatePrice(formation.prixAvecHebergement)}</p>
-                                                    </div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-xs text-muted-foreground mb-4">Par personne</p>
+                                                     <p className="text-sm text-muted-foreground">à partir de</p>
+                                                    <p className="font-semibold text-2xl">{calculatePrice(formation.prixAvecHebergement)}</p>
                                                 </div>
                                             </CardContent>
                                         </Card>
@@ -375,3 +375,4 @@ export default function FormationDetailPage() {
         </div>
     );
 }
+
