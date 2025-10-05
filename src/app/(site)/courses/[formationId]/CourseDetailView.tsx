@@ -274,7 +274,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
                                                             <div className="flex items-center justify-center gap-2 text-muted-foreground"><GraduationCap size={18}/></div>
-                                                            <h4 className="font-semibold mt-2 text-sm sm:text-base">Formation seule</h4>
+                                                            <h4 className="font-semibold mt-2 text-xs sm:text-base">Formation seule</h4>
                                                         </div>
                                                         <div className="text-center">
                                                             <p className="text-xs text-muted-foreground">à partir de</p>
@@ -374,8 +374,8 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-4">
                                         {availability.length > 0 ? (
                                             availability.map((month) => (
-                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg border text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
-                                                    <div className="text-center">
+                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg border text-center text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                                    <div className="">
                                                         <p className="font-semibold capitalize text-xs sm:text-sm">{month.month}</p>
                                                         <p className="text-xs">{month.year}</p>
                                                     </div>
@@ -494,7 +494,5 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     
 }
-
-    
 
     
