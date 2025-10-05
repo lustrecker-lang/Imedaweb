@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Phone, Mail, GraduationCap, Building, Check } from 'lucide-react';
+import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, ArrowLeft } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -16,6 +16,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 interface Formation {
@@ -105,8 +107,17 @@ const MediaPreview = ({ url, alt, className }: { url: string; alt: string; class
 export default function CourseDetailView({ formation, theme, modules, campuses, allServices, coursePageContent }: CourseDetailViewProps) {
     const [availability, setAvailability] = useState<MonthAvailability[]>([]);
     const [numberOfPeople, setNumberOfPeople] = useState(3);
+    const [showBackButton, setShowBackButton] = useState(false);
+    const isMobile = useIsMobile();
 
     useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const referrer = document.referrer;
+            if (referrer.includes('/courses')) {
+                setShowBackButton(true);
+            }
+        }
+
         const today = new Date();
         const months: MonthAvailability[] = [];
         for (let i = 0; i < 7; i++) {
@@ -160,6 +171,18 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     return (
         <div className="bg-background">
+             {isMobile && showBackButton && (
+                <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b md:hidden">
+                    <div className="container px-4 h-12 flex items-center">
+                        <Button variant="ghost" size="sm" asChild>
+                            <Link href="/courses">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Retour au catalogue
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+            )}
             <header className="py-12 bg-muted/30 border-b">
                 <div className="container mx-auto px-4 md:px-6">
                     <div className="max-w-4xl">
@@ -326,7 +349,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     <TableRow 
                                                         key={module.id} 
                                                         className={cn(
-                                                            "flex flex-col md:table-row",
+                                                            "flex flex-col md:table-row hover:bg-transparent",
                                                             index === sortedModules.length - 1 ? "border-b-0" : "border-b"
                                                         )}
                                                     >
@@ -390,7 +413,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 pt-4">
+                                    <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-4">
                                         {availability.length > 0 ? (
                                             availability.map((month) => (
                                                 <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg border text-center text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
