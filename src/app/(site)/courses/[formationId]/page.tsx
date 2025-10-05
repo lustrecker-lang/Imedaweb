@@ -87,7 +87,7 @@ export default function FormationDetailPage() {
     const params = useParams();
     const formationId = params.formationId as string;
     const [availability, setAvailability] = useState<MonthAvailability[]>([]);
-    const [numberOfPeople, setNumberOfPeople] = useState(1);
+    const [numberOfPeople, setNumberOfPeople] = useState(3);
 
     useEffect(() => {
         const today = new Date();
@@ -142,11 +142,19 @@ export default function FormationDetailPage() {
         });
     }, [modules]);
     
-    const calculatePrice = (basePrice: string | undefined) => {
-        if (!basePrice) return 'N/A';
-        const price = parseFloat(basePrice);
-        if (isNaN(price)) return 'N/A';
-        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price * numberOfPeople);
+    const calculatePrice = (basePriceString: string | undefined) => {
+        if (!basePriceString) return 'N/A';
+        const basePrice = parseFloat(basePriceString);
+        if (isNaN(basePrice)) return 'N/A';
+
+        let finalPrice = basePrice;
+        if (numberOfPeople === 1) {
+            finalPrice = basePrice * 1.4;
+        } else if (numberOfPeople === 2) {
+            finalPrice = basePrice * 1.2;
+        }
+
+        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(finalPrice);
     };
 
     if (isLoading) {
@@ -230,10 +238,11 @@ export default function FormationDetailPage() {
                              <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 <div className="space-y-4 border-l-2 border-primary/20 pl-6">
-                                    {sortedModules.map((module) => (
+                                    {sortedModules.map((module, index) => (
                                         <div key={module.id} className="relative">
                                             <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                            <p className="text-foreground">
+                                            <p className="font-semibold text-foreground">{`Module ${index + 1}`}</p>
+                                            <p className="text-muted-foreground text-sm">
                                                 {module.name}
                                             </p>
                                         </div>
@@ -272,16 +281,16 @@ export default function FormationDetailPage() {
                                     <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Lieux</h3>
                                     <div className="flex flex-wrap gap-4">
                                         {campuses && campuses.map(campus => (
-                                            <div key={campus.id} className="w-48 text-center">
+                                            <Link href={`/campus/${campus.slug}`} key={campus.id} className="w-48 text-center group">
                                                 <div className="relative w-48 h-32 rounded-lg overflow-hidden border">
                                                     {campus.imageUrl ? (
-                                                        <MediaPreview url={campus.imageUrl} alt={campus.name} />
+                                                        <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
                                                     ) : (
                                                         <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                     )}
                                                 </div>
-                                                <p className="text-sm font-medium mt-2">{campus.name}</p>
-                                            </div>
+                                                <p className="text-sm font-medium mt-2 group-hover:text-primary">{campus.name}</p>
+                                            </Link>
                                         ))}
                                     </div>
                                 </div>
@@ -312,7 +321,7 @@ export default function FormationDetailPage() {
                                         <Label>Personnes:</Label>
                                         <Select value={String(numberOfPeople)} onValueChange={(val) => setNumberOfPeople(Number(val))}>
                                             <SelectTrigger className="w-[80px]">
-                                                <SelectValue placeholder="1" />
+                                                <SelectValue placeholder="3" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
@@ -363,5 +372,3 @@ export default function FormationDetailPage() {
         </div>
     );
 }
-
-    
