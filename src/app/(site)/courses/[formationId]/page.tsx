@@ -14,6 +14,8 @@ import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 
 
 interface Formation {
@@ -68,14 +70,14 @@ const isVideoUrl = (url?: string | null) => {
     }
 };
 
-const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+const MediaPreview = ({ url, alt, className }: { url: string; alt: string; className?: string }) => {
     if (isVideoUrl(url)) {
         return (
-            <video src={url} autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover"/>
+            <video src={url} autoPlay loop muted playsInline className={cn("absolute inset-0 h-full w-full object-cover", className)}/>
         );
     }
     return (
-        <Image src={url} alt={alt} fill className="object-cover" />
+        <Image src={url} alt={alt} fill className={cn("object-cover", className)} />
     );
 }
 
@@ -84,6 +86,7 @@ export default function FormationDetailPage() {
     const params = useParams();
     const formationId = params.formationId as string;
     const [availability, setAvailability] = useState<MonthAvailability[]>([]);
+    const [numberOfPeople, setNumberOfPeople] = useState(1);
 
     useEffect(() => {
         const today = new Date();
@@ -128,6 +131,18 @@ export default function FormationDetailPage() {
     const { data: campuses, isLoading: areCampusesLoading } = useCollection<Campus>(campusesQuery);
     
     const isLoading = isFormationLoading || isThemeLoading || areCampusesLoading;
+
+    const sortedModules = useMemo(() => {
+        if (!modules) return [];
+        return [...modules].sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true }));
+    }, [modules]);
+    
+    const calculatePrice = (basePrice: string | undefined) => {
+        if (!basePrice) return 'N/A';
+        const price = parseFloat(basePrice);
+        if (isNaN(price)) return 'N/A';
+        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price * numberOfPeople);
+    };
 
     if (isLoading) {
         return (
@@ -206,14 +221,14 @@ export default function FormationDetailPage() {
                             </div>
                         </section>
                         
-                        {areModulesLoading ? <Skeleton className="h-48 w-full" /> : modules && modules.length > 0 && (
+                        {areModulesLoading ? <Skeleton className="h-48 w-full" /> : sortedModules && sortedModules.length > 0 && (
                              <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 <div className="space-y-4 border-l-2 border-primary/20 pl-6">
-                                    {modules.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true })).map((module) => (
+                                    {sortedModules.map((module) => (
                                         <div key={module.id} className="relative">
                                             <div className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-primary" />
-                                            <p className="">
+                                            <p className="text-foreground">
                                                 {module.name}
                                             </p>
                                         </div>
@@ -227,7 +242,7 @@ export default function FormationDetailPage() {
                              <div className="flex flex-wrap gap-4">
                                 {availability.length > 0 ? (
                                     availability.map((month) => (
-                                        <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-28", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                        <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
                                             <div className="text-center">
                                                 <p className="font-semibold capitalize">{month.month}</p>
                                                 <p className="text-xs">{month.year}</p>
@@ -240,7 +255,7 @@ export default function FormationDetailPage() {
                                         </div>
                                     ))
                                 ) : (
-                                    Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-28 w-32" />)
+                                    Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-32 w-32" />)
                                 )}
                             </div>
                         </section>
@@ -253,12 +268,12 @@ export default function FormationDetailPage() {
                                     <div className="flex flex-wrap gap-4">
                                         {campuses && campuses.map(campus => (
                                              <div key={campus.id} className="group w-40 text-center">
-                                                <div className="relative w-40 h-32 rounded-md overflow-hidden border">
-                                                         {campus.imageUrl ? (
-                                                            <MediaPreview url={campus.imageUrl} alt={campus.name} />
-                                                          ) : (
-                                                            <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
-                                                          )}
+                                                <div className="relative w-40 h-32 rounded-lg overflow-hidden border">
+                                                    {campus.imageUrl ? (
+                                                        <MediaPreview url={campus.imageUrl} alt={campus.name} className="group-hover:scale-105 transition-transform duration-300" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
+                                                    )}
                                                 </div>
                                                 <p className="text-sm font-medium mt-2">{campus.name}</p>
                                             </div>
@@ -285,26 +300,47 @@ export default function FormationDetailPage() {
                         </section>
                         
                         {(formation.prixSansHebergement || formation.prixAvecHebergement) && (
-                             <section>
-                                <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
-                                <div className="space-y-4 max-w-lg border rounded-lg p-6 bg-muted/20">
+                            <section>
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
+                                    <div className="flex items-center gap-2 mt-4 sm:mt-0">
+                                        <FormLabel>Personnes:</FormLabel>
+                                        <Select value={String(numberOfPeople)} onValueChange={(val) => setNumberOfPeople(Number(val))}>
+                                            <SelectTrigger className="w-[80px]">
+                                                <SelectValue placeholder="1" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
+                                                    <SelectItem key={num} value={String(num)}>{num}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="grid sm:grid-cols-2 gap-6">
                                     {formation.prixSansHebergement && (
-                                        <div className="flex items-baseline justify-between text-sm">
-                                            <div className="flex items-center gap-2 text-muted-foreground"><Banknote size={16}/>Formation seule</div>
-                                            <div className="text-right">
-                                                <p className="text-xs text-muted-foreground">à partir de</p>
-                                                <p className="font-semibold text-lg">{formation.prixSansHebergement} €</p>
-                                            </div>
-                                        </div>
+                                        <Card className="border-primary/50">
+                                            <CardContent className="pt-6">
+                                                <div className="flex flex-col items-center text-center">
+                                                    <div className="flex items-center gap-2 text-muted-foreground"><Banknote size={18}/></div>
+                                                    <h4 className="font-semibold mt-2">Formation seule</h4>
+                                                    <p className="text-xs text-muted-foreground mt-1">Par personne</p>
+                                                    <p className="font-semibold text-2xl mt-4">{calculatePrice(formation.prixSansHebergement)}</p>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
                                     )}
                                     {formation.prixAvecHebergement && (
-                                        <div className="flex items-baseline justify-between text-sm">
-                                            <div className="flex items-center gap-2 text-muted-foreground"><Building size={16}/>Forfait avec hébergement</div>
-                                            <div className="text-right">
-                                                <p className="text-xs text-muted-foreground">à partir de</p>
-                                                <p className="font-semibold text-lg">{formation.prixAvecHebergement} €</p>
-                                            </div>
-                                        </div>
+                                        <Card className="border-primary/50 bg-primary/5">
+                                            <CardContent className="pt-6">
+                                                <div className="flex flex-col items-center text-center">
+                                                    <div className="flex items-center gap-2 text-muted-foreground"><Building size={18}/></div>
+                                                    <h4 className="font-semibold mt-2">Forfait avec hébergement</h4>
+                                                    <p className="text-xs text-muted-foreground mt-1">Par personne</p>
+                                                    <p className="font-semibold text-2xl mt-4">{calculatePrice(formation.prixAvecHebergement)}</p>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
                                     )}
                                 </div>
                             </section>
@@ -321,5 +357,4 @@ export default function FormationDetailPage() {
             </main>
         </div>
     );
-
-    
+}
