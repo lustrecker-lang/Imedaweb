@@ -3,7 +3,6 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, ArrowLeft } from 'lucide-react';
@@ -19,6 +18,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 
 interface Formation {
@@ -106,11 +106,10 @@ const MediaPreview = ({ url, alt, className }: { url: string; alt: string; class
 }
 
 export default function CourseDetailView({ formation, theme, modules, campuses, allServices, coursePageContent }: CourseDetailViewProps) {
-    const searchParams = useSearchParams();
     const [availability, setAvailability] = useState<MonthAvailability[]>([]);
     const [numberOfPeople, setNumberOfPeople] = useState(3);
     const isMobile = useIsMobile();
-    const fromCatalog = searchParams.get('from') === 'catalog';
+    const [isEnquirySheetOpen, setIsEnquirySheetOpen] = useState(false);
 
     useEffect(() => {
         const today = new Date();
@@ -166,13 +165,13 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     return (
         <div className="bg-background">
-             {isMobile && fromCatalog && (
+             {isMobile && (
                 <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b md:hidden">
                     <div className="container px-4 h-12 flex items-center">
                         <Button variant="ghost" size="sm" asChild>
                             <Link href="/courses">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
-                                Retour au catalogue
+                                Catalogue
                             </Link>
                         </Button>
                     </div>
@@ -212,7 +211,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <div className="space-y-8 pt-4">
                                         <div>
                                             <h3 className="font-normal mb-3">Cette formation est disponible dans tous ces campus.</h3>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                                 {campuses && campuses.map(campus => (
                                                     <div key={campus.id} className="group relative overflow-hidden rounded-lg aspect-w-4 aspect-h-3">
                                                         <Link href={`/campus/${campus.slug}`} className="absolute inset-0 z-10">
@@ -236,21 +235,21 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <h3 className="font-normal">Durée</h3>
                                                 <p className="text-sm text-muted-foreground">14 jours</p>
                                             </div>
-                                            <div className="sm:border-l sm:pl-4">
+                                             <div className="border-l pl-4">
                                                 <h3 className="font-normal">Heures de cours</h3>
                                                 <p className="text-sm text-muted-foreground">55 heures</p>
                                             </div>
                                              {formation.format && (
-                                                <div className="sm:border-l sm:pl-4">
+                                                <div className="border-l pl-4">
                                                     <h3 className="font-normal">Format</h3>
                                                     <p className="text-sm text-muted-foreground">{formation.format}</p>
                                                 </div>
                                              )}
-                                             <div className="sm:border-l sm:pl-4">
+                                             <div className="border-l pl-4">
                                                 <h3 className="font-normal">Langue</h3>
                                                 <p className="text-sm text-muted-foreground">Français</p>
                                             </div>
-                                            <div className="sm:border-l sm:pl-4">
+                                            <div className="border-l pl-4">
                                                 <h3 className="font-normal">Course ID</h3>
                                                 <p className="text-sm text-muted-foreground">{formation.formationId}</p>
                                             </div>
@@ -331,10 +330,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                         key={module.id} 
                                                         className={cn(
                                                             "flex flex-col md:table-row hover:bg-transparent",
-                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b"
+                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b-[1px] md:border-b"
                                                         )}
                                                     >
-                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-3 md:py-4 border-b md:border-b-0 md:border-r">
+                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-3 md:py-4 border-b-[1px] border-b-border/50 md:border-b-0 md:border-r">
                                                             <div className="flex items-start gap-4">
                                                                 <div className="w-[100px] shrink-0">
                                                                     <div className="font-semibold text-sm">Module {index + 1}</div>
@@ -519,19 +518,29 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                          </Accordion>
                     </div>
                     
-                    <aside className="sticky top-24 self-start">
+                    <aside className="sticky top-24 self-start hidden lg:block">
                          <div className="bg-white p-6 rounded-lg border">
                            <CourseInquiryForm courseName={formation.name} />
                          </div>
                     </aside>
                 </div>
             </main>
+             {isMobile && (
+                <div className="sticky bottom-0 z-40 bg-background/95 p-4 border-t lg:hidden">
+                    <Sheet open={isEnquirySheetOpen} onOpenChange={setIsEnquirySheetOpen}>
+                        <SheetTrigger asChild>
+                            <Button className="w-full">En Savoir plus</Button>
+                        </SheetTrigger>
+                        <SheetContent side="bottom" className="h-[90vh] flex flex-col">
+                           <div className="overflow-y-auto p-6">
+                             <CourseInquiryForm courseName={formation.name} />
+                           </div>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+            )}
         </div>
     );
-
-    
 }
-
-    
 
     
