@@ -316,7 +316,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionContent>
                                     <div className="pt-4">
                                         <div className="relative pl-3">
-                                            <div className="absolute left-3 top-1 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
+                                            <div className="absolute left-[0.375rem] top-1 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
                                             <div className="space-y-8">
                                                 {sortedModules.map((module) => (
                                                 <div key={module.id} className="relative flex items-start gap-4 pl-6">
@@ -335,9 +335,12 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Services</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 pt-4">
-                                        {allServices.map((service) => (
-                                            <div key={service.id} className="flex items-center justify-between gap-4 py-2 border-b">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 pt-4">
+                                        {allServices.map((service, index) => (
+                                            <div key={service.id} className={cn(
+                                                "flex items-center justify-between gap-4 py-3",
+                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1)) && "border-b"
+                                            )}>
                                                 <div className="flex items-center gap-4">
                                                      {service.mediaUrl ? (
                                                         <div className="relative h-10 w-10 shrink-0 rounded-sm overflow-hidden">
