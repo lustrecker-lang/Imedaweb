@@ -184,7 +184,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             <main className="container mx-auto px-4 py-12 md:px-6">
                 <div className="grid lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
-                         <Accordion type="multiple" defaultValue={['item-1', 'item-3']} className="w-full">
+                         <Accordion type="multiple" defaultValue={['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7']} className="w-full">
                             <AccordionItem value="item-1">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Informations</h2>
@@ -193,13 +193,13 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <div className="space-y-8 pt-4">
                                         <div>
                                             <h3 className="font-normal mb-3">Cette formation est disponible dans tous ces campus.</h3>
-                                            <div className="flex flex-wrap gap-4">
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                                 {campuses && campuses.map(campus => (
-                                                    <div key={campus.id} className="w-48 group relative overflow-hidden rounded-lg">
+                                                    <div key={campus.id} className="group relative overflow-hidden rounded-lg aspect-[4/3]">
                                                         <Link href={`/campus/${campus.slug}`} className="absolute inset-0 z-10">
                                                             <span className="sr-only">View {campus.name}</span>
                                                         </Link>
-                                                        <div className="relative w-48 h-32">
+                                                        <div className="relative w-full h-full">
                                                             {campus.imageUrl ? (
                                                                 <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
                                                             ) : (
@@ -314,10 +314,18 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Programme de la formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="space-y-2 pt-4 text-foreground">
-                                        {sortedModules.map((module) => (
-                                            <p key={module.id}>{module.name}</p>
-                                        ))}
+                                    <div className="pt-4">
+                                        <div className="relative">
+                                            <div className="absolute left-3 top-0 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
+                                            <div className="space-y-6">
+                                                {sortedModules.map((module) => (
+                                                <div key={module.id} className="relative pl-8">
+                                                    <div className="absolute left-3 top-1 h-3 w-3 -translate-x-1/2 rounded-full bg-primary" />
+                                                    <p className="font-medium text-foreground">{module.name}</p>
+                                                </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -433,8 +441,8 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Contactez-nous</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="grid md:grid-cols-3 gap-8 items-center pt-4">
-                                        <div className="relative aspect-square md:h-full w-full mx-auto md:mx-0 max-w-[200px] md:max-w-none overflow-hidden">
+                                    <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
+                                        <div className="relative aspect-square md:aspect-auto h-full w-full mx-auto md:mx-0 max-w-[200px] md:max-w-none overflow-hidden self-stretch">
                                             <Image 
                                                 src={coursePageContent.contact.imageUrl}
                                                 alt={coursePageContent.contact.name}
@@ -443,9 +451,9 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 data-ai-hint="professional woman portrait"
                                             />
                                         </div>
-                                        <div className="md:col-span-2 text-center md:text-left">
-                                            <h3 className="text-xl font-headline font-normal text-foreground">{coursePageContent.contact.name}</h3>
-                                            <p className="text-sm text-primary">{coursePageContent.contact.title}</p>
+                                        <div className="text-center md:text-left">
+                                            <h3 className="text-2xl font-headline font-normal text-foreground">{coursePageContent.contact.name}</h3>
+                                            <p className="text-sm text-primary/80">{coursePageContent.contact.title}</p>
                                             <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto md:mx-0">
                                                {coursePageContent.contact.description}
                                             </p>
