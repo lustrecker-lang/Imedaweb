@@ -8,7 +8,7 @@ import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase
 import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, MapPin, XCircle, Check } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, MapPin, XCircle, Check, Clock, Laptop } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -252,24 +252,34 @@ export default function FormationDetailPage() {
                                     <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Lieux</h3>
                                     <div className="flex flex-wrap gap-4">
                                         {campuses && campuses.map(campus => (
-                                             <div key={campus.id} className="group">
-                                                <div className="w-40 text-center">
-                                                    <div className="relative w-40 h-32 rounded-md overflow-hidden border">
+                                             <div key={campus.id} className="group w-40 text-center">
+                                                <div className="relative w-40 h-32 rounded-md overflow-hidden border">
                                                          {campus.imageUrl ? (
                                                             <MediaPreview url={campus.imageUrl} alt={campus.name} />
                                                           ) : (
                                                             <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                           )}
-                                                    </div>
-                                                    <p className="text-sm font-medium mt-2">{campus.name}</p>
                                                 </div>
+                                                <p className="text-sm font-medium mt-2">{campus.name}</p>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div>
-                                    <h3 className="font-semibold flex items-center gap-2 mb-2"><Calendar size={20} /> Durée</h3>
-                                    <p className="text-sm text-muted-foreground">Deux semaines</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                                    <div>
+                                        <h3 className="font-semibold flex items-center gap-2 mb-2"><Calendar size={20} /> Durée</h3>
+                                        <p className="text-sm text-muted-foreground">Deux semaines</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold flex items-center gap-2 mb-2"><Clock size={20} /> Heures de cours</h3>
+                                        <p className="text-sm text-muted-foreground">55 heures</p>
+                                    </div>
+                                     {formation.format && (
+                                        <div>
+                                            <h3 className="font-semibold flex items-center gap-2 mb-2"><Laptop size={20} /> Format</h3>
+                                            <Badge variant="outline">{formation.format}</Badge>
+                                        </div>
+                                     )}
                                 </div>
                              </div>
                         </section>
