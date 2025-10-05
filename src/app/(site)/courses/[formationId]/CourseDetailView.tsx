@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, GraduationCap, Phone, Mail, Building, Check } from 'lucide-react';
+import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, HelpCircle } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -300,7 +300,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="relative pl-3 pt-4">
-                                        <div className="absolute top-4 bottom-0 left-[0.32rem] w-0.5 bg-primary/20" />
+                                        <div className="absolute top-4 bottom-4 left-[0.32rem] w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
                                             <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
                                                 <div className="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-primary" />
@@ -376,7 +376,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
-                                        <div className="relative h-64 overflow-hidden">
+                                        <div className="relative aspect-square md:aspect-auto h-full min-h-[250px] w-full overflow-hidden">
                                             <Image 
                                                 src="https://picsum.photos/seed/imeda-value/800/600"
                                                 alt="Valeur IMEDA"
@@ -433,7 +433,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid md:grid-cols-3 gap-8 items-center pt-4">
-                                        <div className="relative h-40 w-40 mx-auto md:mx-0 overflow-hidden">
+                                        <div className="relative aspect-square md:aspect-auto md:h-full w-full mx-auto md:mx-0 max-w-[200px] md:max-w-none overflow-hidden">
                                             <Image 
                                                 src="https://picsum.photos/seed/rep/400/400"
                                                 alt="Amel K."
