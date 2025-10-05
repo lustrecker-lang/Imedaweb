@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, Check } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, Check, MapPin, Briefcase } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -15,7 +15,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { MapPin } from 'lucide-react';
 
 
 interface Formation {
@@ -65,6 +64,12 @@ interface CourseDetailViewProps {
     modules: Module[];
     campuses: Campus[];
     allServices: Service[];
+}
+
+interface MonthAvailability {
+    month: string;
+    year: string;
+    isAvailable: boolean;
 }
 
 const isVideoUrl = (url?: string | null) => {
@@ -219,62 +224,60 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionContent>
                             </AccordionItem>
 
-                            {(formation.prixSansHebergement || formation.prixAvecHebergement) && (
-                                <AccordionItem value="item-2">
-                                    <AccordionTrigger>
-                                        <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="pt-4">
-                                            <div className="flex items-center gap-2 mb-6">
-                                                <Label htmlFor="people-select">Personnes:</Label>
-                                                <Select value={String(numberOfPeople)} onValueChange={(val) => setNumberOfPeople(Number(val))}>
-                                                    <SelectTrigger id="people-select" className="w-[80px]">
-                                                        <SelectValue placeholder="3" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
-                                                            <SelectItem key={num} value={String(num)}>{num}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="grid sm:grid-cols-2 gap-6">
-                                                {formation.prixSansHebergement && (
-                                                    <Card className="border-primary/50">
-                                                        <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
-                                                            <div className="text-center">
-                                                                <div className="flex items-center justify-center gap-2 text-muted-foreground"><Banknote size={18}/></div>
-                                                                <h4 className="font-semibold mt-2">Formation seule</h4>
-                                                            </div>
-                                                            <div className="text-center">
-                                                                <p className="text-xs text-muted-foreground">à partir de</p>
-                                                                <p className="font-semibold text-2xl">{calculatePrice(formation.prixSansHebergement)}</p>
-                                                                <p className="text-xs text-muted-foreground mt-1">Par personne</p>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                )}
-                                                {formation.prixAvecHebergement && (
-                                                    <Card className="border-primary/50 bg-primary/5">
-                                                        <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
-                                                            <div className="text-center">
-                                                                <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18}/></div>
-                                                                <h4 className="font-semibold mt-2">Forfait avec hébergement</h4>
-                                                            </div>
-                                                            <div className="text-center">
-                                                                <p className="text-xs text-muted-foreground">à partir de</p>
-                                                                <p className="font-semibold text-2xl">{calculatePrice(formation.prixAvecHebergement)}</p>
-                                                                <p className="text-xs text-muted-foreground mt-1">Par personne</p>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                )}
-                                            </div>
+                             <AccordionItem value="item-2">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="pt-4">
+                                        <div className="flex items-center gap-2 mb-6">
+                                            <Label htmlFor="people-select">Personnes:</Label>
+                                            <Select value={String(numberOfPeople)} onValueChange={(val) => setNumberOfPeople(Number(val))}>
+                                                <SelectTrigger id="people-select" className="w-[80px]">
+                                                    <SelectValue placeholder="3" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
+                                                        <SelectItem key={num} value={String(num)}>{num}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
                                         </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            )}
+                                        <div className="grid sm:grid-cols-2 gap-6">
+                                            {formation.prixSansHebergement && (
+                                                <Card className="border-primary/50">
+                                                    <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
+                                                        <div className="text-center">
+                                                            <div className="flex items-center justify-center gap-2 text-muted-foreground"><Banknote size={18}/></div>
+                                                            <h4 className="font-semibold mt-2">Formation seule</h4>
+                                                        </div>
+                                                        <div className="text-center">
+                                                            <p className="text-xs text-muted-foreground">à partir de</p>
+                                                            <p className="font-semibold text-2xl mt-1">{calculatePrice(formation.prixSansHebergement)}</p>
+                                                            <p className="text-xs text-muted-foreground mt-2">Par personne</p>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            )}
+                                            {formation.prixAvecHebergement && (
+                                                <Card className="border-primary/50 bg-primary/5">
+                                                    <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
+                                                        <div className="text-center">
+                                                            <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18}/></div>
+                                                            <h4 className="font-semibold mt-2">Forfait avec hébergement</h4>
+                                                        </div>
+                                                        <div className="text-center">
+                                                            <p className="text-xs text-muted-foreground">à partir de</p>
+                                                            <p className="font-semibold text-2xl mt-1">{calculatePrice(formation.prixAvecHebergement)}</p>
+                                                            <p className="text-xs text-muted-foreground mt-2">Par personne</p>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            )}
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                             
                             <AccordionItem value="item-3">
                                 <AccordionTrigger>
@@ -293,55 +296,25 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
                             {sortedModules && sortedModules.length > 0 && (
                                 <AccordionItem value="item-4">
-                                    <AccordionTrigger>
-                                        <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="relative pl-8 pt-4 border-l-2 border-primary/20 ml-2">
-                                            <div className="space-y-4">
-                                                {sortedModules.map((module, index) => (
-                                                    <div key={module.id} className="relative">
-                                                        <div className={cn(
-                                                          "absolute -left-[39px] h-3 w-3 rounded-full bg-primary",
-                                                          index === 0 ? "top-1" : "top-1"
-                                                        )} />
-                                                        <p className="text-foreground">{module.name}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            )}
-
-                             <AccordionItem value="item-5">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="flex flex-wrap gap-4 pt-4">
-                                        {availability.length > 0 ? (
-                                            availability.map((month) => (
-                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
-                                                    <div className="text-center">
-                                                        <p className="font-semibold capitalize">{month.month}</p>
-                                                        <p className="text-xs">{month.year}</p>
-                                                    </div>
-                                                    {month.isAvailable ? (
-                                                        <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800">Disponible</Badge>
-                                                    ) : (
-                                                        <Badge variant="secondary" className="mt-2 bg-red-100 text-red-800">Complet</Badge>
-                                                    )}
+                                    <div className="relative pl-8 pt-4 border-l-2 border-primary/20 ml-2">
+                                        <div className="space-y-4">
+                                            {sortedModules.map((module) => (
+                                                <div key={module.id} className="relative">
+                                                    <div className="absolute -left-[39px] h-3 w-3 rounded-full bg-primary top-1.5" />
+                                                    <p className="text-foreground">{module.name}</p>
                                                 </div>
-                                            ))
-                                        ) : (
-                                            Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-32 w-32" />)
-                                        )}
+                                            ))}
+                                        </div>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-                            
-                            {allServices && allServices.length > 0 && (
+                            )}
+
+                             {allServices && allServices.length > 0 && (
                                 <AccordionItem value="item-6">
                                     <AccordionTrigger>
                                         <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Briefcase size={24}/>Services</h2>
@@ -376,6 +349,33 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </AccordionContent>
                                 </AccordionItem>
                             )}
+
+                             <AccordionItem value="item-5">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Calendar size={24}/>Disponibilité</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="flex flex-wrap gap-4 pt-4">
+                                        {availability.length > 0 ? (
+                                            availability.map((month) => (
+                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm w-32 h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                                    <div className="text-center">
+                                                        <p className="font-semibold capitalize">{month.month}</p>
+                                                        <p className="text-xs">{month.year}</p>
+                                                    </div>
+                                                    {month.isAvailable ? (
+                                                        <Badge variant="secondary" className="mt-2 bg-green-100 text-green-800">Disponible</Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary" className="mt-2 bg-red-100 text-red-800">Complet</Badge>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            Array.from({ length: 7 }).map((_, i) => <Skeleton key={i} className="h-32 w-32" />)
+                                        )}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                          </Accordion>
                     </div>
                     
