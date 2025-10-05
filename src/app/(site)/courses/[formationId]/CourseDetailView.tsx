@@ -213,7 +213,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+                                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-8">
                                             <div>
                                                 <h3 className="font-normal">Durée</h3>
                                                 <p className="text-sm text-muted-foreground">Deux semaines (14 jours)</p>
@@ -232,6 +232,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <h3 className="font-normal">Langue</h3>
                                                 <p className="text-sm text-muted-foreground">Français</p>
                                             </div>
+                                            <div>
+                                                <h3 className="font-normal">Course ID</h3>
+                                                <p className="text-sm text-muted-foreground">{formation.formationId}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </AccordionContent>
@@ -241,7 +245,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Détails de la formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="space-y-6 pt-4">
+                                    <div className="space-y-6 pt-4 whitespace-pre-wrap">
                                         <DetailCard title="Public Concerné" content={formation.publicConcerne} />
                                         <DetailCard title="Pré-requis" content={formation.preRequis} />
                                         <DetailCard title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
@@ -319,11 +323,14 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         <Table>
                                             <TableBody>
                                                 {sortedModules.map((module, index) => (
-                                                    <TableRow key={module.id} className={cn(
-                                                        "flex flex-col md:table-row hover:bg-transparent",
-                                                        index === sortedModules.length - 1 ? "border-b-0" : "border-b md:border-b"
-                                                    )}>
-                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-2 md:py-4 border-b md:border-b-0">
+                                                    <TableRow 
+                                                        key={module.id} 
+                                                        className={cn(
+                                                            "flex flex-col md:table-row hover:bg-transparent",
+                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b"
+                                                        )}
+                                                    >
+                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-2 md:py-4 border-b md:border-b-0 md:border-r">
                                                             <div className="flex items-start gap-4">
                                                                 <div className="w-[100px] shrink-0">
                                                                     <div className="font-semibold text-sm">Module {index + 1}</div>
@@ -351,7 +358,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                         {allServices.map((service, index) => (
                                             <div key={service.id} className={cn(
                                                 "flex items-center justify-between gap-4 py-3",
-                                                (index < allServices.length - (allServices.length % 2 !== 0 && index === allServices.length - 1 ? 1 : 2)) && "border-b"
+                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1)) && "border-b"
                                             )}>
                                                 <div className="flex items-center gap-4">
                                                      {service.mediaUrl ? (
