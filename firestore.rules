@@ -1,56 +1,55 @@
-
+/**
+ * @fileoverview Firestore Security Rules for Prototyping.
+ *
+ * Core Philosophy:
+ * This ruleset prioritizes rapid prototyping by granting broad access while maintaining basic authorization.
+ * It focuses on preventing unauthorized data access and modification, but deliberately avoids strict data validation.
+ *
+ * Data Structure:
+ * - `/pages/{pageId}`: Stores content for individual pages.
+ * - `/companyProfile/{profileId}`: Stores company branding information.
+ *
+ * Key Security Decisions:
+ * - Authenticated users can create, update, and delete page content and company profiles.
+ * - Data shape validation is skipped to facilitate rapid schema iteration during prototyping.
+ * - Listing of documents is enabled for all collections to allow initial exploration.
+ */
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    function isAdmin() {
-      return request.auth != null;
-    }
 
+    /**
+     * @description Controls access to page content.
+     * @path /pages/{pageId}
+     * @allow (create, update, delete) Authenticated user creating or modifying page content.
+     * @deny (create, update, delete) Unauthenticated user attempting to create, update, or delete page content.
+     * @principle Allows authenticated users to manage page content.
+     */
     match /pages/{pageId} {
-      allow read;
-      allow write: if isAdmin();
+      allow get, list: if true;
+      allow create, update, delete: if isSignedIn();
     }
 
+    /**
+     * @description Controls access to company profile information.
+     * @path /companyProfile/{profileId}
+     * @allow (create, update, delete) Authenticated user creating or modifying company profile.
+     * @deny (create, update, delete) Unauthenticated user attempting to create, update, or delete company profile.
+     * @principle Allows authenticated users to manage company profile information.
+     */
     match /companyProfile/{profileId} {
-      allow read;
-      allow write: if isAdmin();
-    }
-    
-    match /leads/{leadId} {
-      allow create;
-      allow read, write, delete: if isAdmin();
-    }
-    
-    match /campuses/{campusId} {
-      allow read;
-      allow write: if isAdmin();
-    }
-    
-    match /services/{serviceId} {
-       allow read;
-       allow write: if isAdmin();
-    }
-    
-    match /course_categories/{categoryId} {
-      allow read;
-      allow write: if isAdmin();
-    }
-    
-    match /course_themes/{themeId} {
-      allow read;
-      allow write: if isAdmin();
-    }
-    
-    match /course_formations/{formationId} {
-      allow read;
-      allow write: if isAdmin();
+      allow get, list: if true;
+      allow create, update, delete: if isSignedIn();
     }
 
-    match /course_modules/{moduleId} {
-      allow read;
-      allow write: if isAdmin();
+    // ========================= HELPER FUNCTIONS =========================
+
+    /**
+     * @description Checks if the user is signed in.
+     * @return {bool} True if the user is signed in, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
     }
   }
 }
