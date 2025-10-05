@@ -61,11 +61,15 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Trash2, Edit, X, Plus } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Service name is required.'),
   description: z.string().optional(),
   mediaUrl: z.string().optional(),
+  isPremium: z.boolean().default(false),
+  isOptional: z.boolean().default(false),
 });
 
 interface Service extends z.infer<typeof formSchema> {
@@ -117,7 +121,13 @@ export default function ServicesPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: '', description: '', mediaUrl: '' },
+    defaultValues: { 
+      name: '', 
+      description: '', 
+      mediaUrl: '',
+      isPremium: false,
+      isOptional: false,
+    },
   });
 
   const editForm = useForm<z.infer<typeof formSchema>>({
@@ -133,7 +143,13 @@ export default function ServicesPage() {
   
   useEffect(() => {
     if (editingService) {
-      editForm.reset(editingService);
+      editForm.reset({
+        name: editingService.name || '',
+        description: editingService.description || '',
+        mediaUrl: editingService.mediaUrl || '',
+        isPremium: editingService.isPremium || false,
+        isOptional: editingService.isOptional || false,
+      });
     }
   }, [editingService, editForm]);
 
@@ -272,7 +288,7 @@ export default function ServicesPage() {
                         Add Service
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Add New Service</DialogTitle>
                         <DialogDescription>
@@ -322,6 +338,42 @@ export default function ServicesPage() {
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
+                             <FormField
+                                control={form.control}
+                                name="isPremium"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                    <div className="space-y-0.5">
+                                      <FormLabel>Premium Service</FormLabel>
+                                      <FormMessage />
+                                    </div>
+                                    <FormControl>
+                                      <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="isOptional"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                    <div className="space-y-0.5">
+                                      <FormLabel>Optional Service</FormLabel>
+                                      <FormMessage />
+                                    </div>
+                                    <FormControl>
+                                      <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
                              <DialogFooter>
                                 <DialogClose asChild>
                                     <Button type="button" variant="outline">Cancel</Button>
@@ -341,6 +393,8 @@ export default function ServicesPage() {
                 <TableRow>
                   <TableHead>Media</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="hidden md:table-cell">Description</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -351,6 +405,8 @@ export default function ServicesPage() {
                     <TableRow key={i}>
                       <TableCell><Skeleton className="h-10 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                       <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-48" /></TableCell>
                       <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                     </TableRow>
@@ -366,6 +422,16 @@ export default function ServicesPage() {
                         )}
                       </TableCell>
                       <TableCell className="font-medium">{service.name}</TableCell>
+                      <TableCell>
+                        <Badge variant={service.isPremium ? 'default' : 'secondary'}>
+                          {service.isPremium ? 'Premium' : 'Basic'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={service.isOptional ? 'outline' : 'secondary'}>
+                          {service.isOptional ? 'Optional' : 'Included'}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="hidden md:table-cell text-sm text-muted-foreground truncate max-w-xs">{service.description}</TableCell>
                       <TableCell className="text-right">
                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(service as Service)}>
@@ -381,7 +447,7 @@ export default function ServicesPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       No services found. Add one to get started.
                     </TableCell>
                   </TableRow>
@@ -393,7 +459,7 @@ export default function ServicesPage() {
       </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-md">
               <DialogHeader>
                   <DialogTitle>Edit Service: {editingService?.name}</DialogTitle>
                   <DialogDescription>
@@ -419,6 +485,42 @@ export default function ServicesPage() {
                           </div>
                           <FormMessage />
                       </FormItem>
+                      <FormField
+                        control={editForm.control}
+                        name="isPremium"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5">
+                              <FormLabel>Premium Service</FormLabel>
+                              <FormMessage />
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={editForm.control}
+                        name="isOptional"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5">
+                              <FormLabel>Optional Service</FormLabel>
+                              <FormMessage />
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
                       <DialogFooter className="pt-4">
                           <DialogClose asChild>
                               <Button type="button" variant="outline">Cancel</Button>

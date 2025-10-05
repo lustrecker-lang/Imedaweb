@@ -226,6 +226,14 @@
           "type": "string",
           "description": "URL for an image or video representing the service.",
           "format": "uri"
+        },
+        "isPremium": {
+          "type": "boolean",
+          "description": "Indicates if the service is a premium offering."
+        },
+        "isOptional": {
+          "type": "boolean",
+          "description": "Indicates if the service is optional or included by default."
         }
       },
       "required": ["name"]
