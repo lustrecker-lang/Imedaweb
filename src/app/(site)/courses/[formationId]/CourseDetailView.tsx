@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, MapPin, Briefcase, Check } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, Clock, Laptop, Check } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { MapPin } from 'lucide-react';
 
 
 interface Formation {
@@ -49,12 +50,6 @@ interface Campus {
     name: string;
     imageUrl?: string;
     slug: string;
-}
-
-interface MonthAvailability {
-  month: string;
-  year: string;
-  isAvailable: boolean;
 }
 
 interface Service {
@@ -181,7 +176,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                 <div className="grid lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
                          <Accordion type="multiple" defaultValue={['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6']} className="w-full">
-                             <AccordionItem value="item-3">
+                            <AccordionItem value="item-1">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Info size={24}/>Informations</h2>
                                 </AccordionTrigger>
@@ -225,7 +220,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
 
                             {(formation.prixSansHebergement || formation.prixAvecHebergement) && (
-                                <AccordionItem value="item-4">
+                                <AccordionItem value="item-2">
                                     <AccordionTrigger>
                                         <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
                                     </AccordionTrigger>
@@ -281,7 +276,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionItem>
                             )}
                             
-                            <AccordionItem value="item-1">
+                            <AccordionItem value="item-3">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><BookOpen size={24}/>Détails de la Formation</h2>
                                 </AccordionTrigger>
@@ -297,18 +292,23 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
 
                             {sortedModules && sortedModules.length > 0 && (
-                                <AccordionItem value="item-2">
+                                <AccordionItem value="item-4">
                                     <AccordionTrigger>
                                         <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
                                     </AccordionTrigger>
                                     <AccordionContent>
-                                        <div className="space-y-4 pt-4 ml-2">
-                                            {sortedModules.map((module) => (
-                                                <div key={module.id} className="relative pl-8 border-l-2 border-primary/20">
-                                                    <div className="absolute -left-[7px] top-1 h-3 w-3 rounded-full bg-primary" />
-                                                    <p className="text-foreground">{module.name}</p>
-                                                </div>
-                                            ))}
+                                        <div className="relative pl-8 pt-4 border-l-2 border-primary/20 ml-2">
+                                            <div className="space-y-4">
+                                                {sortedModules.map((module, index) => (
+                                                    <div key={module.id} className="relative">
+                                                        <div className={cn(
+                                                          "absolute -left-[39px] h-3 w-3 rounded-full bg-primary",
+                                                          index === 0 ? "top-1" : "top-1"
+                                                        )} />
+                                                        <p className="text-foreground">{module.name}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </AccordionContent>
                                 </AccordionItem>
