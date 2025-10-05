@@ -195,7 +195,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             <h3 className="font-normal mb-3">Cette formation est disponible dans tous ces campus.</h3>
                                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                                 {campuses && campuses.map(campus => (
-                                                    <div key={campus.id} className="group relative overflow-hidden rounded-lg aspect-[4/3]">
+                                                    <div key={campus.id} className="group relative overflow-hidden rounded-lg aspect-w-4 aspect-h-3">
                                                         <Link href={`/campus/${campus.slug}`} className="absolute inset-0 z-10">
                                                             <span className="sr-only">View {campus.name}</span>
                                                         </Link>
@@ -268,17 +268,17 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-2 gap-4 sm:gap-6">
                                             {formation.prixSansHebergement && (
                                                 <Card className="border-primary/50">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
                                                             <div className="flex items-center justify-center gap-2 text-muted-foreground"><GraduationCap size={18}/></div>
-                                                            <h4 className="font-semibold mt-2">Formation seule</h4>
+                                                            <h4 className="font-semibold mt-2 text-sm sm:text-base">Formation seule</h4>
                                                         </div>
                                                         <div className="text-center">
                                                             <p className="text-xs text-muted-foreground">à partir de</p>
-                                                            <p className="font-semibold text-2xl mt-1">{calculatePrice(formation.prixSansHebergement)}</p>
+                                                            <p className="font-semibold text-xl sm:text-2xl mt-1">{calculatePrice(formation.prixSansHebergement)}</p>
                                                             <p className="text-xs text-muted-foreground mt-2">Par personne</p>
                                                         </div>
                                                     </CardContent>
@@ -289,11 +289,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
                                                              <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18}/></div>
-                                                            <h4 className="font-semibold mt-2">Forfait avec hébergement</h4>
+                                                            <h4 className="font-semibold mt-2 text-sm sm:text-base">Forfait avec hébergement</h4>
                                                         </div>
                                                         <div className="text-center">
                                                             <p className="text-xs text-muted-foreground">à partir de</p>
-                                                            <p className="font-semibold text-2xl mt-1">{calculatePrice(formation.prixAvecHebergement)}</p>
+                                                            <p className="font-semibold text-xl sm:text-2xl mt-1">{calculatePrice(formation.prixAvecHebergement)}</p>
                                                             <p className="text-xs text-muted-foreground mt-2">Par personne</p>
                                                         </div>
                                                     </CardContent>
@@ -316,11 +316,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 <AccordionContent>
                                     <div className="pt-4">
                                         <div className="relative pl-3.5">
-                                            <div className="absolute left-[17.5px] top-0 h-full w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
+                                            <div className="absolute left-0 top-0 h-full w-0.5 bg-border translate-x-1.5" aria-hidden="true" />
                                             <div className="space-y-6">
                                                 {sortedModules.map((module) => (
                                                 <div key={module.id} className="relative pl-8">
-                                                    <div className="absolute left-[17.5px] top-1 h-3 w-3 -translate-x-1/2 rounded-full bg-primary" />
+                                                    <div className="absolute left-0 top-1 h-3 w-3 rounded-full bg-primary" />
                                                     <p className="font-medium text-foreground">{module.name}</p>
                                                 </div>
                                                 ))}
