@@ -62,7 +62,7 @@ const isVideoUrl = (url?: string | null) => {
 const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
     if (isVideoUrl(url)) {
         return (
-            <video src={url} autoPlay loop muted playsInline className="h-full w-full object-cover"/>
+            <video src={url} autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover"/>
         );
     }
     return (
@@ -188,14 +188,14 @@ export default function FormationDetailPage() {
                                     <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Lieux</h3>
                                     <div className="flex flex-wrap gap-4">
                                         {campuses && campuses.map(campus => (
-                                            <Link href={`/campus/${campus.slug}`} key={campus.id} className="group">
-                                                <div className="w-24 text-center">
-                                                    <div className="relative w-24 h-16 rounded-md overflow-hidden border transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2">
-                                                        <MediaPreview url={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/100/75`} alt={campus.name} />
+                                            <div key={campus.id} className="group">
+                                                <div className="w-28 text-center">
+                                                    <div className="relative w-28 h-20 rounded-md overflow-hidden border">
+                                                        <MediaPreview url={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/112/80`} alt={campus.name} />
                                                     </div>
                                                     <p className="text-xs font-medium mt-2">{campus.name}</p>
                                                 </div>
-                                            </Link>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
