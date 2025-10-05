@@ -300,7 +300,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 </Card>
                                             )}
                                         </div>
-                                        <div className="text-center mt-6">
+                                        <div className="text-left mt-6">
                                             <p className="text-xs text-muted-foreground">
                                                 Les prix sont approximatifs et peuvent varier en fonction du mois, du nombre de personnes, de la disponibilité et de nombreux autres facteurs.
                                             </p>
@@ -438,7 +438,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid md:grid-cols-3 gap-8 items-center pt-4">
-                                        <div className="relative aspect-square md:aspect-auto md:h-full w-full mx-auto md:mx-0 max-w-[200px] md:max-w-none overflow-hidden">
+                                        <div className="relative aspect-square md:h-full w-full mx-auto md:mx-0 max-w-[200px] md:max-w-none overflow-hidden">
                                             <Image 
                                                 src={coursePageContent.contact.imageUrl}
                                                 alt={coursePageContent.contact.name}
