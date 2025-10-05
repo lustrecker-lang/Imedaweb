@@ -9,7 +9,6 @@ import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, MapPin } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 
@@ -235,16 +234,17 @@ export default function FormationDetailPage() {
                         {areModulesLoading ? <Skeleton className="h-48 w-full" /> : modules && modules.length > 0 && (
                             <section>
                                 <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
-                                <Accordion type="single" collapsible className="w-full">
-                                    {modules.sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric: true})).map(module => (
-                                        <AccordionItem key={module.id} value={module.id}>
-                                            <AccordionTrigger>{module.name}</AccordionTrigger>
-                                            <AccordionContent>
-                                                {module.description || "Aucune description détaillée disponible pour ce module."}
-                                            </AccordionContent>
-                                        </AccordionItem>
+                                <div className="space-y-6 border-l-2 border-primary/20 pl-6">
+                                    {modules.sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric: true})).map((module, index) => (
+                                        <div key={module.id} className="relative">
+                                          <div className="absolute -left-[29px] top-1.5 h-3 w-3 rounded-full bg-primary" />
+                                          <h4 className="font-semibold">{module.name}</h4>
+                                          <p className="text-sm text-muted-foreground mt-1">
+                                            {module.description || "Aucune description détaillée disponible pour ce module."}
+                                          </p>
+                                        </div>
                                     ))}
-                                </Accordion>
+                                </div>
                             </section>
                         )}
                     </div>
