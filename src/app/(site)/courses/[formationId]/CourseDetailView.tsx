@@ -268,7 +268,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                                        <div className="grid grid-cols-2 gap-4">
                                             {formation.prixSansHebergement && (
                                                 <Card className="border-primary/50">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
@@ -320,7 +320,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                             <div className="space-y-6">
                                                 {sortedModules.map((module) => (
                                                 <div key={module.id} className="relative pl-8">
-                                                    <div className="absolute left-0 top-1 h-3 w-3 rounded-full bg-primary" />
+                                                    <div className="absolute left-[1px] top-1 h-3 w-3 rounded-full bg-primary" />
                                                     <p className="font-medium text-foreground">{module.name}</p>
                                                 </div>
                                                 ))}
@@ -368,10 +368,10 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="flex flex-wrap gap-4 pt-4">
+                                    <div className="grid grid-cols-3 md:flex md:flex-wrap gap-4 pt-4">
                                         {availability.length > 0 ? (
                                             availability.map((month) => (
-                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm flex-1 basis-[28%] md:basis-auto md:w-32 md:h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-4 rounded-lg border text-sm aspect-square md:w-32 md:h-32", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
                                                     <div className="text-center">
                                                         <p className="font-semibold capitalize">{month.month}</p>
                                                         <p className="text-xs">{month.year}</p>
