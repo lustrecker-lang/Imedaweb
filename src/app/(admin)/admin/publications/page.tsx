@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -255,13 +256,11 @@ export default function PublicationsPage() {
         </Card>
       </div>
       
-      {/* Replaced Dialog with Sheet */}
       <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
         <SheetContent className="flex flex-col sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>Edit Article: {editingArticle?.title}</SheetTitle>
           </SheetHeader>
-          {/* Made the form content scrollable */}
           <div className="flex-grow overflow-y-auto pr-4">
             <Form {...editForm}>
               <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
@@ -278,7 +277,6 @@ export default function PublicationsPage() {
               </form>
             </Form>
           </div>
-          {/* Made the footer sticky */}
           <SheetFooter className="mt-auto border-t py-4">
             <SheetClose asChild><Button type="button" variant="outline">Cancel</Button></SheetClose>
             <Button type="button" onClick={editForm.handleSubmit(onEditSubmit)} disabled={editForm.formState.isSubmitting}>Save Changes</Button>
