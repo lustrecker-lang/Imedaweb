@@ -99,22 +99,6 @@ export default function PublicationsPage() {
                 </>
               )}
             </CardHeader>
-            <CardContent className="p-0 mt-6">
-               <div className="w-full max-w-[240px]">
-                    <Label className="text-sm font-medium text-gray-300 mb-2 block">Topics</Label>
-                    <Select value={selectedAuthor} onValueChange={setSelectedAuthor}>
-                        <SelectTrigger className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white">
-                            <SelectValue placeholder="Filter by author..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Authors</SelectItem>
-                            {authors.map(author => (
-                                <SelectItem key={author} value={author}>{author}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                 </div>
-            </CardContent>
           </div>
         </Card>
       </header>
@@ -175,7 +159,7 @@ export default function PublicationsPage() {
         </div>
       ) : (
         <div className="text-center py-16">
-          <p className="text-muted-foreground">No articles found for the selected topic.</p>
+          <p className="text-muted-foreground">No articles found.</p>
         </div>
       )}
     </div>
