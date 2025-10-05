@@ -8,9 +8,10 @@ import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase
 import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight } from 'lucide-react';
+import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, Building, ChevronRight, Info, Calendar, MapPin } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
+import Image from 'next/image';
 
 
 interface Formation {
@@ -40,6 +41,13 @@ interface Module {
     description?: string;
 }
 
+interface Campus {
+    id: string;
+    name: string;
+    imageUrl?: string;
+    slug: string;
+}
+
 export default function FormationDetailPage() {
     const firestore = useFirestore();
     const params = useParams();
@@ -52,7 +60,6 @@ export default function FormationDetailPage() {
 
     const { data: formation, isLoading: isFormationLoading } = useDoc<Formation>(formationRef);
     
-    // Fetch the theme based on themeId from the formation
     const themeRef = useMemoFirebase(() => {
         if (!firestore || !formation?.themeId) return null;
         return doc(firestore, 'course_themes', formation.themeId);
@@ -64,10 +71,16 @@ export default function FormationDetailPage() {
         if (!firestore || !formationId) return null;
         return query(collection(firestore, 'course_modules'), where('formationId', '==', formationId), orderBy('name', 'asc'));
     }, [firestore, formationId]);
+    
+    const campusesQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'campuses'), orderBy('name', 'asc'));
+    }, [firestore]);
 
     const { data: modules, isLoading: areModulesLoading } = useCollection<Module>(modulesQuery);
+    const { data: campuses, isLoading: areCampusesLoading } = useCollection<Campus>(campusesQuery);
     
-    const isLoading = isFormationLoading || isThemeLoading;
+    const isLoading = isFormationLoading || isThemeLoading || areCampusesLoading;
 
     if (isLoading) {
         return (
@@ -144,6 +157,31 @@ export default function FormationDetailPage() {
                                 <DetailCard icon={<Users size={20} />} title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
                                 <DetailCard icon={<BookOpen size={20} />} title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
                             </div>
+                        </section>
+
+                        <section>
+                            <h2 className="text-2xl font-headline font-normal text-primary mb-6 flex items-center gap-3"><Info size={24}/>Informations</h2>
+                             <div className="space-y-6">
+                                <div>
+                                    <h3 className="font-semibold flex items-center gap-2 mb-3"><MapPin size={20} /> Lieux</h3>
+                                    <div className="flex flex-wrap gap-4">
+                                        {campuses && campuses.map(campus => (
+                                            <Link href={`/campus/${campus.slug}`} key={campus.id} className="group">
+                                                <div className="w-24 text-center">
+                                                    <div className="relative w-24 h-16 rounded-md overflow-hidden border transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2">
+                                                        <Image src={campus.imageUrl || `https://picsum.photos/seed/${campus.id}/100/75`} alt={campus.name} fill className="object-cover" />
+                                                    </div>
+                                                    <p className="text-xs font-medium mt-2">{campus.name}</p>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold flex items-center gap-2 mb-2"><Calendar size={20} /> Durée</h3>
+                                    <p className="text-sm text-muted-foreground">Deux semaines</p>
+                                </div>
+                             </div>
                         </section>
                         
                         {(formation.prixSansHebergement || formation.prixAvecHebergement) && (
