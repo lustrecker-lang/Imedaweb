@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Users, Target, CheckCircle, Award, ListTree, Banknote, ChevronRight, Info, Check, Briefcase, Building } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -180,12 +180,12 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                          <Accordion type="multiple" defaultValue={['item-1', 'item-3']} className="w-full">
                             <AccordionItem value="item-1">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Info size={24}/>Informations</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Informations</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="space-y-8 pt-4">
                                         <div>
-                                            <h3 className="font-semibold flex items-center gap-2 mb-3">Cette formation est disponible dans tous ces campus.</h3>
+                                            <h3 className="font-normal mb-3">Cette formation est disponible dans tous ces campus.</h3>
                                             <div className="flex flex-wrap gap-4">
                                                 {campuses && campuses.map(campus => (
                                                       <div key={campus.id} className="w-48 group">
@@ -222,7 +222,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
                              <AccordionItem value="item-3">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><BookOpen size={24}/>Détails de la formation</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Détails de la formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="space-y-6 pt-4">
@@ -236,7 +236,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
                              <AccordionItem value="item-2">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Banknote size={24}/>Tarifs</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Tarifs</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="pt-4">
@@ -258,7 +258,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <Card className="border-primary/50">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
-                                                            <div className="flex items-center justify-center gap-2 text-muted-foreground"><Banknote size={18}/></div>
                                                             <h4 className="font-semibold mt-2">Formation seule</h4>
                                                         </div>
                                                         <div className="text-center">
@@ -273,7 +272,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <Card className="border-primary/50 bg-primary/5">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
-                                                            <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18}/></div>
                                                             <h4 className="font-semibold mt-2">Forfait avec hébergement</h4>
                                                         </div>
                                                         <div className="text-center">
@@ -291,7 +289,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             {sortedModules && sortedModules.length > 0 && (
                                 <AccordionItem value="item-4">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><ListTree size={24}/>Programme de la Formation</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Programme de la Formation</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="relative pl-6 pt-4">
@@ -308,7 +306,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             )}
                              <AccordionItem value="item-6">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3"><Briefcase size={24}/>Services</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Services</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 pt-4">
@@ -341,7 +339,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
                              <AccordionItem value="item-5">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary flex items-center gap-3">Disponibilité</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="flex flex-wrap gap-4 pt-4">
