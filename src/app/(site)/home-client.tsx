@@ -4,7 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { useState, useMemo } from 'react';
 
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,18 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
 interface Page { id: string; title: string; sections: Section[]; }
 interface Campus { id: string; name: string; slug: string; description?: string; imageUrl?: string; }
-interface Theme { id: string; name: string; description?: string; }
+interface Category { id: string; name: string; description?: string; }
+interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
 
 // Props
-interface HomeClientProps { homePage: Page | null; campuses: Campus[]; themes: Theme[]; formations: Formation[]; }
+interface HomeClientProps {
+  homePage: Page | null;
+  campuses: Campus[];
+  categories: Category[];
+  themes: Theme[];
+  formations: Formation[];
+}
 
 const isVideoUrl = (url?: string | null) => {
     if (!url) return false;
@@ -32,7 +39,7 @@ const isVideoUrl = (url?: string | null) => {
     } catch (e) { return false; }
 };
 
-export function HomeClient({ homePage, campuses, themes, formations }: HomeClientProps) {
+export function HomeClient({ homePage, campuses, categories, themes, formations }: HomeClientProps) {
   const router = useRouter();
   const isMobile = useIsMobile();
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
@@ -66,11 +73,21 @@ export function HomeClient({ homePage, campuses, themes, formations }: HomeClien
     );
   };
 
+  const categoriesWithThemes = useMemo(() => {
+    return categories.map(category => {
+      const categoryThemes = themes.filter(theme => theme.categoryId === category.id);
+      return {
+        ...category,
+        themes: categoryThemes,
+      };
+    });
+  }, [categories, themes]);
+
   return (
     <div className="flex flex-col">
       <section className="py-8">
         <div className="container px-4 md:px-6">
-          <div className="relative h-[50vh] min-h-[350px] md:min-h-[400px] w-full overflow-hidden">
+          <div className="relative h-[50vh] min-h-[400px] md:min-h-[500px] w-full overflow-hidden">
               {heroMediaUrl && ( isHeroVideo ? 
                   (<video src={heroMediaUrl} autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover"/>) : 
                   (<Image src={heroMediaUrl} alt={heroSection?.title || ""} fill className="object-cover" priority/>)
@@ -118,33 +135,51 @@ export function HomeClient({ homePage, campuses, themes, formations }: HomeClien
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Formations IMEDA</h2>
-                <p className="mt-2 text-muted-foreground md:text-base/relaxed"><span className="md:hidden">Explorez nos thèmes de formation</span><span className="hidden md:inline">Explorez nos thèmes de formation pour trouver le programme parfait pour vous.</span></p>
+                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                  <span className="md:hidden">Explorez nos thèmes de formation</span>
+                  <span className="hidden md:inline">Explorez nos thèmes de formation pour trouver le programme parfait pour vous.</span>
+                </p>
+            </div>
+            <div className="hidden sm:inline-flex">
+              <Button variant="link" asChild><Link href="/courses">Voir tout <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
             </div>
           </div>
           <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
           <CarouselContent className="-ml-4">
-  {themes.map((theme) => (
-      <CarouselItem key={theme.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
-          <Link href={`/courses?themeId=${theme.id}`} className="block h-full">
-              <Card className="h-full flex flex-col hover:border-primary transition-colors">
-                  <CardHeader>
-                      <CardTitle className="font-headline font-normal">{theme.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                      <CardDescription className="line-clamp-3">
-                          {theme.description || "Aucune description pour ce thème."}
-                      </CardDescription>
-                  </CardContent>
-                  {/* The count div is now gone */}
-              </Card>
-          </Link>
-      </CarouselItem>
-  ))}
-</CarouselContent>
-                <div className="absolute top-[-3.5rem] right-0 flex gap-2">
-                  <CarouselPrevious className="static translate-y-0 rounded-none inline-flex" />
-                  <CarouselNext className="static translate-y-0 rounded-none inline-flex" />
-                </div>
+              {categoriesWithThemes.map((category) => (
+                  <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
+                      <Link href={`/courses?categoryId=${category.id}`} className="block h-full">
+                          <Card className="h-full flex flex-col hover:border-primary transition-colors">
+                              <CardHeader>
+                                  <CardTitle className="font-headline font-normal">{category.name}</CardTitle>
+                              </CardHeader>
+                              <CardContent className="flex-grow">
+                                  {category.themes && category.themes.length > 0 ? (
+                                      <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                                          {category.themes.slice(0, 3).map(theme => (
+                                              <li key={theme.id} className="truncate">{theme.name}</li>
+                                          ))}
+                                          {category.themes.length > 3 && (
+                                            <li className="font-semibold">et {category.themes.length - 3} autres...</li>
+                                          )}
+                                      </ul>
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">Aucun thème disponible.</p>
+                                  )}
+                              </CardContent>
+                          </Card>
+                      </Link>
+                  </CarouselItem>
+              ))}
+          </CarouselContent>
+            <div className="absolute top-[-3.5rem] right-0 flex gap-2 sm:hidden">
+              <CarouselPrevious className="static translate-y-0 rounded-none inline-flex" />
+              <CarouselNext className="static translate-y-0 rounded-none inline-flex" />
+            </div>
+            <div className="absolute top-[-4.5rem] right-0 hidden sm:inline-flex gap-2">
+              <CarouselPrevious className="static translate-y-0 rounded-none" />
+              <CarouselNext className="static translate-y-0 rounded-none" />
+            </div>
           </Carousel>
         </div>
       </section>
@@ -154,7 +189,10 @@ export function HomeClient({ homePage, campuses, themes, formations }: HomeClien
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Our Campuses</h2>
-                <p className="mt-2 text-muted-foreground md:text-base/relaxed">{isMobile ? "Explore our world-class campuses" : "Explore our world-class campuses located in global hubs of innovation."}</p>
+                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                    <span className="md:hidden">Explore our world-class campuses</span>
+                    <span className="hidden md:inline">Explore our world-class campuses located in global hubs of innovation.</span>
+                </p>
             </div>
           </div>
           {isMobile ? (
