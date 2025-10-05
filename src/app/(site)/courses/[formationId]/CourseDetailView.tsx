@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, HelpCircle } from 'lucide-react';
+import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, Info, BookOpen, Banknote, ListTree, Briefcase } from 'lucide-react';
 import { CourseInquiryForm } from '@/components/course-inquiry-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
@@ -58,12 +58,19 @@ interface Service {
     mediaUrl?: string;
 }
 
+interface CourseDetailPageContent {
+  valeurImeda: { title: string; content: string; imageUrl: string };
+  faq: { id: string; question: string; answer: string }[];
+  contact: { name: string; title: string; description: string; francePhone: string; uaePhone: string; email: string; imageUrl: string };
+}
+
 interface CourseDetailViewProps {
     formation: Formation | null;
     theme: Theme | null;
     modules: Module[];
     campuses: Campus[];
     allServices: Service[];
+    coursePageContent: CourseDetailPageContent | null;
 }
 
 interface MonthAvailability {
@@ -94,7 +101,7 @@ const MediaPreview = ({ url, alt, className }: { url: string; alt: string; class
     );
 }
 
-export default function CourseDetailView({ formation, theme, modules, campuses, allServices }: CourseDetailViewProps) {
+export default function CourseDetailView({ formation, theme, modules, campuses, allServices, coursePageContent }: CourseDetailViewProps) {
     const [availability, setAvailability] = useState<MonthAvailability[]>([]);
     const [numberOfPeople, setNumberOfPeople] = useState(3);
 
@@ -300,9 +307,9 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="relative pl-3 pt-4">
-                                        <div className="absolute top-4 bottom-4 left-[0.32rem] w-0.5 bg-primary/20" />
+                                        <div className="absolute left-[0.32rem] top-4 bottom-4 w-0.5 bg-primary/20" />
                                         {sortedModules.map((module) => (
-                                            <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
+                                             <div key={module.id} className="relative pl-6 mb-4 last:mb-0">
                                                 <div className="absolute left-0 top-1.5 h-3 w-3 rounded-full bg-primary" />
                                                 <p className="text-foreground">{module.name}</p>
                                             </div>
@@ -370,6 +377,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
+                            {coursePageContent?.valeurImeda && (
                             <AccordionItem value="item-7">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Valeur IMEDA</h2>
@@ -378,55 +386,43 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
                                         <div className="relative aspect-square md:aspect-auto h-full min-h-[250px] w-full overflow-hidden">
                                             <Image 
-                                                src="https://picsum.photos/seed/imeda-value/800/600"
-                                                alt="Valeur IMEDA"
+                                                src={coursePageContent.valeurImeda.imageUrl}
+                                                alt={coursePageContent.valeurImeda.title}
                                                 fill
                                                 className="object-cover"
                                                 data-ai-hint="network growth"
                                             />
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-headline font-normal">Un Réseau International d'Excellence</h3>
+                                            <h3 className="text-lg font-headline font-normal">{coursePageContent.valeurImeda.title}</h3>
                                             <p className="text-sm text-muted-foreground mt-2">
-                                                En rejoignant IMEDA, vous accédez à un écosystème dynamique d'acteurs influents, d'experts sectoriels et de décideurs africains et européens. Nos programmes sont conçus pour favoriser les connexions, le partage d'expériences et la création d'opportunités professionnelles durables.
+                                               {coursePageContent.valeurImeda.content}
                                             </p>
                                         </div>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
+                            )}
+                            {coursePageContent?.faq && coursePageContent.faq.length > 0 && (
                              <AccordionItem value="faq">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">FAQ</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <Accordion type="single" collapsible className="w-full">
-                                        <AccordionItem value="faq-1">
-                                            <AccordionTrigger>When should I apply?</AccordionTrigger>
-                                            <AccordionContent className="text-sm text-muted-foreground">
-                                            We recommend applying at least three months in advance to secure your spot, as our programs often fill up quickly.
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                        <AccordionItem value="faq-2">
-                                            <AccordionTrigger>How do I reserve a space?</AccordionTrigger>
-                                            <AccordionContent className="text-sm text-muted-foreground">
-                                            You can reserve your space by filling out the inquiry form on this page. Our advisors will then guide you through the enrollment process.
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                        <AccordionItem value="faq-3">
-                                            <AccordionTrigger>Do you make a custom course for me?</AccordionTrigger>
-                                            <AccordionContent className="text-sm text-muted-foreground">
-                                            Yes, we offer customized corporate training solutions. Please contact us to discuss your specific needs.
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                        <AccordionItem value="faq-4">
-                                            <AccordionTrigger>How does the full process work?</AccordionTrigger>
-                                            <AccordionContent className="text-sm text-muted-foreground">
-                                            The process is simple: 1. Inquire about the course. 2. Our advisor contacts you. 3. Finalize your enrollment and payment. 4. Receive your pre-course materials and get ready to learn!
-                                            </AccordionContent>
-                                        </AccordionItem>
+                                        {coursePageContent.faq.map(item => (
+                                            <AccordionItem value={item.id} key={item.id}>
+                                                <AccordionTrigger>{item.question}</AccordionTrigger>
+                                                <AccordionContent className="text-sm text-muted-foreground">
+                                                    {item.answer}
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        ))}
                                     </Accordion>
                                 </AccordionContent>
                             </AccordionItem>
+                            )}
+                            {coursePageContent?.contact && (
                             <AccordionItem value="item-contact">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Contactez-nous</h2>
@@ -435,37 +431,38 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <div className="grid md:grid-cols-3 gap-8 items-center pt-4">
                                         <div className="relative aspect-square md:aspect-auto md:h-full w-full mx-auto md:mx-0 max-w-[200px] md:max-w-none overflow-hidden">
                                             <Image 
-                                                src="https://picsum.photos/seed/rep/400/400"
-                                                alt="Amel K."
+                                                src={coursePageContent.contact.imageUrl}
+                                                alt={coursePageContent.contact.name}
                                                 fill
                                                 className="object-cover"
                                                 data-ai-hint="professional woman portrait"
                                             />
                                         </div>
                                         <div className="md:col-span-2 text-center md:text-left">
-                                            <h3 className="text-xl font-headline font-normal">Amel K.</h3>
-                                            <p className="text-sm text-foreground">Représentante de la formation</p>
+                                            <h3 className="text-xl font-headline font-normal">{coursePageContent.contact.name}</h3>
+                                            <p className="text-sm text-foreground">{coursePageContent.contact.title}</p>
                                             <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto md:mx-0">
-                                               Que vous soyez un particulier ou une organisation/un groupe à la recherche d'un programme, contactez-nous et nous vous aiderons à trouver la meilleure solution pour vous.
+                                               {coursePageContent.contact.description}
                                             </p>
                                             <div className="flex flex-col items-center md:items-start gap-2 mt-4">
-                                                <a href="tel:+33189169308" className="flex items-center gap-2 text-sm text-primary hover:underline">
+                                                <a href={`tel:${coursePageContent.contact.francePhone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
                                                     <Phone size={16} />
-                                                    <span>France: +33 1 89 16 93 08</span>
+                                                    <span>France: {coursePageContent.contact.francePhone}</span>
                                                 </a>
-                                                <a href="tel:+97145656157" className="flex items-center gap-2 text-sm text-primary hover:underline">
+                                                <a href={`tel:${coursePageContent.contact.uaePhone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
                                                     <Phone size={16} />
-                                                    <span>EAU: +971 4 565 61 57</span>
+                                                    <span>EAU: {coursePageContent.contact.uaePhone}</span>
                                                 </a>
-                                                 <a href="mailto:amel@imeda.fr" className="flex items-center gap-2 text-sm text-primary hover:underline">
+                                                 <a href={`mailto:${coursePageContent.contact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
                                                     <Mail size={16} />
-                                                    <span>amel@imeda.fr</span>
+                                                    <span>{coursePageContent.contact.email}</span>
                                                 </a>
                                             </div>
                                         </div>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
+                            )}
                          </Accordion>
                     </div>
                     

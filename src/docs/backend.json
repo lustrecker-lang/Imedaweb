@@ -294,6 +294,46 @@
         "formationId": { "type": "string" }
       },
       "required": ["name", "formationId"]
+    },
+    "CourseDetailPageContent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseDetailPageContent",
+      "type": "object",
+      "description": "Stores reusable content for the course detail page.",
+      "properties": {
+        "valeurImeda": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "content": { "type": "string" },
+            "imageUrl": { "type": "string", "format": "uri" }
+          }
+        },
+        "faq": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "question": { "type": "string" },
+              "answer": { "type": "string" }
+            },
+            "required": ["id", "question", "answer"]
+          }
+        },
+        "contact": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "francePhone": { "type": "string" },
+            "uaePhone": { "type": "string" },
+            "email": { "type": "string", "format": "email" },
+            "imageUrl": { "type": "string", "format": "uri" }
+          }
+        }
+      }
     }
   },
   "auth": {
@@ -316,6 +356,22 @@
             {
               "name": "pageId",
               "description": "The unique identifier for the page (e.g., 'home', 'courses')."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/courseDetailPage/{docId}",
+        "definition": {
+          "entityName": "CourseDetailPageContent",
+          "schema": {
+            "$ref": "#/backend/entities/CourseDetailPageContent"
+          },
+          "description": "Stores reusable content for the course detail page.",
+          "params": [
+            {
+              "name": "docId",
+              "description": "Usually 'main' for a singleton document."
             }
           ]
         }
