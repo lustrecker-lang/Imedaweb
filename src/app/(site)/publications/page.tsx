@@ -1,3 +1,4 @@
+
 // src/app/(site)/publications/page.tsx
 'use client';
 
@@ -14,6 +15,8 @@ import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase
 import { doc, collection, query, orderBy, where } from 'firebase/firestore';
 import { useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Label } from '@/components/ui/label';
 
 interface Article {
   id: string;
@@ -42,7 +45,7 @@ export default function PublicationsPage() {
   const [selectedAuthor, setSelectedAuthor] = useState<string | 'all'>('all');
 
   const pageRef = useMemoFirebase(() => firestore ? doc(firestore, 'pages', 'publications') : null, [firestore]);
-  const { data: pageData } = useDoc<Page>(pageRef);
+  const { data: pageData, isLoading: isPageLoading } = useDoc<Page>(pageRef);
 
   const articlesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -68,23 +71,39 @@ export default function PublicationsPage() {
   return (
     <div className="container mx-auto px-4 py-12 md:px-6">
       <header className="mb-12">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="text-left">
-                 <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">{heroSection?.title || 'Publications'}</h1>
-                <p className="mt-4 max-w-2xl text-muted-foreground">
-                  {heroSection?.content || 'Explore our latest articles, research, and insights from our experts.'}
-                </p>
-            </div>
-            <div className="flex md:justify-end items-start gap-4">
-                 <div className="relative w-full max-w-[200px] aspect-[4/3]">
-                    {heroImageUrl && (
-                        <Image src={heroImageUrl} alt={heroSection?.title || 'Publications'} fill className="object-cover rounded-md" />
-                    )}
-                </div>
-                 <div className="w-full max-w-[200px]">
-                    <p className="text-sm font-medium mb-2">Topics</p>
+        <Card className="relative w-full overflow-hidden md:min-h-[250px] flex flex-col justify-center text-left">
+          {heroImageUrl && (
+            <Image
+              src={heroImageUrl}
+              alt={heroSection?.title || 'Publications background'}
+              fill
+              className="object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="relative z-10 p-6 sm:p-8 md:p-10 text-white">
+            <CardHeader className="p-0">
+              {isPageLoading ? (
+                <>
+                  <Skeleton className="h-10 w-3/4 bg-gray-400/50" />
+                  <Skeleton className="h-5 w-1/2 mt-3 bg-gray-400/50" />
+                </>
+              ) : (
+                <>
+                  <CardTitle className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">
+                    {heroSection?.title || 'Publications'}
+                  </CardTitle>
+                  <CardDescription className="mt-2 max-w-2xl text-gray-200">
+                    {heroSection?.content || 'Explore our latest articles, research, and insights from our experts.'}
+                  </CardDescription>
+                </>
+              )}
+            </CardHeader>
+            <CardContent className="p-0 mt-6">
+               <div className="w-full max-w-[240px]">
+                    <Label className="text-sm font-medium text-gray-300 mb-2 block">Topics</Label>
                     <Select value={selectedAuthor} onValueChange={setSelectedAuthor}>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white">
                             <SelectValue placeholder="Filter by author..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -95,8 +114,9 @@ export default function PublicationsPage() {
                         </SelectContent>
                     </Select>
                  </div>
-            </div>
-        </div>
+            </CardContent>
+          </div>
+        </Card>
       </header>
 
       {areArticlesLoading ? (

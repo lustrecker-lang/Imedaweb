@@ -15,7 +15,7 @@ const pageToSeed = {
             id: "hero",
             title: "Publications",
             content: "Explore our latest articles, research, and insights from our experts.",
-            imageUrl: "https://picsum.photos/seed/pubs/600/400"
+            imageUrl: "https://picsum.photos/seed/publications-hero/1200/400"
         }
     ]
 };
