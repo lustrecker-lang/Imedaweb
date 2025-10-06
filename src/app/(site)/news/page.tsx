@@ -57,12 +57,7 @@ const NewsPageSkeleton = () => {
       </header>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="space-y-4">
-            <Skeleton className="aspect-video w-full" />
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-12 w-full" />
-          </div>
+          <Skeleton key={i} className="aspect-[4/5] w-full" />
         ))}
       </div>
     </div>
@@ -87,9 +82,8 @@ export default async function NewsPage() {
         {newsStories.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {newsStories.map((story) => (
-              <Card key={story.id} className="flex flex-col overflow-hidden group">
-                <Link href={`/news/${story.slug || story.id}`} className="block">
-                  <div className="aspect-video relative overflow-hidden">
+              <Link key={story.id} href={`/news/${story.slug || story.id}`} className="block group">
+                <Card className="relative flex flex-col overflow-hidden h-full aspect-[4/5] justify-end text-white">
                     {story.mediaUrl ? (
                       <Image
                         src={story.mediaUrl}
@@ -98,31 +92,20 @@ export default async function NewsPage() {
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="h-full w-full bg-muted flex items-center justify-center">
-                        <p className="text-xs text-muted-foreground">No Image</p>
-                      </div>
+                      <div className="h-full w-full bg-muted" />
                     )}
-                  </div>
-                </Link>
-                <CardHeader>
-                  <CardDescription className="text-xs">{story.publicationDate}</CardDescription>
-                  <CardTitle className="font-headline font-normal text-lg leading-tight">
-                    <Link href={`/news/${story.slug || story.id}`} className="hover:text-primary transition-colors">
-                      {story.title}
-                    </Link>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-sm text-muted-foreground line-clamp-3">{story.summary}</p>
-                </CardContent>
-                <div className="p-6 pt-0">
-                   <Button variant="link" asChild className="p-0 h-auto">
-                      <Link href={`/news/${story.slug || story.id}`}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+                    <div className="relative z-10 p-6">
+                      <p className="text-xs text-white/80 mb-2">{story.publicationDate}</p>
+                      <h2 className="font-headline font-normal text-lg leading-tight text-white">
+                          {story.title}
+                      </h2>
+                      <div className="mt-4 text-white/90 flex items-center text-sm">
                           Read More <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                   </Button>
-                </div>
-              </Card>
+                      </div>
+                    </div>
+                </Card>
+              </Link>
             ))}
           </div>
         ) : (
