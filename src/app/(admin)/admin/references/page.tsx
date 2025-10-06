@@ -107,6 +107,12 @@ export default function ReferencesPage() {
 
   const onAddSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!firestore) return;
+    
+    // Ensure file is selected
+    if (!logoFile) {
+        form.setError("logoUrl", { type: "manual", message: "Please select a logo file to upload." });
+        return;
+    }
 
     const logoUrl = await handleFileUpload(logoFile);
     if (!logoUrl) {
@@ -195,13 +201,19 @@ export default function ReferencesPage() {
             <FormMessage />
           </FormItem>
         )} />
-        <FormItem>
-            <FormLabel>Company Logo</FormLabel>
-            <FormControl>
-                <Input type="file" accept="image/*" required onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
-            </FormControl>
-            <FormMessage />
-        </FormItem>
+        <FormField control={form.control} name="logoUrl" render={({ field }) => (
+            <FormItem>
+                <FormLabel>Company Logo</FormLabel>
+                <FormControl>
+                    <Input type="file" accept="image/*" onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setLogoFile(file);
+                        field.onChange(file ? file.name : ''); // Update form value for validation
+                    }} />
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+        )} />
         <DialogFooter>
           <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
           <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -222,14 +234,20 @@ export default function ReferencesPage() {
             <FormMessage />
           </FormItem>
         )} />
-        <FormItem>
-            <FormLabel>Company Logo</FormLabel>
-            {editForm.watch('logoUrl') && <Image src={editForm.watch('logoUrl')!} alt="Current logo" width={120} height={40} className="object-contain my-2 rounded-sm border p-2" />}
-            <FormControl>
-                <Input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
-            </FormControl>
-            <FormMessage />
-        </FormItem>
+        <FormField control={editForm.control} name="logoUrl" render={({ field }) => (
+            <FormItem>
+                <FormLabel>Company Logo</FormLabel>
+                {editForm.watch('logoUrl') && <Image src={editForm.watch('logoUrl')!} alt="Current logo" width={120} height={40} className="object-contain my-2 rounded-sm border p-2" />}
+                <FormControl>
+                    <Input type="file" accept="image/*" onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setLogoFile(file);
+                      field.onChange(file ? file.name : editForm.getValues('logoUrl'));
+                    }} />
+                </FormControl>
+                <FormMessage />
+            </FormItem>
+        )} />
         <DialogFooter>
           <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
           <Button type="submit" disabled={editForm.formState.isSubmitting}>
