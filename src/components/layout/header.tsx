@@ -50,7 +50,7 @@ const navStructure = [
             { href: "#", title: "Services", description: "Des solutions sur mesure pour les entreprises." },
             { href: "/publications", title: "Publications", description: "Nos dernières recherches, articles et livres blancs." },
             { href: "#", title: "Partenariats d'entreprise", description: "Collaborez avec nous pour un succès mutuel." },
-            { href: "#", title: "Actualités et Mises à jour", description: "Restez informé des dernières nouvelles de notre institution." },
+            { href: "/news", title: "Actualités et Mises à jour", description: "Restez informé des dernières nouvelles de notre institution." },
         ]
     }
 ];
