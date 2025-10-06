@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
@@ -21,25 +22,25 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
 import { Trash2, Edit, Plus } from 'lucide-react';
 import { Combobox } from '@/components/ui/combobox'; // Assuming you have a reusable combobox
 
 const generateSlug = (title: string) => {
-    if (!title) return '';
+  if (!title) return '';
 
-    const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;';
-    const b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------';
-    const p = new RegExp(a.split('').join('|'), 'g');
+  const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;';
+  const b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------';
+  const p = new RegExp(a.split('').join('|'), 'g');
 
-    return title.toString().toLowerCase()
-        .replace(/\s+/g, '-') 
-        .replace(p, c => b.charAt(a.indexOf(c))) 
-        .replace(/&/g, '-and-') 
-        .replace(/[^\w\-]+/g, '') 
-        .replace(/\-\-+/g, '-') 
-        .replace(/^-+/, '') 
-        .replace(/-+$/, ''); 
+  return title.toString().toLowerCase()
+    .replace(/\s+/g, '-') 
+    .replace(p, c => b.charAt(a.indexOf(c))) 
+    .replace(/&/g, '-and-') 
+    .replace(/[^\w\-]+/g, '') 
+    .replace(/\-\-+/g, '-') 
+    .replace(/^-+/, '') 
+    .replace(/-+$/, ''); 
 };
 
 const formSchema = z.object({
@@ -391,5 +392,3 @@ export default function PublicationsPage() {
     </>
   );
 }
-
-    
