@@ -120,6 +120,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
   
   const featureSections = useMemo(() => {
+    if (!featuresData) return [];
     const sections = [];
     for (let i = 1; i <= 3; i++) {
         const section = featuresData?.sections.find(s => s.id === `feature-${i}`);
