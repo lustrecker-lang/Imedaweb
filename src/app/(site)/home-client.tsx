@@ -115,7 +115,15 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
                   <p className="mx-auto mt-4 max-w-[600px] text-sm text-gray-200 md:text-base">{heroSection?.content}</p>
                   <div className="mt-8 w-full max-w-2xl">
                     <div className="flex flex-col sm:flex-row items-center gap-2 bg-white/20 backdrop-blur-sm p-3 rounded-lg border border-white/30">
-                        <Combobox items={themeOptions} value={selectedThemeId} onChange={setSelectedThemeId} placeholder="Rechercher un thème..." searchPlaceholder="Rechercher un thème..." noResultsText="Aucun thème trouvé."/>
+                        <Combobox
+                          items={themeOptions}
+                          value={selectedThemeId}
+                          onChange={setSelectedThemeId}
+                          placeholder="Rechercher un thème..."
+                          searchPlaceholder="Rechercher un thème..."
+                          noResultsText="Aucun thème trouvé."
+                          className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10"
+                        />
                         <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90"><Search className="mr-2 h-4 w-4" />Rechercher</Button>
                     </div>
                   </div>
