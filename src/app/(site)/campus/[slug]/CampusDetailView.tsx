@@ -53,6 +53,11 @@ interface Campus {
     headline?: string;
     body?: string;
   };
+  bannerSection?: {
+      title?: string;
+      text?: string;
+      mediaUrl?: string;
+  };
   academicOffering?: {
     headline?: string;
     subtitle?: string;
@@ -108,6 +113,17 @@ const isVideoUrl = (url?: string | null) => {
       return false; // Invalid URL
     }
 };
+
+const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+    if (isVideoUrl(url)) {
+        return (
+            <video src={url} autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover"/>
+        );
+    }
+    return (
+        <Image src={url} alt={alt} fill className="object-cover" />
+    );
+}
 
 export default function CampusDetailView({ campus, categories, themes }: CampusDetailViewProps) {
     const firestore = useFirestore();
@@ -167,6 +183,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
   }
   
   const isHeroVideo = isVideoUrl(campus.hero?.backgroundMediaUrl);
+  const isBannerVideo = isVideoUrl(campus.bannerSection?.mediaUrl);
 
   const categoriesWithThemes = useMemo(() => {
     return categories.map(category => ({
@@ -178,9 +195,9 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
 
   return (
     <div className="flex flex-col">
-       <header className="py-12">
+       <header className="py-8">
             <div className="container">
-                <Card className="relative min-h-[25vh] w-full flex items-end justify-start text-white text-left p-6 md:p-8 lg:p-12 overflow-hidden rounded-lg">
+                <Card className="relative min-h-[40vh] w-full flex items-end justify-start text-white text-left p-6 md:p-8 lg:p-12 overflow-hidden rounded-lg">
                     {campus.hero?.backgroundMediaUrl ? (
                         isHeroVideo ? (
                             <video
@@ -231,6 +248,23 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         </div>
                     </section>
                 )}
+
+                {/* Banner Section */}
+                {campus.bannerSection && (campus.bannerSection.title || campus.bannerSection.text || campus.bannerSection.mediaUrl) && (
+                    <section id="banner">
+                        <Card className="overflow-hidden">
+                            <div className="grid grid-cols-1 md:grid-cols-2">
+                                <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full">
+                                    {campus.bannerSection.mediaUrl && <MediaPreview url={campus.bannerSection.mediaUrl} alt={campus.bannerSection.title || "Banner"} />}
+                                </div>
+                                <div className="p-6 flex flex-col justify-center">
+                                    <h3 className="font-headline text-2xl font-normal">{campus.bannerSection.title}</h3>
+                                    <p className="mt-2 text-sm text-muted-foreground">{campus.bannerSection.text}</p>
+                                </div>
+                            </div>
+                        </Card>
+                    </section>
+                )}
                 
                 {/* Academic Offering */}
                 <section id="academics">
@@ -252,7 +286,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                     <ul className="pt-2 pl-4 space-y-2">
                                         {category.themes.map(theme => (
                                             <li key={theme.id}>
-                                                <Link href={`/courses?themeId=${theme.id}`} className="flex items-center text-sm text-primary hover:underline transition-colors">
+                                                <Link href={`/courses?themeId=${theme.id}`} className="flex items-center text-primary hover:underline transition-colors">
                                                     <ChevronRight className="h-4 w-4 mr-2" />
                                                     {theme.name}
                                                 </Link>
@@ -275,7 +309,9 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                             {campus.campusExperience.features.map(feature => (
                                  <div key={feature.id} className="flex gap-6 items-start">
                                     {feature.mediaUrl && (
-                                         <Image src={feature.mediaUrl} alt={feature.name} width={150} height={100} className="rounded-md object-cover hidden sm:block"/>
+                                         <div className="relative w-[150px] h-[100px] shrink-0 rounded-md overflow-hidden hidden sm:block">
+                                            <MediaPreview url={feature.mediaUrl} alt={feature.name} />
+                                         </div>
                                     )}
                                     <div>
                                         <h3 className="font-headline font-normal text-xl">{feature.name}</h3>
@@ -291,7 +327,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                 {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
                     <section id="faq">
                         <div className="max-w-2xl">
-                           <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.faq.headline || "FAQ"}</h2>
+                           <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.faq.headline || "Frequently Asked Questions"}</h2>
                         </div>
                         <Accordion type="single" collapsible className="w-full mt-8">
                             {campus.faq.faqs.map(faq => (
@@ -299,7 +335,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                     <AccordionTrigger className="text-left font-normal text-sm">
                                         {faq.question}
                                     </AccordionTrigger>
-                                    <AccordionContent className="text-sm text-muted-foreground">
+                                    <AccordionContent className="text-sm text-muted-foreground whitespace-pre-wrap">
                                         {faq.answer}
                                     </AccordionContent>
                                 </AccordionItem>
@@ -314,21 +350,23 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                 {campus.visitAndContact?.name && (
                      <section id="contact-person">
                         <Card>
-                            <CardContent className="pt-6">
-                                <div className="text-center">
+                             <CardContent className="pt-6">
+                                <div className="flex items-start gap-4">
                                     {campus.visitAndContact.imageUrl && (
-                                        <div className="relative h-24 w-24 rounded-full overflow-hidden mx-auto mb-4">
+                                        <div className="relative h-20 w-20 rounded-md shrink-0 overflow-hidden">
                                             <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
                                         </div>
                                     )}
-                                    <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
-                                    <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
-                                    <p className="text-sm text-muted-foreground mt-2">{campus.visitAndContact.description}</p>
-                                    <div className="flex flex-col items-center gap-2 mt-4 border-t pt-4">
-                                        {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Phone size={16} /><span>{campus.visitAndContact.phone}</span></a>}
-                                        {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Mail size={16} /><span>{campus.visitAndContact.email}</span></a>}
+                                    <div className="flex-1">
+                                        <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
+                                        <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
+                                        <div className="flex flex-col items-start gap-2 mt-2">
+                                            {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Phone size={14} /><span>{campus.visitAndContact.phone}</span></a>}
+                                            {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Mail size={14} /><span>{campus.visitAndContact.email}</span></a>}
+                                        </div>
                                     </div>
                                 </div>
+                                {campus.visitAndContact.description && <p className="text-sm text-muted-foreground mt-3 border-t pt-3">{campus.visitAndContact.description}</p>}
                             </CardContent>
                         </Card>
                     </section>
@@ -373,7 +411,6 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center text-xl font-headline font-normal">
-                                <MapPin className="mr-2 h-5 w-5" />
                                 {campus.visitAndContact?.headline || "Visit & Contact"}
                             </CardTitle>
                              {campus.visitAndContact?.subtitle && <CardDescription className="pt-2 text-sm">{campus.visitAndContact.subtitle}</CardDescription>}
@@ -383,7 +420,6 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         </CardContent>
                     </Card>
                 </section>
-
             </aside>
         </div>
       </main>

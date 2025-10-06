@@ -264,6 +264,14 @@
             "body": { "type": "string" }
           }
         },
+        "bannerSection": {
+            "type": "object",
+            "properties": {
+                "title": { "type": "string" },
+                "text": { "type": "string" },
+                "mediaUrl": { "type": "string", "format": "uri" }
+            }
+        },
         "academicOffering": {
           "type": "object",
           "properties": {
@@ -626,4 +634,3 @@
     "reasoning": "This Firestore data structure allows for modular content management. Each page's content is stored in a separate document within the 'pages' collection. This makes it easy to add new pages and edit their content by section."
   }
 }
-    
