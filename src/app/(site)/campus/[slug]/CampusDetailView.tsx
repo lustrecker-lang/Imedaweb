@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 
 interface CampusFeature {
@@ -115,14 +116,14 @@ const isVideoUrl = (url?: string | null) => {
     }
 };
 
-const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
+const MediaPreview = ({ url, alt, className }: { url: string; alt: string; className?: string }) => {
     if (isVideoUrl(url)) {
         return (
-            <video src={url} autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover"/>
+            <video src={url} autoPlay loop muted playsInline className={cn("absolute inset-0 h-full w-full object-cover", className)}/>
         );
     }
     return (
-        <Image src={url} alt={alt} fill className="object-cover" />
+        <Image src={url} alt={alt} fill className={cn("object-cover", className)} />
     );
 }
 
@@ -184,7 +185,6 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
   }
   
   const isHeroVideo = isVideoUrl(campus.hero?.backgroundMediaUrl);
-  const isBannerVideo = isVideoUrl(campus.bannerSection?.mediaUrl);
 
   const categoriesWithThemes = useMemo(() => {
     return categories.map(category => ({
@@ -240,7 +240,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
         <div className="grid md:grid-cols-12 gap-8 lg:gap-12">
             <div className="md:col-span-8 space-y-12">
                 
-                {/* Campus Description */}
+                {/* 1. Campus Description */}
                 {campus.campusDescription && (campus.campusDescription.headline || campus.campusDescription.body) && (
                     <section id="description">
                         <div className="max-w-2xl">
@@ -250,48 +250,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </section>
                 )}
 
-                {/* Campus Experience */}
-                {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
-                    <section id="experience">
-                        <div className="max-w-2xl">
-                            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusExperience.headline || "Campus Experience"}</h2>
-                        </div>
-                        <div className="grid gap-8 mt-8">
-                            {campus.campusExperience.features.map(feature => (
-                                 <div key={feature.id} className="flex gap-6 items-start">
-                                    <div>
-                                        <h3 className="font-headline font-normal text-xl">{feature.name}</h3>
-                                        <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
-                                    </div>
-                                    {feature.mediaUrl && (
-                                         <div className="relative w-[150px] h-[100px] shrink-0 rounded-md overflow-hidden hidden sm:block">
-                                            <MediaPreview url={feature.mediaUrl} alt={feature.name} />
-                                         </div>
-                                    )}
-                                 </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* Banner Section */}
-                {campus.bannerSection && (campus.bannerSection.title || campus.bannerSection.text || campus.bannerSection.mediaUrl) && (
-                    <section id="banner">
-                        <Card className="overflow-hidden">
-                            <div className="grid grid-cols-1 md:grid-cols-2">
-                                <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full">
-                                    {campus.bannerSection.mediaUrl && <MediaPreview url={campus.bannerSection.mediaUrl} alt={campus.bannerSection.title || "Banner"} />}
-                                </div>
-                                <div className="p-6 flex flex-col justify-center">
-                                    <h3 className="font-headline text-2xl font-normal">{campus.bannerSection.title}</h3>
-                                    <p className="mt-2 text-sm text-muted-foreground">{campus.bannerSection.text}</p>
-                                </div>
-                            </div>
-                        </Card>
-                    </section>
-                )}
-                
-                {/* Academic Offering */}
+                {/* 2. Academic Offering */}
                 <section id="academics">
                      <div className="max-w-2xl mb-8">
                         <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.academicOffering?.headline || "Academic Offering"}</h2>
@@ -334,8 +293,48 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </Accordion>
                 </section>
                 
+                {/* 3. Banner Section */}
+                {campus.bannerSection && (campus.bannerSection.title || campus.bannerSection.text || campus.bannerSection.mediaUrl) && (
+                    <section id="banner">
+                        <Card className="overflow-hidden">
+                            <div className="grid grid-cols-1 md:grid-cols-2">
+                                <div className="p-6 flex flex-col justify-center">
+                                    <h3 className="font-headline text-2xl font-normal">{campus.bannerSection.title}</h3>
+                                    <p className="mt-2 text-sm text-muted-foreground">{campus.bannerSection.text}</p>
+                                </div>
+                                <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full">
+                                    {campus.bannerSection.mediaUrl && <MediaPreview url={campus.bannerSection.mediaUrl} alt={campus.bannerSection.title || "Banner"} />}
+                                </div>
+                            </div>
+                        </Card>
+                    </section>
+                )}
 
-                 {/* FAQ */}
+                {/* 4. Campus Experience */}
+                {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
+                    <section id="experience">
+                        <div className="max-w-2xl">
+                            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusExperience.headline || "Campus Experience"}</h2>
+                        </div>
+                        <div className="grid gap-8 mt-8">
+                            {campus.campusExperience.features.map(feature => (
+                                 <div key={feature.id} className="flex gap-6 items-start">
+                                    <div>
+                                        <h3 className="font-headline font-normal text-xl">{feature.name}</h3>
+                                        <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
+                                    </div>
+                                    {feature.mediaUrl && (
+                                         <div className="relative w-[150px] h-[100px] shrink-0 rounded-md overflow-hidden hidden sm:block">
+                                            <MediaPreview url={feature.mediaUrl} alt={feature.name} />
+                                         </div>
+                                    )}
+                                 </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+                
+                 {/* 5. FAQ */}
                 {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
                     <section id="faq">
                         <div className="max-w-2xl">
@@ -416,19 +415,22 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </Card>
                 </section>
 
-                {/* Visit & Contact */}
                 <section id="contact-info">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center text-xl font-headline font-normal">
-                                {campus.visitAndContact?.headline || "Visit & Contact"}
-                            </CardTitle>
-                             {campus.visitAndContact?.subtitle && <CardDescription className="pt-2 text-sm">{campus.visitAndContact.subtitle}</CardDescription>}
-                        </CardHeader>
-                        <CardContent>
-                           <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campus.visitAndContact?.address}</p>
-                        </CardContent>
-                    </Card>
+                  <div className="max-w-2xl">
+                    <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
+                      {campus.visitAndContact?.headline || "Visit & Contact"}
+                    </h2>
+                    {campus.visitAndContact?.subtitle && (
+                      <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                        {campus.visitAndContact.subtitle}
+                      </p>
+                    )}
+                    {campus.visitAndContact?.address && (
+                      <p className="mt-4 text-sm text-muted-foreground whitespace-pre-wrap">
+                        {campus.visitAndContact.address}
+                      </p>
+                    )}
+                  </div>
                 </section>
             </aside>
         </div>
@@ -436,4 +438,3 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
     </div>
   );
 }
-
