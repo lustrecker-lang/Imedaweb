@@ -291,15 +291,15 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         <div className="grid gap-8 mt-8">
                             {campus.campusExperience.features.map(feature => (
                                  <div key={feature.id} className="flex gap-6 items-start">
+                                    <div>
+                                        <h3 className="font-headline font-normal text-xl">{feature.name}</h3>
+                                        <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
+                                    </div>
                                     {feature.mediaUrl && (
                                          <div className="relative w-[150px] h-[100px] shrink-0 rounded-md overflow-hidden hidden sm:block">
                                             <MediaPreview url={feature.mediaUrl} alt={feature.name} />
                                          </div>
                                     )}
-                                    <div>
-                                        <h3 className="font-headline font-normal text-xl">{feature.name}</h3>
-                                        <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
-                                    </div>
                                  </div>
                             ))}
                         </div>
@@ -323,7 +323,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </section>
                 )}
 
-                {/* FAQ */}
+                 {/* FAQ */}
                 {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
                     <section id="faq">
                         <div className="max-w-2xl">
@@ -353,7 +353,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                              <CardContent className="pt-6">
                                 <div className="text-left">
                                     {campus.visitAndContact.imageUrl && (
-                                        <div className="relative h-24 w-24 rounded-md mb-4 overflow-hidden">
+                                        <div className="relative h-24 w-24 rounded-lg mb-4 overflow-hidden">
                                             <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
                                         </div>
                                     )}
