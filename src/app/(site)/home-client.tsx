@@ -137,7 +137,6 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
   const handleCatalogSubmit = async () => {
     if (!isEmailValid || isSubmitting || !firestore) return;
-
     setIsSubmitting(true);
     try {
       await addDocumentNonBlocking(collection(firestore, 'leads'), {
@@ -152,9 +151,8 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       link.href = '/api/download-catalog';
       document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       
-      link.parentNode?.removeChild(link);
-
       setHasSubmitted(true);
     } catch (error) {
       console.error("Error submitting lead:", error);
@@ -523,7 +521,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                 return (
                   <CarouselItem key={story.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/4">
                     <Link href={`/news/${story.slug || story.id}`} className="block group">
-                      <Card className="relative flex flex-col overflow-hidden h-[350px] justify-end text-white rounded-lg">
+                      <Card className="relative flex flex-col overflow-hidden h-[450px] justify-end text-white rounded-lg">
                           {story.mediaUrl ? (
                             isVideo ? (
                                <video
