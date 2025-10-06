@@ -256,13 +256,17 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {featureSections.map((featureSection) => (
-                <Card key={featureSection.id} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2">
-                  <div className="aspect-video relative overflow-hidden">
-                    {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} width={600} height={400} className="object-cover w-full h-full"/>)}
-                  </div>
-                  <CardHeader><CardTitle className="font-headline font-normal">{featureSection.title}</CardTitle></CardHeader>
-                  <CardContent><CardDescription>{featureSection.content}</CardDescription></CardContent>
-                </Card>
+                <div key={featureSection.id} className="md:flex md:flex-col md:overflow-hidden md:rounded-lg md:border md:bg-card md:transition-transform md:duration-300 md:ease-in-out md:hover:-translate-y-2">
+                    <div className="flex items-start gap-4 md:flex-col">
+                        <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg md:aspect-video md:w-full">
+                          {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} fill className="object-cover"/>)}
+                        </div>
+                        <div className="flex-1 md:p-6 md:pt-4">
+                            <h3 className="font-headline font-normal md:text-lg">{featureSection.title}</h3>
+                            <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{featureSection.content}</p>
+                        </div>
+                    </div>
+                </div>
               ))}
           </div>
         </div>
