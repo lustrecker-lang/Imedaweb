@@ -45,6 +45,8 @@ export default function ReferencesPage() {
   const [editingReference, setEditingReference] = useState<Reference | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
 
   const referencesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -72,6 +74,7 @@ export default function ReferencesPage() {
   useEffect(() => {
     if (editingReference) {
       editForm.reset(editingReference);
+      setPreviewUrl(editingReference.logoUrl);
     }
   }, [editingReference, editForm]);
 
@@ -108,7 +111,6 @@ export default function ReferencesPage() {
   const onAddSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!firestore) return;
     
-    // Ensure file is selected
     if (!logoFile) {
         form.setError("logoUrl", { type: "manual", message: "Please select a logo file to upload." });
         return;
@@ -160,6 +162,7 @@ export default function ReferencesPage() {
     setIsEditDialogOpen(false);
     setEditingReference(null);
     setLogoFile(null);
+    setPreviewUrl(null);
   };
 
   const openDeleteDialog = (reference: Reference) => {
@@ -169,6 +172,7 @@ export default function ReferencesPage() {
   
   const openEditDialog = (reference: Reference) => {
     setEditingReference(reference);
+    setPreviewUrl(reference.logoUrl);
     setIsEditDialogOpen(true);
     setLogoFile(null);
   };
@@ -237,12 +241,17 @@ export default function ReferencesPage() {
         <FormField control={editForm.control} name="logoUrl" render={({ field }) => (
             <FormItem>
                 <FormLabel>Company Logo</FormLabel>
-                {editForm.watch('logoUrl') && <Image src={editForm.watch('logoUrl')!} alt="Current logo" width={120} height={40} className="object-contain my-2 rounded-sm border p-2" />}
+                {previewUrl && <Image src={previewUrl} alt="Current logo" width={120} height={40} className="object-contain my-2 rounded-sm border p-2" />}
                 <FormControl>
                     <Input type="file" accept="image/*" onChange={(e) => {
                       const file = e.target.files?.[0] || null;
                       setLogoFile(file);
-                      field.onChange(file ? file.name : editForm.getValues('logoUrl'));
+                      if (file) {
+                        setPreviewUrl(URL.createObjectURL(file));
+                      } else {
+                        setPreviewUrl(editingReference?.logoUrl || null);
+                      }
+                      field.onChange(file ? file.name : editingReference?.logoUrl || '');
                     }} />
                 </FormControl>
                 <FormMessage />
@@ -334,7 +343,7 @@ export default function ReferencesPage() {
         </Card>
       </div>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog open={isEditDialogOpen} onOpenChange={(isOpen) => { setIsEditDialogOpen(isOpen); if (!isOpen) setPreviewUrl(null); }}>
           <DialogContent className="sm:max-w-md">
               <DialogHeader><DialogTitle>Edit Reference: {editingReference?.name}</DialogTitle></DialogHeader>
               {renderEditForm()}
