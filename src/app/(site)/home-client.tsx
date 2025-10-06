@@ -202,15 +202,13 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {featureSections.map((featureSection) => (
-                <div key={featureSection.id} className="md:flex md:flex-col md:overflow-hidden md:rounded-lg md:border md:bg-card md:transition-transform md:duration-300 md:ease-in-out md:hover:-translate-y-2">
-                    <div className="flex items-start gap-4 md:flex-col">
-                        <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg md:aspect-video md:w-full">
-                          {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} fill className="object-cover"/>)}
-                        </div>
-                        <div className="flex-1 md:p-6 md:pt-4">
-                            <h3 className="font-headline font-normal md:text-lg">{featureSection.title}</h3>
-                            <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{featureSection.content}</p>
-                        </div>
+                <div key={featureSection.id} className="flex items-start gap-4 md:flex-col md:overflow-hidden md:rounded-lg md:border md:bg-card md:transition-transform md:duration-300 md:ease-in-out md:hover:-translate-y-2">
+                    <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg md:aspect-video md:w-full">
+                      {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} fill className="object-cover"/>)}
+                    </div>
+                    <div className="flex-1 md:p-6 md:pt-4">
+                        <h3 className="font-headline font-normal md:text-lg">{featureSection.title}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{featureSection.content}</p>
                     </div>
                 </div>
               ))}
@@ -218,11 +216,11 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
         </div>
       </section>
 
-      <section className="py-16 bg-muted/30">
+       <section className="py-16 bg-muted/30">
         <div className="container px-4 md:px-6">
           <Card className="overflow-hidden">
               <div className="grid md:grid-cols-2 items-center">
-                  <div className="md:order-2 relative aspect-video h-full min-h-[250px]">
+                  <div className="md:order-2 relative aspect-video h-full min-h-[250px] md:min-h-0">
                        <Image 
                           src="https://picsum.photos/seed/catalog/800/600"
                           alt="Download Catalog"
@@ -254,7 +252,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           </Card>
         </div>
       </section>
-
+      
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
