@@ -67,7 +67,7 @@ export default function LegalPage() {
                 <CardTitle className="font-headline text-2xl font-normal">Conditions Générales d’Utilisation</CardTitle>
                 <CardDescription>Dernière mise à jour : 24 Juillet 2024</CardDescription>
               </CardHeader>
-              <CardContent className="prose prose-sm prose-p:text-muted-foreground prose-h2:text-foreground dark:prose-invert max-w-none">
+              <CardContent className="prose prose-sm prose-p:text-muted-foreground prose-h2:font-headline prose-h2:font-normal prose-h2:text-foreground dark:prose-invert max-w-none">
                 <h2 className="text-base font-semibold">1. Objet</h2>
                 <p>Les présentes conditions générales d'utilisation (dites « CGU ») ont pour objet l'encadrement juridique des modalités de mise à disposition du site et des services par IMEDA et de définir les conditions d’accès et d’utilisation des services par « l'Utilisateur ».</p>
 
@@ -86,7 +86,7 @@ export default function LegalPage() {
                 <CardTitle className="font-headline text-2xl font-normal">Politique de Confidentialité</CardTitle>
                 <CardDescription>Dernière mise à jour : 24 Juillet 2024</CardDescription>
               </CardHeader>
-              <CardContent className="prose prose-sm prose-p:text-muted-foreground prose-h2:text-foreground dark:prose-invert max-w-none">
+              <CardContent className="prose prose-sm prose-p:text-muted-foreground prose-h2:font-headline prose-h2:font-normal prose-h2:text-foreground dark:prose-invert max-w-none">
                 <h2 className="text-base font-semibold">1. Collecte des données personnelles</h2>
                 <p>Nous collectons les données suivantes : nom, prénom, adresse électronique, numéro de téléphone. Ces données sont collectées lorsque vous remplissez nos formulaires de contact ou d'inscription.</p>
 
@@ -105,7 +105,7 @@ export default function LegalPage() {
                 <CardTitle className="font-headline text-2xl font-normal">Protection de Nos Marques</CardTitle>
                 <CardDescription>Dernière mise à jour : 24 Juillet 2024</CardDescription>
               </CardHeader>
-              <CardContent className="prose prose-sm prose-p:text-muted-foreground prose-h2:text-foreground dark:prose-invert max-w-none">
+              <CardContent className="prose prose-sm prose-p:text-muted-foreground prose-h2:font-headline prose-h2:font-normal prose-h2:text-foreground dark:prose-invert max-w-none">
                 <h2 className="text-base font-semibold">1. Utilisation des marques IMEDA</h2>
                 <p>Le nom IMEDA, notre logo et tous les noms de produits et services, slogans et graphismes associés sont des marques déposées de IMEDA International. Toute utilisation non autorisée est strictement interdite et peut faire l'objet de poursuites judiciaires.</p>
 
