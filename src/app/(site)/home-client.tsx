@@ -183,6 +183,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
   return (
     <div className="flex flex-col">
+      {/* 1. Hero */}
       <section className="py-8">
         <div className="container px-4 md:px-6">
           <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
@@ -213,6 +214,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
         </div>
       </section>
 
+      {/* 2. Reference Carousel */}
       {referencesData && referencesData.length > 0 && (
         <section className="py-8 bg-background">
             <div className="container">
@@ -235,80 +237,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
         </section>
       )}
 
-      <section className="py-16">
-        <div className="container px-4 md:px-6">
-          <div className="max-w-2xl">
-            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{featuresSectionHeader?.title}</h2>
-            <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
-          </div>
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {featureSections.map((featureSection) => (
-                <div key={featureSection.id} className="flex items-start gap-4 md:flex-col md:overflow-hidden md:rounded-lg md:border md:bg-card md:transition-transform md:duration-300 md:ease-in-out md:hover:-translate-y-2">
-                    <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg md:aspect-video md:w-full">
-                      {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} fill className="object-cover"/>)}
-                    </div>
-                    <div className="flex-1 md:p-6 md:pt-4">
-                        <h3 className="font-headline font-normal md:text-lg">{featureSection.title}</h3>
-                        <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{featureSection.content}</p>
-                    </div>
-                </div>
-              ))}
-          </div>
-        </div>
-      </section>
-
-      {catalogSection && (
-        <section className="py-16">
-          <div className="container">
-            <Card className="overflow-hidden md:rounded-lg">
-                <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-                    <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1 md:order-2">
-                        {catalogSection.imageUrl && (
-                            <Image
-                                src={catalogSection.imageUrl}
-                                alt={catalogSection.title || "Download Catalog"}
-                                fill
-                                className="object-cover"
-                            />
-                        )}
-                    </div>
-                    <div className="p-6 md:p-10 text-left order-2 md:order-1">
-                        {hasSubmitted ? (
-                          <div className="flex flex-col items-center justify-center text-center space-y-4">
-                            <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
-                            <h3 className="font-headline font-normal text-2xl">Merci!</h3>
-                            <p className="text-muted-foreground mt-1 text-sm">Votre téléchargement a commencé.</p>
-                            <Button variant="outline" onClick={handleResetForm} className="mt-4">
-                                Fermer
-                            </Button>
-                          </div>
-                        ) : (
-                          <>
-                            <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
-                            <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
-                            <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
-                                <Input
-                                    type="email"
-                                    placeholder="Votre adresse email"
-                                    className="w-full sm:flex-1"
-                                    value={catalogEmail}
-                                    onChange={(e) => setCatalogEmail(e.target.value)}
-                                    disabled={isSubmitting}
-                                />
-                                <Button className="w-full sm:w-auto" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
-                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                    Télécharger
-                                </Button>
-                            </div>
-                          </>
-                        )}
-                    </div>
-                </div>
-            </Card>
-          </div>
-        </section>
-      )}
-
+      {/* 3. Formations IMEDA Carousel */}
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
@@ -379,6 +308,83 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
         </div>
       </section>
 
+      {/* 4. Catalog Download */}
+      {catalogSection && (
+        <section className="py-16">
+          <div className="container">
+            <Card className="overflow-hidden md:rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+                    <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1 md:order-2">
+                        {catalogSection.imageUrl && (
+                            <Image
+                                src={catalogSection.imageUrl}
+                                alt={catalogSection.title || "Download Catalog"}
+                                fill
+                                className="object-cover"
+                            />
+                        )}
+                    </div>
+                    <div className="p-6 md:p-10 text-left order-2 md:order-1">
+                        {hasSubmitted ? (
+                          <div className="flex flex-col items-center justify-center text-center space-y-4">
+                            <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
+                            <h3 className="font-headline font-normal text-2xl">Merci!</h3>
+                            <p className="text-muted-foreground mt-1 text-sm">Votre téléchargement a commencé.</p>
+                            <Button variant="outline" onClick={handleResetForm} className="mt-4">
+                                Fermer
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
+                            <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
+                            <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
+                                <Input
+                                    type="email"
+                                    placeholder="Votre adresse email"
+                                    className="w-full sm:flex-1"
+                                    value={catalogEmail}
+                                    onChange={(e) => setCatalogEmail(e.target.value)}
+                                    disabled={isSubmitting}
+                                />
+                                <Button className="w-full sm:w-auto" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
+                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                    Télécharger
+                                </Button>
+                            </div>
+                          </>
+                        )}
+                    </div>
+                </div>
+            </Card>
+          </div>
+        </section>
+      )}
+
+      {/* 5. Excellence Academic (Features) */}
+      <section className="py-16">
+        <div className="container px-4 md:px-6">
+          <div className="max-w-2xl">
+            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{featuresSectionHeader?.title}</h2>
+            <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
+          </div>
+          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {featureSections.map((featureSection) => (
+                <div key={featureSection.id} className="flex items-start gap-4 md:flex-col md:overflow-hidden md:rounded-lg md:border md:bg-card md:transition-transform md:duration-300 md:ease-in-out md:hover:-translate-y-2">
+                    <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg md:aspect-video md:w-full">
+                      {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} fill className="object-cover"/>)}
+                    </div>
+                    <div className="flex-1 md:p-6 md:pt-4">
+                        <h3 className="font-headline font-normal md:text-lg">{featureSection.title}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{featureSection.content}</p>
+                    </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Our Campuses */}
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
@@ -413,6 +419,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
         </div>
       </section>
       
+      {/* 7. KPI Numbers */}
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 md:gap-x-8 text-left">
@@ -435,6 +442,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
         </div>
       </section>
       
+      {/* 8. Nos Publications */}
       <section className="py-16 bg-muted/30">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
@@ -497,6 +505,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
         </div>
       </section>
 
+      {/* 9. IMEDA News */}
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">

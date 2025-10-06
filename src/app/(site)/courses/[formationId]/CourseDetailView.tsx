@@ -536,7 +536,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                 </div>
             </main>
              {isMobile && (
-                <div className="sticky bottom-0 z-40 bg-background/95 p-4 border-t lg:hidden">
+                <div className="fixed bottom-0 z-40 w-full bg-background/95 p-4 border-t lg:hidden">
                     <Sheet open={isEnquirySheetOpen} onOpenChange={setIsEnquirySheetOpen}>
                         <SheetTrigger asChild>
                             <Button className="w-full">En Savoir plus</Button>
