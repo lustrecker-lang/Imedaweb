@@ -1,34 +1,11 @@
 
-'use client';
-
-import Image from "next/image";
-import { collection, query, where, DocumentData } from 'firebase/firestore';
-import { useParams } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
-import { useFirestore, useMemoFirebase, useCollection } from "@/firebase";
+import { Suspense } from 'react';
+import { adminDb } from '@/firebase/admin';
+import { notFound } from 'next/navigation';
+import { DocumentData } from 'firebase-admin/firestore';
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Building, GraduationCap, MapPin, Sparkles, HelpCircle } from "lucide-react";
-
-interface CampusFeature {
-    id: string;
-    name: string;
-    description?: string;
-    mediaUrl?: string;
-}
-
-interface CampusFaq {
-    id: string;
-    question: string;
-    answer?: string;
-}
-
-interface CampusCourse {
-    id: string;
-    name: string;
-    description?: string;
-}
+import CampusDetailView from './CampusDetailView';
+import { Metadata } from 'next';
 
 interface Campus {
   id: string;
@@ -48,11 +25,11 @@ interface Campus {
   academicOffering?: {
     headline?: string;
     subtitle?: string;
-    courses?: CampusCourse[];
+    courses?: any[]; // Simplified for server
   };
   campusExperience?: {
     headline?: string;
-    features?: CampusFeature[];
+    features?: any[]; // Simplified for server
   };
   visitAndContact?: {
     headline?: string;
@@ -61,35 +38,75 @@ interface Campus {
   };
   faq?: {
     headline?: string;
-    faqs?: CampusFaq[];
+    faqs?: any[]; // Simplified for server
   };
 }
 
-const isVideoUrl = (url?: string | null) => {
-    if (!url) return false;
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    try {
-      const pathname = new URL(url).pathname.split('?')[0];
-      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
-    } catch (e) {
-      return false; // Invalid URL
+interface Category {
+    id: string;
+    name: string;
+    mediaUrl?: string;
+}
+
+interface Theme {
+    id: string;
+    name: string;
+    categoryId: string;
+}
+
+async function getCampusDetails(slug: string) {
+  try {
+    const campusQuery = adminDb.collection('campuses').where('slug', '==', slug).limit(1);
+    const campusQuerySnapshot = await campusQuery.get();
+
+    if (campusQuerySnapshot.empty) {
+      return { campus: null, categories: [], themes: [] };
     }
-};
 
-export default function CampusPage() {
-  const firestore = useFirestore();
-  const params = useParams();
-  const slug = params.slug as string;
+    const campusDoc = campusQuerySnapshot.docs[0];
+    const campusData = { id: campusDoc.id, ...campusDoc.data() } as Campus;
 
-  const campusQuery = useMemoFirebase(() => {
-    if (!firestore || !slug) return null;
-    return query(collection(firestore, 'campuses'), where('slug', '==', slug));
-  }, [firestore, slug]);
+    const [categoriesSnap, themesSnap] = await Promise.all([
+      adminDb.collection('course_categories').orderBy('name', 'asc').get(),
+      adminDb.collection('course_themes').orderBy('name', 'asc').get()
+    ]);
 
-  const { data: campuses, isLoading, error } = useCollection<Campus>(campusQuery);
-  const campus = useMemo(() => (campuses && campuses.length > 0 ? campuses[0] : null), [campuses]);
+    const categories = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Category[];
+    const themes = themesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Theme[];
+
+    return {
+      campus: campusData,
+      categories,
+      themes,
+    };
+
+  } catch (error) {
+    console.error("Error fetching campus details:", error);
+    return { campus: null, categories: [], themes: [] };
+  }
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const { campus } = await getCampusDetails(params.slug);
   
-  if (isLoading) {
+  if (!campus) {
+    return {
+      title: 'Campus Not Found',
+    };
+  }
+
+  return {
+    title: `${campus.name} Campus`,
+    description: campus.description || `Explore the ${campus.name} campus, its programs, and campus life.`,
+    openGraph: {
+      title: `${campus.name} Campus`,
+      description: campus.description || `Explore our campus in ${campus.name}.`,
+      images: campus.hero?.backgroundMediaUrl ? [{ url: campus.hero.backgroundMediaUrl }] : [],
+    },
+  };
+}
+
+const CampusPageSkeleton = () => {
     return (
         <div className="container py-8 space-y-12">
             <Skeleton className="h-[50vh] w-full" />
@@ -106,148 +123,17 @@ export default function CampusPage() {
     )
   }
 
-  if (error) {
-    return <div className="container py-12 text-center text-destructive">{error.message}</div>
-  }
-
-  if (!campus) {
-    return <div className="container py-12 text-center text-muted-foreground">Campus not found.</div>
-  }
+export default async function CampusPage({ params }: { params: { slug: string } }) {
+  const { campus, categories, themes } = await getCampusDetails(params.slug);
   
-  const isHeroVideo = isVideoUrl(campus.hero?.backgroundMediaUrl);
-
+  if (!campus) {
+    notFound();
+  }
 
   return (
-    <div className="flex flex-col">
-      <main className="container py-12 md:py-16 lg:py-20">
-         <Card className="relative h-[40vh] min-h-[300px] w-full flex items-end justify-start text-white text-left p-6 md:p-8 lg:p-12 overflow-hidden rounded-lg mb-12">
-            {campus.hero?.backgroundMediaUrl ? (
-                isHeroVideo ? (
-                    <video
-                        src={campus.hero.backgroundMediaUrl}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="absolute inset-0 h-full w-full object-cover"
-                    />
-                ) : (
-                    <Image
-                        src={campus.hero.backgroundMediaUrl}
-                        alt={campus.hero.title || campus.name}
-                        fill
-                        className="object-cover"
-                        priority
-                    />
-                )
-            ) : (
-            <div className="absolute inset-0 bg-slate-800" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-            <div className="relative z-10 max-w-2xl">
-                <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline text-white">
-                    {campus.hero?.title || "Welcome"}
-                </h1>
-                {campus.hero?.subtitle && (
-                    <p className="mt-2 max-w-[700px] text-gray-200 text-sm md:text-base">
-                        {campus.hero.subtitle}
-                    </p>
-                )}
-            </div>
-        </Card>
-
-        <div className="grid md:grid-cols-12 gap-8 lg:gap-12">
-            <div className="md:col-span-8 space-y-12">
-                
-                {/* Campus Description */}
-                {campus.campusDescription && (campus.campusDescription.headline || campus.campusDescription.body) && (
-                    <section id="description">
-                        <div className="max-w-2xl">
-                            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusDescription.headline || `About ${campus.name}`}</h2>
-                             <p className="mt-2 text-muted-foreground md:text-base/relaxed whitespace-pre-wrap">{campus.campusDescription.body}</p>
-                        </div>
-                    </section>
-                )}
-                
-                {/* Academic Offering */}
-                <section id="academics">
-                     <div className="max-w-2xl">
-                        <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.academicOffering?.headline || "Academic Offering"}</h2>
-                        {campus.academicOffering?.subtitle && <p className="mt-2 text-muted-foreground md:text-base/relaxed">{campus.academicOffering.subtitle}</p>}
-                        <p className="mt-4 text-sm text-muted-foreground">Course list will be displayed here soon.</p>
-                    </div>
-                </section>
-                
-                {/* Campus Experience */}
-                {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
-                    <section id="experience">
-                        <div className="max-w-2xl">
-                            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusExperience.headline || "Campus Experience"}</h2>
-                        </div>
-                        <div className="grid gap-8 mt-8">
-                            {campus.campusExperience.features.map(feature => (
-                                 <div key={feature.id} className="flex gap-6 items-start">
-                                    {feature.mediaUrl && (
-                                         <Image src={feature.mediaUrl} alt={feature.name} width={150} height={100} className="rounded-md object-cover hidden sm:block"/>
-                                    )}
-                                    <div>
-                                        <h3 className="font-semibold text-lg">{feature.name}</h3>
-                                        <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
-                                    </div>
-                                 </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-            </div>
-            <aside className="md:col-span-4 space-y-8 md:sticky top-24 self-start">
-                
-                {/* Visit & Contact */}
-                <section id="contact">
-                    <Card>
-                        <CardHeader>
-                             <div className="flex items-center gap-3">
-                                <MapPin className="h-6 w-6 text-primary" />
-                                <CardTitle className="text-xl font-headline font-normal">{campus.visitAndContact?.headline || "Visit & Contact"}</CardTitle>
-                            </div>
-                            {campus.visitAndContact?.subtitle && <CardDescription className="pt-2 text-sm">{campus.visitAndContact.subtitle}</CardDescription>}
-                        </CardHeader>
-                        <CardContent>
-                           <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campus.visitAndContact?.address}</p>
-                        </CardContent>
-                    </Card>
-                </section>
-
-                {/* FAQ */}
-                {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
-                    <section id="faq">
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center gap-3">
-                                    <HelpCircle className="h-6 w-6 text-primary" />
-                                    <CardTitle className="text-xl font-headline font-normal">{campus.faq.headline || "FAQ"}</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <Accordion type="single" collapsible className="w-full">
-                                    {campus.faq.faqs.map(faq => (
-                                         <AccordionItem value={faq.id} key={faq.id}>
-                                            <AccordionTrigger>{faq.question}</AccordionTrigger>
-                                            <AccordionContent className="text-sm text-muted-foreground">
-                                                {faq.answer}
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    ))}
-                                </Accordion>
-                            </CardContent>
-                        </Card>
-                    </section>
-                )}
-
-            </aside>
-        </div>
-      </main>
-    </div>
+    <Suspense fallback={<CampusPageSkeleton />}>
+      <CampusDetailView campus={campus} categories={categories} themes={themes} />
+    </Suspense>
   );
 }
+
