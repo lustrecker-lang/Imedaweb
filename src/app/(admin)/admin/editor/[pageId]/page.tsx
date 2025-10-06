@@ -83,6 +83,7 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
   };
   
   const isHeroSection = section.id === 'hero';
+  const isCatalogSection = section.id === 'catalog-download';
   const currentMediaUrl = form.watch('imageUrl');
   const isVideo = currentMediaUrl?.includes('video');
 
@@ -137,7 +138,7 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
                     <Input 
                         id={`file-input-${section.id}`}
                         type="file" 
-                        accept={isHeroSection ? "image/*,video/*,.mov" : "image/svg+xml, image/png, image/jpeg, image/webp, image/gif"}
+                        accept={isHeroSection || isCatalogSection ? "image/*,video/*,.mov" : "image/svg+xml, image/png, image/jpeg, image/webp, image/gif"}
                         onChange={(e) => {
                             if (e.target.files?.[0]) {
                                 setImageFile(e.target.files[0]);

@@ -109,6 +109,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
 
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
+  const catalogSection = homePage?.sections.find(s => s.id === 'catalog-download');
   const heroMediaUrl = heroSection?.imageUrl;
   const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
   
@@ -216,43 +217,44 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
         </div>
       </section>
 
-      <section className="py-16 bg-muted/30">
-    <div className="container px-4 md:px-6">
-        <Card className="overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+      {catalogSection && (
+        <section className="py-16 bg-muted/30">
+          <div className="container">
+            <Card className="overflow-hidden">
+              <div className="grid grid-cols-1 md:grid-cols-2 items-center">
                 <div className="relative aspect-video h-full min-h-[200px] md:min-h-0 md:order-2">
+                  {catalogSection.imageUrl && (
                     <Image
-                        src="https://picsum.photos/seed/catalog/800/600"
-                        alt="Download Catalog"
-                        fill
-                        className="object-cover"
+                      src={catalogSection.imageUrl}
+                      alt={catalogSection.title || "Download Catalog"}
+                      fill
+                      className="object-cover"
                     />
+                  )}
                 </div>
                 <div className="p-6 md:p-10 text-left md:order-1">
-                    <h3 className="font-headline font-normal text-2xl">Catalogue 2025-26</h3>
-                    <p className="text-muted-foreground mt-2 text-sm">Entrez votre email pour recevoir notre catalogue complet et découvrir toutes nos formations.</p>
-                    <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
-                        <Input
-                            type="email"
-                            placeholder="Votre adresse email"
-                            className="w-full sm:flex-1"
-                            value={catalogEmail}
-                            onChange={(e) => setCatalogEmail(e.target.value)}
-                        />
-                        <Button
-                            className="w-full sm:w-auto"
-                            disabled={!isEmailValid}
-                        >
-                            <Download className="mr-2 h-4 w-4" />
-                            Télécharger
-                        </Button>
-                    </div>
+                  <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
+                  <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
+                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
+                    <Input
+                      type="email"
+                      placeholder="Votre adresse email"
+                      className="w-full sm:flex-1"
+                      value={catalogEmail}
+                      onChange={(e) => setCatalogEmail(e.target.value)}
+                    />
+                    <Button className="w-full sm:w-auto" disabled={!isEmailValid}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Télécharger
+                    </Button>
+                  </div>
                 </div>
-            </div>
-        </Card>
-    </div>
-</section>
-      
+              </div>
+            </Card>
+          </div>
+        </section>
+      )}
+
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
