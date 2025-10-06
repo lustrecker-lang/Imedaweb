@@ -195,7 +195,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                     <ul className="pt-2 pl-4 space-y-3">
                                         {category.themes.map(theme => (
                                             <li key={theme.id}>
-                                                <Link href={`/courses?themeId=${theme.id}`} className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
+                                                <Link href={`/courses?themeId=${theme.id}`} className="flex items-center text-sm text-primary hover:underline transition-colors">
                                                     <ChevronRight className="h-4 w-4 mr-2" />
                                                     {theme.name}
                                                 </Link>
@@ -253,21 +253,21 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                      <section id="contact-person">
                         <Card>
                             <CardContent className="pt-6">
-                                <div className="flex flex-col md:flex-row gap-4 items-center md:items-start text-center md:text-left">
+                                <div className="flex flex-col md:flex-row gap-4 md:text-left">
                                     {campus.visitAndContact.imageUrl && (
-                                        <div className="relative h-24 w-24 rounded-md overflow-hidden shrink-0">
+                                        <div className="relative h-24 w-24 rounded-md overflow-hidden shrink-0 mx-auto md:mx-0">
                                             <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
                                         </div>
                                     )}
-                                    <div className="flex-1">
+                                    <div className="flex-1 text-center md:text-left">
                                         <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
                                         <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
                                         <p className="text-xs text-muted-foreground mt-2">{campus.visitAndContact.description}</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-col items-center md:items-start gap-2 mt-4 border-t pt-4">
-                                    {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Phone size={16} /><span>{campus.visitAndContact.phone}</span></a>}
-                                    {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Mail size={16} /><span>{campus.visitAndContact.email}</span></a>}
+                                    {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Phone size={18} /><span>{campus.visitAndContact.phone}</span></a>}
+                                    {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Mail size={18} /><span>{campus.visitAndContact.email}</span></a>}
                                 </div>
                             </CardContent>
                         </Card>
