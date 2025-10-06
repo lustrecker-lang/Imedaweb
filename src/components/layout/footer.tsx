@@ -64,7 +64,7 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
             <ul className="mt-4 space-y-2">
               <li><Link href="/services" className="text-xs text-muted-foreground hover:text-foreground">Services</Link></li>
               <li><Link href="/publications" className="text-xs text-muted-foreground hover:text-foreground">Publications</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Partenariats d'entreprise</Link></li>
+              <li><Link href="/partenariats" className="text-xs text-muted-foreground hover:text-foreground">Partenariats d'entreprise</Link></li>
               <li><Link href="/news" className="text-xs text-muted-foreground hover:text-foreground">Actualités et Mises à jour</Link></li>
             </ul>
           </div>
