@@ -83,12 +83,12 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
             <p className="text-xs text-muted-foreground text-left lg:text-right">
               Institut de Management, Économie et Développement Appliqué.
             </p>
-             <div className="flex items-center gap-4">
+             <div className="flex items-center gap-6">
               <Link href="#" aria-label="Instagram">
-                <Instagram className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
+                <Instagram className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
               </Link>
               <Link href="#" aria-label="YouTube">
-                <Youtube className="h-5 w-5 text-muted-foreground transition-colors hover:text-primary" />
+                <Youtube className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
               </Link>
             </div>
           </div>
