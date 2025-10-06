@@ -222,7 +222,15 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
         <div className="container px-4 md:px-6">
           <Card className="overflow-hidden">
               <div className="grid md:grid-cols-2 items-center">
-                  <div className="p-6 md:p-10 text-left">
+                  <div className="md:order-2 relative aspect-video h-full min-h-[250px]">
+                       <Image 
+                          src="https://picsum.photos/seed/catalog/800/600"
+                          alt="Download Catalog"
+                          fill
+                          className="object-cover"
+                       />
+                  </div>
+                   <div className="p-6 md:p-10 text-left">
                       <h3 className="font-headline font-normal text-2xl">Catalogue 2025-26</h3>
                       <p className="text-muted-foreground mt-2 text-sm">Entrez votre email pour recevoir notre catalogue complet et découvrir toutes nos formations.</p>
                       <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
@@ -242,14 +250,6 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
                           </Button>
                       </div>
                   </div>
-                   <div className="hidden md:block aspect-video relative h-full">
-                       <Image 
-                          src="https://picsum.photos/seed/catalog/800/600"
-                          alt="Download Catalog"
-                          fill
-                          className="object-cover"
-                       />
-                   </div>
               </div>
           </Card>
         </div>
