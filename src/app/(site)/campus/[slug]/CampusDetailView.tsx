@@ -243,10 +243,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                 <section id="contact">
                     <Card>
                         <CardHeader>
-                             <div className="flex items-center gap-3">
-                                <MapPin className="h-6 w-6 text-primary" />
-                                <CardTitle className="text-xl font-headline font-normal">{campus.visitAndContact?.headline || "Visit & Contact"}</CardTitle>
-                            </div>
+                            <CardTitle className="text-xl font-headline font-normal">{campus.visitAndContact?.headline || "Visit & Contact"}</CardTitle>
                             {campus.visitAndContact?.subtitle && <CardDescription className="pt-2 text-sm">{campus.visitAndContact.subtitle}</CardDescription>}
                         </CardHeader>
                         <CardContent>
@@ -260,16 +257,13 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     <section id="faq">
                         <Card>
                             <CardHeader>
-                                <div className="flex items-center gap-3">
-                                    <HelpCircle className="h-6 w-6 text-primary" />
-                                    <CardTitle className="text-xl font-headline font-normal">{campus.faq.headline || "FAQ"}</CardTitle>
-                                </div>
+                                <CardTitle className="text-xl font-headline font-normal">{campus.faq.headline || "FAQ"}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Accordion type="single" collapsible className="w-full">
                                     {campus.faq.faqs.map(faq => (
                                          <AccordionItem value={faq.id} key={faq.id}>
-                                            <AccordionTrigger>{faq.question}</AccordionTrigger>
+                                            <AccordionTrigger className="text-left font-normal text-sm">{faq.question}</AccordionTrigger>
                                             <AccordionContent className="text-sm text-muted-foreground">
                                                 {faq.answer}
                                             </AccordionContent>
