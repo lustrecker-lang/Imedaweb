@@ -84,6 +84,17 @@
       },
       "required": ["name"]
     },
+    "Reference": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Reference",
+      "type": "object",
+      "description": "Represents a company reference or partner.",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the company." },
+        "logoUrl": { "type": "string", "description": "URL for the company's logo.", "format": "uri" }
+      },
+      "required": ["name", "logoUrl"]
+    },
     "CompanyProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "CompanyProfile",
@@ -574,6 +585,14 @@
               "description": "The unique identifier for the service."
             }
           ]
+        }
+      },
+      {
+        "path": "/references/{referenceId}",
+        "definition": {
+          "entityName": "Reference",
+          "schema": { "$ref": "#/backend/entities/Reference" },
+          "description": "Stores company references or partners."
         }
       },
       {
