@@ -114,42 +114,46 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
 
   return (
     <div className="flex flex-col">
-      <main className="container py-12 md:py-16 lg:py-20">
-         <Card className="relative h-[40vh] min-h-[300px] w-full flex items-end justify-start text-white text-left p-6 md:p-8 lg:p-12 overflow-hidden rounded-lg mb-12">
-            {campus.hero?.backgroundMediaUrl ? (
-                isHeroVideo ? (
-                    <video
-                        src={campus.hero.backgroundMediaUrl}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="absolute inset-0 h-full w-full object-cover"
-                    />
-                ) : (
-                    <Image
-                        src={campus.hero.backgroundMediaUrl}
-                        alt={campus.hero.title || campus.name}
-                        fill
-                        className="object-cover"
-                        priority
-                    />
-                )
-            ) : (
-            <div className="absolute inset-0 bg-slate-800" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-            <div className="relative z-10 max-w-2xl">
-                <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline text-white">
-                    {campus.hero?.title || "Welcome"}
-                </h1>
-                {campus.hero?.subtitle && (
-                    <p className="mt-2 max-w-[700px] text-gray-200 text-sm md:text-base">
-                        {campus.hero.subtitle}
-                    </p>
-                )}
+       <header className="py-12 md:py-16">
+            <div className="container">
+                <Card className="relative h-[40vh] min-h-[300px] w-full flex items-end justify-start text-white text-left p-6 md:p-8 lg:p-12 overflow-hidden rounded-lg">
+                    {campus.hero?.backgroundMediaUrl ? (
+                        isHeroVideo ? (
+                            <video
+                                src={campus.hero.backgroundMediaUrl}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="absolute inset-0 h-full w-full object-cover"
+                            />
+                        ) : (
+                            <Image
+                                src={campus.hero.backgroundMediaUrl}
+                                alt={campus.hero.title || campus.name}
+                                fill
+                                className="object-cover"
+                                priority
+                            />
+                        )
+                    ) : (
+                    <div className="absolute inset-0 bg-slate-800" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+                    <div className="relative z-10 max-w-2xl">
+                        <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline text-white">
+                            {campus.hero?.title || "Welcome"}
+                        </h1>
+                        {campus.hero?.subtitle && (
+                            <p className="mt-2 max-w-[700px] text-gray-200 text-sm md:text-base">
+                                {campus.hero.subtitle}
+                            </p>
+                        )}
+                    </div>
+                </Card>
             </div>
-        </Card>
+        </header>
+      <main className="container py-12 md:py-16 lg:py-20">
 
         <div className="grid md:grid-cols-12 gap-8 lg:gap-12">
             <div className="md:col-span-8 space-y-12">
@@ -176,7 +180,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                             {categoriesWithThemes.map((category) => (
                                 <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
                                     <Link href={`/courses?categoryId=${category.id}`} className="block h-full">
-                                    <Card className="h-full flex flex-col transition-colors hover:border-primary overflow-hidden">
+                                    <Card className="h-full flex flex-col transition-colors overflow-hidden">
                                         <div className="aspect-video relative w-full">
                                         <Image 
                                             src={category.mediaUrl || `https://picsum.photos/seed/${category.id}/400/225`}
@@ -190,10 +194,9 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                         </CardHeader>
                                         <CardContent className="flex-grow">
                                             <ul className="text-sm text-muted-foreground space-y-1">
-                                                {category.themes.slice(0, 4).map(theme => (
+                                                {category.themes.map(theme => (
                                                     <li key={theme.id} className="truncate">{theme.name}</li>
                                                 ))}
-                                                {category.themes.length > 4 && <li className="text-xs font-medium">et plus...</li>}
                                             </ul>
                                         </CardContent>
                                     </Card>

@@ -136,4 +136,3 @@ export default async function CampusPage({ params }: { params: { slug: string } 
     </Suspense>
   );
 }
-
