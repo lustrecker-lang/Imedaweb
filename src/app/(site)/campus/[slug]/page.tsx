@@ -65,6 +65,17 @@ interface Campus {
   };
 }
 
+const isVideoUrl = (url?: string | null) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    try {
+      const pathname = new URL(url).pathname.split('?')[0];
+      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+    } catch (e) {
+      return false; // Invalid URL
+    }
+};
+
 export default function CampusPage() {
   const firestore = useFirestore();
   const params = useParams();
@@ -102,19 +113,33 @@ export default function CampusPage() {
   if (!campus) {
     return <div className="container py-12 text-center text-muted-foreground">Campus not found.</div>
   }
+  
+  const isHeroVideo = isVideoUrl(campus.hero?.backgroundMediaUrl);
+
 
   return (
     <div className="flex flex-col">
       <main className="container py-12 md:py-16 lg:py-20">
          <Card className="relative aspect-video w-full flex items-center justify-center text-white text-center p-4 overflow-hidden rounded-lg mb-12">
             {campus.hero?.backgroundMediaUrl ? (
-                <Image
-                    src={campus.hero.backgroundMediaUrl}
-                    alt={campus.hero.title || campus.name}
-                    fill
-                    className="object-cover"
-                    priority
-                />
+                isHeroVideo ? (
+                    <video
+                        src={campus.hero.backgroundMediaUrl}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="absolute inset-0 h-full w-full object-cover"
+                    />
+                ) : (
+                    <Image
+                        src={campus.hero.backgroundMediaUrl}
+                        alt={campus.hero.title || campus.name}
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                )
             ) : (
             <div className="absolute inset-0 bg-slate-800" />
             )}
