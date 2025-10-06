@@ -1,4 +1,3 @@
-
 'use client';
 import Link from "next/link";
 import { Instagram, Youtube } from "lucide-react";
@@ -21,7 +20,6 @@ interface FooterProps {
 }
 
 export function Footer({ companyProfile, campuses }: FooterProps) {
-
   return (
     <footer className="border-t bg-white">
       <div className="container mx-auto max-w-[1400px] px-4 py-8 md:px-6">

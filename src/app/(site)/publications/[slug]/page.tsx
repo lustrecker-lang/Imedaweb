@@ -11,6 +11,13 @@ import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
+interface Section {
+  id: string;
+  title?: string;
+  paragraph?: string;
+  imageUrl?: string;
+}
+
 interface Article {
   id: string;
   title: string;
@@ -18,9 +25,14 @@ interface Article {
   author: string;
   publicationDate: string;
   summary?: string;
-  content?: string;
+  sections?: Section[];
   imageUrl?: string;
-  topic?: { id: string; name: string };
+  topicId?: string;
+}
+
+interface Topic {
+  id: string;
+  name: string;
 }
 
 async function getArticle(slugOrId: string): Promise<Article | null> {
@@ -40,6 +52,14 @@ async function getArticle(slugOrId: string): Promise<Article | null> {
         const publicationDate = data.publicationDate?.toDate();
         const formattedDate = publicationDate ? format(publicationDate, 'MMMM d, yyyy') : '';
 
+        let topic = null;
+        if(data.topicId) {
+            const topicSnap = await adminDb.collection('article_topics').doc(data.topicId).get();
+            if(topicSnap.exists) {
+                topic = { id: topicSnap.id, ...topicSnap.data() } as Topic;
+            }
+        }
+
         return {
             id: docSnap.id,
             title: data.title,
@@ -47,9 +67,10 @@ async function getArticle(slugOrId: string): Promise<Article | null> {
             author: data.author,
             publicationDate: formattedDate,
             summary: data.summary,
-            content: data.content,
+            sections: data.sections,
             imageUrl: data.imageUrl,
             topicId: data.topicId,
+            topic: topic,
         } as Article;
     }
     
@@ -103,13 +124,21 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline text-primary">
           {article.title}
         </h1>
-        <p className="mt-4 text-sm text-muted-foreground">
-          By {article.author} • {article.publicationDate}
-        </p>
+        <div className="mt-4 text-sm text-muted-foreground flex items-center justify-center gap-4">
+          <span>By {article.author}</span>
+          <span>&bull;</span>
+          <span>{article.publicationDate}</span>
+          {article.topic && (
+            <>
+                <span>&bull;</span>
+                <Link href={`/publications?topic=${article.topic.id}`} className="hover:text-primary">{article.topic.name}</Link>
+            </>
+          )}
+        </div>
       </header>
       
       {article.imageUrl && (
-        <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-8">
+        <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-12">
           <Image
             src={article.imageUrl}
             alt={article.title}
@@ -120,8 +149,18 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         </div>
       )}
       
-      <div className="prose prose-stone mx-auto max-w-3xl dark:prose-invert prose-p:text-base prose-p:leading-relaxed prose-headings:font-headline prose-headings:font-normal">
-        <div dangerouslySetInnerHTML={{ __html: article.content || '' }} />
+      <div className="prose prose-stone mx-auto max-w-3xl dark:prose-invert prose-p:text-base prose-p:leading-relaxed prose-h2:font-headline prose-h2:font-normal prose-h2:text-2xl prose-h2:text-primary">
+        {article.sections && article.sections.map(section => (
+            <section key={section.id} className="mb-8">
+                {section.title && <h2>{section.title}</h2>}
+                {section.imageUrl && (
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg my-6">
+                        <Image src={section.imageUrl} alt={section.title || article.title} fill className="object-cover" />
+                    </div>
+                )}
+                {section.paragraph && <div dangerouslySetInnerHTML={{ __html: section.paragraph.replace(/\n/g, '<br />') }} />}
+            </section>
+        ))}
       </div>
 
     </article>

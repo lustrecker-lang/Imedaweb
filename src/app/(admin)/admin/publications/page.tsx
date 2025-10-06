@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking, useStorage } from '@/firebase';
 import { collection, doc, query, orderBy, Timestamp, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,8 +22,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
-import { Trash2, Edit, Plus, Search } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetFooter } from '@/components/ui/sheet';
+import { Trash2, Edit, Plus, Search, GripVertical } from 'lucide-react';
 import { Combobox } from '@/components/ui/combobox';
 
 const generateSlug = (title: string) => {
@@ -34,14 +34,21 @@ const generateSlug = (title: string) => {
   const p = new RegExp(a.split('').join('|'), 'g');
 
   return title.toString().toLowerCase()
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
-    .replace(/&/g, '-and-') // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '') // Remove all non-word chars except -
-    .replace(/\-\-+/g, '-') // Replace multiple - with single -
-    .replace(/^-+/, '') // Trim - from start of text
-    .replace(/-+$/, ''); // Trim - from end of text
+    .replace(/\s+/g, '-') 
+    .replace(p, c => b.charAt(a.indexOf(c))) 
+    .replace(/&/g, '-and-') 
+    .replace(/[^\w\-]+/g, '') 
+    .replace(/\-\-+/g, '-') 
+    .replace(/^-+/, '') 
+    .replace(/-+$/, '');
 };
+
+const sectionSchema = z.object({
+  id: z.string(),
+  title: z.string().optional(),
+  paragraph: z.string().optional(),
+  imageUrl: z.string().optional(),
+});
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required.'),
@@ -49,7 +56,7 @@ const formSchema = z.object({
   author: z.string().min(1, 'Author is required.'),
   publicationDate: z.date(),
   summary: z.string().optional(),
-  content: z.string().optional(),
+  sections: z.array(sectionSchema).optional(),
   imageUrl: z.string().optional(),
   topicId: z.string().optional(),
 });
@@ -72,6 +79,8 @@ export default function PublicationsPage() {
   const { toast } = useToast();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [sectionImageFiles, setSectionImageFiles] = useState<(File | null)[]>([]);
+
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
@@ -101,16 +110,19 @@ export default function PublicationsPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '', slug: '', author: '', publicationDate: new Date(), summary: '', content: '<h1>Main Title</h1>\n\n<p>Start writing your article here...</p>\n\n<h2>Subtitle</h2>\n\n<p>More content...</p>', imageUrl: '', topicId: ''
+      title: '', slug: '', author: '', publicationDate: new Date(), summary: '', sections: [], imageUrl: '', topicId: ''
     },
   });
   
   const editForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '', slug: '', author: '', publicationDate: new Date(), summary: '', content: '', imageUrl: '', topicId: ''
+      title: '', slug: '', author: '', publicationDate: new Date(), summary: '', sections: [], imageUrl: '', topicId: ''
     },
   });
+
+  const { fields: addSections, append: appendAddSection, remove: removeAddSection } = useFieldArray({ control: form.control, name: "sections" });
+  const { fields: editSections, append: appendEditSection, remove: removeEditSection } = useFieldArray({ control: editForm.control, name: "sections" });
 
   const titleValue = form.watch("title");
 
@@ -132,12 +144,13 @@ export default function PublicationsPage() {
       editForm.reset({
         ...editingArticle,
         summary: editingArticle.summary || '',
-        content: editingArticle.content || '',
+        sections: editingArticle.sections || [],
         imageUrl: editingArticle.imageUrl || '',
         publicationDate: editingArticle.publicationDate.toDate(),
         topicId: editingArticle.topicId || '',
       });
       setIsSlugManuallyEdited(false);
+      setSectionImageFiles([]);
     }
   }, [editingArticle, editForm]);
 
@@ -160,10 +173,11 @@ export default function PublicationsPage() {
     const lowercasedTerm = searchTerm.toLowerCase();
     return articles.filter(article => {
         const topicName = topics?.find(t => t.id === article.topicId)?.name || '';
+        const contentSearch = article.sections?.map(s => `${s.title || ''} ${s.paragraph || ''}`).join(' ').toLowerCase().includes(lowercasedTerm)
         return (
             article.title.toLowerCase().includes(lowercasedTerm) ||
             article.author.toLowerCase().includes(lowercasedTerm) ||
-            (article.content && article.content.toLowerCase().includes(lowercasedTerm)) ||
+            contentSearch ||
             topicName.toLowerCase().includes(lowercasedTerm)
         );
     });
@@ -187,17 +201,34 @@ export default function PublicationsPage() {
     }
   };
 
+  const processSectionsWithImages = async (sections: z.infer<typeof sectionSchema>[], files: (File | null)[]) => {
+      const processedSections = [...sections];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file && processedSections[i]) {
+            const newMediaUrl = await handleFileUpload(file);
+            if(newMediaUrl) {
+                processedSections[i].imageUrl = newMediaUrl;
+            }
+        }
+      }
+      return processedSections;
+  }
+
   const onAddSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!firestore) return;
     let imageUrl = '';
     if (imageFile) {
       imageUrl = await handleFileUpload(imageFile) || '';
     }
-    const dataToSave = { ...values, imageUrl, publicationDate: Timestamp.fromDate(values.publicationDate) };
+    const processedSections = await processSectionsWithImages(values.sections || [], sectionImageFiles);
+    
+    const dataToSave = { ...values, imageUrl, sections: processedSections, publicationDate: Timestamp.fromDate(values.publicationDate) };
     addDocumentNonBlocking(collection(firestore, 'articles'), dataToSave);
     toast({ title: 'Success!', description: 'New article has been added.' });
     form.reset();
     setImageFile(null);
+    setSectionImageFiles([]);
     setIsAddSheetOpen(false);
   };
 
@@ -213,13 +244,16 @@ export default function PublicationsPage() {
       }
       imageUrl = await handleFileUpload(imageFile) || editingArticle.imageUrl;
     }
-    const dataToSave = { ...values, imageUrl, publicationDate: Timestamp.fromDate(values.publicationDate) };
+    const processedSections = await processSectionsWithImages(values.sections || [], sectionImageFiles);
+
+    const dataToSave = { ...values, imageUrl, sections: processedSections, publicationDate: Timestamp.fromDate(values.publicationDate) };
     const docRef = doc(firestore, 'articles', editingArticle.id);
     setDocumentNonBlocking(docRef, dataToSave, { merge: true });
     toast({ title: 'Success!', description: `Article "${values.title}" has been updated.` });
     setIsEditSheetOpen(false);
     setEditingArticle(null);
     setImageFile(null);
+    setSectionImageFiles([]);
   };
 
   const openDeleteDialog = (article: Article) => {
@@ -230,6 +264,7 @@ export default function PublicationsPage() {
   const openEditDialog = (article: Article) => {
     setEditingArticle(article);
     setImageFile(null);
+    setSectionImageFiles([]);
     setIsEditSheetOpen(true);
   };
 
@@ -239,12 +274,56 @@ export default function PublicationsPage() {
       const imageRef = ref(storage, articleToDelete.imageUrl);
       deleteObject(imageRef).catch(error => console.error("Error deleting image: ", error));
     }
+    articleToDelete.sections?.forEach(section => {
+        if (section.imageUrl && storage) {
+            const sectionImageRef = ref(storage, section.imageUrl);
+            deleteObject(sectionImageRef).catch(error => console.error("Error deleting section image: ", error));
+        }
+    });
     const docRef = doc(firestore, 'articles', articleToDelete.id);
     deleteDocumentNonBlocking(docRef);
     toast({ title: "Article Deleted", description: "The article has been permanently deleted." });
     setIsDeleteDialogOpen(false);
     setArticleToDelete(null);
   };
+  
+  const handleSectionImageChange = (index: number, file: File | null, formType: 'add' | 'edit') => {
+      const newFiles = [...sectionImageFiles];
+      newFiles[index] = file;
+      setSectionImageFiles(newFiles);
+  }
+
+  const renderSectionForms = (formInstance: any, sections: any[], appendFn: Function, removeFn: Function) => {
+      return (
+        <div className="space-y-6">
+            <h3 className="text-lg font-medium text-foreground">Sections</h3>
+            {sections.map((field, index) => (
+                <div key={field.id} className="p-4 border rounded-md space-y-3 relative bg-background">
+                     <div className="flex justify-between items-center">
+                        <h4 className="font-semibold text-sm">Section {index + 1}</h4>
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeFn(index)} className="h-7 w-7 text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                     </div>
+                    <FormField control={formInstance.control} name={`sections.${index}.title`} render={({ field }) => ( <FormItem> <FormLabel>Section Title</FormLabel> <FormControl><Input {...field} placeholder="Optional section title"/></FormControl> <FormMessage /> </FormItem> )} />
+                    <FormField control={formInstance.control} name={`sections.${index}.paragraph`} render={({ field }) => ( <FormItem> <FormLabel>Paragraph</FormLabel> <FormControl><Textarea {...field} placeholder="Section content..." rows={5}/></FormControl> <FormMessage /> </FormItem> )} />
+                    <FormItem>
+                      <FormLabel>Section Image</FormLabel>
+                       {formInstance.getValues(`sections.${index}.imageUrl`) && (
+                          <div className="mb-2">
+                             <Image src={formInstance.getValues(`sections.${index}.imageUrl`)} alt={`Section ${index+1} image`} width={100} height={60} className="object-cover rounded-sm border" />
+                          </div>
+                       )}
+                      <FormControl><Input type="file" accept="image/*" onChange={(e) => handleSectionImageChange(index, e.target.files?.[0] || null, formInstance === form ? 'add' : 'edit')} /></FormControl>
+                    </FormItem>
+                </div>
+            ))}
+            <Button type="button" variant="outline" size="sm" onClick={() => appendFn({ id: uuidv4(), title: '', paragraph: '', imageUrl: '' })}>
+                <Plus className="mr-2 h-4 w-4" /> Add Section
+            </Button>
+        </div>
+      )
+  }
 
   return (
     <>
@@ -293,11 +372,13 @@ export default function PublicationsPage() {
                       />
                       <FormField control={form.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                      <FormField control={form.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={15} {...field} className="font-mono text-sm" /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormItem>
-                          <FormLabel>Image</FormLabel>
+                          <FormLabel>Main Image</FormLabel>
                           <FormControl><Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} /></FormControl>
                       </FormItem>
+                      <div className="p-4 bg-muted/50 rounded-lg">
+                        {renderSectionForms(form, addSections, appendAddSection, removeAddSection)}
+                      </div>
                     </form>
                   </Form>
                 </div>
@@ -403,12 +484,14 @@ export default function PublicationsPage() {
                   />
                 <FormField control={editForm.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={editForm.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={15} {...field} className="font-mono text-sm" /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormItem>
-                  <FormLabel>Image</FormLabel>
+                  <FormLabel>Main Image</FormLabel>
                   {editForm.watch('imageUrl') && <Image src={editForm.watch('imageUrl')!} alt="Current Image" width={100} height={60} className="rounded-sm object-cover" />}
                   <FormControl><Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} /></FormControl>
                 </FormItem>
+                 <div className="p-4 bg-muted/50 rounded-lg">
+                    {renderSectionForms(editForm, editSections, appendEditSection, removeEditSection)}
+                 </div>
               </form>
             </Form>
           </div>

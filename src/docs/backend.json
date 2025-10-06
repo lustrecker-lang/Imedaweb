@@ -28,18 +28,28 @@
           "type": "string",
           "description": "A short summary of the article."
         },
-        "content": {
-          "type": "string",
-          "description": "The full content of the article."
-        },
         "imageUrl": {
           "type": "string",
-          "description": "URL for the article's feature image.",
+          "description": "URL for the article's main feature image.",
           "format": "uri"
         },
         "topicId": {
             "type": "string",
             "description": "The ID of the associated article topic."
+        },
+        "sections": {
+            "type": "array",
+            "description": "An array of content sections for this article.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "description": "Unique ID for the section." },
+                "title": { "type": "string", "description": "Optional title for the section." },
+                "paragraph": { "type": "string", "description": "The text content for the section." },
+                "imageUrl": { "type": "string", "description": "Optional image for the section.", "format": "uri" }
+              },
+              "required": ["id"]
+            }
         }
       },
       "required": ["title", "slug", "author", "publicationDate"]
@@ -561,5 +571,4 @@
     "reasoning": "This Firestore data structure allows for modular content management. Each page's content is stored in a separate document within the 'pages' collection. This makes it easy to add new pages and edit their content by section."
   }
 }
-
     

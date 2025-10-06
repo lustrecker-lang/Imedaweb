@@ -1,4 +1,5 @@
 
+
 // src/app/(site)/publications/PublicationsView.tsx
 'use client';
 
@@ -11,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination';
 
 
 interface Article {
@@ -24,6 +25,12 @@ interface Article {
   slug?: string;
   topicId?: string;
   topic?: { id: string; name: string };
+  sections?: {
+      id: string;
+      title?: string;
+      paragraph?: string;
+      imageUrl?: string;
+  }[];
 }
 
 interface Topic {
