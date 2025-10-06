@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext, PaginationLink } from '@/components/ui/pagination';
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 
 interface Article {
@@ -68,6 +68,11 @@ export default function PublicationsView({ articles, pageData, topics }: Publica
 
   const heroSection = pageData?.sections.find(s => s.id === 'hero');
   const heroImageUrl = heroSection?.imageUrl;
+
+  const activeTopics = useMemo(() => {
+    const articleTopicIds = new Set(articles.map(a => a.topicId));
+    return topics.filter(t => articleTopicIds.has(t.id));
+  }, [articles, topics]);
 
   const filteredArticles = useMemo(() => {
     if (!selectedTopic || selectedTopic === 'all') {
@@ -132,24 +137,28 @@ export default function PublicationsView({ articles, pageData, topics }: Publica
         </Card>
       </header>
 
-      <div className="mb-10 flex flex-wrap items-center gap-2">
-        <Button 
-          variant={!selectedTopic || selectedTopic === 'all' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => handleTopicChange(null)}
-        >
-          All Topics
-        </Button>
-        {topics.map(topic => (
-            <Button
-              key={topic.id}
-              variant={selectedTopic === topic.id ? 'default' : 'outline'}
+      <div className="mb-10">
+        <div className="flex overflow-x-auto space-x-2 pb-4 md:flex-wrap md:overflow-x-visible md:pb-0 md:space-x-0 md:gap-2">
+            <Button 
+              variant={!selectedTopic || selectedTopic === 'all' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => handleTopicChange(topic.id)}
+              onClick={() => handleTopicChange(null)}
+              className="shrink-0"
             >
-              {topic.name}
+              All Topics
             </Button>
-        ))}
+            {activeTopics.map(topic => (
+                <Button
+                  key={topic.id}
+                  variant={selectedTopic === topic.id ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handleTopicChange(topic.id)}
+                  className="shrink-0"
+                >
+                  {topic.name}
+                </Button>
+            ))}
+        </div>
       </div>
       
       {paginatedArticles && paginatedArticles.length > 0 ? (
