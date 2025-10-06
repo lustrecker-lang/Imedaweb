@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Image from "next/image";
@@ -293,7 +292,31 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </Accordion>
                 </section>
                 
-                {/* 3. Banner Section */}
+                {/* 3. Campus Experience */}
+                {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
+                    <section id="experience">
+                        <div className="max-w-2xl">
+                            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusExperience.headline || "Campus Experience"}</h2>
+                        </div>
+                        <div className="grid gap-8 mt-8">
+                            {campus.campusExperience.features.map(feature => (
+                                 <div key={feature.id} className="flex flex-col md:flex-row gap-6 items-start">
+                                    <div className="flex-1">
+                                        <h3 className="font-headline font-normal text-xl">{feature.name}</h3>
+                                        <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
+                                    </div>
+                                    {feature.mediaUrl && (
+                                         <div className="relative w-full md:w-[150px] aspect-video md:aspect-[4/3] shrink-0 rounded-md overflow-hidden">
+                                            <MediaPreview url={feature.mediaUrl} alt={feature.name} />
+                                         </div>
+                                    )}
+                                 </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+                
+                {/* 4. Banner Section */}
                 {campus.bannerSection && (campus.bannerSection.title || campus.bannerSection.text || campus.bannerSection.mediaUrl) && (
                     <section id="banner">
                         <Card className="overflow-hidden">
@@ -310,30 +333,6 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </section>
                 )}
 
-                {/* 4. Campus Experience */}
-                {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
-                    <section id="experience">
-                        <div className="max-w-2xl">
-                            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusExperience.headline || "Campus Experience"}</h2>
-                        </div>
-                        <div className="grid gap-8 mt-8">
-                            {campus.campusExperience.features.map(feature => (
-                                 <div key={feature.id} className="flex gap-6 items-start">
-                                    <div>
-                                        <h3 className="font-headline font-normal text-xl">{feature.name}</h3>
-                                        <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
-                                    </div>
-                                    {feature.mediaUrl && (
-                                         <div className="relative w-[150px] h-[100px] shrink-0 rounded-md overflow-hidden hidden sm:block">
-                                            <MediaPreview url={feature.mediaUrl} alt={feature.name} />
-                                         </div>
-                                    )}
-                                 </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-                
                  {/* 5. FAQ */}
                 {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
                     <section id="faq">
@@ -362,18 +361,20 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                      <section id="contact-person">
                         <Card>
                              <CardContent className="pt-6">
-                                <div className="text-left">
+                                <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4">
                                     {campus.visitAndContact.imageUrl && (
-                                        <div className="relative h-24 w-24 rounded-lg mb-4 overflow-hidden">
+                                        <div className="relative h-24 w-24 rounded-full overflow-hidden shrink-0">
                                             <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
                                         </div>
                                     )}
-                                    <h3 className="font-headline font-normal text-xl">{campus.visitAndContact.name}</h3>
-                                    <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
-                                    {campus.visitAndContact.description && <p className="text-sm text-muted-foreground mt-3">{campus.visitAndContact.description}</p>}
-                                    <div className="flex flex-col items-start gap-3 mt-4">
-                                        {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Phone size={16} /><span>{campus.visitAndContact.phone}</span></a>}
-                                        {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Mail size={16} /><span>{campus.visitAndContact.email}</span></a>}
+                                    <div>
+                                        <h3 className="font-headline font-normal text-xl">{campus.visitAndContact.name}</h3>
+                                        <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
+                                        {campus.visitAndContact.description && <p className="text-sm text-muted-foreground mt-2">{campus.visitAndContact.description}</p>}
+                                        <div className="flex flex-col items-center md:items-start gap-2 mt-3">
+                                            {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Phone size={14} /><span>{campus.visitAndContact.phone}</span></a>}
+                                            {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Mail size={14} /><span>{campus.visitAndContact.email}</span></a>}
+                                        </div>
                                     </div>
                                 </div>
                             </CardContent>
@@ -415,22 +416,22 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </Card>
                 </section>
 
-                <section id="contact-info">
-                  <div className="max-w-2xl">
-                    <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">
-                      {campus.visitAndContact?.headline || "Visit & Contact"}
-                    </h2>
-                    {campus.visitAndContact?.subtitle && (
-                      <p className="mt-2 text-muted-foreground md:text-base/relaxed">
-                        {campus.visitAndContact.subtitle}
-                      </p>
-                    )}
-                    {campus.visitAndContact?.address && (
-                      <p className="mt-4 text-sm text-muted-foreground whitespace-pre-wrap">
-                        {campus.visitAndContact.address}
-                      </p>
-                    )}
-                  </div>
+                <section id="visit-campus">
+                    <Card>
+                         <CardHeader>
+                            <CardTitle className="font-headline font-normal text-xl">{campus.visitAndContact?.headline || "Visit Us"}</CardTitle>
+                             {campus.visitAndContact?.subtitle && (
+                                <CardDescription>{campus.visitAndContact.subtitle}</CardDescription>
+                            )}
+                         </CardHeader>
+                         <CardContent>
+                            {campus.visitAndContact?.address && (
+                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                {campus.visitAndContact.address}
+                            </p>
+                            )}
+                         </CardContent>
+                    </Card>
                 </section>
             </aside>
         </div>

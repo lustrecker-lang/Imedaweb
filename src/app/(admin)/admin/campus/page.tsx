@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -633,7 +632,7 @@ export default function CampusPage() {
                                 <FormItem>
                                   <FormLabel>Banner Media</FormLabel>
                                   <div className="flex items-center gap-4">
-                                      {editForm.watch('bannerSection.mediaUrl') && ( <div className="relative"> <MediaPreview url={editForm.watch('bannerSection.mediaUrl')!} alt="Banner media" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('bannerSection.mediaUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
+                                      {editForm.watch('bannerSection.mediaUrl') && ( <div className="relative"> <MediaPreview url={editForm.watch('bannerSection.mediaUrl')!} alt="Banner media" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('bannerSection.mediaUrl')}> <X className="h-4 w-4" /> </Button> d</div> )}
                                       <FormControl>
                                         <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { setBannerFile(e.target.files[0]) } }}/>
                                       </FormControl>
@@ -678,33 +677,35 @@ export default function CampusPage() {
                            </AccordionContent>
                         </AccordionItem>
                         <AccordionItem value="visit">
-                           <AccordionTrigger>Visit & Contact</AccordionTrigger>
+                           <AccordionTrigger>Visit</AccordionTrigger>
                            <AccordionContent className="space-y-4 p-1">
                                 <FormField control={editForm.control} name="visitAndContact.headline" render={({ field }) => ( <FormItem> <FormLabel>Location Headline</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                 <FormField control={editForm.control} name="visitAndContact.subtitle" render={({ field }) => ( <FormItem> <FormLabel>Location Subtitle</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                 <FormField control={editForm.control} name="visitAndContact.address" render={({ field }) => ( <FormItem> <FormLabel>Address</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                <div className="pt-4 border-t">
-                                    <h4 className="text-sm font-medium mb-2">Contact Person</h4>
-                                    <FormField control={editForm.control} name="visitAndContact.name" render={({ field }) => ( <FormItem> <FormLabel>Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                    <FormField control={editForm.control} name="visitAndContact.title" render={({ field }) => ( <FormItem className="mt-4"> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                    <FormField control={editForm.control} name="visitAndContact.description" render={({ field }) => ( <FormItem className="mt-4"> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                    <FormField control={editForm.control} name="visitAndContact.phone" render={({ field }) => ( <FormItem className="mt-4"> <FormLabel>Phone</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                    <FormField control={editForm.control} name="visitAndContact.email" render={({ field }) => ( <FormItem className="mt-4"> <FormLabel>Email</FormLabel> <FormControl><Input type="email" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                    <FormItem className="mt-4">
-                                        <FormLabel>Contact Person Image</FormLabel>
-                                        <div className="flex items-center gap-4">
-                                            {editForm.watch('visitAndContact.imageUrl') && ( <div className="relative"> <Image src={editForm.watch('visitAndContact.imageUrl')!} alt="Contact Person" width={80} height={80} className="object-cover rounded-full" /> <SheetClose asChild><Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('visitAndContact.imageUrl')}><X className="h-4 w-4" /></Button></SheetClose> </div> )}
-                                            <FormControl>
-                                                <Input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) { setContactImageFile(e.target.files[0]) } }}/>
-                                            </FormControl>
-                                        </div>
-                                        <FormMessage />
-                                    </FormItem>
-                                </div>
-                           </AccordionContent>
+                            </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="contact-person">
+                            <AccordionTrigger>Contact Person</AccordionTrigger>
+                            <AccordionContent className="space-y-4 p-1">
+                                <FormField control={editForm.control} name="visitAndContact.name" render={({ field }) => ( <FormItem> <FormLabel>Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="visitAndContact.title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="visitAndContact.description" render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="visitAndContact.phone" render={({ field }) => ( <FormItem> <FormLabel>Phone</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="visitAndContact.email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input type="email" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormItem>
+                                    <FormLabel>Contact Person Image</FormLabel>
+                                    <div className="flex items-center gap-4">
+                                        {editForm.watch('visitAndContact.imageUrl') && ( <div className="relative"> <Image src={editForm.watch('visitAndContact.imageUrl')!} alt="Contact Person" width={80} height={80} className="object-cover rounded-full" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('visitAndContact.imageUrl')}><X className="h-4 w-4" /></Button> </div> )}
+                                        <FormControl>
+                                            <Input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) { setContactImageFile(e.target.files[0]) } }}/>
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            </AccordionContent>
                         </AccordionItem>
                          <AccordionItem value="faq">
-                           <AccordionTrigger>Help & Information (FAQ)</AccordionTrigger>
+                           <AccordionTrigger>Help &amp; Information (FAQ)</AccordionTrigger>
                            <AccordionContent className="space-y-4 p-1">
                                 <FormField control={editForm.control} name="faq.headline" render={({ field }) => ( <FormItem> <FormLabel>FAQ Section Headline</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                 <div className="space-y-4">
