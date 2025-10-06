@@ -23,6 +23,17 @@ interface NewsStory {
   ogImage?: string;
 }
 
+const isVideoUrl = (url?: string | null) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    try {
+      const pathname = new URL(url).pathname.split('?')[0];
+      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+    } catch (e) {
+      return false; // Invalid URL
+    }
+};
+
 async function getNewsStory(slugOrId: string): Promise<NewsStory | null> {
   try {
     const newsRef = adminDb.collection('news');
@@ -91,9 +102,11 @@ export default async function NewsStoryPage({ params }: { params: { slug: string
   if (!story) {
     notFound();
   }
+  
+  const isVideo = isVideoUrl(story.mediaUrl);
 
   return (
-    <article className="container mx-auto max-w-4xl px-4 py-12 md:px-6">
+    <article className="container mx-auto max-w-7xl px-4 py-12 md:px-6">
       <div className="mb-8">
         <Button variant="ghost" size="sm" asChild>
             <Link href="/news">
@@ -102,32 +115,51 @@ export default async function NewsStoryPage({ params }: { params: { slug: string
             </Link>
         </Button>
       </div>
-      
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline text-primary">
-          {story.title}
-        </h1>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Published on {story.publicationDate}
-        </p>
-      </header>
-      
-      {story.mediaUrl && (
-        <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-12">
-          <Image
-            src={story.mediaUrl}
-            alt={story.title}
-            fill
-            className="object-cover"
-            priority
+
+      <div className="grid md:grid-cols-12 md:gap-12 lg:gap-16">
+        <div className="md:col-span-5 lg:col-span-4 mb-8 md:mb-0">
+           {story.mediaUrl && (
+            <div className="sticky top-24">
+                <div className="relative aspect-[9/16] w-full overflow-hidden rounded-lg">
+                    {isVideo ? (
+                        <video
+                            src={story.mediaUrl}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="absolute inset-0 h-full w-full object-cover"
+                        />
+                    ) : (
+                        <Image
+                            src={story.mediaUrl}
+                            alt={story.title}
+                            fill
+                            className="object-cover"
+                            priority
+                        />
+                    )}
+                </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="md:col-span-7 lg:col-span-8">
+          <header className="mb-8">
+            <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline text-primary">
+              {story.title}
+            </h1>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Published on {story.publicationDate}
+            </p>
+          </header>
+          
+          <div 
+            className="prose prose-stone dark:prose-invert max-w-none prose-p:text-base prose-p:leading-relaxed prose-h2:font-headline prose-h2:font-normal prose-h2:text-2xl prose-h2:text-primary"
+            dangerouslySetInnerHTML={{ __html: story.content.replace(/\n/g, '<br />') }} 
           />
         </div>
-      )}
-      
-      <div 
-        className="prose prose-stone mx-auto max-w-3xl dark:prose-invert prose-p:text-base prose-p:leading-relaxed prose-h2:font-headline prose-h2:font-normal prose-h2:text-2xl prose-h2:text-primary"
-        dangerouslySetInnerHTML={{ __html: story.content.replace(/\n/g, '<br />') }} 
-      />
+      </div>
     </article>
   );
 }
