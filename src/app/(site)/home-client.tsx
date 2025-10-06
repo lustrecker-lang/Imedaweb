@@ -148,10 +148,8 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
         createdAt: serverTimestamp(),
       });
       
-      const pdfUrl = 'https://firebasestorage.googleapis.com/v0/b/imedawebsite-98ced.firebasestorage.app/o/company-assets%2FCatalogue2025-26.pdf?alt=media&token=7742f046-32b4-4925-97ee-64d61a2e5f5e';
-      
       const link = document.createElement('a');
-      link.href = pdfUrl;
+      link.href = '/api/download-catalog';
       link.setAttribute('download', 'IMEDA-Catalogue-2025-26.pdf');
       document.body.appendChild(link);
       link.click();
