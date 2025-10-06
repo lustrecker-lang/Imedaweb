@@ -186,7 +186,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         <CarouselContent className="-ml-4">
                             {categoriesWithThemes.map((category) => (
                                 <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3 flex">
-                                    <Card className="flex flex-col w-full overflow-hidden">
+                                    <Card className="flex flex-col w-full overflow-hidden transition-colors">
                                         <div className="aspect-video relative w-full">
                                         <Image 
                                             src={category.mediaUrl || `https://picsum.photos/seed/${category.id}/400/225`}
@@ -261,22 +261,24 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
 
                 {/* Contact Person */}
                 {campus.visitAndContact?.name && (
-                    <section id="contact-person">
+                     <section id="contact-person">
                         <Card>
                             <CardContent className="pt-6">
-                                <div className="flex flex-col items-center text-center">
+                                <div className="flex gap-4">
                                     {campus.visitAndContact.imageUrl && (
-                                        <div className="relative h-20 w-20 rounded-full overflow-hidden mb-4">
+                                        <div className="relative h-24 w-24 rounded-md overflow-hidden shrink-0">
                                             <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
                                         </div>
                                     )}
-                                    <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
-                                    <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
-                                    <p className="text-xs text-muted-foreground mt-2 max-w-xs">{campus.visitAndContact.description}</p>
-                                    <div className="flex flex-col items-center gap-2 mt-4">
-                                        {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-xs text-primary hover:underline"><Phone size={14} /><span>{campus.visitAndContact.phone}</span></a>}
-                                        {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-xs text-primary hover:underline"><Mail size={14} /><span>{campus.visitAndContact.email}</span></a>}
+                                    <div className="flex-1">
+                                        <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
+                                        <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
+                                        <p className="text-xs text-muted-foreground mt-2">{campus.visitAndContact.description}</p>
                                     </div>
+                                </div>
+                                <div className="flex flex-col items-start gap-2 mt-4 border-t pt-4">
+                                    {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Phone size={16} /><span>{campus.visitAndContact.phone}</span></a>}
+                                    {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Mail size={16} /><span>{campus.visitAndContact.email}</span></a>}
                                 </div>
                             </CardContent>
                         </Card>
@@ -313,5 +315,3 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
     </div>
   );
 }
-
-    
