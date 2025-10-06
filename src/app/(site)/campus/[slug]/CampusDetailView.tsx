@@ -178,7 +178,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
 
   return (
     <div className="flex flex-col">
-       <header className="py-8">
+       <header className="py-12">
             <div className="container">
                 <Card className="relative min-h-[25vh] w-full flex items-end justify-start text-white text-left p-6 md:p-8 lg:p-12 overflow-hidden rounded-lg">
                     {campus.hero?.backgroundMediaUrl ? (
@@ -217,7 +217,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                 </Card>
             </div>
         </header>
-      <main className="container pt-8 pb-12 md:pt-12 md:pb-16 lg:pb-20">
+      <main className="container pt-12 pb-16 lg:pb-20">
 
         <div className="grid md:grid-cols-12 gap-8 lg:gap-12">
             <div className="md:col-span-8 space-y-12">
@@ -249,7 +249,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <ul className="pt-2 pl-4 space-y-3">
+                                    <ul className="pt-2 pl-4 space-y-2">
                                         {category.themes.map(theme => (
                                             <li key={theme.id}>
                                                 <Link href={`/courses?themeId=${theme.id}`} className="flex items-center text-sm text-primary hover:underline transition-colors">
@@ -286,72 +286,49 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         </div>
                     </section>
                 )}
+                
+                {/* FAQ */}
+                {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
+                    <section id="faq">
+                        <div className="max-w-2xl">
+                           <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.faq.headline || "FAQ"}</h2>
+                        </div>
+                        <Accordion type="single" collapsible className="w-full mt-8">
+                            {campus.faq.faqs.map(faq => (
+                                 <AccordionItem value={faq.id} key={faq.id}>
+                                    <AccordionTrigger className="text-left font-normal text-sm">
+                                        {faq.question}
+                                    </AccordionTrigger>
+                                    <AccordionContent className="text-sm text-muted-foreground">
+                                        {faq.answer}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                    </section>
+                )}
 
             </div>
             <aside className="md:col-span-4 space-y-8 md:sticky top-24 self-start">
-
-                {/* Visit & Contact */}
-                <section id="contact-info">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-xl font-headline font-normal">
-                                {campus.visitAndContact?.headline || "Visit & Contact"}
-                            </CardTitle>
-                             {campus.visitAndContact?.subtitle && <CardDescription className="pt-2 text-sm">{campus.visitAndContact.subtitle}</CardDescription>}
-                        </CardHeader>
-                        <CardContent>
-                           <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campus.visitAndContact?.address}</p>
-                        </CardContent>
-                    </Card>
-                </section>
-
                 {/* Contact Person */}
                 {campus.visitAndContact?.name && (
                      <section id="contact-person">
                         <Card>
                             <CardContent className="pt-6">
-                                <div className="flex flex-col md:flex-row gap-4">
+                                <div className="text-center">
                                     {campus.visitAndContact.imageUrl && (
-                                        <div className="relative h-24 w-24 rounded-md overflow-hidden shrink-0 mx-auto md:mx-0">
+                                        <div className="relative h-24 w-24 rounded-full overflow-hidden mx-auto mb-4">
                                             <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
                                         </div>
                                     )}
-                                    <div className="flex-1 text-left">
-                                        <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
-                                        <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
-                                        <p className="text-sm text-muted-foreground mt-2">{campus.visitAndContact.description}</p>
+                                    <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
+                                    <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
+                                    <p className="text-sm text-muted-foreground mt-2">{campus.visitAndContact.description}</p>
+                                    <div className="flex flex-col items-center gap-2 mt-4 border-t pt-4">
+                                        {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Phone size={16} /><span>{campus.visitAndContact.phone}</span></a>}
+                                        {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Mail size={16} /><span>{campus.visitAndContact.email}</span></a>}
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-start gap-2 mt-4 border-t pt-4">
-                                    {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Phone size={18} /><span>{campus.visitAndContact.phone}</span></a>}
-                                    {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Mail size={18} /><span>{campus.visitAndContact.email}</span></a>}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </section>
-                )}
-
-
-                {/* FAQ */}
-                {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
-                    <section id="faq">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-xl font-headline font-normal">{campus.faq.headline || "FAQ"}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Accordion type="single" collapsible className="w-full">
-                                    {campus.faq.faqs.map(faq => (
-                                         <AccordionItem value={faq.id} key={faq.id}>
-                                            <AccordionTrigger className="text-left font-normal text-sm">
-                                                {faq.question}
-                                            </AccordionTrigger>
-                                            <AccordionContent className="text-sm text-muted-foreground">
-                                                {faq.answer}
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    ))}
-                                </Accordion>
                             </CardContent>
                         </Card>
                     </section>
@@ -387,6 +364,22 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                     </div>
                                 </>
                             )}
+                        </CardContent>
+                    </Card>
+                </section>
+
+                {/* Visit & Contact */}
+                <section id="contact-info">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center text-xl font-headline font-normal">
+                                <MapPin className="mr-2 h-5 w-5" />
+                                {campus.visitAndContact?.headline || "Visit & Contact"}
+                            </CardTitle>
+                             {campus.visitAndContact?.subtitle && <CardDescription className="pt-2 text-sm">{campus.visitAndContact.subtitle}</CardDescription>}
+                        </CardHeader>
+                        <CardContent>
+                           <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campus.visitAndContact?.address}</p>
                         </CardContent>
                     </Card>
                 </section>
