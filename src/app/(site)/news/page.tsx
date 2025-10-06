@@ -8,9 +8,8 @@ import { enUS } from 'date-fns/locale';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
 interface NewsStory {
@@ -21,6 +20,17 @@ interface NewsStory {
   summary?: string;
   mediaUrl?: string;
 }
+
+const isVideoUrl = (url?: string | null) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    try {
+      const pathname = new URL(url).pathname.split('?')[0];
+      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+    } catch (e) {
+      return false; // Invalid URL
+    }
+};
 
 async function getNewsData() {
   try {
@@ -81,32 +91,46 @@ export default async function NewsPage() {
 
         {newsStories.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {newsStories.map((story) => (
-              <Link key={story.id} href={`/news/${story.slug || story.id}`} className="block group">
-                <Card className="relative flex flex-col overflow-hidden h-full aspect-[4/5] justify-end text-white">
-                    {story.mediaUrl ? (
-                      <Image
-                        src={story.mediaUrl}
-                        alt={story.title}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-muted" />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-                    <div className="relative z-10 p-6">
-                      <p className="text-xs text-white/80 mb-2">{story.publicationDate}</p>
-                      <h2 className="font-headline font-normal text-lg leading-tight text-white">
-                          {story.title}
-                      </h2>
-                      <div className="mt-4 text-white/90 flex items-center text-sm">
-                          Read More <ArrowRight className="ml-2 h-4 w-4" />
+            {newsStories.map((story) => {
+              const isVideo = isVideoUrl(story.mediaUrl);
+              return (
+                <Link key={story.id} href={`/news/${story.slug || story.id}`} className="block group">
+                  <Card className="relative flex flex-col overflow-hidden h-full aspect-[4/5] justify-end text-white">
+                      {story.mediaUrl ? (
+                        isVideo ? (
+                           <video
+                              src={story.mediaUrl}
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                           />
+                        ) : (
+                          <Image
+                            src={story.mediaUrl}
+                            alt={story.title}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        )
+                      ) : (
+                        <div className="h-full w-full bg-muted" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+                      <div className="relative z-10 p-6">
+                        <p className="text-xs text-white/80 mb-2">{story.publicationDate}</p>
+                        <h2 className="font-headline font-normal text-lg leading-tight text-white">
+                            {story.title}
+                        </h2>
+                        <div className="mt-4 text-white/90 flex items-center text-sm">
+                            Read More <ArrowRight className="ml-2 h-4 w-4" />
+                        </div>
                       </div>
-                    </div>
-                </Card>
-              </Link>
-            ))}
+                  </Card>
+                </Link>
+              )
+            })}
           </div>
         ) : (
           <div className="text-center py-16">
