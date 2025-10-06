@@ -1,4 +1,3 @@
-
 // src/app/(site)/home-client.tsx
 'use client';
 
@@ -48,14 +47,14 @@ interface NewsStory {
 
 // Props
 interface HomeClientProps {
-  homePage: Page | null;
-  campuses: Campus[];
-  categories: Category[];
-  themes: Theme[];
-  formations: Formation[];
-  articles: Article[];
-  references: Reference[];
-  newsStories: NewsStory[];
+  heroData: Page | null;
+  referencesData: Reference[];
+  featuresData: Page | null;
+  catalogData: Page | null;
+  coursesData: { categories: Category[]; themes: Theme[]; formations: Formation[] };
+  campusesData: Campus[];
+  articlesData: Article[];
+  newsData: NewsStory[];
 }
 
 const isVideoUrl = (url?: string | null) => {
@@ -87,7 +86,7 @@ const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: 
   };
 
 
-export function HomeClient({ homePage, campuses, categories, themes, formations, articles, references, newsStories }: HomeClientProps) {
+export function HomeClient({ heroData, referencesData, featuresData, catalogData, coursesData, campusesData, articlesData, newsData }: HomeClientProps) {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
@@ -107,38 +106,38 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
-  const heroSection = homePage?.sections.find(s => s.id === 'hero');
-  const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
-  const catalogSection = homePage?.sections.find(s => s.id === 'catalog-download');
+  const heroSection = heroData?.sections.find(s => s.id === 'hero');
+  const featuresSectionHeader = featuresData?.sections.find(s => s.id === 'features');
+  const catalogSection = catalogData?.sections.find(s => s.id === 'catalog-download');
   const heroMediaUrl = heroSection?.imageUrl;
   const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
   
   const featureSections = useMemo(() => {
     const sections = [];
     for (let i = 1; i <= 3; i++) {
-        const section = homePage?.sections.find(s => s.id === `feature-${i}`);
+        const section = featuresData?.sections.find(s => s.id === `feature-${i}`);
         if (section) sections.push(section);
     }
     return sections;
-  }, [homePage]);
+  }, [featuresData]);
 
-  const themeOptions = useMemo(() => themes.map(theme => ({ value: theme.id, label: theme.name })), [themes]);
+  const themeOptions = useMemo(() => coursesData.themes.map(theme => ({ value: theme.id, label: theme.name })), [coursesData.themes]);
 
   const handleSearch = () => {
     if (selectedThemeId) router.push(`/courses?themeId=${selectedThemeId}`);
   };
 
   const categoriesWithThemes = useMemo(() => {
-    return categories.map(category => {
-      const categoryThemes = themes.filter(theme => theme.categoryId === category.id);
-      const formationCount = formations.filter(formation => categoryThemes.some(theme => theme.id === formation.themeId)).length;
+    return coursesData.categories.map(category => {
+      const categoryThemes = coursesData.themes.filter(theme => theme.categoryId === category.id);
+      const formationCount = coursesData.formations.filter(formation => categoryThemes.some(theme => theme.id === formation.themeId)).length;
       return {
         ...category,
         themes: categoryThemes,
         formationCount: formationCount
       };
     });
-  }, [categories, themes, formations]);
+  }, [coursesData.categories, coursesData.themes, coursesData.formations]);
 
 
   return (
@@ -173,12 +172,12 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
         </div>
       </section>
 
-      {references && references.length > 0 && (
+      {referencesData && referencesData.length > 0 && (
         <section className="py-8 bg-background">
             <div className="container">
                 <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
                     <div className="flex w-max animate-scroll">
-                    {[...references, ...references].map((reference, index) => (
+                    {[...referencesData, ...referencesData].map((reference, index) => (
                         <div key={`${reference.id}-${index}`} className="flex items-center justify-center h-20 w-48 px-8">
                         <Image
                             src={reference.logoUrl}
@@ -219,40 +218,40 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
 
       {catalogSection && (
         <section className="py-16 bg-muted/30">
-          <div className="container">
+        <div className="container px-4 md:px-6">
             <Card className="overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-                <div className="relative aspect-video h-full min-h-[200px] md:min-h-0 md:order-2">
-                  {catalogSection.imageUrl && (
-                    <Image
-                      src={catalogSection.imageUrl}
-                      alt={catalogSection.title || "Download Catalog"}
-                      fill
-                      className="object-cover"
-                    />
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+                    <div className="relative aspect-video h-full min-h-[200px] md:min-h-0 md:order-2">
+                        {catalogSection.imageUrl && (
+                            <Image
+                                src={catalogSection.imageUrl}
+                                alt={catalogSection.title || "Download Catalog"}
+                                fill
+                                className="object-cover"
+                            />
+                        )}
+                    </div>
+                    <div className="p-6 md:p-10 text-left md:order-1">
+                        <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
+                        <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
+                        <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
+                            <Input
+                                type="email"
+                                placeholder="Votre adresse email"
+                                className="w-full sm:flex-1"
+                                value={catalogEmail}
+                                onChange={(e) => setCatalogEmail(e.target.value)}
+                            />
+                            <Button className="w-full sm:w-auto" disabled={!isEmailValid}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Télécharger
+                            </Button>
+                        </div>
+                    </div>
                 </div>
-                <div className="p-6 md:p-10 text-left md:order-1">
-                  <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
-                  <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
-                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
-                    <Input
-                      type="email"
-                      placeholder="Votre adresse email"
-                      className="w-full sm:flex-1"
-                      value={catalogEmail}
-                      onChange={(e) => setCatalogEmail(e.target.value)}
-                    />
-                    <Button className="w-full sm:w-auto" disabled={!isEmailValid}>
-                      <Download className="mr-2 h-4 w-4" />
-                      Télécharger
-                    </Button>
-                  </div>
-                </div>
-              </div>
             </Card>
-          </div>
-        </section>
+        </div>
+    </section>
       )}
 
       <section className="py-16">
@@ -334,7 +333,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           {isMobile ? (
              <Carousel className="w-full relative" opts={{ align: "start", loop: true }}>
                 <CarouselContent className="-ml-4">
-                  {campuses.map((campus) => (
+                  {campusesData.map((campus) => (
                     <CarouselItem key={campus.id} className="basis-4/5 pl-4">
                       <div className="h-[40vh] min-h-[350px] w-full">
                         <CampusCardDisplay campus={campus} className="h-full w-full" />
@@ -348,7 +347,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
             </Carousel>
           ) : (
             <div className="mt-12 grid h-[50vh] min-h-[400px] grid-cols-1 grid-rows-3 gap-6 md:grid-cols-2 md:grid-rows-2">
-              {campuses.map((campus, index) => (<CampusCardDisplay key={campus.id} campus={campus} className={index === 0 ? 'md:row-span-2' : ''} />))}
+              {campusesData.map((campus, index) => (<CampusCardDisplay key={campus.id} campus={campus} className={index === 0 ? 'md:row-span-2' : ''} />))}
             </div>
           )}
         </div>
@@ -388,7 +387,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           </div>
           <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
             <CarouselContent className="-ml-4">
-              {articles.map((article) => (
+              {articlesData.map((article) => (
                 <CarouselItem key={article.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/4">
                   <Card className="h-full flex flex-col group overflow-hidden">
                     <Link href={`/publications/${article.slug || article.id}`} className="block">
@@ -450,7 +449,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           </div>
           <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
             <CarouselContent className="-ml-4">
-              {newsStories.map((story) => {
+              {newsData.map((story) => {
                 const isVideo = isVideoUrl(story.mediaUrl);
                 return (
                   <CarouselItem key={story.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/4">
