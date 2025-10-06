@@ -189,7 +189,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Formations IMEDA</h2>
-                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">
                   <span className="md:hidden">Explorez nos thèmes de formation</span>
                   <span className="hidden md:inline">Explorez nos thèmes de formation pour trouver le programme parfait pour vous.</span>
                 </p>
@@ -253,7 +253,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
         <div className="container px-4 md:px-6">
           <div className="max-w-2xl">
             <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{featuresSectionHeader?.title}</h2>
-            <p className="mt-2 text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
+            <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {featureSections.map((featureSection) => (
@@ -278,7 +278,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Our Campuses</h2>
-                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">
                     <span className="md:hidden">Explore our world-class campuses</span>
                     <span className="hidden md:inline">Explore our world-class campuses located in global hubs of innovation.</span>
                 </p>
@@ -334,7 +334,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Nos Publications</h2>
-                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">
                   Découvrez nos dernières analyses, recherches et perspectives de nos experts.
                 </p>
             </div>
@@ -396,7 +396,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">IMEDA News</h2>
-                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">
                   The latest news and announcements from our institution.
                 </p>
             </div>
