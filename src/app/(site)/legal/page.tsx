@@ -3,8 +3,9 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export default function LegalPage() {
   const router = useRouter();
@@ -24,25 +25,43 @@ export default function LegalPage() {
     // Update URL hash without reloading the page
     router.replace(`/legal#${value}`, { scroll: false });
   };
+  
+  const navItems = [
+      { id: 'terms', title: 'Conditions d’utilisation' },
+      { id: 'privacy', title: 'Politique de confidentialité' },
+      { id: 'branding', title: 'Protection des marques' },
+  ];
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-12 md:px-6">
-      <header className="mb-8 text-left">
+    <div className="container mx-auto max-w-7xl px-4 py-12 md:px-6">
+      <header className="mb-12 text-left">
         <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">Mentions Légales</h1>
         <p className="text-muted-foreground mt-2 text-base">
           Informations importantes concernant l'utilisation de nos services.
         </p>
       </header>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="terms">Conditions d’utilisation</TabsTrigger>
-          <TabsTrigger value="privacy">Politique de confidentialité</TabsTrigger>
-          <TabsTrigger value="branding">Protection des marques</TabsTrigger>
-        </TabsList>
-        
-        <div className="mt-6">
-          <TabsContent value="terms">
+      <div className="grid md:grid-cols-4 gap-8 lg:gap-12">
+        <aside className="md:col-span-1">
+            <nav className="flex flex-col space-y-2 sticky top-24">
+                {navItems.map((item) => (
+                    <Button
+                        key={item.id}
+                        variant="ghost"
+                        onClick={() => handleTabChange(item.id)}
+                        className={cn(
+                            "justify-start text-left",
+                            activeTab === item.id && "bg-muted font-semibold text-primary"
+                        )}
+                    >
+                        {item.title}
+                    </Button>
+                ))}
+            </nav>
+        </aside>
+
+        <main className="md:col-span-3">
+          {activeTab === 'terms' && (
             <Card>
               <CardHeader>
                 <CardTitle className="font-headline text-2xl font-normal">Conditions Générales d’Utilisation</CardTitle>
@@ -59,9 +78,9 @@ export default function LegalPage() {
                 <p>Les marques, logos, signes ainsi que tous les contenus du site (textes, images, son…) font l'objet d'une protection par le Code de la propriété intellectuelle et plus particulièrement par le droit d'auteur. L'Utilisateur doit solliciter l'autorisation préalable du site pour toute reproduction, publication, copie des différents contenus.</p>
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          <TabsContent value="privacy">
+          {activeTab === 'privacy' && (
             <Card>
               <CardHeader>
                 <CardTitle className="font-headline text-2xl font-normal">Politique de Confidentialité</CardTitle>
@@ -78,9 +97,9 @@ export default function LegalPage() {
                 <p>Conformément à la réglementation, vous disposez d’un droit d’accès, de rectification, de portabilité et d’effacement de vos données ou encore de limitation du traitement. Vous pouvez également, pour des motifs légitimes, vous opposer au traitement des données vous concernant.</p>
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          <TabsContent value="branding">
+          {activeTab === 'branding' && (
             <Card>
               <CardHeader>
                 <CardTitle className="font-headline text-2xl font-normal">Protection de Nos Marques</CardTitle>
@@ -97,9 +116,9 @@ export default function LegalPage() {
                 <p>Pour toute demande d'utilisation de nos marques ou pour signaler une utilisation abusive, veuillez nous contacter via notre page de contact.</p>
               </CardContent>
             </Card>
-          </TabsContent>
-        </div>
-      </Tabs>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
