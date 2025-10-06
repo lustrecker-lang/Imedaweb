@@ -155,21 +155,23 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
 
       {references && references.length > 0 && (
         <section className="py-8 bg-background">
-          <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
-            <div className="flex w-max animate-scroll">
-              {[...references, ...references].map((reference, index) => (
-                <div key={`${reference.id}-${index}`} className="flex items-center justify-center h-20 w-48 px-8">
-                  <Image
-                    src={reference.logoUrl}
-                    alt={reference.name}
-                    width={120}
-                    height={40}
-                    className="max-h-10 w-auto object-contain"
-                  />
+            <div className="container">
+                <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
+                    <div className="flex w-max animate-scroll">
+                    {[...references, ...references].map((reference, index) => (
+                        <div key={`${reference.id}-${index}`} className="flex items-center justify-center h-20 w-48 px-8">
+                        <Image
+                            src={reference.logoUrl}
+                            alt={reference.name}
+                            width={120}
+                            height={40}
+                            className="max-h-10 w-auto object-contain"
+                        />
+                        </div>
+                    ))}
+                    </div>
                 </div>
-              ))}
             </div>
-          </div>
         </section>
       )}
 
