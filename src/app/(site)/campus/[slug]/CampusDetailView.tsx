@@ -6,12 +6,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
-import { useFirestore, useMemoFirebase, useCollection } from "@/firebase";
+import { useFirestore, useMemoFirebase, useCollection, addDocumentNonBlocking } from "@/firebase";
+import { collection, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Building, GraduationCap, MapPin, Sparkles, HelpCircle, Phone, Mail, ChevronRight } from "lucide-react";
+import { Building, GraduationCap, MapPin, Sparkles, HelpCircle, Phone, Mail, ChevronRight, Download, CheckCircle, Loader2 } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
 
 interface CampusFeature {
     id: string;
@@ -104,7 +110,58 @@ const isVideoUrl = (url?: string | null) => {
 };
 
 export default function CampusDetailView({ campus, categories, themes }: CampusDetailViewProps) {
-  
+    const firestore = useFirestore();
+    const { toast } = useToast();
+    const [catalogEmail, setCatalogEmail] = useState('');
+    const [isEmailValid, setIsEmailValid] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [hasSubmitted, setHasSubmitted] = useState(false);
+
+    useEffect(() => {
+        const emailSchema = z.string().email();
+        const result = emailSchema.safeParse(catalogEmail);
+        setIsEmailValid(result.success);
+    }, [catalogEmail]);
+
+    const handleCatalogSubmit = async () => {
+        if (!isEmailValid || isSubmitting) return;
+        setIsSubmitting(true);
+        try {
+        if (firestore) {
+            await addDocumentNonBlocking(collection(firestore, 'leads'), {
+                email: catalogEmail,
+                leadType: 'Catalog Download',
+                fullName: 'Catalog Lead (Campus Page)',
+                message: `Catalog download request from campus page: ${campus?.name}`,
+                createdAt: serverTimestamp(),
+            });
+        }
+        
+        const link = document.createElement('a');
+        link.href = '/api/download-catalog';
+        link.download = 'IMEDA-Catalogue-2025-26.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        setHasSubmitted(true);
+        } catch (error) {
+            console.error("Error submitting lead:", error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not process your catalog download request.'
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleResetForm = () => {
+        setHasSubmitted(false);
+        setCatalogEmail('');
+    };
+
   if (!campus) {
     return <div className="container py-12 text-center text-muted-foreground">Campus not found.</div>
   }
@@ -123,7 +180,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
     <div className="flex flex-col">
        <header className="py-8">
             <div className="container">
-                <Card className="relative h-[30vh] min-h-[250px] w-full flex items-end justify-start text-white text-left p-6 md:p-8 lg:p-12 overflow-hidden rounded-lg">
+                <Card className="relative min-h-[25vh] w-full flex items-end justify-start text-white text-left p-6 md:p-8 lg:p-12 overflow-hidden rounded-lg">
                     {campus.hero?.backgroundMediaUrl ? (
                         isHeroVideo ? (
                             <video
@@ -232,7 +289,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
 
             </div>
             <aside className="md:col-span-4 space-y-8 md:sticky top-24 self-start">
-                
+
                 {/* Visit & Contact */}
                 <section id="contact-info">
                     <Card>
@@ -253,19 +310,19 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                      <section id="contact-person">
                         <Card>
                             <CardContent className="pt-6">
-                                <div className="flex flex-col md:flex-row gap-4 md:text-left">
+                                <div className="flex flex-col md:flex-row gap-4">
                                     {campus.visitAndContact.imageUrl && (
                                         <div className="relative h-24 w-24 rounded-md overflow-hidden shrink-0 mx-auto md:mx-0">
                                             <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
                                         </div>
                                     )}
-                                    <div className="flex-1 text-center md:text-left">
+                                    <div className="flex-1 text-left">
                                         <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
                                         <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
-                                        <p className="text-xs text-muted-foreground mt-2">{campus.visitAndContact.description}</p>
+                                        <p className="text-sm text-muted-foreground mt-2">{campus.visitAndContact.description}</p>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-center md:items-start gap-2 mt-4 border-t pt-4">
+                                <div className="flex flex-col items-start gap-2 mt-4 border-t pt-4">
                                     {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Phone size={18} /><span>{campus.visitAndContact.phone}</span></a>}
                                     {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Mail size={18} /><span>{campus.visitAndContact.email}</span></a>}
                                 </div>
@@ -299,6 +356,40 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         </Card>
                     </section>
                 )}
+
+                {/* Download Catalog */}
+                <section id="download-catalog">
+                    <Card>
+                        <CardContent className="pt-6">
+                            {hasSubmitted ? (
+                                <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
+                                    <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
+                                    <h3 className="font-headline font-normal text-xl">Merci!</h3>
+                                    <p className="text-muted-foreground mt-1 text-sm">Votre téléchargement a commencé.</p>
+                                    <Button variant="outline" onClick={handleResetForm} className="mt-4 w-full">Fermer</Button>
+                                </div>
+                            ) : (
+                                <>
+                                    <h3 className="font-headline font-normal text-lg">Télécharger le catalogue 2025-26</h3>
+                                    <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
+                                        <Input
+                                            type="email"
+                                            placeholder="Votre adresse email"
+                                            className="w-full"
+                                            value={catalogEmail}
+                                            onChange={(e) => setCatalogEmail(e.target.value)}
+                                            disabled={isSubmitting}
+                                        />
+                                        <Button className="w-full sm:w-auto" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
+                                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                            Télécharger
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                </section>
 
             </aside>
         </div>
