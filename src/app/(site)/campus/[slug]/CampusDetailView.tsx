@@ -10,7 +10,7 @@ import { useFirestore, useMemoFirebase, useCollection } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Building, GraduationCap, MapPin, Sparkles, HelpCircle, Phone, Mail } from "lucide-react";
+import { Building, GraduationCap, MapPin, Sparkles, HelpCircle, Phone, Mail, ChevronRight } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface CampusFeature {
@@ -182,43 +182,30 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         {campus.academicOffering?.subtitle && <p className="mt-2 text-muted-foreground md:text-base/relaxed">{campus.academicOffering.subtitle}</p>}
                     </div>
 
-                    <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
-                        <CarouselContent className="-ml-4">
-                            {categoriesWithThemes.map((category) => (
-                                <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3 flex">
-                                    <Card className="flex flex-col w-full overflow-hidden transition-colors">
-                                        <div className="aspect-video relative w-full">
-                                        <Image 
-                                            src={category.mediaUrl || `https://picsum.photos/seed/${category.id}/400/225`}
-                                            alt={category.name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                        </div>
-                                        <CardHeader>
-                                            <CardTitle className="font-headline font-normal">{category.name}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="flex-grow">
-                                            <ul className="text-sm text-muted-foreground space-y-2">
-                                                {category.themes.map(theme => (
-                                                    <li key={theme.id} className="truncate">
-                                                        <Link href={`/courses?themeId=${theme.id}`} className="hover:text-primary hover:underline">
-                                                            {theme.name}
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </CardContent>
-                                    </Card>
-                                </CarouselItem>
-                            ))}
-                        </CarouselContent>
-                        <div className="absolute top-[-3.5rem] right-0 flex gap-2">
-                            <CarouselPrevious className="static translate-y-0 rounded-none sm:inline-flex" />
-                            <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
-                        </div>
-                    </Carousel>
-
+                    <Accordion type="multiple" className="w-full">
+                        {categoriesWithThemes.map((category) => (
+                            <AccordionItem value={category.id} key={category.id}>
+                                <AccordionTrigger>
+                                    <div className="flex items-center justify-between w-full">
+                                        <h3 className="font-headline font-normal text-lg">{category.name}</h3>
+                                        <p className="text-sm text-muted-foreground mr-4">{category.themes.length} Thèmes</p>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <ul className="pt-2 pl-4 space-y-3">
+                                        {category.themes.map(theme => (
+                                            <li key={theme.id}>
+                                                <Link href={`/courses?themeId=${theme.id}`} className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors">
+                                                    <ChevronRight className="h-4 w-4 mr-2" />
+                                                    {theme.name}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
                 </section>
                 
                 {/* Campus Experience */}
@@ -250,8 +237,10 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                 <section id="contact-info">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl font-headline font-normal">{campus.visitAndContact?.headline || "Visit & Contact"}</CardTitle>
-                            {campus.visitAndContact?.subtitle && <CardDescription className="pt-2 text-sm">{campus.visitAndContact.subtitle}</CardDescription>}
+                            <CardTitle className="text-xl font-headline font-normal">
+                                {campus.visitAndContact?.headline || "Visit & Contact"}
+                            </CardTitle>
+                             {campus.visitAndContact?.subtitle && <CardDescription className="pt-2 text-sm">{campus.visitAndContact.subtitle}</CardDescription>}
                         </CardHeader>
                         <CardContent>
                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campus.visitAndContact?.address}</p>
@@ -264,7 +253,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                      <section id="contact-person">
                         <Card>
                             <CardContent className="pt-6">
-                                <div className="flex gap-4">
+                                <div className="flex flex-col md:flex-row gap-4 items-center md:items-start text-center md:text-left">
                                     {campus.visitAndContact.imageUrl && (
                                         <div className="relative h-24 w-24 rounded-md overflow-hidden shrink-0">
                                             <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
@@ -276,9 +265,9 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                         <p className="text-xs text-muted-foreground mt-2">{campus.visitAndContact.description}</p>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-start gap-2 mt-4 border-t pt-4">
-                                    {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Phone size={16} /><span>{campus.visitAndContact.phone}</span></a>}
-                                    {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Mail size={16} /><span>{campus.visitAndContact.email}</span></a>}
+                                <div className="flex flex-col items-center md:items-start gap-2 mt-4 border-t pt-4">
+                                    {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Phone size={16} /><span>{campus.visitAndContact.phone}</span></a>}
+                                    {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Mail size={16} /><span>{campus.visitAndContact.email}</span></a>}
                                 </div>
                             </CardContent>
                         </Card>
@@ -297,7 +286,9 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                 <Accordion type="single" collapsible className="w-full">
                                     {campus.faq.faqs.map(faq => (
                                          <AccordionItem value={faq.id} key={faq.id}>
-                                            <AccordionTrigger className="text-left font-normal text-sm">{faq.question}</AccordionTrigger>
+                                            <AccordionTrigger className="text-left font-normal text-sm">
+                                                {faq.question}
+                                            </AccordionTrigger>
                                             <AccordionContent className="text-sm text-muted-foreground">
                                                 {faq.answer}
                                             </AccordionContent>
