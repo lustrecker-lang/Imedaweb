@@ -250,49 +250,6 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </section>
                 )}
 
-                {/* Academic Offering */}
-                <section id="academics">
-                     <div className="max-w-2xl mb-8">
-                        <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.academicOffering?.headline || "Academic Offering"}</h2>
-                        {campus.academicOffering?.subtitle && <p className="mt-2 text-muted-foreground md:text-base/relaxed">{campus.academicOffering.subtitle}</p>}
-                    </div>
-
-                    <Accordion type="multiple" className="w-full">
-                        {categoriesWithThemes.map((category) => (
-                            <AccordionItem value={category.id} key={category.id}>
-                                <AccordionTrigger>
-                                    <div className="flex items-center justify-between w-full">
-                                        <h3 className="font-headline font-normal text-lg">{category.name}</h3>
-                                        <p className="text-sm text-muted-foreground mr-4">{category.themes.length} Thèmes</p>
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                  <Table>
-                                    <TableBody>
-                                      {category.themes.map((theme) => (
-                                        <TableRow key={theme.id}>
-                                          <TableCell className="font-medium text-primary">
-                                            <Link href={`/courses?themeId=${theme.id}`} className="hover:underline">
-                                              {theme.name}
-                                            </Link>
-                                          </TableCell>
-                                          <TableCell className="text-right">
-                                            <Button asChild variant="outline" size="sm">
-                                              <Link href={`/courses?themeId=${theme.id}`}>
-                                                Voir Les Formations
-                                              </Link>
-                                            </Button>
-                                          </TableCell>
-                                        </TableRow>
-                                      ))}
-                                    </TableBody>
-                                  </Table>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                </section>
-                
                 {/* Campus Experience */}
                 {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
                     <section id="experience">
@@ -333,6 +290,50 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         </Card>
                     </section>
                 )}
+                
+                {/* Academic Offering */}
+                <section id="academics">
+                     <div className="max-w-2xl mb-8">
+                        <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.academicOffering?.headline || "Academic Offering"}</h2>
+                        {campus.academicOffering?.subtitle && <p className="mt-2 text-muted-foreground md:text-base/relaxed">{campus.academicOffering.subtitle}</p>}
+                    </div>
+
+                    <Accordion type="multiple" className="w-full">
+                        {categoriesWithThemes.map((category) => (
+                            <AccordionItem value={category.id} key={category.id}>
+                                <AccordionTrigger>
+                                    <div className="flex items-center justify-between w-full">
+                                        <h3 className="font-headline font-normal text-lg">{category.name}</h3>
+                                        <p className="text-sm text-muted-foreground mr-4">{category.themes.length} Thèmes</p>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                  <Table>
+                                    <TableBody>
+                                      {category.themes.map((theme) => (
+                                        <TableRow key={theme.id} className="hover:bg-transparent">
+                                          <TableCell className="font-medium text-primary">
+                                            <Link href={`/courses?themeId=${theme.id}`} className="hover:underline">
+                                              {theme.name}
+                                            </Link>
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            <Button asChild variant="outline" size="sm">
+                                              <Link href={`/courses?themeId=${theme.id}`}>
+                                                Voir Les Formations
+                                              </Link>
+                                            </Button>
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </section>
+                
 
                  {/* FAQ */}
                 {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
@@ -435,3 +436,4 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
     </div>
   );
 }
+
