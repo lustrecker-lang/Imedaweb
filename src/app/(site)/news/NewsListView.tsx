@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -52,7 +53,7 @@ export default function NewsListView({ newsStories, pageData }: NewsListViewProp
         <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline text-primary">
           {heroSection?.title || 'Company News'}
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+        <p className="mt-2 text-muted-foreground">
           {heroSection?.content || 'The latest news, announcements, and updates from our team.'}
         </p>
       </header>

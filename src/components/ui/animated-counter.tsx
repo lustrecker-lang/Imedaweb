@@ -1,3 +1,4 @@
+
 // src/components/ui/animated-counter.tsx
 'use client';
 
@@ -10,7 +11,7 @@ interface AnimatedCounterProps {
 
 export function AnimatedCounter({ to }: AnimatedCounterProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const isInView = useInView(ref, { once: true, margin: '0px' });
   const motionValue = useSpring(0, {
     damping: 50,
     stiffness: 200,

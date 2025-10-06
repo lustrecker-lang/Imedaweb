@@ -1,3 +1,4 @@
+
 // src/app/(site)/page.tsx
 import { adminDb } from '@/firebase/admin';
 import { HomeClient } from './home-client';
@@ -37,6 +38,11 @@ interface NewsStory {
   slug: string;
   publicationDate: string;
   mediaUrl?: string;
+}
+interface CompanyProfile {
+  name?: string;
+  logoUrl?: string;
+  iconUrl?: string;
 }
 // ------------------------------------------------------------------------------------------
 
@@ -152,6 +158,11 @@ async function getNewsData() {
   return newsStories;
 }
 
+async function getCompanyProfile() {
+    const snap = await adminDb.collection('companyProfile').doc('main').get();
+    return snap.exists ? snap.data() as CompanyProfile : null;
+}
+
 // Main component that fetches data and passes it to the client component
 export default async function Home() {
   const [
@@ -163,6 +174,7 @@ export default async function Home() {
     campusesData,
     articlesData,
     newsData,
+    companyProfile,
   ] = await Promise.all([
     getHeroData(),
     getReferencesData(),
@@ -172,6 +184,7 @@ export default async function Home() {
     getCampusesData(),
     getArticlesData(),
     getNewsData(),
+    getCompanyProfile(),
   ]);
 
   const data = {
@@ -182,7 +195,8 @@ export default async function Home() {
     coursesData,
     campusesData,
     articlesData,
-    newsData
+    newsData,
+    companyProfile,
   };
 
   return (

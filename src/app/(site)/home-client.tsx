@@ -46,6 +46,11 @@ interface NewsStory {
   publicationDate: string;
   mediaUrl?: string;
 }
+interface CompanyProfile {
+  name?: string;
+  logoUrl?: string;
+  iconUrl?: string;
+}
 
 
 // Props
@@ -58,6 +63,7 @@ interface HomeClientProps {
   campusesData: Campus[];
   articlesData: Article[];
   newsData: NewsStory[];
+  companyProfile: CompanyProfile | null;
 }
 
 const isVideoUrl = (url?: string | null) => {
@@ -89,7 +95,7 @@ const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: 
   };
 
 
-export function HomeClient({ heroData, referencesData, featuresData, catalogData, coursesData, campusesData, articlesData, newsData }: HomeClientProps) {
+export function HomeClient({ heroData, referencesData, featuresData, catalogData, coursesData, campusesData, articlesData, newsData, companyProfile }: HomeClientProps) {
   const router = useRouter();
   const firestore = useFirestore();
   const [isMobile, setIsMobile] = useState(false);
@@ -198,6 +204,16 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
               )}
               <div className="absolute inset-0 bg-black/50" />
               <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
+                  {companyProfile?.iconUrl && (
+                    <div className="mb-4 h-10 w-10 relative">
+                        <Image
+                            src={companyProfile.iconUrl}
+                            alt="Company Icon"
+                            fill
+                            className="object-contain brightness-0 invert"
+                        />
+                    </div>
+                  )}
                   <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">{heroSection?.title}</h1>
                   <p className="mx-auto mt-4 max-w-[600px] text-sm text-gray-200 md:text-base">{heroSection?.content}</p>
                   <div className="mt-8 w-full max-w-2xl">
