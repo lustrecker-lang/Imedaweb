@@ -55,6 +55,7 @@ const navStructure = [
 interface CompanyProfile {
   name?: string;
   logoUrl?: string;
+  logoLightUrl?: string;
 }
 
 interface Campus {

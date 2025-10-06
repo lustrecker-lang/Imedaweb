@@ -6,6 +6,7 @@ import { DocumentData } from 'firebase-admin/firestore';
 interface CompanyProfile {
   name?: string;
   logoUrl?: string;
+  logoLightUrl?: string;
 }
 
 interface Campus {
