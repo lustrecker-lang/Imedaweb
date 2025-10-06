@@ -178,9 +178,8 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
                         <CarouselContent className="-ml-4">
                             {categoriesWithThemes.map((category) => (
-                                <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
-                                    <Link href={`/courses?categoryId=${category.id}`} className="block h-full">
-                                    <Card className="h-full flex flex-col transition-colors overflow-hidden">
+                                <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3 flex">
+                                    <Card className="flex flex-col w-full transition-colors overflow-hidden">
                                         <div className="aspect-video relative w-full">
                                         <Image 
                                             src={category.mediaUrl || `https://picsum.photos/seed/${category.id}/400/225`}
@@ -193,14 +192,17 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                             <CardTitle className="font-headline font-normal">{category.name}</CardTitle>
                                         </CardHeader>
                                         <CardContent className="flex-grow">
-                                            <ul className="text-sm text-muted-foreground space-y-1">
+                                            <ul className="text-sm text-muted-foreground space-y-2">
                                                 {category.themes.map(theme => (
-                                                    <li key={theme.id} className="truncate">{theme.name}</li>
+                                                    <li key={theme.id} className="truncate">
+                                                        <Link href={`/courses?themeId=${theme.id}`} className="hover:text-primary hover:underline">
+                                                            {theme.name}
+                                                        </Link>
+                                                    </li>
                                                 ))}
                                             </ul>
                                         </CardContent>
                                     </Card>
-                                    </Link>
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
