@@ -1,10 +1,11 @@
+
 // src/app/(site)/publications/[slug]/page.tsx
 import { adminDb } from '@/firebase/admin';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { DocumentData } from 'firebase-admin/firestore';
 import { format } from 'date-fns';
-import PublicationDetailView from './PublicationDetailView';
+import PublicationDetailView from '../PublicationDetailView';
 
 export const dynamic = 'force-dynamic';
 

@@ -18,7 +18,6 @@ import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 
@@ -110,10 +109,17 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
     const searchParams = useSearchParams();
     const [availability, setAvailability] = useState<MonthAvailability[]>([]);
     const [numberOfPeople, setNumberOfPeople] = useState(3);
-    const isMobile = useIsMobile();
+    const [isMobile, setIsMobile] = useState(false);
     const [isEnquirySheetOpen, setIsEnquirySheetOpen] = useState(false);
     
     const cameFromCatalog = useMemo(() => searchParams.get('from') === 'catalog', [searchParams]);
+
+    useEffect(() => {
+        const checkIsMobile = () => setIsMobile(window.innerWidth < 1024);
+        checkIsMobile();
+        window.addEventListener('resize', checkIsMobile);
+        return () => window.removeEventListener('resize', checkIsMobile);
+      }, []);
 
     useEffect(() => {
         const today = new Date();

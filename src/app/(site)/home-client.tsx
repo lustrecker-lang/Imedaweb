@@ -5,12 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, ArrowRight } from "lucide-react";
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Combobox } from "@/components/ui/combobox";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils"; // Import cn to use with the video component
 
@@ -62,8 +61,15 @@ const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: 
 
 export function HomeClient({ homePage, campuses, categories, themes, formations }: HomeClientProps) {
   const router = useRouter();
-  const isMobile = useIsMobile();
+  const [isMobile, setIsMobile] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   // Directly access the sections from the homePage prop
   const heroSection = homePage?.sections.find(s => s.id === 'hero');

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from '@/components/ui/badge';
 import { ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/use-mobile';
 import Image from 'next/image';
 
 // Interfaces for component props
@@ -62,7 +61,14 @@ export default function CoursesView({ formations, themes, categories, pageData }
     const searchParams = useSearchParams();
     const themeIdFromUrl = searchParams.get('themeId');
     const categoryIdFromUrl = searchParams.get('categoryId');
-    const isMobile = useIsMobile();
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
+        checkIsMobile();
+        window.addEventListener('resize', checkIsMobile);
+        return () => window.removeEventListener('resize', checkIsMobile);
+      }, []);
 
     const [selectedCategory, setSelectedCategory] = React.useState<string | null>(categoryIdFromUrl);
     const [selectedTheme, setSelectedTheme] = React.useState<string | null>(themeIdFromUrl);

@@ -1,12 +1,11 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import {
@@ -19,8 +18,6 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCollection, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 import { ContactForm } from "@/components/contact-form";
 
@@ -106,7 +103,14 @@ ListItem.displayName = "ListItem";
 export function Header({ companyProfile, campuses }: HeaderProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
-  const isMobile = useIsMobile();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
   
   const LogoComponent = () => {
     const fixedWidth = 'w-[96px]';
