@@ -98,6 +98,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
 
   useEffect(() => {
@@ -132,23 +133,29 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const themeOptions = useMemo(() => coursesData.themes.map(theme => ({ value: theme.id, label: theme.name })), [coursesData.themes]);
 
   const handleSearch = () => {
-    if (selectedThemeId) router.push(`/courses?themeId=${selectedThemeId}`);
+    if (selectedThemeId) {
+      setIsSearching(true);
+      router.push(`/courses?themeId=${selectedThemeId}`);
+    }
   };
 
   const handleCatalogSubmit = async () => {
-    if (!isEmailValid || isSubmitting || !firestore) return;
+    if (!isEmailValid || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await addDocumentNonBlocking(collection(firestore, 'leads'), {
-        email: catalogEmail,
-        leadType: 'Catalog Download',
-        fullName: 'Catalog Lead',
-        message: 'Catalog Download Request from homepage.',
-        createdAt: serverTimestamp(),
-      });
+      if (firestore) {
+        await addDocumentNonBlocking(collection(firestore, 'leads'), {
+            email: catalogEmail,
+            leadType: 'Catalog Download',
+            fullName: 'Catalog Lead',
+            message: 'Catalog Download Request from homepage.',
+            createdAt: serverTimestamp(),
+        });
+      }
       
       const link = document.createElement('a');
       link.href = '/api/download-catalog';
+      link.download = 'IMEDA-Catalogue-2025-26.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -204,7 +211,19 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                           noResultsText="Aucun thème trouvé."
                           className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10 hover:text-white"
                         />
-                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90"><Search className="mr-2 h-4 w-4" />Rechercher</Button>
+                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching}>
+                          {isSearching ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Recherche...
+                            </>
+                          ) : (
+                            <>
+                              <Search className="mr-2 h-4 w-4" />
+                              Rechercher
+                            </>
+                          )}
+                        </Button>
                     </div>
                   </div>
               </div>
