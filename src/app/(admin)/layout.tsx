@@ -1,4 +1,5 @@
 
+
 'use client';
 import {
   SidebarProvider,
@@ -13,7 +14,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -175,6 +176,14 @@ export default function AdminLayout({
                 <SidebarMenuButton tooltip="Seed References">
                   <FolderKanban />
                   <span className="text-sm">Seed References</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem asChild>
+              <Link href="/admin/seed-careers">
+                <SidebarMenuButton tooltip="Seed Careers">
+                  <BriefcaseBusiness />
+                  <span className="text-sm">Seed Careers</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
