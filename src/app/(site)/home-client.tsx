@@ -1,12 +1,15 @@
+
 // src/app/(site)/home-client.tsx
 'use client';
 
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, Download } from "lucide-react";
+import { Search, ArrowRight, Download, CheckCircle, Loader2 } from "lucide-react";
 import { useState, useMemo, useEffect } from 'react';
 import { z } from 'zod';
+import { useFirestore, addDocumentNonBlocking } from '@/firebase';
+import { collection, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,10 +91,14 @@ const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: 
 
 export function HomeClient({ heroData, referencesData, featuresData, catalogData, coursesData, campusesData, articlesData, newsData }: HomeClientProps) {
   const router = useRouter();
+  const firestore = useFirestore();
   const [isMobile, setIsMobile] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
   const [catalogEmail, setCatalogEmail] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
 
   useEffect(() => {
     const emailSchema = z.string().email();
@@ -125,6 +132,26 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
   const handleSearch = () => {
     if (selectedThemeId) router.push(`/courses?themeId=${selectedThemeId}`);
+  };
+
+  const handleCatalogSubmit = async () => {
+    if (!isEmailValid || isSubmitting || !firestore) return;
+    
+    setIsSubmitting(true);
+    try {
+        await addDocumentNonBlocking(collection(firestore, 'leads'), {
+            email: catalogEmail,
+            leadType: 'Catalog Download',
+            fullName: 'Catalog Lead',
+            message: 'Catalog Download Request',
+            createdAt: serverTimestamp(),
+        });
+        setHasSubmitted(true);
+    } catch (error) {
+        console.error("Error submitting lead:", error);
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   const categoriesWithThemes = useMemo(() => {
@@ -218,10 +245,10 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
       {catalogSection && (
         <section className="py-16 bg-muted/30">
-        <div className="container px-4 md:px-6">
-            <Card className="overflow-hidden">
+          <div className="container px-0 md:px-6">
+            <Card className="overflow-hidden md:rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-                    <div className="relative aspect-video h-full min-h-[200px] md:min-h-0 md:order-2">
+                    <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 md:order-2">
                         {catalogSection.imageUrl && (
                             <Image
                                 src={catalogSection.imageUrl}
@@ -232,26 +259,37 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                         )}
                     </div>
                     <div className="p-6 md:p-10 text-left md:order-1">
-                        <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
-                        <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
-                        <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
-                            <Input
-                                type="email"
-                                placeholder="Votre adresse email"
-                                className="w-full sm:flex-1"
-                                value={catalogEmail}
-                                onChange={(e) => setCatalogEmail(e.target.value)}
-                            />
-                            <Button className="w-full sm:w-auto" disabled={!isEmailValid}>
-                                <Download className="mr-2 h-4 w-4" />
-                                Télécharger
-                            </Button>
-                        </div>
+                        {hasSubmitted ? (
+                          <div className="flex flex-col items-center justify-center text-center">
+                            <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
+                            <h3 className="font-headline font-normal text-2xl">Merci!</h3>
+                            <p className="text-muted-foreground mt-2 text-sm">Le téléchargement commencera sous peu.</p>
+                          </div>
+                        ) : (
+                          <>
+                            <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
+                            <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
+                            <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
+                                <Input
+                                    type="email"
+                                    placeholder="Votre adresse email"
+                                    className="w-full sm:flex-1"
+                                    value={catalogEmail}
+                                    onChange={(e) => setCatalogEmail(e.target.value)}
+                                    disabled={isSubmitting}
+                                />
+                                <Button className="w-full sm:w-auto" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
+                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                    Télécharger
+                                </Button>
+                            </div>
+                          </>
+                        )}
                     </div>
                 </div>
             </Card>
-        </div>
-    </section>
+          </div>
+        </section>
       )}
 
       <section className="py-16">
@@ -316,6 +354,11 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
               <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
             </div>
           </Carousel>
+           <div className="text-left mt-8">
+              <Button asChild variant="outline">
+                  <Link href="/courses">Voir toutes les formations</Link>
+              </Button>
+          </div>
         </div>
       </section>
 
@@ -429,7 +472,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
               <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
             </div>
           </Carousel>
-           <div className="mt-8 text-left">
+           <div className="text-left mt-8">
                 <Button asChild variant="outline">
                     <Link href="/publications">Voir toutes les publications</Link>
                 </Button>
@@ -494,7 +537,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
               <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
             </div>
           </Carousel>
-           <div className="mt-8 text-left">
+           <div className="text-left mt-8">
                 <Button asChild variant="outline">
                     <Link href="/news">See All News</Link>
                 </Button>
