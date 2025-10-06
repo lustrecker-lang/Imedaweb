@@ -110,6 +110,12 @@ export default function DashboardPage() {
                   >
                     <TableCell className="font-medium">Course Details</TableCell>
                   </TableRow>
+                   <TableRow
+                    onClick={() => router.push('/admin/editor/legal')}
+                    className="cursor-pointer"
+                  >
+                    <TableCell className="font-medium">Legal Page</TableCell>
+                  </TableRow>
                 </>
               )}
             </TableBody>

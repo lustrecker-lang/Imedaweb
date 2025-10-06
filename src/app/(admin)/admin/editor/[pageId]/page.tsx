@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -85,6 +86,8 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
   const currentMediaUrl = form.watch('imageUrl');
   const isVideo = currentMediaUrl?.includes('video');
 
+  const isRawHTML = page.id === 'legal';
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -110,6 +113,7 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
               <FormControl>
                 <Textarea {...field} className="min-h-[120px]" />
               </FormControl>
+               {isRawHTML && <p className="text-xs text-muted-foreground mt-2">This field supports HTML for formatting.</p>}
               <FormMessage />
             </FormItem>
           )}
@@ -170,7 +174,6 @@ export default function PageEditor() {
 
   const { data: page, isLoading: isPageLoading } = useDoc<Page>(pageRef);
 
-  // Corrected: Initialize the form with default values from the start
   const ogForm = useForm<z.infer<typeof ogFormSchema>>({
     resolver: zodResolver(ogFormSchema),
     defaultValues: {
@@ -288,7 +291,7 @@ export default function PageEditor() {
         <p className="text-sm text-muted-foreground">Manage this page's content sections.</p>
       </header>
       
-      {/* New Card for OG Data */}
+      {pageId !== 'legal' && (
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Social Media & SEO</CardTitle>
@@ -369,6 +372,7 @@ export default function PageEditor() {
             </Form>
         )}
       </Card>
+      )}
 
       <Card>
         <CardHeader>
