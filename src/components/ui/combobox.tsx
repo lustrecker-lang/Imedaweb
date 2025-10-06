@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, PlusCircle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-
 interface ComboboxProps {
     items: { value: string; label: string }[];
     value: string | null;
@@ -29,6 +28,7 @@ interface ComboboxProps {
     searchPlaceholder?: string;
     noResultsText?: string;
     className?: string;
+    onNewItem?: (newItem: string) => Promise<string | null>; // Callback to create a new item
 }
 
 export function Combobox({
@@ -39,8 +39,26 @@ export function Combobox({
     searchPlaceholder = "Search item...",
     noResultsText = "No item found.",
     className,
+    onNewItem,
 }: ComboboxProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState("");
+
+  const handleCreateNew = async () => {
+    if (onNewItem && inputValue) {
+      const newItemId = await onNewItem(inputValue);
+      if (newItemId) {
+        onChange(newItemId);
+        setOpen(false);
+      }
+    }
+  };
+
+  const filteredItems = items.filter((item) =>
+    item.label.toLowerCase().includes(inputValue.toLowerCase())
+  );
+
+  const showCreateOption = onNewItem && inputValue && !filteredItems.some(item => item.label.toLowerCase() === inputValue.toLowerCase());
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -49,7 +67,7 @@ export function Combobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white", className)}
+          className={cn("w-full justify-between", className)}
         >
           {value
             ? items.find((item) => item.value === value)?.label
@@ -59,17 +77,20 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput 
+            placeholder={searchPlaceholder} 
+            value={inputValue}
+            onValueChange={setInputValue}
+          />
           <CommandList>
-            <CommandEmpty>{noResultsText}</CommandEmpty>
             <CommandGroup>
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <CommandItem
                   key={item.value}
                   value={item.label}
                   onSelect={() => {
-                    onChange(item.value === value ? null : item.value)
-                    setOpen(false)
+                    onChange(item.value);
+                    setOpen(false);
                   }}
                 >
                   <Check
@@ -81,10 +102,24 @@ export function Combobox({
                   {item.label}
                 </CommandItem>
               ))}
+              {showCreateOption && (
+                <CommandItem
+                  onSelect={handleCreateNew}
+                  className="text-primary cursor-pointer"
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create "{inputValue}"
+                </CommandItem>
+              )}
             </CommandGroup>
+             {filteredItems.length === 0 && !showCreateOption && (
+                 <CommandEmpty>{noResultsText}</CommandEmpty>
+             )}
           </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
+
+    

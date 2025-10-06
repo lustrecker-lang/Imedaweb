@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react'; // Added useCallback
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking, useStorage } from '@/firebase';
-import { collection, doc, query, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, doc, query, orderBy, Timestamp, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,26 +21,26 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger } from '@/components/ui/sheet';
 import { Trash2, Edit, Plus } from 'lucide-react';
+import { Combobox } from '@/components/ui/combobox'; // Assuming you have a reusable combobox
 
 const generateSlug = (title: string) => {
-  if (!title) return '';
+    if (!title) return '';
 
-  const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;';
-  const b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------';
-  const p = new RegExp(a.split('').join('|'), 'g');
+    const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;';
+    const b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------';
+    const p = new RegExp(a.split('').join('|'), 'g');
 
-  return title.toString().toLowerCase()
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
-    .replace(/&/g, '-and-') // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '') // Remove all non-word chars except for -
-    .replace(/\-\-+/g, '-') // Replace multiple - with single -
-    .replace(/^-+/, '') // Trim - from start of text
-    .replace(/-+$/, ''); // Trim - from end of text
+    return title.toString().toLowerCase()
+        .replace(/\s+/g, '-') 
+        .replace(p, c => b.charAt(a.indexOf(c))) 
+        .replace(/&/g, '-and-') 
+        .replace(/[^\w\-]+/g, '') 
+        .replace(/\-\-+/g, '-') 
+        .replace(/^-+/, '') 
+        .replace(/-+$/, ''); 
 };
-
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required.'),
@@ -50,12 +50,17 @@ const formSchema = z.object({
   summary: z.string().optional(),
   content: z.string().optional(),
   imageUrl: z.string().optional(),
+  topicId: z.string().optional(),
 });
 
-// Added slug to the Article interface
 interface Article extends z.infer<typeof formSchema> {
   id: string;
   publicationDate: Timestamp;
+}
+
+interface Topic {
+    id: string;
+    name: string;
 }
 
 export default function PublicationsPage() {
@@ -71,39 +76,38 @@ export default function PublicationsPage() {
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
-  // State to track if the slug has been manually edited
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
+  const [topicInputValue, setTopicInputValue] = useState('');
 
   const articlesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'articles'), orderBy('publicationDate', 'desc'));
   }, [firestore]);
 
+  const topicsQuery = useMemoFirebase(() => {
+      if (!firestore) return null;
+      return query(collection(firestore, 'article_topics'), orderBy('name', 'asc'));
+  }, [firestore]);
+
   const { data: articles, isLoading: areArticlesLoading } = useCollection<Article>(articlesQuery);
+  const { data: topics, isLoading: areTopicsLoading } = useCollection<Topic>(topicsQuery);
+
+  const topicOptions = useMemo(() => {
+    if (!topics) return [];
+    return topics.map(topic => ({ value: topic.id, label: topic.name }));
+  }, [topics]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      slug: '',
-      author: '',
-      publicationDate: new Date(),
-      summary: '',
-      content: '',
-      imageUrl: '',
+      title: '', slug: '', author: '', publicationDate: new Date(), summary: '', content: '', imageUrl: '', topicId: ''
     },
   });
   
   const editForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      slug: '',
-      author: '',
-      publicationDate: new Date(),
-      summary: '',
-      content: '',
-      imageUrl: '',
+      title: '', slug: '', author: '', publicationDate: new Date(), summary: '', content: '', imageUrl: '', topicId: ''
     },
   });
 
@@ -121,11 +125,23 @@ export default function PublicationsPage() {
         content: editingArticle.content || '',
         imageUrl: editingArticle.imageUrl || '',
         publicationDate: editingArticle.publicationDate.toDate(),
+        topicId: editingArticle.topicId || '',
       });
-      // Reset the manual edit state when a new article is selected for editing
       setIsSlugManuallyEdited(false);
     }
   }, [editingArticle, editForm]);
+
+  const handleCreateTopic = async (topicName: string) => {
+    if (!firestore || !topicName) return null;
+    try {
+        const docRef = await addDoc(collection(firestore, 'article_topics'), { name: topicName });
+        toast({ title: 'Topic created!', description: `Successfully created "${topicName}".`});
+        return docRef.id;
+    } catch (e) {
+        toast({ title: 'Error', description: 'Could not create topic.', variant: 'destructive' });
+        return null;
+    }
+  };
 
   if (isUserLoading || !user) {
     return <div className="flex h-screen items-center justify-center"><p>Loading...</p></div>;
@@ -227,16 +243,28 @@ export default function PublicationsPage() {
                 <div className="flex-grow overflow-y-auto pr-4">
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
-                      <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} onBlur={(e) => {
-                        if (!isSlugManuallyEdited) {
-                            form.setValue('slug', generateSlug(e.target.value));
-                        }
-                      }} /></FormControl> <FormMessage /> </FormItem> )} />
-                      <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} onChange={(e) => {
-                          field.onChange(e);
-                          setIsSlugManuallyEdited(true); // User changed slug, so stop auto-gen
-                      }} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} onBlur={(e) => { if (!form.getValues('slug')) { form.setValue('slug', generateSlug(e.target.value)); } }} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                       <FormField
+                        control={form.control}
+                        name="topicId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Topic</FormLabel>
+                            <Combobox
+                                items={topicOptions}
+                                value={field.value || null}
+                                onChange={field.onChange}
+                                placeholder="Select a topic"
+                                searchPlaceholder="Search or create..."
+                                noResultsText="No topic found. Create a new one."
+                                onNewItem={handleCreateTopic}
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       <FormField control={form.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={10} {...field} /></FormControl> <FormMessage /> </FormItem> )} />
@@ -308,16 +336,28 @@ export default function PublicationsPage() {
           <div className="flex-grow overflow-y-auto pr-4">
             <Form {...editForm}>
               <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
-                <FormField control={editForm.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} onBlur={(e) => {
-                    if (!isSlugManuallyEdited) {
-                        editForm.setValue('slug', generateSlug(e.target.value));
-                    }
-                }} /></FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={editForm.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} onChange={(e) => {
-                    field.onChange(e);
-                    setIsSlugManuallyEdited(true); // User changed slug, so stop auto-gen
-                }} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} onBlur={(e) => { if (!isSlugManuallyEdited && !editForm.getValues('slug')) { editForm.setValue('slug', generateSlug(e.target.value)); } }} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} onChange={(e) => { field.onChange(e); setIsSlugManuallyEdited(true); }} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                 <FormField
+                    control={editForm.control}
+                    name="topicId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Topic</FormLabel>
+                        <Combobox
+                            items={topicOptions}
+                            value={field.value || null}
+                            onChange={field.onChange}
+                            placeholder="Select a topic"
+                            searchPlaceholder="Search or create..."
+                            noResultsText="No topic found. Create a new one."
+                            onNewItem={handleCreateTopic}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 <FormField control={editForm.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={10} {...field} /></FormControl> <FormMessage /> </FormItem> )} />
@@ -351,3 +391,5 @@ export default function PublicationsPage() {
     </>
   );
 }
+
+    
