@@ -37,8 +37,8 @@ const navStructure = [
             { href: "/about", title: "À propos de nous", description: "Découvrez notre histoire, notre mission et nos valeurs." },
             { href: "#", title: "Carrières", description: "Rejoignez notre équipe et construisons l'avenir ensemble." },
             { href: "#", title: "Présentation", description: "Une vue d'ensemble de nos activités et de notre impact." },
-            { href: "#", title: "Références", description: "Voyez comment nous avons aidé nos clients à réussir." },
-            { href: "#", title: "Notre approche", description: "Notre méthodologie unique pour des résultats exceptionnels." },
+            { href: "/references", title: "Références", description: "Voyez comment nous avons aidé nos clients à réussir." },
+            { href: "/notre-approche", title: "Notre approche", description: "Notre méthodologie unique pour des résultats exceptionnels." },
         ]
     },
     {

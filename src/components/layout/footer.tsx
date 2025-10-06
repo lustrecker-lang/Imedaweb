@@ -31,8 +31,8 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
               <li><Link href="/about" className="text-xs text-muted-foreground hover:text-foreground">À propos de nous</Link></li>
               <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Carrières</Link></li>
               <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Présentation</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Références</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Notre approche</Link></li>
+              <li><Link href="/references" className="text-xs text-muted-foreground hover:text-foreground">Références</Link></li>
+              <li><Link href="/notre-approche" className="text-xs text-muted-foreground hover:text-foreground">Notre approche</Link></li>
             </ul>
           </div>
           <div>

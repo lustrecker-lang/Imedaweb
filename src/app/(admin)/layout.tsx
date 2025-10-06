@@ -14,7 +14,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -152,6 +152,14 @@ export default function AdminLayout({
                 <SidebarMenuButton tooltip="Seed Publications">
                   <DatabaseZap />
                   <span className="text-sm">Seed Publications</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem asChild>
+              <Link href="/admin/seed-approche">
+                <SidebarMenuButton tooltip="Seed Approche">
+                  <BrainCircuit />
+                  <span className="text-sm">Seed Approche</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
