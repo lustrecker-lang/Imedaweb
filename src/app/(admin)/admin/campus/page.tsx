@@ -644,7 +644,9 @@ export default function CampusPage() {
                                         <FormLabel>Contact Person Image</FormLabel>
                                         <div className="flex items-center gap-4">
                                             {editForm.watch('visitAndContact.imageUrl') && ( <div className="relative"> <Image src={editForm.watch('visitAndContact.imageUrl')!} alt="Contact Person" width={80} height={80} className="object-cover rounded-full" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('visitAndContact.imageUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
-                                            <FormControl className="flex-1"> <Input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) { setContactImageFile(e.target.files[0]) } }}/> </FormControl>
+                                            <FormControl className="flex-1">
+                                                <Input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) { setContactImageFile(e.target.files[0]) } }}/>
+                                            </FormControl>
                                         </div>
                                         <FormMessage />
                                     </FormItem>
@@ -671,7 +673,9 @@ export default function CampusPage() {
                       </Accordion>
 
                       <SheetFooter className="pt-4 sticky bottom-0 bg-background py-4">
-                          <SheetClose asChild><Button type="button" variant="outline">Cancel</Button></SheetClose>
+                          <SheetClose asChild>
+                            <Button type="button" variant="outline">Cancel</Button>
+                          </SheetClose>
                           <Button type="submit" disabled={editForm.formState.isSubmitting}>{editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
                       </SheetFooter>
                     </form>
