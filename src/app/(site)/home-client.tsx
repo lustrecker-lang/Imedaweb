@@ -198,7 +198,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           <CarouselContent className="-ml-4">
             {categoriesWithThemes.map((category) => {
                 const cardContent = (
-                    <Card className="h-full flex flex-col hover:border-primary transition-colors overflow-hidden">
+                    <Card className="h-full flex flex-col transition-colors overflow-hidden">
                         <div className="aspect-video relative w-full">
                           <Image 
                             src={category.mediaUrl || `https://picsum.photos/seed/${category.id}/400/225`}
@@ -209,7 +209,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
                         </div>
                         <CardHeader className="text-left">
                             <CardTitle className="font-headline font-normal">{category.name}</CardTitle>
-                             <CardDescription>{`${category.formationCount} formations`}</CardDescription>
+                             <CardDescription className="text-primary">{`${category.formationCount} formations`}</CardDescription>
                         </CardHeader>
                         <CardContent className="flex-grow text-left">
                             <ul className="text-sm text-muted-foreground space-y-1">
