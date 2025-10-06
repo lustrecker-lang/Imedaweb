@@ -14,6 +14,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 // Interfaces
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
@@ -305,13 +306,25 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           )}
         </div>
       </section>
-
+      
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 md:gap-x-8 text-left">
-            <div><p className="text-4xl lg:text-5xl font-headline text-primary">700+</p><p className="mt-2 font-semibold">Formations Internationales</p><p className="text-sm text-muted-foreground">Disponibles dans nos campus et en ligne.</p></div>
-            <div><p className="text-4xl lg:text-5xl font-headline text-primary">95%</p><p className="mt-2 font-semibold">Taux de placement</p><p className="text-sm text-muted-foreground">De nos diplômés dans les 6 mois.</p></div>
-            <div><p className="text-4xl lg:text-5xl font-headline text-primary">120+</p><p className="mt-2 font-semibold">Nationalités</p><p className="text-sm text-muted-foreground">Représentées parmi nos étudiants.</p></div>
+            <div>
+              <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={700} />+</p>
+              <p className="mt-2 font-normal">Formations Internationales</p>
+              <p className="text-sm text-muted-foreground">Disponibles dans nos campus et en ligne.</p>
+            </div>
+            <div>
+              <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={95} />%</p>
+              <p className="mt-2 font-normal">Taux de placement</p>
+              <p className="text-sm text-muted-foreground">De nos diplômés dans les 6 mois.</p>
+            </div>
+            <div>
+              <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={120} />+</p>
+              <p className="mt-2 font-normal">Nationalités</p>
+              <p className="text-sm text-muted-foreground">Représentées parmi nos étudiants.</p>
+            </div>
           </div>
         </div>
       </section>
