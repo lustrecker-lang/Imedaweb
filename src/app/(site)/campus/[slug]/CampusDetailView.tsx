@@ -249,23 +249,6 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </section>
                 )}
 
-                {/* Banner Section */}
-                {campus.bannerSection && (campus.bannerSection.title || campus.bannerSection.text || campus.bannerSection.mediaUrl) && (
-                    <section id="banner">
-                        <Card className="overflow-hidden">
-                            <div className="grid grid-cols-1 md:grid-cols-2">
-                                <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full">
-                                    {campus.bannerSection.mediaUrl && <MediaPreview url={campus.bannerSection.mediaUrl} alt={campus.bannerSection.title || "Banner"} />}
-                                </div>
-                                <div className="p-6 flex flex-col justify-center">
-                                    <h3 className="font-headline text-2xl font-normal">{campus.bannerSection.title}</h3>
-                                    <p className="mt-2 text-sm text-muted-foreground">{campus.bannerSection.text}</p>
-                                </div>
-                            </div>
-                        </Card>
-                    </section>
-                )}
-                
                 {/* Academic Offering */}
                 <section id="academics">
                      <div className="max-w-2xl mb-8">
@@ -322,7 +305,24 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         </div>
                     </section>
                 )}
-                
+
+                {/* Banner Section */}
+                {campus.bannerSection && (campus.bannerSection.title || campus.bannerSection.text || campus.bannerSection.mediaUrl) && (
+                    <section id="banner">
+                        <Card className="overflow-hidden">
+                            <div className="grid grid-cols-1 md:grid-cols-2">
+                                <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full">
+                                    {campus.bannerSection.mediaUrl && <MediaPreview url={campus.bannerSection.mediaUrl} alt={campus.bannerSection.title || "Banner"} />}
+                                </div>
+                                <div className="p-6 flex flex-col justify-center">
+                                    <h3 className="font-headline text-2xl font-normal">{campus.bannerSection.title}</h3>
+                                    <p className="mt-2 text-sm text-muted-foreground">{campus.bannerSection.text}</p>
+                                </div>
+                            </div>
+                        </Card>
+                    </section>
+                )}
+
                 {/* FAQ */}
                 {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
                     <section id="faq">
@@ -346,27 +346,25 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
 
             </div>
             <aside className="md:col-span-4 space-y-8 md:sticky top-24 self-start">
-                {/* Contact Person */}
+                 {/* Contact Person */}
                 {campus.visitAndContact?.name && (
                      <section id="contact-person">
                         <Card>
                              <CardContent className="pt-6">
-                                <div className="flex items-start gap-4">
+                                <div className="text-left">
                                     {campus.visitAndContact.imageUrl && (
-                                        <div className="relative h-20 w-20 rounded-md shrink-0 overflow-hidden">
+                                        <div className="relative h-24 w-24 rounded-md mb-4 overflow-hidden">
                                             <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
                                         </div>
                                     )}
-                                    <div className="flex-1">
-                                        <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
-                                        <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
-                                        <div className="flex flex-col items-start gap-2 mt-2">
-                                            {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Phone size={14} /><span>{campus.visitAndContact.phone}</span></a>}
-                                            {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Mail size={14} /><span>{campus.visitAndContact.email}</span></a>}
-                                        </div>
+                                    <h3 className="font-headline font-normal text-xl">{campus.visitAndContact.name}</h3>
+                                    <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
+                                    {campus.visitAndContact.description && <p className="text-sm text-muted-foreground mt-3">{campus.visitAndContact.description}</p>}
+                                    <div className="flex flex-col items-start gap-3 mt-4">
+                                        {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Phone size={16} /><span>{campus.visitAndContact.phone}</span></a>}
+                                        {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Mail size={16} /><span>{campus.visitAndContact.email}</span></a>}
                                     </div>
                                 </div>
-                                {campus.visitAndContact.description && <p className="text-sm text-muted-foreground mt-3 border-t pt-3">{campus.visitAndContact.description}</p>}
                             </CardContent>
                         </Card>
                     </section>
