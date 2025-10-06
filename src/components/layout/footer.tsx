@@ -2,9 +2,6 @@
 'use client';
 import Link from "next/link";
 import { Instagram, Youtube } from "lucide-react";
-import { useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { useMemo } from "react";
-import { doc, collection, query, orderBy } from "firebase/firestore";
 import Image from "next/image";
 
 interface CompanyProfile {
@@ -18,21 +15,12 @@ interface Campus {
   slug: string;
 }
 
-export function Footer() {
-  const firestore = useFirestore();
-  const companyProfileRef = useMemo(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'companyProfile', 'main');
-  }, [firestore]);
+interface FooterProps {
+  companyProfile: CompanyProfile | null;
+  campuses: Campus[];
+}
 
-  const { data: companyProfile, isLoading } = useDoc<CompanyProfile>(companyProfileRef);
-
-  const campusesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'campuses'), orderBy('name', 'asc'));
-  }, [firestore]);
-
-  const { data: campuses } = useCollection<Campus>(campusesQuery);
+export function Footer({ companyProfile, campuses }: FooterProps) {
 
   return (
     <footer className="border-t bg-white">
@@ -59,7 +47,7 @@ export function Footer() {
           <div>
             <h3 className="text-xs font-semibold tracking-wider uppercase">Campus</h3>
             <ul className="mt-4 space-y-2">
-              {campuses ? (
+              {campuses && campuses.length > 0 ? (
                  campuses.map(campus => (
                   <li key={campus.id}><Link href={`/campus/${campus.slug}`} className="text-xs text-muted-foreground hover:text-foreground">{campus.name}</Link></li>
                  ))
@@ -83,7 +71,7 @@ export function Footer() {
           </div>
           <div className="flex flex-col gap-4 items-start lg:items-end">
             <Link href="/" className="flex items-center gap-2 h-6">
-                {!isLoading && companyProfile?.logoUrl ? (
+                {companyProfile?.logoUrl ? (
                   <Image
                     src={companyProfile.logoUrl}
                     alt={companyProfile.name || 'Company Logo'}
@@ -116,7 +104,7 @@ export function Footer() {
 
         <div className="mt-8 border-t pt-6 text-center">
             <p className="text-xs text-muted-foreground">
-              © 2025 {!isLoading && companyProfile?.name ? companyProfile.name : 'Imeda International – IMEDA'}.
+              © 2025 {companyProfile?.name ? companyProfile.name : 'Imeda International – IMEDA'}.
             </p>
              <p className="text-xs text-muted-foreground mt-1">
               L’institution Licences 4700-9288 (Dubaï) et 1671-3512 (Europe).

@@ -2,7 +2,6 @@
 import { adminDb } from '@/firebase/admin';
 import { HomeClient } from './home-client';
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { DocumentData } from 'firebase-admin/firestore';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -46,19 +45,23 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getHomePageData() {
   try {
-    const [pageSnap, campusesSnap, categoriesSnap, themesSnap, formationsSnap] = await Promise.all([
+    const [pageSnap, categoriesSnap, themesSnap, formationsSnap] = await Promise.all([
       adminDb.collection('pages').doc('home').get(),
-      adminDb.collection('campuses').orderBy('name', 'asc').get(),
       adminDb.collection('course_categories').orderBy('name', 'asc').get(),
       adminDb.collection('course_themes').orderBy('name', 'asc').get(),
       adminDb.collection('course_formations').get(),
     ]);
 
     const homePage = pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
-    const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
+    // Campuses are now fetched in the main layout, so we don't need to fetch them here
     const categories = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Category[];
     const themes = themesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Theme[];
     const formations = formationsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Formation[];
+
+    // Fetch campuses separately just for this page's component props
+    const campusesSnap = await adminDb.collection('campuses').orderBy('name', 'asc').get();
+    const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
+
 
     return { homePage, campuses, categories, themes, formations };
   } catch (error) {

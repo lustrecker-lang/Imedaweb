@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
@@ -16,12 +16,11 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { doc, collection, query, orderBy } from 'firebase/firestore';
+import { useCollection, useMemoFirebase } from "@/firebase";
+import { collection, query, orderBy } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 import { ContactForm } from "@/components/contact-form";
 
@@ -69,6 +68,11 @@ interface Campus {
   imageUrl?: string;
 }
 
+interface HeaderProps {
+    companyProfile: CompanyProfile | null;
+    campuses: Campus[];
+}
+
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
   React.ComponentPropsWithoutRef<"a"> & { description?: string }
@@ -99,33 +103,15 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 
-export function Header() {
+export function Header({ companyProfile, campuses }: HeaderProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
-  const firestore = useFirestore();
   const isMobile = useIsMobile();
-
-  const companyProfileRef = useMemo(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'companyProfile', 'main');
-  }, [firestore]);
-
-  const { data: companyProfile, isLoading } = useDoc<CompanyProfile>(companyProfileRef);
-
-  const campusesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'campuses'), orderBy('name', 'asc'));
-  }, [firestore]);
-
-  const { data: campuses } = useCollection<Campus>(campusesQuery);
-
+  
   const LogoComponent = () => {
     const fixedWidth = 'w-[96px]';
     const fixedHeight = 'h-6';
     
-    if (isLoading) {
-      return <Skeleton className={`${fixedHeight} ${fixedWidth}`} />;
-    }
     if (companyProfile?.logoUrl) {
       return (
         <div className={`relative ${fixedHeight} ${fixedWidth}`}>
@@ -208,7 +194,7 @@ export function Header() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0" hideClose>              {/* Corrected mobile header structure */}
+            <SheetContent side="right" className="w-full max-w-sm flex flex-col p-0" hideClose>
               <div className="flex h-16 items-center justify-between border-b px-6">
                 <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
                 <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileNavOpen(false)}>
