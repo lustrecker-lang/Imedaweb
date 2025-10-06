@@ -140,26 +140,32 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
     setIsSubmitting(true);
     try {
-      // Save lead to Firestore
       await addDocumentNonBlocking(collection(firestore, 'leads'), {
         email: catalogEmail,
         leadType: 'Catalog Download',
-        fullName: 'Catalog Lead', // This is a placeholder as the form only asks for email
+        fullName: 'Catalog Lead',
         message: 'Catalog Download Request from homepage.',
         createdAt: serverTimestamp(),
       });
 
-      // Trigger the download
+      const pdfUrl = 'https://firebasestorage.googleapis.com/v0/b/imedawebsite-98ced.firebasestorage.app/o/company-assets%2FCatalogue2025-26.pdf?alt=media&token=7742f046-32b4-4925-97ee-64d61a2e5f5e';
+
+      const response = await fetch(pdfUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
       const link = document.createElement('a');
-      link.href = 'https://firebasestorage.googleapis.com/v0/b/imedawebsite-98ced.firebasestorage.app/o/company-assets%2FCatalogue2025-26.pdf?alt=media&token=7742f046-32b4-4925-97ee-64d61a2e5f5e';
+      link.href = blobUrl;
       link.setAttribute('download', 'IMEDA-Catalogue-2025-26.pdf');
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
       
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
       setHasSubmitted(true);
     } catch (error) {
-      console.error("Error submitting lead:", error);
+      console.error("Error submitting lead or downloading file:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -256,7 +262,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
       {catalogSection && (
         <section className="py-16 bg-muted/30">
-          <div className="container px-0 md:px-6">
+          <div className="container">
             <Card className="overflow-hidden md:rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 items-center">
                     <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 md:order-2">
