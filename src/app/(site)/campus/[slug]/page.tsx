@@ -1,4 +1,5 @@
 
+
 import { Suspense } from 'react';
 import { adminDb } from '@/firebase/admin';
 import { notFound } from 'next/navigation';
@@ -35,6 +36,12 @@ interface Campus {
     headline?: string;
     subtitle?: string;
     address?: string;
+    name?: string;
+    title?: string;
+    description?: string;
+    phone?: string;
+    email?: string;
+    imageUrl?: string;
   };
   faq?: {
     headline?: string;
@@ -136,3 +143,5 @@ export default async function CampusPage({ params }: { params: { slug: string } 
     </Suspense>
   );
 }
+
+    

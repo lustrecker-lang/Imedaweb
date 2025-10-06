@@ -70,7 +70,7 @@ import {
   SheetTitle,
   SheetClose,
 } from '@/components/ui/sheet';
-import { Trash2, Edit, X, Plus } from 'lucide-react';
+import { Trash2, Edit, X, Plus, User } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const featureSchema = z.object({
@@ -119,6 +119,12 @@ const formSchema = z.object({
       headline: z.string().optional(),
       subtitle: z.string().optional(),
       address: z.string().optional(),
+      name: z.string().optional(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      phone: z.string().optional(),
+      email: z.string().email().optional().or(z.literal('')),
+      imageUrl: z.string().optional(),
   }).optional(),
   faq: z.object({
       headline: z.string().optional(),
@@ -171,6 +177,8 @@ export default function CampusPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [heroBgFile, setHeroBgFile] = useState<File | null>(null);
   const [featureFiles, setFeatureFiles] = useState<(File | null)[]>([]);
+  const [contactImageFile, setContactImageFile] = useState<File | null>(null);
+
   const [campusToDelete, setCampusToDelete] = useState<Campus | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingCampus, setEditingCampus] = useState<Campus | null>(null);
@@ -247,6 +255,12 @@ export default function CampusPage() {
           headline: editingCampus.visitAndContact?.headline || '',
           subtitle: editingCampus.visitAndContact?.subtitle || '',
           address: editingCampus.visitAndContact?.address || '',
+          name: editingCampus.visitAndContact?.name || '',
+          title: editingCampus.visitAndContact?.title || '',
+          description: editingCampus.visitAndContact?.description || '',
+          phone: editingCampus.visitAndContact?.phone || '',
+          email: editingCampus.visitAndContact?.email || '',
+          imageUrl: editingCampus.visitAndContact?.imageUrl || '',
         },
         faq: {
           headline: editingCampus.faq?.headline || '',
@@ -315,41 +329,38 @@ export default function CampusPage() {
 
     let imageUrl = editingCampus.imageUrl;
     let heroBackgroundMediaUrl = values.hero?.backgroundMediaUrl;
+    let contactImageUrl = values.visitAndContact?.imageUrl;
 
     if (imageFile) {
       if (editingCampus.imageUrl && storage) {
-        try {
-          const oldImageRef = ref(storage, editingCampus.imageUrl);
-          await deleteObject(oldImageRef);
-        } catch (error) { console.error("Error deleting old image: ", error); }
+        try { const oldImageRef = ref(storage, editingCampus.imageUrl); await deleteObject(oldImageRef); } catch (error) { console.error("Error deleting old image: ", error); }
       }
       imageUrl = await handleFileUpload(imageFile) || editingCampus.imageUrl;
     }
 
     if (heroBgFile) {
       if (editingCampus.hero?.backgroundMediaUrl && storage) {
-        try {
-          const oldImageRef = ref(storage, editingCampus.hero.backgroundMediaUrl);
-          await deleteObject(oldImageRef);
-        } catch (error) { console.error("Error deleting old hero background: ", error); }
+        try { const oldImageRef = ref(storage, editingCampus.hero.backgroundMediaUrl); await deleteObject(oldImageRef); } catch (error) { console.error("Error deleting old hero background: ", error); }
       }
       heroBackgroundMediaUrl = await handleFileUpload(heroBgFile) || editingCampus.hero?.backgroundMediaUrl;
     }
+
+    if (contactImageFile) {
+        if (editingCampus.visitAndContact?.imageUrl && storage) {
+          try { const oldImageRef = ref(storage, editingCampus.visitAndContact.imageUrl); await deleteObject(oldImageRef); } catch (error) { console.error("Error deleting old contact image: ", error); }
+        }
+        contactImageUrl = await handleFileUpload(contactImageFile) || editingCampus.visitAndContact?.imageUrl;
+      }
 
     const updatedFeatures = [...(values.campusExperience?.features || [])];
     for (let i = 0; i < featureFiles.length; i++) {
         const file = featureFiles[i];
         if (file && updatedFeatures[i]) {
             if(updatedFeatures[i].mediaUrl && storage) {
-                try {
-                  const oldImageRef = ref(storage, updatedFeatures[i].mediaUrl!);
-                  await deleteObject(oldImageRef);
-                } catch (error) { console.error(`Error deleting old feature media at index ${i}: `, error); }
+                try { const oldImageRef = ref(storage, updatedFeatures[i].mediaUrl!); await deleteObject(oldImageRef); } catch (error) { console.error(`Error deleting old feature media at index ${i}: `, error); }
             }
             const newMediaUrl = await handleFileUpload(file);
-            if(newMediaUrl) {
-                updatedFeatures[i].mediaUrl = newMediaUrl;
-            }
+            if(newMediaUrl) { updatedFeatures[i].mediaUrl = newMediaUrl; }
         }
     }
     
@@ -359,6 +370,7 @@ export default function CampusPage() {
       imageUrl,
       hero: { ...values.hero, backgroundMediaUrl: heroBackgroundMediaUrl },
       campusExperience: { ...values.campusExperience, features: updatedFeatures },
+      visitAndContact: { ...values.visitAndContact, imageUrl: contactImageUrl }
     };
     
     setDocumentNonBlocking(docRef, dataToSave, { merge: true });
@@ -373,65 +385,44 @@ export default function CampusPage() {
     setImageFile(null);
     setHeroBgFile(null);
     setFeatureFiles([]);
+    setContactImageFile(null);
   };
   
-  const handleRemoveImage = async (field: keyof Campus | `hero.backgroundMediaUrl` | `campusExperience.features.${number}.mediaUrl`, index?: number) => {
+  const handleRemoveImage = async (field: keyof Campus | `hero.backgroundMediaUrl` | `campusExperience.features.${number}.mediaUrl` | 'visitAndContact.imageUrl', index?: number) => {
     if (!firestore || !editingCampus) return;
 
     let imageUrl: string | undefined;
 
-    if (field === 'imageUrl') {
-        imageUrl = editingCampus.imageUrl;
-    } else if (field === 'hero.backgroundMediaUrl') {
-        imageUrl = editingCampus.hero?.backgroundMediaUrl;
-    } else if (typeof index === 'number' && field.startsWith('campusExperience.features')) {
-        imageUrl = editingCampus.campusExperience?.features?.[index]?.mediaUrl;
-    }
+    if (field === 'imageUrl') imageUrl = editingCampus.imageUrl;
+    else if (field === 'hero.backgroundMediaUrl') imageUrl = editingCampus.hero?.backgroundMediaUrl;
+    else if (field === 'visitAndContact.imageUrl') imageUrl = editingCampus.visitAndContact?.imageUrl;
+    else if (typeof index === 'number' && field.startsWith('campusExperience.features')) imageUrl = editingCampus.campusExperience?.features?.[index]?.mediaUrl;
 
     if (!imageUrl) return;
 
     if (storage) {
-        try {
-            const imageRef = ref(storage, imageUrl);
-            await deleteObject(imageRef);
-        } catch (error) {
-            console.error("Error deleting image from storage: ", error);
-        }
+        try { await deleteObject(ref(storage, imageUrl)); } catch (error) { console.error("Error deleting image from storage: ", error); }
     }
     
     const docRef = doc(firestore, 'campuses', editingCampus.id);
     let updatedData = {};
-
-    if (field === 'imageUrl') {
-        updatedData = { imageUrl: '' };
-        editForm.setValue('imageUrl', '');
-        setEditingCampus(prev => prev ? { ...prev, imageUrl: '' } : null);
-    } else if (field === 'hero.backgroundMediaUrl') {
-        updatedData = { 'hero.backgroundMediaUrl': '' };
-        editForm.setValue('hero.backgroundMediaUrl', '');
-        setEditingCampus(prev => prev ? { ...prev, hero: { ...prev.hero, backgroundMediaUrl: '' } } : null);
-    } else if (typeof index === 'number' && field.startsWith('campusExperience.features')) {
+    if (field === 'imageUrl') { updatedData = { imageUrl: '' }; editForm.setValue('imageUrl', ''); setEditingCampus(prev => prev ? { ...prev, imageUrl: '' } : null); } 
+    else if (field === 'hero.backgroundMediaUrl') { updatedData = { 'hero.backgroundMediaUrl': '' }; editForm.setValue('hero.backgroundMediaUrl', ''); setEditingCampus(prev => prev ? { ...prev, hero: { ...prev.hero, backgroundMediaUrl: '' } } : null); }
+    else if (field === 'visitAndContact.imageUrl') { updatedData = { 'visitAndContact.imageUrl': '' }; editForm.setValue('visitAndContact.imageUrl', ''); setEditingCampus(prev => prev ? { ...prev, visitAndContact: { ...prev.visitAndContact, imageUrl: ''} } : null); }
+    else if (typeof index === 'number' && field.startsWith('campusExperience.features')) {
         const features = [...(editingCampus.campusExperience?.features || [])];
         if(features[index]) {
             features[index].mediaUrl = '';
             updatedData = { campusExperience: { ...editingCampus.campusExperience, features } };
             const updatedFormFeatures = editForm.getValues('campusExperience.features');
-            if(updatedFormFeatures && updatedFormFeatures[index]) {
-                updatedFormFeatures[index].mediaUrl = '';
-                editForm.setValue('campusExperience.features', updatedFormFeatures);
-            }
-             setEditingCampus(prev => prev ? { ...prev, campusExperience: { ...prev.campusExperience, features: features } } : null);
+            if(updatedFormFeatures && updatedFormFeatures[index]) { updatedFormFeatures[index].mediaUrl = ''; editForm.setValue('campusExperience.features', updatedFormFeatures); }
+            setEditingCampus(prev => prev ? { ...prev, campusExperience: { ...prev.campusExperience, features: features } } : null);
         }
     }
 
-    if (Object.keys(updatedData).length > 0) {
-        setDocumentNonBlocking(docRef, updatedData, { merge: true });
-    }
+    if (Object.keys(updatedData).length > 0) { setDocumentNonBlocking(docRef, updatedData, { merge: true }); }
     
-    toast({
-      title: 'Image Removed',
-      description: 'The image has been removed.',
-    });
+    toast({ title: 'Image Removed', description: 'The image has been removed.' });
   }
 
   const openDeleteDialog = (campus: Campus) => {
@@ -445,32 +436,22 @@ export default function CampusPage() {
     setImageFile(null);
     setHeroBgFile(null);
     setFeatureFiles([]);
+    setContactImageFile(null);
   };
 
   const handleDeleteCampus = () => {
     if (!firestore || !campusToDelete) return;
     
-    if (campusToDelete.imageUrl && storage) {
-      const imageRef = ref(storage, campusToDelete.imageUrl);
-      deleteObject(imageRef).catch(error => console.error("Error deleting image: ", error));
-    }
-    if (campusToDelete.hero?.backgroundMediaUrl && storage) {
-      const heroRef = ref(storage, campusToDelete.hero.backgroundMediaUrl);
-      deleteObject(heroRef).catch(error => console.error("Error deleting hero image: ", error));
-    }
+    if (campusToDelete.imageUrl && storage) deleteObject(ref(storage, campusToDelete.imageUrl)).catch(error => console.error("Error deleting image: ", error));
+    if (campusToDelete.hero?.backgroundMediaUrl && storage) deleteObject(ref(storage, campusToDelete.hero.backgroundMediaUrl)).catch(error => console.error("Error deleting hero image: ", error));
+    if (campusToDelete.visitAndContact?.imageUrl && storage) deleteObject(ref(storage, campusToDelete.visitAndContact.imageUrl)).catch(error => console.error("Error deleting contact image: ", error));
     campusToDelete.campusExperience?.features?.forEach(f => {
-      if(f.mediaUrl && storage) {
-        const featureRef = ref(storage, f.mediaUrl);
-        deleteObject(featureRef).catch(error => console.error(`Error deleting feature image ${f.mediaUrl}: `, error));
-      }
+      if(f.mediaUrl && storage) deleteObject(ref(storage, f.mediaUrl)).catch(error => console.error(`Error deleting feature image ${f.mediaUrl}: `, error));
     });
 
     const docRef = doc(firestore, 'campuses', campusToDelete.id);
     deleteDocumentNonBlocking(docRef);
-    toast({
-      title: "Campus Deleted",
-      description: "The campus has been permanently deleted.",
-    });
+    toast({ title: "Campus Deleted", description: "The campus has been permanently deleted." });
     setIsDeleteDialogOpen(false);
     setCampusToDelete(null);
   };
@@ -505,68 +486,17 @@ export default function CampusPage() {
                     </DialogHeader>
                      <Form {...form}>
                         <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Campus Name</FormLabel>
-                                    <FormControl>
-                                    <Input placeholder="e.g., Paris" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="slug"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Slug</FormLabel>
-                                    <FormControl>
-                                    <Input placeholder="e.g., paris" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="description"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description (for menus)</FormLabel>
-                                    <FormControl>
-                                    <Textarea placeholder="A short description of the campus." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
+                            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Campus Name</FormLabel> <FormControl> <Input placeholder="e.g., Paris" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
+                            <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl> <Input placeholder="e.g., paris" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
+                            <FormField control={form.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Description (for menus)</FormLabel> <FormControl> <Textarea placeholder="A short description of the campus." {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
                             <FormItem>
                                 <FormLabel>Campus Media (for listings)</FormLabel>
-                                <FormControl>
-                                <Input 
-                                    id="campus-image-input"
-                                    type="file" 
-                                    accept="image/*,video/*,.mov"
-                                    onChange={(e) => {
-                                    if (e.target.files?.[0]) {
-                                        setImageFile(e.target.files[0]);
-                                    }
-                                    }}
-                                />
-                                </FormControl>
+                                <FormControl> <Input id="campus-image-input" type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]); } }} /> </FormControl>
                                 <FormMessage />
                             </FormItem>
                              <DialogFooter>
-                                <DialogClose asChild>
-                                    <Button type="button" variant="outline">Cancel</Button>
-                                </DialogClose>
-                                <Button type="submit" disabled={form.formState.isSubmitting}>
-                                    {form.formState.isSubmitting ? 'Saving...' : 'Save Campus'}
-                                </Button>
+                                <DialogClose asChild> <Button type="button" variant="outline">Cancel</Button> </DialogClose>
+                                <Button type="submit" disabled={form.formState.isSubmitting}> {form.formState.isSubmitting ? 'Saving...' : 'Save Campus'} </Button>
                             </DialogFooter>
                         </form>
                     </Form>
@@ -585,44 +515,21 @@ export default function CampusPage() {
               </TableHeader>
               <TableBody>
                 {areCampusesLoading ? (
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell><Skeleton className="h-10 w-16" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                      <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
-                    </TableRow>
-                  ))
+                  Array.from({ length: 3 }).map((_, i) => ( <TableRow key={i}> <TableCell><Skeleton className="h-10 w-16" /></TableCell> <TableCell><Skeleton className="h-5 w-32" /></TableCell> <TableCell><Skeleton className="h-5 w-24" /></TableCell> <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell> </TableRow> ))
                 ) : campuses && campuses.length > 0 ? (
                   campuses.map((campus) => (
                     <TableRow key={campus.id}>
-                      <TableCell>
-                        {campus.imageUrl ? (
-                           <MediaPreview url={campus.imageUrl} alt={campus.name} />
-                        ) : (
-                          <div className="h-10 w-16 bg-muted rounded-sm flex items-center justify-center text-xs text-muted-foreground">No Media</div>
-                        )}
-                      </TableCell>
+                      <TableCell> {campus.imageUrl ? ( <MediaPreview url={campus.imageUrl} alt={campus.name} /> ) : ( <div className="h-10 w-16 bg-muted rounded-sm flex items-center justify-center text-xs text-muted-foreground">No Media</div> )} </TableCell>
                       <TableCell className="font-medium">{campus.name}</TableCell>
                       <TableCell className="font-mono text-xs">{campus.slug}</TableCell>
                       <TableCell className="text-right">
-                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus as Campus)}>
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                        </Button>
-                         <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(campus as Campus)}>
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                            <span className="sr-only">Delete</span>
-                        </Button>
+                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus as Campus)}> <Edit className="h-4 w-4" /> <span className="sr-only">Edit</span> </Button>
+                         <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(campus as Campus)}> <Trash2 className="h-4 w-4 text-red-600" /> <span className="sr-only">Delete</span> </Button>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
-                      No campuses found. Add one to get started.
-                    </TableCell>
-                  </TableRow>
+                  <TableRow> <TableCell colSpan={4} className="h-24 text-center"> No campuses found. Add one to get started. </TableCell> </TableRow>
                 )}
               </TableBody>
             </Table>
@@ -634,9 +541,7 @@ export default function CampusPage() {
           <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
               <SheetHeader>
                   <SheetTitle>Edit Campus: {editingCampus?.name}</SheetTitle>
-                  <SheetDescription>
-                    Make changes to the campus content below. Click save when you're done.
-                  </SheetDescription>
+                  <SheetDescription> Make changes to the campus content below. Click save when you're done. </SheetDescription>
               </SheetHeader>
               <div className="py-4">
                 <Form {...editForm}>
@@ -651,17 +556,8 @@ export default function CampusPage() {
                               <FormItem>
                                   <FormLabel>Campus Media (for listings)</FormLabel>
                                   <div className="flex items-center gap-4">
-                                      {editForm.watch('imageUrl') && (
-                                          <div className="relative">
-                                              <MediaPreview url={editForm.watch('imageUrl')!} alt={editForm.watch('name')} />
-                                              <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('imageUrl')}>
-                                                  <X className="h-4 w-4" />
-                                              </Button>
-                                          </div>
-                                      )}
-                                      <FormControl className="flex-1">
-                                          <Input type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]) } }}/>
-                                      </FormControl>
+                                      {editForm.watch('imageUrl') && ( <div className="relative"> <MediaPreview url={editForm.watch('imageUrl')!} alt={editForm.watch('name')} /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('imageUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
+                                      <FormControl className="flex-1"> <Input type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]) } }}/> </FormControl>
                                   </div>
                                   <FormMessage />
                               </FormItem>
@@ -675,17 +571,8 @@ export default function CampusPage() {
                                 <FormItem>
                                   <FormLabel>Background Media</FormLabel>
                                   <div className="flex items-center gap-4">
-                                      {editForm.watch('hero.backgroundMediaUrl') && (
-                                          <div className="relative">
-                                              <Image src={editForm.watch('hero.backgroundMediaUrl')!} alt="Hero Background" width={80} height={50} className="object-cover rounded-sm" />
-                                              <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('hero.backgroundMediaUrl')}>
-                                                  <X className="h-4 w-4" />
-                                              </Button>
-                                          </div>
-                                      )}
-                                      <FormControl className="flex-1">
-                                          <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { setHeroBgFile(e.target.files[0]) } }}/>
-                                      </FormControl>
+                                      {editForm.watch('hero.backgroundMediaUrl') && ( <div className="relative"> <Image src={editForm.watch('hero.backgroundMediaUrl')!} alt="Hero Background" width={80} height={50} className="object-cover rounded-sm" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('hero.backgroundMediaUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
+                                      <FormControl className="flex-1"> <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { setHeroBgFile(e.target.files[0]) } }}/> </FormControl>
                                   </div>
                                   <FormMessage />
                               </FormItem>
@@ -719,34 +606,15 @@ export default function CampusPage() {
                                             <FormItem>
                                                 <FormLabel>Image or Video</FormLabel>
                                                 <div className="flex items-center gap-4">
-                                                     {editForm.watch(`campusExperience.features.${index}.mediaUrl`) && (
-                                                        <div className="relative">
-                                                            <Image src={editForm.watch(`campusExperience.features.${index}.mediaUrl`)!} alt={`Feature ${index + 1}`} width={80} height={50} className="object-cover rounded-sm" />
-                                                            <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage(`campusExperience.features.${index}.mediaUrl`, index)}>
-                                                                <X className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                    <FormControl className="flex-1">
-                                                        <Input type="file" accept="image/*,video/*" onChange={(e) => { 
-                                                            if (e.target.files?.[0]) {
-                                                                const newFiles = [...featureFiles];
-                                                                newFiles[index] = e.target.files[0];
-                                                                setFeatureFiles(newFiles);
-                                                            } 
-                                                        }}/>
-                                                    </FormControl>
+                                                     {editForm.watch(`campusExperience.features.${index}.mediaUrl`) && ( <div className="relative"> <Image src={editForm.watch(`campusExperience.features.${index}.mediaUrl`)!} alt={`Feature ${index + 1}`} width={80} height={50} className="object-cover rounded-sm" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage(`campusExperience.features.${index}.mediaUrl`, index)}> <X className="h-4 w-4" /> </Button> </div> )}
+                                                    <FormControl className="flex-1"> <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { const newFiles = [...featureFiles]; newFiles[index] = e.target.files[0]; setFeatureFiles(newFiles); } }}/> </FormControl>
                                                 </div>
                                                 <FormMessage />
                                             </FormItem>
-                                            <Button type="button" variant="destructive" size="sm" onClick={() => removeFeature(index)} className="absolute top-2 right-2">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            <Button type="button" variant="destructive" size="sm" onClick={() => removeFeature(index)} className="absolute top-2 right-2"> <Trash2 className="h-4 w-4" /> </Button>
                                         </div>
                                     ))}
-                                    <Button type="button" variant="outline" size="sm" onClick={() => appendFeature({ id: uuidv4(), name: '', description: '', mediaUrl: '' })}>
-                                        <Plus className="mr-2 h-4 w-4" /> Add Feature
-                                    </Button>
+                                    <Button type="button" variant="outline" size="sm" onClick={() => appendFeature({ id: uuidv4(), name: '', description: '', mediaUrl: '' })}> <Plus className="mr-2 h-4 w-4" /> Add Feature </Button>
                                 </div>
                            </AccordionContent>
                         </AccordionItem>
@@ -756,6 +624,22 @@ export default function CampusPage() {
                                 <FormField control={editForm.control} name="visitAndContact.headline" render={({ field }) => ( <FormItem> <FormLabel>Location Headline</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                 <FormField control={editForm.control} name="visitAndContact.subtitle" render={({ field }) => ( <FormItem> <FormLabel>Location Subtitle</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                 <FormField control={editForm.control} name="visitAndContact.address" render={({ field }) => ( <FormItem> <FormLabel>Address</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <div className="pt-4 border-t">
+                                    <h4 className="text-sm font-medium mb-2">Contact Person</h4>
+                                    <FormField control={editForm.control} name="visitAndContact.name" render={({ field }) => ( <FormItem> <FormLabel>Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    <FormField control={editForm.control} name="visitAndContact.title" render={({ field }) => ( <FormItem className="mt-4"> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    <FormField control={editForm.control} name="visitAndContact.description" render={({ field }) => ( <FormItem className="mt-4"> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    <FormField control={editForm.control} name="visitAndContact.phone" render={({ field }) => ( <FormItem className="mt-4"> <FormLabel>Phone</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    <FormField control={editForm.control} name="visitAndContact.email" render={({ field }) => ( <FormItem className="mt-4"> <FormLabel>Email</FormLabel> <FormControl><Input type="email" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    <FormItem className="mt-4">
+                                        <FormLabel>Contact Person Image</FormLabel>
+                                        <div className="flex items-center gap-4">
+                                            {editForm.watch('visitAndContact.imageUrl') && ( <div className="relative"> <Image src={editForm.watch('visitAndContact.imageUrl')!} alt="Contact Person" width={80} height={80} className="object-cover rounded-full" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('visitAndContact.imageUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
+                                            <FormControl className="flex-1"> <Input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) { setContactImageFile(e.target.files[0]) } }}/> </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                </div>
                            </AccordionContent>
                         </AccordionItem>
                          <AccordionItem value="faq">
@@ -768,26 +652,18 @@ export default function CampusPage() {
                                         <div key={field.id} className="p-4 border rounded-md space-y-2 relative">
                                             <FormField control={editForm.control} name={`faq.faqs.${index}.question`} render={({ field }) => ( <FormItem> <FormLabel>Question</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                             <FormField control={editForm.control} name={`faq.faqs.${index}.answer`} render={({ field }) => ( <FormItem> <FormLabel>Answer</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                            <Button type="button" variant="destructive" size="sm" onClick={() => removeFaq(index)} className="absolute top-2 right-2">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            <Button type="button" variant="destructive" size="sm" onClick={() => removeFaq(index)} className="absolute top-2 right-2"> <Trash2 className="h-4 w-4" /> </Button>
                                         </div>
                                     ))}
-                                    <Button type="button" variant="outline" size="sm" onClick={() => appendFaq({ id: uuidv4(), question: '', answer: '' })}>
-                                        <Plus className="mr-2 h-4 w-4" /> Add FAQ
-                                    </Button>
+                                    <Button type="button" variant="outline" size="sm" onClick={() => appendFaq({ id: uuidv4(), question: '', answer: '' })}> <Plus className="mr-2 h-4 w-4" /> Add FAQ </Button>
                                 </div>
                            </AccordionContent>
                         </AccordionItem>
                       </Accordion>
 
                       <SheetFooter className="pt-4 sticky bottom-0 bg-background py-4">
-                          <SheetClose asChild>
-                              <Button type="button" variant="outline">Cancel</Button>
-                          </SheetClose>
-                          <Button type="submit" disabled={editForm.formState.isSubmitting}>
-                              {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
-                          </Button>
+                          <SheetClose asChild> <Button type="button" variant="outline">Cancel</Button> </SheetClose>
+                          <Button type="submit" disabled={editForm.formState.isSubmitting}> {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'} </Button>
                       </SheetFooter>
                     </form>
                 </Form>
@@ -799,15 +675,11 @@ export default function CampusPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the campus <span className="font-semibold">{campusToDelete?.name}</span> and all its associated data. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription> This will permanently delete the campus <span className="font-semibold">{campusToDelete?.name}</span> and all its associated data. This action cannot be undone. </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteCampus} className="bg-destructive hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteCampus} className="bg-destructive hover:bg-destructive/90"> Delete </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

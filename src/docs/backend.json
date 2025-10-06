@@ -110,6 +110,11 @@
           "description": "URL of the uploaded company logo.",
           "format": "uri"
         },
+        "logoLightUrl": {
+          "type": "string",
+          "description": "URL of the uploaded light version of the company logo.",
+          "format": "uri"
+        },
         "iconUrl": {
           "type": "string",
           "description": "URL of the uploaded company icon (e.g., for favicons).",
@@ -300,7 +305,13 @@
           "properties": {
             "headline": { "type": "string" },
             "subtitle": { "type": "string" },
-            "address": { "type": "string" }
+            "address": { "type": "string" },
+            "name": { "type": "string", "description": "Contact person's name" },
+            "title": { "type": "string", "description": "Contact person's title" },
+            "description": { "type": "string", "description": "Descriptive text for the contact person." },
+            "phone": { "type": "string", "description": "Contact person's phone number." },
+            "email": { "type": "string", "format": "email", "description": "Contact person's email." },
+            "imageUrl": { "type": "string", "format": "uri", "description": "URL for contact person's photo." }
           }
         },
         "faq": {

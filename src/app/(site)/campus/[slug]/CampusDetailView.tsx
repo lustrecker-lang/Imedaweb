@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Image from "next/image";
@@ -9,7 +10,7 @@ import { useFirestore, useMemoFirebase, useCollection } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Building, GraduationCap, MapPin, Sparkles, HelpCircle } from "lucide-react";
+import { Building, GraduationCap, MapPin, Sparkles, HelpCircle, Phone, Mail } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface CampusFeature {
@@ -59,6 +60,12 @@ interface Campus {
     headline?: string;
     subtitle?: string;
     address?: string;
+    name?: string;
+    title?: string;
+    description?: string;
+    phone?: string;
+    email?: string;
+    imageUrl?: string;
   };
   faq?: {
     headline?: string;
@@ -240,7 +247,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
             <aside className="md:col-span-4 space-y-8 md:sticky top-24 self-start">
                 
                 {/* Visit & Contact */}
-                <section id="contact">
+                <section id="contact-info">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-xl font-headline font-normal">{campus.visitAndContact?.headline || "Visit & Contact"}</CardTitle>
@@ -251,6 +258,31 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         </CardContent>
                     </Card>
                 </section>
+
+                {/* Contact Person */}
+                {campus.visitAndContact?.name && (
+                    <section id="contact-person">
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="flex flex-col items-center text-center">
+                                    {campus.visitAndContact.imageUrl && (
+                                        <div className="relative h-20 w-20 rounded-full overflow-hidden mb-4">
+                                            <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
+                                        </div>
+                                    )}
+                                    <h3 className="font-headline font-normal text-lg">{campus.visitAndContact.name}</h3>
+                                    <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
+                                    <p className="text-xs text-muted-foreground mt-2 max-w-xs">{campus.visitAndContact.description}</p>
+                                    <div className="flex flex-col items-center gap-2 mt-4">
+                                        {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-xs text-primary hover:underline"><Phone size={14} /><span>{campus.visitAndContact.phone}</span></a>}
+                                        {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-xs text-primary hover:underline"><Mail size={14} /><span>{campus.visitAndContact.email}</span></a>}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+                )}
+
 
                 {/* FAQ */}
                 {campus.faq?.faqs && campus.faq.faqs.length > 0 && (
@@ -281,3 +313,5 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
     </div>
   );
 }
+
+    
