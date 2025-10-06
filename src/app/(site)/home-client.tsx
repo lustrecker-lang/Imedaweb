@@ -22,6 +22,7 @@ interface Campus { id: string; name: string; slug: string; description?: string;
 interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
+interface Reference { id: string; name: string; logoUrl: string; }
 interface Article {
     id: string;
     title: string;
@@ -43,6 +44,7 @@ interface HomeClientProps {
   themes: Theme[];
   formations: Formation[];
   articles: Article[];
+  references: Reference[];
 }
 
 const isVideoUrl = (url?: string | null) => {
@@ -74,7 +76,7 @@ const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: 
   };
 
 
-export function HomeClient({ homePage, campuses, categories, themes, formations, articles }: HomeClientProps) {
+export function HomeClient({ homePage, campuses, categories, themes, formations, articles, references }: HomeClientProps) {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
@@ -151,6 +153,26 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
         </div>
       </section>
 
+      {references && references.length > 0 && (
+        <section className="py-8 bg-background">
+          <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
+            <div className="flex w-max animate-scroll">
+              {[...references, ...references].map((reference, index) => (
+                <div key={`${reference.id}-${index}`} className="flex items-center justify-center h-20 w-48 px-8">
+                  <Image
+                    src={reference.logoUrl}
+                    alt={reference.name}
+                    width={120}
+                    height={40}
+                    className="max-h-10 w-auto object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="max-w-2xl">
@@ -214,7 +236,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
                 );
 
                 return (
-                  <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3 flex flex-col">
+                  <CarouselItem key={category.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/4">
                     {isMobile ? (
                       <Link href={`/courses?categoryId=${category.id}`} className="block h-full">
                         {cardContent}
@@ -319,7 +341,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
                           </Link>
                       </CardTitle>
                       <CardDescription className="text-xs">
-                        Par {article.author} le {article.publicationDate}
+                        By {article.author} on {article.publicationDate}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow">

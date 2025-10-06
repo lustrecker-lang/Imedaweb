@@ -16,6 +16,7 @@ interface Campus { id: string; name: string; slug: string; description?: string;
 interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
+interface Reference { id: string; name: string; logoUrl: string; }
 interface Article {
   id: string;
   title: string;
@@ -70,7 +71,8 @@ async function getHomePageData() {
         formationsSnap, 
         articlesSnap,
         topicsSnap,
-        campusesSnap
+        campusesSnap,
+        referencesSnap
     ] = await Promise.all([
       adminDb.collection('pages').doc('home').get(),
       adminDb.collection('course_categories').orderBy('name', 'asc').get(),
@@ -79,6 +81,7 @@ async function getHomePageData() {
       adminDb.collection('articles').orderBy('publicationDate', 'desc').limit(6).get(),
       adminDb.collection('article_topics').get(),
       adminDb.collection('campuses').orderBy('name', 'asc').get(),
+      adminDb.collection('references').orderBy('name', 'asc').get(),
     ]);
 
     const homePage = pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
@@ -86,6 +89,7 @@ async function getHomePageData() {
     const themes = themesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Theme[];
     const formations = formationsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Formation[];
     const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
+    const references = referencesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Reference[];
     
     const topics = topicsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Topic[];
     const topicsMap = new Map(topics.map(t => [t.id, t]));
@@ -102,10 +106,10 @@ async function getHomePageData() {
     });
 
 
-    return { homePage, campuses, categories, themes, formations, articles };
+    return { homePage, campuses, categories, themes, formations, articles, references };
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
-    return { homePage: null, campuses: [], categories: [], themes: [], formations: [], articles: [] };
+    return { homePage: null, campuses: [], categories: [], themes: [], formations: [], articles: [], references: [] };
   }
 }
 
