@@ -20,18 +20,15 @@ interface Article {
   summary?: string;
   content?: string;
   imageUrl?: string;
+  topic?: { id: string; name: string };
 }
 
 async function getArticle(slugOrId: string): Promise<Article | null> {
   try {
-    console.log(`[getArticle] Starting search for slug: '${slugOrId}'`);
     const articlesRef = adminDb.collection('articles');
-
-    // Attempt to find the article by slug
     const slugQuerySnapshot = await articlesRef.where('slug', '==', slugOrId).limit(1).get();
 
     if (!slugQuerySnapshot.empty) {
-      console.log(`[getArticle] Article found by slug: '${slugOrId}'`);
       const docSnap = slugQuerySnapshot.docs[0];
       const data = docSnap.data() as DocumentData;
       const publicationDate = data.publicationDate?.toDate();
@@ -48,9 +45,25 @@ async function getArticle(slugOrId: string): Promise<Article | null> {
           imageUrl: data.imageUrl,
       } as Article;
     } else {
-      console.log(`[getArticle] No article found with slug: '${slugOrId}'`);
-      return null;
+        const docSnap = await articlesRef.doc(slugOrId).get();
+        if (docSnap.exists) {
+            const data = docSnap.data() as DocumentData;
+            const publicationDate = data.publicationDate?.toDate();
+            const formattedDate = publicationDate ? format(publicationDate, 'MMMM d, yyyy') : '';
+
+            return {
+                id: docSnap.id,
+                title: data.title,
+                slug: data.slug,
+                author: data.author,
+                publicationDate: formattedDate,
+                summary: data.summary,
+                content: data.content,
+                imageUrl: data.imageUrl,
+            } as Article;
+        }
     }
+    return null;
   } catch (error) {
     console.error("[getArticle] Error fetching article:", error);
     return null;
@@ -79,11 +92,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  console.log(`[ArticlePage] Rendering for params:`, params);
   const article = await getArticle(params.slug);
 
   if (!article) {
-    console.log(`[ArticlePage] Article not found. Triggering notFound()`);
     notFound();
   }
 
