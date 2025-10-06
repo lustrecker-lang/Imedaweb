@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking, useStorage } from '@/firebase';
-import { collection, doc, query, orderBy, Timestamp, addDoc } from 'firebase/firestore';
+import { collection, doc, query, orderBy, Timestamp, addDoc, where, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,6 +12,8 @@ import * as z from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import Image from 'next/image';
 import { format } from 'date-fns';
+
+import publicationData from './publication.json';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -293,6 +295,56 @@ export default function PublicationsPage() {
       setSectionImageFiles(newFiles);
   }
 
+  const handleSeed = async () => {
+      if (!firestore) return;
+      toast({ title: "Seeding started...", description: "Please wait while the publications are being seeded." });
+
+      const topicsMap = new Map<string, string>();
+      // Pre-fill map with existing topics
+      if(topics) {
+        topics.forEach(t => topicsMap.set(t.name, t.id));
+      }
+
+      for (const pub of publicationData) {
+          let topicId = '';
+          if (topicsMap.has(pub.Topic)) {
+              topicId = topicsMap.get(pub.Topic)!;
+          } else {
+              const newTopic = { name: pub.Topic };
+              const docRef = await addDoc(collection(firestore, 'article_topics'), newTopic);
+              topicId = docRef.id;
+              topicsMap.set(pub.Topic, topicId);
+          }
+
+          const sections = [];
+          for (let i = 1; i <= 5; i++) {
+              const titleKey = `Section Title ${i}` as keyof typeof pub;
+              const paragraphKey = `Section Paragraph ${i}` as keyof typeof pub;
+              if (pub[titleKey] || pub[paragraphKey]) {
+                  sections.push({
+                      id: uuidv4(),
+                      title: pub[titleKey] || '',
+                      paragraph: pub[paragraphKey] || '',
+                  });
+              }
+          }
+
+          const articleData = {
+              title: pub.Title,
+              slug: pub.Slug,
+              author: pub.Author,
+              summary: pub.Summary,
+              publicationDate: Timestamp.now(), // Using current date as placeholder
+              topicId: topicId,
+              sections: sections,
+              imageUrl: '', // No image in JSON
+          };
+          
+          await addDocumentNonBlocking(collection(firestore, 'articles'), articleData);
+      }
+      toast({ title: "Seeding Complete", description: "Publications have been successfully seeded." });
+  }
+
   const renderSectionForms = (formInstance: any, sections: any[], appendFn: Function, removeFn: Function) => {
       return (
         <div className="space-y-6">
@@ -339,55 +391,58 @@ export default function PublicationsPage() {
               <CardTitle>Existing Articles</CardTitle>
               <CardDescription>A list of all current articles.</CardDescription>
             </div>
-            <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-              <SheetTrigger asChild><Button><Plus className="h-4 w-4" /> Add Article</Button></SheetTrigger>
-              <SheetContent className="flex flex-col sm:max-w-3xl">
-                <SheetHeader>
-                  <SheetTitle>Add New Article</SheetTitle>
-                </SheetHeader>
-                <div className="flex-grow overflow-y-auto pr-4">
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
-                      <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                      <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} onChange={(e) => { field.onChange(e); setIsSlugManuallyEdited(true); }}/></FormControl> <FormMessage /> </FormItem> )} />
-                      <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                       <FormField
-                        control={form.control}
-                        name="topicId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Topic</FormLabel>
-                            <Combobox
-                                items={topicOptions}
-                                value={field.value || null}
-                                onChange={field.onChange}
-                                placeholder="Select a topic"
-                                searchPlaceholder="Search or create..."
-                                noResultsText="No topic found. Create a new one."
-                                onNewItem={handleCreateTopic}
-                            />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField control={form.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
-                      <FormField control={form.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                      <FormItem>
-                          <FormLabel>Main Image</FormLabel>
-                          <FormControl><Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} /></FormControl>
-                      </FormItem>
-                      <div className="p-4 bg-muted/50 rounded-lg">
-                        {renderSectionForms(form, addSections, appendAddSection, removeAddSection)}
-                      </div>
-                    </form>
-                  </Form>
-                </div>
-                <SheetFooter className="mt-auto border-t py-4">
-                  <SheetClose asChild><Button type="button" variant="outline">Cancel</Button></SheetClose>
-                  <Button type="button" onClick={form.handleSubmit(onAddSubmit)} disabled={form.formState.isSubmitting}>Save Article</Button>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
+            <div className="flex gap-2">
+                <Button variant="outline" onClick={handleSeed}>Seed Publications</Button>
+                <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
+                <SheetTrigger asChild><Button><Plus className="h-4 w-4" /> Add Article</Button></SheetTrigger>
+                <SheetContent className="flex flex-col sm:max-w-3xl">
+                    <SheetHeader>
+                    <SheetTitle>Add New Article</SheetTitle>
+                    </SheetHeader>
+                    <div className="flex-grow overflow-y-auto pr-4">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
+                        <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} onChange={(e) => { field.onChange(e); setIsSlugManuallyEdited(true); }}/></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField
+                            control={form.control}
+                            name="topicId"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Topic</FormLabel>
+                                <Combobox
+                                    items={topicOptions}
+                                    value={field.value || null}
+                                    onChange={field.onChange}
+                                    placeholder="Select a topic"
+                                    searchPlaceholder="Search or create..."
+                                    noResultsText="No topic found. Create a new one."
+                                    onNewItem={handleCreateTopic}
+                                />
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField control={form.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormField control={form.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                        <FormItem>
+                            <FormLabel>Main Image</FormLabel>
+                            <FormControl><Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} /></FormControl>
+                        </FormItem>
+                        <div className="p-4 bg-muted/50 rounded-lg">
+                            {renderSectionForms(form, addSections, appendAddSection, removeAddSection)}
+                        </div>
+                        </form>
+                    </Form>
+                    </div>
+                    <SheetFooter className="mt-auto border-t py-4">
+                    <SheetClose asChild><Button type="button" variant="outline">Cancel</Button></SheetClose>
+                    <Button type="button" onClick={form.handleSubmit(onAddSubmit)} disabled={form.formState.isSubmitting}>Save Article</Button>
+                    </SheetFooter>
+                </SheetContent>
+                </Sheet>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="mb-4">
@@ -517,3 +572,5 @@ export default function PublicationsPage() {
     </>
   );
 }
+
+    
