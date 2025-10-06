@@ -150,7 +150,6 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       
       const link = document.createElement('a');
       link.href = '/api/download-catalog';
-      link.setAttribute('download', 'IMEDA-Catalogue-2025-26.pdf');
       document.body.appendChild(link);
       link.click();
       
@@ -162,6 +161,11 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleResetForm = () => {
+    setHasSubmitted(false);
+    setCatalogEmail('');
   };
 
   const categoriesWithThemes = useMemo(() => {
@@ -270,10 +274,13 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                     </div>
                     <div className="p-6 md:p-10 text-left order-2 md:order-1">
                         {hasSubmitted ? (
-                          <div className="flex flex-col items-center justify-center text-center">
-                            <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
+                          <div className="flex flex-col items-center justify-center text-center space-y-4">
+                            <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
                             <h3 className="font-headline font-normal text-2xl">Merci!</h3>
-                            <p className="text-muted-foreground mt-2 text-sm">Votre téléchargement a commencé.</p>
+                            <p className="text-muted-foreground mt-1 text-sm">Votre téléchargement a commencé.</p>
+                            <Button variant="outline" onClick={handleResetForm} className="mt-4">
+                                Fermer
+                            </Button>
                           </div>
                         ) : (
                           <>
