@@ -1,3 +1,4 @@
+
 // src/app/(site)/page.tsx
 import { adminDb } from '@/firebase/admin';
 import { HomeClient } from './home-client';
@@ -5,6 +6,8 @@ import { Metadata } from 'next';
 import { DocumentData } from 'firebase-admin/firestore';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 
 // Interfaces
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
@@ -13,6 +16,21 @@ interface Campus { id: string; name: string; slug: string; description?: string;
 interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
+interface Article {
+  id: string;
+  title: string;
+  author: string;
+  publicationDate: string;
+  summary?: string;
+  imageUrl?: string;
+  slug?: string;
+  topicId?: string;
+  topic?: { id: string; name: string };
+}
+interface Topic {
+    id: string;
+    name: string;
+}
 
 // Dynamic Metadata Generation for Home Page
 export async function generateMetadata(): Promise<Metadata> {
@@ -45,28 +63,49 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getHomePageData() {
   try {
-    const [pageSnap, categoriesSnap, themesSnap, formationsSnap] = await Promise.all([
+    const [
+        pageSnap, 
+        categoriesSnap, 
+        themesSnap, 
+        formationsSnap, 
+        articlesSnap,
+        topicsSnap,
+        campusesSnap
+    ] = await Promise.all([
       adminDb.collection('pages').doc('home').get(),
       adminDb.collection('course_categories').orderBy('name', 'asc').get(),
       adminDb.collection('course_themes').orderBy('name', 'asc').get(),
       adminDb.collection('course_formations').get(),
+      adminDb.collection('articles').orderBy('publicationDate', 'desc').limit(6).get(),
+      adminDb.collection('article_topics').get(),
+      adminDb.collection('campuses').orderBy('name', 'asc').get(),
     ]);
 
     const homePage = pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
-    // Campuses are now fetched in the main layout, so we don't need to fetch them here
     const categories = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Category[];
     const themes = themesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Theme[];
     const formations = formationsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Formation[];
-
-    // Fetch campuses separately just for this page's component props
-    const campusesSnap = await adminDb.collection('campuses').orderBy('name', 'asc').get();
     const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
+    
+    const topics = topicsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Topic[];
+    const topicsMap = new Map(topics.map(t => [t.id, t]));
+
+    const articles = articlesSnap.docs.map(doc => {
+      const data = doc.data();
+      const topic = data.topicId ? topicsMap.get(data.topicId) : null;
+      return {
+        id: doc.id,
+        ...data,
+        publicationDate: data.publicationDate ? format(data.publicationDate.toDate(), 'PPP', { locale: enUS }) : '',
+        topic: topic ? { id: topic.id, name: topic.name } : null,
+      } as Article;
+    });
 
 
-    return { homePage, campuses, categories, themes, formations };
+    return { homePage, campuses, categories, themes, formations, articles };
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
-    return { homePage: null, campuses: [], categories: [], themes: [], formations: [] };
+    return { homePage: null, campuses: [], categories: [], themes: [], formations: [], articles: [] };
   }
 }
 

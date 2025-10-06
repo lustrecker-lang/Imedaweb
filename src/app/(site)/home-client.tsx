@@ -1,3 +1,4 @@
+
 // src/app/(site)/home-client.tsx
 'use client';
 
@@ -11,7 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Combobox } from "@/components/ui/combobox";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { cn } from "@/lib/utils"; // Import cn to use with the video component
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 // Interfaces
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
@@ -20,6 +22,18 @@ interface Campus { id: string; name: string; slug: string; description?: string;
 interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
+interface Article {
+    id: string;
+    title: string;
+    author: string;
+    publicationDate: string;
+    summary?: string;
+    imageUrl?: string;
+    slug?: string;
+    topicId?: string;
+    topic?: { id: string; name: string };
+}
+
 
 // Props
 interface HomeClientProps {
@@ -28,6 +42,7 @@ interface HomeClientProps {
   categories: Category[];
   themes: Theme[];
   formations: Formation[];
+  articles: Article[];
 }
 
 const isVideoUrl = (url?: string | null) => {
@@ -59,7 +74,7 @@ const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: 
   };
 
 
-export function HomeClient({ homePage, campuses, categories, themes, formations }: HomeClientProps) {
+export function HomeClient({ homePage, campuses, categories, themes, formations, articles }: HomeClientProps) {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
@@ -71,13 +86,11 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
-  // Directly access the sections from the homePage prop
   const heroSection = homePage?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = homePage?.sections.find(s => s.id === 'features');
   const heroMediaUrl = heroSection?.imageUrl;
   const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
   
-  // Find the three feature sections dynamically
   const featureSections = useMemo(() => {
     const sections = [];
     for (let i = 1; i <= 3; i++) {
@@ -266,6 +279,69 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
           </div>
         </div>
       </section>
+      
+      <section className="py-16 bg-muted/30">
+        <div className="container px-4 md:px-6">
+          <div className="flex items-center justify-between mb-8">
+            <div className="max-w-[75%]">
+                <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Nos Publications</h2>
+                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                  Découvrez nos dernières analyses, recherches et perspectives de nos experts.
+                </p>
+            </div>
+          </div>
+          <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
+            <CarouselContent className="-ml-4">
+              {articles.map((article) => (
+                <CarouselItem key={article.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
+                  <Card className="h-full flex flex-col group overflow-hidden">
+                    <Link href={`/publications/${article.slug || article.id}`} className="block">
+                      <div className="aspect-video relative overflow-hidden">
+                          {article.imageUrl ? (
+                              <Image
+                                  src={article.imageUrl}
+                                  alt={article.title}
+                                  fill
+                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                          ) : (
+                              <div className="h-full w-full bg-muted flex items-center justify-center">
+                                  <p className="text-xs text-muted-foreground">No Image</p>
+                              </div>
+                          )}
+                      </div>
+                    </Link>
+                    <CardHeader>
+                      {article.topic && <Badge variant="secondary" className="w-fit mb-2">{article.topic.name}</Badge>}
+                      <CardTitle className="font-headline font-normal text-lg leading-tight">
+                          <Link href={`/publications/${article.slug || article.id}`} className="hover:text-primary transition-colors">
+                              {article.title}
+                          </Link>
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        Par {article.author} le {article.publicationDate}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                      <p className="text-sm text-muted-foreground line-clamp-3">{article.summary}</p>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+             <div className="absolute top-[-3.5rem] right-0 flex gap-2">
+              <CarouselPrevious className="static translate-y-0 rounded-none sm:inline-flex" />
+              <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
+            </div>
+          </Carousel>
+           <div className="mt-8 text-center">
+                <Button asChild variant="outline">
+                    <Link href="/publications">Voir toutes les publications</Link>
+                </Button>
+            </div>
+        </div>
+      </section>
+
     </div>
   );
 }
