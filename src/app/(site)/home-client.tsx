@@ -204,11 +204,11 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
               )}
               <div className="absolute inset-0 bg-black/50" />
               <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
-                  {companyProfile?.iconUrl && (
-                    <div className="mb-4 h-10 w-10 relative">
+                  {companyProfile?.logoUrl && (
+                    <div className="mb-4 relative h-10 w-32">
                         <Image
-                            src={companyProfile.iconUrl}
-                            alt="Company Icon"
+                            src={companyProfile.logoUrl}
+                            alt="Company Logo"
                             fill
                             className="object-contain"
                         />
