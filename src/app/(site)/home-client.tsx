@@ -293,7 +293,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
           <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
             <CarouselContent className="-ml-4">
               {articles.map((article) => (
-                <CarouselItem key={article.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/3">
+                <CarouselItem key={article.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/4">
                   <Card className="h-full flex flex-col group overflow-hidden">
                     <Link href={`/publications/${article.slug || article.id}`} className="block">
                       <div className="aspect-video relative overflow-hidden">
