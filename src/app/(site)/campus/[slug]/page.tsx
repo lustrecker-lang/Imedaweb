@@ -120,7 +120,7 @@ export default function CampusPage() {
   return (
     <div className="flex flex-col">
       <main className="container py-12 md:py-16 lg:py-20">
-         <Card className="relative aspect-video w-full flex items-center justify-center text-white text-center p-4 overflow-hidden rounded-lg mb-12">
+         <Card className="relative h-[40vh] min-h-[300px] w-full flex items-end justify-start text-white text-left p-6 md:p-8 lg:p-12 overflow-hidden rounded-lg mb-12">
             {campus.hero?.backgroundMediaUrl ? (
                 isHeroVideo ? (
                     <video
@@ -143,13 +143,13 @@ export default function CampusPage() {
             ) : (
             <div className="absolute inset-0 bg-slate-800" />
             )}
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="relative z-10 max-w-4xl">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+            <div className="relative z-10 max-w-2xl">
                 <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline text-white">
                     {campus.hero?.title || "Welcome"}
                 </h1>
                 {campus.hero?.subtitle && (
-                    <p className="mx-auto mt-4 max-w-[700px] text-gray-200 text-sm md:text-base">
+                    <p className="mt-2 max-w-[700px] text-gray-200 text-sm md:text-base">
                         {campus.hero.subtitle}
                     </p>
                 )}
