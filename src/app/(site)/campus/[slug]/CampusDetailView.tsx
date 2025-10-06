@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 
 interface CampusFeature {
@@ -266,16 +267,26 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <ul className="pt-2 pl-4 space-y-2">
-                                        {category.themes.map(theme => (
-                                            <li key={theme.id}>
-                                                <Link href={`/courses?themeId=${theme.id}`} className="flex items-center text-primary hover:underline transition-colors">
-                                                    <ChevronRight className="h-4 w-4 mr-2" />
-                                                    {theme.name}
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                  <Table>
+                                    <TableBody>
+                                      {category.themes.map((theme) => (
+                                        <TableRow key={theme.id}>
+                                          <TableCell className="font-medium text-primary">
+                                            <Link href={`/courses?themeId=${theme.id}`} className="hover:underline">
+                                              {theme.name}
+                                            </Link>
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            <Button asChild variant="outline" size="sm">
+                                              <Link href={`/courses?themeId=${theme.id}`}>
+                                                Voir Les Formations
+                                              </Link>
+                                            </Button>
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
                                 </AccordionContent>
                             </AccordionItem>
                         ))}
