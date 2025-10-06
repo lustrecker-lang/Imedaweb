@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -36,7 +37,7 @@ const navStructure = [
         items: [
             { href: "/about", title: "À propos de nous", description: "Découvrez notre histoire, notre mission et nos valeurs." },
             { href: "#", title: "Carrières", description: "Rejoignez notre équipe et construisons l'avenir ensemble." },
-            { href: "#", title: "Présentation", description: "Une vue d'ensemble de nos activités et de notre impact." },
+            { href: "/presentation", title: "Présentation", description: "Une vue d'ensemble de nos activités et de notre impact." },
             { href: "/references", title: "Références", description: "Voyez comment nous avons aidé nos clients à réussir." },
             { href: "/notre-approche", title: "Notre approche", description: "Notre méthodologie unique pour des résultats exceptionnels." },
         ]

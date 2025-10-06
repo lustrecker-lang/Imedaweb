@@ -1,4 +1,5 @@
 
+
 'use client';
 import Link from "next/link";
 import { Instagram, Youtube } from "lucide-react";
@@ -30,7 +31,7 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
             <ul className="mt-4 space-y-2">
               <li><Link href="/about" className="text-xs text-muted-foreground hover:text-foreground">À propos de nous</Link></li>
               <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Carrières</Link></li>
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Présentation</Link></li>
+              <li><Link href="/presentation" className="text-xs text-muted-foreground hover:text-foreground">Présentation</Link></li>
               <li><Link href="/references" className="text-xs text-muted-foreground hover:text-foreground">Références</Link></li>
               <li><Link href="/notre-approche" className="text-xs text-muted-foreground hover:text-foreground">Notre approche</Link></li>
             </ul>
