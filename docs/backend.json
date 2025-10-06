@@ -1,5 +1,100 @@
+
 {
   "entities": {
+    "NewsStory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "NewsStory",
+      "type": "object",
+      "description": "Represents a single company news story.",
+      "properties": {
+        "title": { "type": "string", "description": "The headline of the news story." },
+        "slug": { "type": "string", "description": "A URL-friendly version of the title." },
+        "publicationDate": { "type": "string", "format": "date-time", "description": "The date the story was published." },
+        "content": { "type": "string", "description": "The full content of the news story." },
+        "mediaUrl": { "type": "string", "description": "URL for the story's main image or video.", "format": "uri" },
+        "ogTitle": { "type": "string", "description": "Open Graph title for social sharing." },
+        "ogDescription": { "type": "string", "description": "Open Graph description for social sharing." },
+        "ogImage": { "type": "string", "description": "Open Graph image URL for social sharing.", "format": "uri" }
+      },
+      "required": ["title", "slug", "publicationDate", "content"]
+    },
+    "Article": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Article",
+      "type": "object",
+      "description": "Represents a single publication or article.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the article."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly version of the article title."
+        },
+        "author": {
+          "type": "string",
+          "description": "The author of the article."
+        },
+        "publicationDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the article was published."
+        },
+        "summary": {
+          "type": "string",
+          "description": "A short summary of the article."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL for the article's main feature image.",
+          "format": "uri"
+        },
+        "topicId": {
+            "type": "string",
+            "description": "The ID of the associated article topic."
+        },
+        "sections": {
+            "type": "array",
+            "description": "An array of content sections for this article.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "description": "Unique ID for the section." },
+                "title": { "type": "string", "description": "Optional title for the section." },
+                "paragraph": { "type": "string", "description": "The text content for the section." },
+                "imageUrl": { "type": "string", "description": "Optional image for the section.", "format": "uri" }
+              },
+              "required": ["id"]
+            }
+        }
+      },
+      "required": ["title", "slug", "author", "publicationDate"]
+    },
+    "ArticleTopic": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ArticleTopic",
+      "type": "object",
+      "description": "Represents a topic for articles.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the topic."
+        }
+      },
+      "required": ["name"]
+    },
+    "Reference": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Reference",
+      "type": "object",
+      "description": "Represents a company reference or partner.",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the company." },
+        "logoUrl": { "type": "string", "description": "URL for the company's logo.", "format": "uri" }
+      },
+      "required": ["name", "logoUrl"]
+    },
     "CompanyProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "CompanyProfile",
@@ -15,9 +110,19 @@
           "description": "URL of the uploaded company logo.",
           "format": "uri"
         },
+        "logoLightUrl": {
+          "type": "string",
+          "description": "URL of the uploaded light version of the company logo.",
+          "format": "uri"
+        },
         "iconUrl": {
           "type": "string",
           "description": "URL of the uploaded company icon (e.g., for favicons).",
+          "format": "uri"
+        },
+        "faviconUrl": {
+          "type": "string",
+          "description": "URL of the uploaded company favicon.",
           "format": "uri"
         }
       },
@@ -56,13 +161,299 @@
               "content": {
                 "type": "string",
                 "description": "The main text content for the section."
+              },
+              "imageUrl": {
+                "type": "string",
+                "description": "URL for an optional background or feature image.",
+                "format": "uri"
               }
             },
             "required": ["id", "title", "content"]
           }
+        },
+        "ogTitle": {
+          "type": "string",
+          "description": "The Open Graph title for social media sharing."
+        },
+        "ogDescription": {
+          "type": "string",
+          "description": "The Open Graph description for social media sharing."
+        },
+        "ogImage": {
+          "type": "string",
+          "description": "The Open Graph image URL for social media sharing.",
+          "format": "uri"
         }
       },
       "required": ["id", "title", "sections"]
+    },
+    "Lead": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Lead",
+      "type": "object",
+      "description": "Represents a lead submitted through a contact form.",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "The full name of the person who submitted the form."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The email address of the lead."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The phone number of the lead (optional)."
+        },
+        "message": {
+          "type": "string",
+          "description": "The message submitted by the lead."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the lead was created."
+        },
+        "leadType": {
+            "type": "string",
+            "description": "Type of lead, e.g., 'Contact Form' or 'Course Inquiry'."
+        },
+        "courseName": {
+            "type": "string",
+            "description": "Name of the course if the lead is a course inquiry."
+        }
+      },
+      "required": ["email", "createdAt"]
+    },
+    "Campus": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Campus",
+      "type": "object",
+      "description": "Represents a school campus and all its page content.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the campus."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly version of the campus name."
+        },
+        "description": {
+          "type": "string",
+          "description": "A short description of the campus for nav menus."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "A general image for the campus, used in listings.",
+          "format": "uri"
+        },
+        "hero": {
+          "type": "object",
+          "properties": {
+            "backgroundMediaUrl": { "type": "string", "format": "uri" },
+            "title": { "type": "string" },
+            "subtitle": { "type": "string" }
+          }
+        },
+        "campusDescription": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "body": { "type": "string" }
+          }
+        },
+        "academicOffering": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "subtitle": { "type": "string" },
+            "courses": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "campusExperience": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "features": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "mediaUrl": { "type": "string", "format": "uri" }
+                }
+              }
+            }
+          }
+        },
+        "visitAndContact": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "subtitle": { "type": "string" },
+            "address": { "type": "string" }
+          }
+        },
+        "faq": {
+          "type": "object",
+          "properties": {
+            "headline": { "type": "string" },
+            "faqs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "question": { "type": "string" },
+                  "answer": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["name", "slug"]
+    },
+    "Service": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Service",
+      "type": "object",
+      "description": "Represents a service offered by the company.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the service."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the service."
+        },
+        "mediaUrl": {
+          "type": "string",
+          "description": "URL for an image or video representing the service.",
+          "format": "uri"
+        },
+        "isPremium": {
+          "type": "boolean",
+          "description": "Indicates if the service is a premium offering."
+        },
+        "isOptional": {
+          "type": "boolean",
+          "description": "Indicates if the service is optional or included by default."
+        }
+      },
+      "required": ["name"]
+    },
+    "CourseCategory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseCategory",
+      "type": "object",
+      "description": "Represents a course category (discipline).",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "mediaUrl": { "type": "string", "format": "uri" }
+      },
+      "required": ["name"]
+    },
+    "CourseTheme": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseTheme",
+      "type": "object",
+      "description": "Represents a theme within a category.",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "categoryId": { "type": "string" }
+      },
+      "required": ["name", "categoryId"]
+    },
+    "CourseFormation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseFormation",
+      "type": "object",
+      "description": "Represents a specific course (formation) within a theme.",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the formation." },
+        "themeId": { "type": "string", "description": "The ID of the parent theme." },
+        "formationId": { "type": "string", "description": "A custom, user-defined ID for the formation." },
+        "objectifPedagogique": { "type": "string", "description": "The pedagogical objective." },
+        "preRequis": { "type": "string", "description": "Prerequisites for the course." },
+        "publicConcerne": { "type": "string", "description": "The target audience." },
+        "methodesMobilisees": { "type": "string", "description": "Methods used in the course." },
+        "moyensPedagogiques": { "type": "string", "description": "Pedagogical means." },
+        "modalitesEvaluation": { "type": "string", "description": "Evaluation modalities." },
+        "prixAvecHebergement": { "type": "string", "description": "Price with accommodation." },
+        "prixSansHebergement": { "type": "string", "description": "Price without accommodation." },
+        "format": { "type": "string", "description": "The format of the course (e.g., online, in-person)." }
+      },
+      "required": ["name", "themeId", "formationId"]
+    },
+    "CourseModule": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseModule",
+      "type": "object",
+      "description": "Represents a module within a formation.",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "formationId": { "type": "string" }
+      },
+      "required": ["name", "formationId"]
+    },
+    "CourseDetailPageContent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseDetailPageContent",
+      "type": "object",
+      "description": "Stores reusable content for the course detail page.",
+      "properties": {
+        "valeurImeda": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "content": { "type": "string" },
+            "imageUrl": { "type": "string", "format": "uri" }
+          }
+        },
+        "faq": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "question": { "type": "string" },
+              "answer": { "type": "string" }
+            },
+            "required": ["id", "question", "answer"]
+          }
+        },
+        "contact": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "francePhone": { "type": "string" },
+            "uaePhone": { "type": "string" },
+            "email": { "type": "string", "format": "email" },
+            "imageUrl": { "type": "string", "format": "uri" }
+          }
+        }
+      }
     }
   },
   "auth": {
@@ -73,6 +464,14 @@
   },
   "firestore": {
     "structure": [
+       {
+        "path": "/news/{newsId}",
+        "definition": {
+          "entityName": "NewsStory",
+          "schema": { "$ref": "#/backend/entities/NewsStory" },
+          "description": "Stores company news stories."
+        }
+      },
       {
         "path": "/pages/{pageId}",
         "definition": {
@@ -84,7 +483,47 @@
           "params": [
             {
               "name": "pageId",
-              "description": "The unique identifier for the page (e.g., 'home')."
+              "description": "The unique identifier for the page (e.g., 'home', 'courses')."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/articles/{articleId}",
+        "definition": {
+          "entityName": "Article",
+          "schema": {
+            "$ref": "#/backend/entities/Article"
+          },
+          "description": "Stores individual articles for the publications page.",
+          "params": [
+            {
+              "name": "articleId",
+              "description": "The unique identifier for the article."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/article_topics/{topicId}",
+        "definition": {
+            "entityName": "ArticleTopic",
+            "schema": { "$ref": "#/backend/entities/ArticleTopic" },
+            "description": "Stores article topics."
+        }
+      },
+      {
+        "path": "/courseDetailPage/{docId}",
+        "definition": {
+          "entityName": "CourseDetailPageContent",
+          "schema": {
+            "$ref": "#/backend/entities/CourseDetailPageContent"
+          },
+          "description": "Stores reusable content for the course detail page.",
+          "params": [
+            {
+              "name": "docId",
+              "description": "Usually 'main' for a singleton document."
             }
           ]
         }
@@ -104,8 +543,81 @@
             }
           ]
         }
+      },
+      {
+        "path": "/leads/{leadId}",
+        "definition": {
+          "entityName": "Lead",
+          "schema": {
+            "$ref": "#/backend/entities/Lead"
+          },
+          "description": "Stores all leads submitted through the contact form.",
+          "params": [
+            {
+              "name": "leadId",
+              "description": "The unique identifier for the lead."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/campuses/{campusId}",
+        "definition": {
+          "entityName": "Campus",
+          "schema": {
+            "$ref": "#/backend/entities/Campus"
+          },
+          "description": "Represents a school campus and all its page content.",
+          "params": [
+            {
+              "name": "campusId",
+              "description": "The unique identifier for the campus."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/services/{serviceId}",
+        "definition": {
+          "entityName": "Service",
+          "schema": {
+            "$ref": "#/backend/entities/Service"
+          },
+          "description": "Stores information about each service offered.",
+          "params": [
+            {
+              "name": "serviceId",
+              "description": "The unique identifier for the service."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/references/{referenceId}",
+        "definition": {
+          "entityName": "Reference",
+          "schema": { "$ref": "#/backend/entities/Reference" },
+          "description": "Stores company references or partners."
+        }
+      },
+      {
+        "path": "/course_categories/{categoryId}",
+        "definition": { "entityName": "CourseCategory", "schema": { "$ref": "#/backend/entities/CourseCategory" } }
+      },
+      {
+        "path": "/course_themes/{themeId}",
+        "definition": { "entityName": "CourseTheme", "schema": { "$ref": "#/backend/entities/CourseTheme" } }
+      },
+      {
+        "path": "/course_formations/{formationId}",
+        "definition": { "entityName": "CourseFormation", "schema": { "$ref": "#/backend/entities/CourseFormation" } }
+      },
+      {
+        "path": "/course_modules/{moduleId}",
+        "definition": { "entityName": "CourseModule", "schema": { "$ref": "#/backend/entities/CourseModule" } }
       }
     ],
     "reasoning": "This Firestore data structure allows for modular content management. Each page's content is stored in a separate document within the 'pages' collection. This makes it easy to add new pages and edit their content by section."
   }
 }
+    

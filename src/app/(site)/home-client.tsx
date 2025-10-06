@@ -49,6 +49,7 @@ interface NewsStory {
 interface CompanyProfile {
   name?: string;
   logoUrl?: string;
+  logoLightUrl?: string;
   iconUrl?: string;
 }
 
@@ -204,11 +205,11 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
               )}
               <div className="absolute inset-0 bg-black/50" />
               <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
-                  {companyProfile?.logoUrl && (
-                    <div className="mb-4 relative h-10 w-32">
+                  {companyProfile?.logoLightUrl && (
+                    <div className="mb-4 relative h-10 w-48">
                         <Image
-                            src={companyProfile.logoUrl}
-                            alt="Company Logo"
+                            src={companyProfile.logoLightUrl}
+                            alt={companyProfile.name || 'Company Logo'}
                             fill
                             className="object-contain"
                         />

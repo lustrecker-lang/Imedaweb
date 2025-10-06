@@ -35,6 +35,7 @@ import Image from 'next/image';
 const formSchema = z.object({
   name: z.string().min(1, 'Company name is required.'),
   logoUrl: z.string().optional(),
+  logoLightUrl: z.string().optional(),
   iconUrl: z.string().optional(),
   faviconUrl: z.string().optional(),
 });
@@ -42,6 +43,7 @@ const formSchema = z.object({
 interface CompanyProfile {
   name: string;
   logoUrl?: string;
+  logoLightUrl?: string;
   iconUrl?: string;
   faviconUrl?: string;
 }
@@ -54,6 +56,7 @@ export default function CompanyPage() {
   const { toast } = useToast();
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoLightFile, setLogoLightFile] = useState<File | null>(null);
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [faviconFile, setFaviconFile] = useState<File | null>(null);
   
@@ -69,6 +72,7 @@ export default function CompanyPage() {
     defaultValues: {
       name: '',
       logoUrl: '',
+      logoLightUrl: '',
       iconUrl: '',
       faviconUrl: '',
     },
@@ -126,6 +130,12 @@ export default function CompanyPage() {
         logoUrl = await handleFileUpload(logoFile);
         if (!logoUrl) return; // Stop submission if upload failed
     }
+    
+    let logoLightUrl = values.logoLightUrl;
+    if (logoLightFile) {
+        logoLightUrl = await handleFileUpload(logoLightFile);
+        if (!logoLightUrl) return; // Stop submission if upload failed
+    }
 
     let iconUrl = values.iconUrl;
     if (iconFile) {
@@ -144,6 +154,7 @@ export default function CompanyPage() {
     const dataToSave = {
         name: values.name,
         logoUrl: logoUrl,
+        logoLightUrl: logoLightUrl,
         iconUrl: iconUrl,
         faviconUrl: faviconUrl,
     };
@@ -155,6 +166,7 @@ export default function CompanyPage() {
       description: 'Company profile has been updated.',
     });
     setLogoFile(null);
+    setLogoLightFile(null);
     setIconFile(null);
     setFaviconFile(null);
   };
@@ -179,6 +191,7 @@ export default function CompanyPage() {
               {isProfileLoading ? (
                 <div className="space-y-4">
                   <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
@@ -227,6 +240,33 @@ export default function CompanyPage() {
                   />
                    <FormField
                     control={form.control}
+                    name="logoLightUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Logo (light version)</FormLabel>
+                         {companyProfile?.logoLightUrl && (
+                          <div className="my-2 p-2 bg-gray-800 inline-block rounded-md">
+                            <Image src={companyProfile.logoLightUrl} alt="Current Light Logo" width={100} height={40} className="object-contain" />
+                          </div>
+                        )}
+                        <FormControl>
+                          <Input 
+                            type="file" 
+                            accept="image/svg+xml, image/png"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                setLogoLightFile(e.target.files[0]);
+                                field.onChange(e.target.files[0].name);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
                     name="iconUrl"
                     render={({ field }) => (
                       <FormItem>
@@ -243,7 +283,7 @@ export default function CompanyPage() {
                             onChange={(e) => {
                               if (e.target.files?.[0]) {
                                 setIconFile(e.target.files[0]);
-                                field.onChange(e.target.files[0].name); // To satisfy react-hook-form
+                                field.onChange(e.target.files[0].name);
                               }
                             }}
                           />
@@ -270,7 +310,7 @@ export default function CompanyPage() {
                             onChange={(e) => {
                               if (e.target.files?.[0]) {
                                 setFaviconFile(e.target.files[0]);
-                                field.onChange(e.target.files[0].name); // To satisfy react-hook-form
+                                field.onChange(e.target.files[0].name);
                               }
                             }}
                           />

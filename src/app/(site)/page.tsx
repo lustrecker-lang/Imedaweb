@@ -42,6 +42,7 @@ interface NewsStory {
 interface CompanyProfile {
   name?: string;
   logoUrl?: string;
+  logoLightUrl?: string;
   iconUrl?: string;
 }
 // ------------------------------------------------------------------------------------------

@@ -25,6 +25,7 @@ import Image from "next/image";
 interface CompanyProfile {
   name?: string;
   iconUrl?: string;
+  logoLightUrl?: string;
 }
 
 export default function AdminLayout({
