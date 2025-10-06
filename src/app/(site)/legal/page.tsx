@@ -1,4 +1,3 @@
-
 // src/app/(site)/legal/page.tsx
 'use client';
 
@@ -67,7 +66,7 @@ export default function LegalPage() {
 
       <div className="grid md:grid-cols-4 gap-8 lg:gap-12">
         <aside className="md:col-span-1">
-            <nav className="flex flex-col space-y-2 sticky top-24">
+            <nav className="flex flex-col space-y-1 sticky top-24">
                 {isPageLoading ? (
                     <div className="space-y-2">
                         <Skeleton className="h-9 w-full" />
@@ -81,8 +80,8 @@ export default function LegalPage() {
                             variant="ghost"
                             onClick={() => handleTabChange(item.id)}
                             className={cn(
-                                "justify-start text-left",
-                                activeTab === item.id && "bg-muted font-semibold text-primary"
+                                "justify-start text-left text-muted-foreground",
+                                activeTab === item.id && "font-semibold text-foreground border border-border shadow-sm bg-background hover:bg-background"
                             )}
                         >
                             {item.title}
