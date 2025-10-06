@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Image from "next/image";
@@ -18,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetClose, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetClose, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { CourseInquiryForm } from "@/components/course-inquiry-form";
 
 
@@ -303,7 +304,24 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </Accordion>
                 </section>
                 
-                 {/* 3. Campus Experience */}
+                 {/* 3. Banner Section */}
+                {campus.bannerSection && (campus.bannerSection.title || campus.bannerSection.text || campus.bannerSection.mediaUrl) && (
+                    <section id="banner">
+                        <Card className="overflow-hidden">
+                            <div className="grid grid-cols-1 md:grid-cols-2">
+                                <div className="p-6 flex flex-col justify-center">
+                                    <h3 className="font-headline text-2xl font-normal">{campus.bannerSection.title}</h3>
+                                    <p className="mt-2 text-sm text-muted-foreground">{campus.bannerSection.text}</p>
+                                </div>
+                                <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full">
+                                    {campus.bannerSection.mediaUrl && <MediaPreview url={campus.bannerSection.mediaUrl} alt={campus.bannerSection.title || "Banner"} />}
+                                </div>
+                            </div>
+                        </Card>
+                    </section>
+                )}
+                
+                {/* 4. Campus Experience */}
                 {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
                     <section id="experience">
                         <div className="max-w-2xl">
@@ -324,23 +342,6 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                  </div>
                             ))}
                         </div>
-                    </section>
-                )}
-                
-                {/* 4. Banner Section */}
-                {campus.bannerSection && (campus.bannerSection.title || campus.bannerSection.text || campus.bannerSection.mediaUrl) && (
-                    <section id="banner">
-                        <Card className="overflow-hidden">
-                            <div className="grid grid-cols-1 md:grid-cols-2">
-                                <div className="p-6 flex flex-col justify-center">
-                                    <h3 className="font-headline text-2xl font-normal">{campus.bannerSection.title}</h3>
-                                    <p className="mt-2 text-sm text-muted-foreground">{campus.bannerSection.text}</p>
-                                </div>
-                                <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full">
-                                    {campus.bannerSection.mediaUrl && <MediaPreview url={campus.bannerSection.mediaUrl} alt={campus.bannerSection.title || "Banner"} />}
-                                </div>
-                            </div>
-                        </Card>
                     </section>
                 )}
 
@@ -453,6 +454,9 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                 <Button className="w-full p-6">Voir les formations à {campus.name}</Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[90vh] flex flex-col">
+                <SheetHeader>
+                    <SheetTitle className="sr-only">Formations for {campus.name}</SheetTitle>
+                </SheetHeader>
                 <div className="overflow-y-auto p-2">
                     <Accordion type="multiple" className="w-full">
                         {categoriesWithThemes.map((category) => (
