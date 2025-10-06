@@ -123,7 +123,7 @@ const formSchema = z.object({
       title: z.string().optional(),
       description: z.string().optional(),
       phone: z.string().optional(),
-      email: z.string().email().optional().or(z.literal('')),
+      email: z.string().email({ message: "Invalid email format" }).optional().or(z.literal('')),
       imageUrl: z.string().optional(),
   }).optional(),
   faq: z.object({
@@ -515,21 +515,30 @@ export default function CampusPage() {
               </TableHeader>
               <TableBody>
                 {areCampusesLoading ? (
-                  Array.from({ length: 3 }).map((_, i) => ( <TableRow key={i}> <TableCell><Skeleton className="h-10 w-16" /></TableCell> <TableCell><Skeleton className="h-5 w-32" /></TableCell> <TableCell><Skeleton className="h-5 w-24" /></TableCell> <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell> </TableRow> ))
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-10 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))
                 ) : campuses && campuses.length > 0 ? (
                   campuses.map((campus) => (
                     <TableRow key={campus.id}>
-                      <TableCell> {campus.imageUrl ? ( <MediaPreview url={campus.imageUrl} alt={campus.name} /> ) : ( <div className="h-10 w-16 bg-muted rounded-sm flex items-center justify-center text-xs text-muted-foreground">No Media</div> )} </TableCell>
+                      <TableCell>{campus.imageUrl ? ( <MediaPreview url={campus.imageUrl} alt={campus.name} /> ) : ( <div className="h-10 w-16 bg-muted rounded-sm flex items-center justify-center text-xs text-muted-foreground">No Media</div> )}</TableCell>
                       <TableCell className="font-medium">{campus.name}</TableCell>
                       <TableCell className="font-mono text-xs">{campus.slug}</TableCell>
                       <TableCell className="text-right">
-                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus as Campus)}> <Edit className="h-4 w-4" /> <span className="sr-only">Edit</span> </Button>
-                         <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(campus as Campus)}> <Trash2 className="h-4 w-4 text-red-600" /> <span className="sr-only">Delete</span> </Button>
+                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(campus as Campus)}><Edit className="h-4 w-4" /><span className="sr-only">Edit</span></Button>
+                         <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(campus as Campus)}><Trash2 className="h-4 w-4 text-red-600" /><span className="sr-only">Delete</span></Button>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow> <TableCell colSpan={4} className="h-24 text-center"> No campuses found. Add one to get started. </TableCell> </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center"> No campuses found. Add one to get started. </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>
@@ -663,7 +672,7 @@ export default function CampusPage() {
 
                       <SheetFooter className="pt-4 sticky bottom-0 bg-background py-4">
                           <SheetClose asChild><Button type="button" variant="outline">Cancel</Button></SheetClose>
-                          <Button type="submit" disabled={editForm.formState.isSubmitting}> {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'} </Button>
+                          <Button type="submit" disabled={editForm.formState.isSubmitting}>{editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
                       </SheetFooter>
                     </form>
                 </Form>
