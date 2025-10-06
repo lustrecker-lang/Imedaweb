@@ -495,7 +495,7 @@ export default function CampusPage() {
                                 <FormMessage />
                             </FormItem>
                              <DialogFooter>
-                                <DialogClose asChild> <Button type="button" variant="outline">Cancel</Button> </DialogClose>
+                                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
                                 <Button type="submit" disabled={form.formState.isSubmitting}> {form.formState.isSubmitting ? 'Saving...' : 'Save Campus'} </Button>
                             </DialogFooter>
                         </form>
@@ -662,7 +662,7 @@ export default function CampusPage() {
                       </Accordion>
 
                       <SheetFooter className="pt-4 sticky bottom-0 bg-background py-4">
-                          <SheetClose asChild> <Button type="button" variant="outline">Cancel</Button> </SheetClose>
+                          <SheetClose asChild><Button type="button" variant="outline">Cancel</Button></SheetClose>
                           <Button type="submit" disabled={editForm.formState.isSubmitting}> {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'} </Button>
                       </SheetFooter>
                     </form>
