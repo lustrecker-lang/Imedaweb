@@ -5,10 +5,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Download } from "lucide-react";
 import { useState, useMemo, useEffect } from 'react';
+import { z } from 'zod';
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Combobox } from "@/components/ui/combobox";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -89,6 +91,14 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
+  const [catalogEmail, setCatalogEmail] = useState('');
+  const [isEmailValid, setIsEmailValid] = useState(false);
+
+  useEffect(() => {
+    const emailSchema = z.string().email();
+    const result = emailSchema.safeParse(catalogEmail);
+    setIsEmailValid(result.success);
+  }, [catalogEmail]);
 
   useEffect(() => {
     const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
@@ -184,7 +194,68 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
         </section>
       )}
 
+      <section className="py-16">
+        <div className="container px-4 md:px-6">
+          <div className="max-w-2xl">
+            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{featuresSectionHeader?.title}</h2>
+            <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
+          </div>
+          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {featureSections.map((featureSection) => (
+                <div key={featureSection.id} className="md:flex md:flex-col md:overflow-hidden md:rounded-lg md:border md:bg-card md:transition-transform md:duration-300 md:ease-in-out md:hover:-translate-y-2">
+                    <div className="flex items-start gap-4 md:flex-col">
+                        <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg md:aspect-video md:w-full">
+                          {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} fill className="object-cover"/>)}
+                        </div>
+                        <div className="flex-1 md:p-6 md:pt-4">
+                            <h3 className="font-headline font-normal md:text-lg">{featureSection.title}</h3>
+                            <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{featureSection.content}</p>
+                        </div>
+                    </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 bg-muted/30">
+        <div className="container px-4 md:px-6">
+          <Card className="overflow-hidden">
+              <div className="grid md:grid-cols-2 items-center">
+                  <div className="p-6 md:p-10 text-left">
+                      <h3 className="font-headline font-normal text-2xl">Catalogue 2025-26</h3>
+                      <p className="text-muted-foreground mt-2 text-sm">Entrez votre email pour recevoir notre catalogue complet et découvrir toutes nos formations.</p>
+                      <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
+                          <Input 
+                              type="email" 
+                              placeholder="Votre adresse email" 
+                              className="w-full sm:flex-1"
+                              value={catalogEmail}
+                              onChange={(e) => setCatalogEmail(e.target.value)}
+                          />
+                          <Button 
+                              className="w-full sm:w-auto"
+                              disabled={!isEmailValid}
+                          >
+                              <Download className="mr-2 h-4 w-4" />
+                              Télécharger
+                          </Button>
+                      </div>
+                  </div>
+                   <div className="hidden md:block aspect-video relative h-full">
+                       <Image 
+                          src="https://picsum.photos/seed/catalog/800/600"
+                          alt="Download Catalog"
+                          fill
+                          className="object-cover"
+                       />
+                   </div>
+              </div>
+          </Card>
+        </div>
+      </section>
+
+      <section className="py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
@@ -246,30 +317,6 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
               <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
             </div>
           </Carousel>
-        </div>
-      </section>
-
-      <section className="py-16">
-        <div className="container px-4 md:px-6">
-          <div className="max-w-2xl">
-            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{featuresSectionHeader?.title}</h2>
-            <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
-          </div>
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {featureSections.map((featureSection) => (
-                <div key={featureSection.id} className="md:flex md:flex-col md:overflow-hidden md:rounded-lg md:border md:bg-card md:transition-transform md:duration-300 md:ease-in-out md:hover:-translate-y-2">
-                    <div className="flex items-start gap-4 md:flex-col">
-                        <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg md:aspect-video md:w-full">
-                          {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} fill className="object-cover"/>)}
-                        </div>
-                        <div className="flex-1 md:p-6 md:pt-4">
-                            <h3 className="font-headline font-normal md:text-lg">{featureSection.title}</h3>
-                            <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{featureSection.content}</p>
-                        </div>
-                    </div>
-                </div>
-              ))}
-          </div>
         </div>
       </section>
 
