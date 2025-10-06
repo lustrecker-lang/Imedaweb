@@ -29,11 +29,10 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
           <div>
             <h3 className="text-xs font-semibold tracking-wider uppercase">À propos</h3>
             <ul className="mt-4 space-y-2">
-              <li><Link href="/about" className="text-xs text-muted-foreground hover:text-foreground">À propos de nous</Link></li>
-              <li><Link href="/careers" className="text-xs text-muted-foreground hover:text-foreground">Carrières</Link></li>
               <li><Link href="/presentation" className="text-xs text-muted-foreground hover:text-foreground">Présentation</Link></li>
-              <li><Link href="/references" className="text-xs text-muted-foreground hover:text-foreground">Références</Link></li>
+              <li><Link href="/careers" className="text-xs text-muted-foreground hover:text-foreground">Carrières</Link></li>
               <li><Link href="/notre-approche" className="text-xs text-muted-foreground hover:text-foreground">Notre approche</Link></li>
+              <li><Link href="/references" className="text-xs text-muted-foreground hover:text-foreground">Références</Link></li>
             </ul>
           </div>
           <div>
@@ -63,7 +62,7 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
           <div>
             <h3 className="text-xs font-semibold tracking-wider uppercase">Autre</h3>
             <ul className="mt-4 space-y-2">
-              <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Services</Link></li>
+              <li><Link href="/services" className="text-xs text-muted-foreground hover:text-foreground">Services</Link></li>
               <li><Link href="/publications" className="text-xs text-muted-foreground hover:text-foreground">Publications</Link></li>
               <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Partenariats d'entreprise</Link></li>
               <li><Link href="/news" className="text-xs text-muted-foreground hover:text-foreground">Actualités et Mises à jour</Link></li>
