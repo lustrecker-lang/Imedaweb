@@ -1,3 +1,4 @@
+
 // src/app/admin/leads/page.tsx
 
 'use client';
@@ -258,7 +259,6 @@ export default function LeadsPage() {
                 )}
                 <div>
                   <h4 className="font-semibold">Lead Type</h4>
-                  {/* FIX IS HERE: Changed p to div */}
                   <div className="text-muted-foreground">
                     <Badge variant={selectedLead?.leadType === 'Course Inquiry' ? 'default' : 'secondary'}>
                       {selectedLead?.leadType || 'Contact Form'}

@@ -258,11 +258,11 @@ export default function LeadsPage() {
                 )}
                 <div>
                   <h4 className="font-semibold">Lead Type</h4>
-                  <p className="text-muted-foreground">
+                  <div className="text-muted-foreground">
                     <Badge variant={selectedLead?.leadType === 'Course Inquiry' ? 'default' : 'secondary'}>
                       {selectedLead?.leadType || 'Contact Form'}
                     </Badge>
-                  </p>
+                  </div>
                 </div>
                  {selectedLead?.leadType === 'Course Inquiry' && selectedLead?.courseName && (
                   <div className="col-span-2">

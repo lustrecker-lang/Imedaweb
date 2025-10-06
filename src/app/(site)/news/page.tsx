@@ -65,9 +65,9 @@ const NewsPageSkeleton = () => {
         <Skeleton className="h-10 w-1/3 mx-auto" />
         <Skeleton className="h-5 w-1/2 mx-auto mt-4" />
       </header>
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="aspect-[4/5] w-full" />
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Skeleton key={i} className="aspect-[9/16] w-full" />
         ))}
       </div>
     </div>
@@ -90,12 +90,12 @@ export default async function NewsPage() {
         </header>
 
         {newsStories.length > 0 ? (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {newsStories.map((story) => {
               const isVideo = isVideoUrl(story.mediaUrl);
               return (
                 <Link key={story.id} href={`/news/${story.slug || story.id}`} className="block group">
-                  <Card className="relative flex flex-col overflow-hidden h-full aspect-[4/5] justify-end text-white">
+                  <Card className="relative flex flex-col overflow-hidden h-full aspect-[9/16] justify-end text-white rounded-lg">
                       {story.mediaUrl ? (
                         isVideo ? (
                            <video
@@ -123,7 +123,7 @@ export default async function NewsPage() {
                         <h2 className="font-headline font-normal text-lg leading-tight text-white">
                             {story.title}
                         </h2>
-                        <div className="mt-4 text-white/90 flex items-center text-sm">
+                        <div className="mt-4 text-white/90 flex items-center text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                             Read More <ArrowRight className="ml-2 h-4 w-4" />
                         </div>
                       </div>
