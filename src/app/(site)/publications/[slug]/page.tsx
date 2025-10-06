@@ -28,41 +28,31 @@ async function getArticle(slugOrId: string): Promise<Article | null> {
     const articlesRef = adminDb.collection('articles');
     const slugQuerySnapshot = await articlesRef.where('slug', '==', slugOrId).limit(1).get();
 
+    let docSnap;
     if (!slugQuerySnapshot.empty) {
-      const docSnap = slugQuerySnapshot.docs[0];
-      const data = docSnap.data() as DocumentData;
-      const publicationDate = data.publicationDate?.toDate();
-      const formattedDate = publicationDate ? format(publicationDate, 'MMMM d, yyyy') : '';
-
-      return {
-          id: docSnap.id,
-          title: data.title,
-          slug: data.slug,
-          author: data.author,
-          publicationDate: formattedDate,
-          summary: data.summary,
-          content: data.content,
-          imageUrl: data.imageUrl,
-      } as Article;
+      docSnap = slugQuerySnapshot.docs[0];
     } else {
-        const docSnap = await articlesRef.doc(slugOrId).get();
-        if (docSnap.exists) {
-            const data = docSnap.data() as DocumentData;
-            const publicationDate = data.publicationDate?.toDate();
-            const formattedDate = publicationDate ? format(publicationDate, 'MMMM d, yyyy') : '';
-
-            return {
-                id: docSnap.id,
-                title: data.title,
-                slug: data.slug,
-                author: data.author,
-                publicationDate: formattedDate,
-                summary: data.summary,
-                content: data.content,
-                imageUrl: data.imageUrl,
-            } as Article;
-        }
+      docSnap = await articlesRef.doc(slugOrId).get();
     }
+    
+    if (docSnap && docSnap.exists) {
+        const data = docSnap.data() as DocumentData;
+        const publicationDate = data.publicationDate?.toDate();
+        const formattedDate = publicationDate ? format(publicationDate, 'MMMM d, yyyy') : '';
+
+        return {
+            id: docSnap.id,
+            title: data.title,
+            slug: data.slug,
+            author: data.author,
+            publicationDate: formattedDate,
+            summary: data.summary,
+            content: data.content,
+            imageUrl: data.imageUrl,
+            topicId: data.topicId,
+        } as Article;
+    }
+    
     return null;
   } catch (error) {
     console.error("[getArticle] Error fetching article:", error);

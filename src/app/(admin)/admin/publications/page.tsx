@@ -34,13 +34,13 @@ const generateSlug = (title: string) => {
   const p = new RegExp(a.split('').join('|'), 'g');
 
   return title.toString().toLowerCase()
-    .replace(/\s+/g, '-') 
-    .replace(p, c => b.charAt(a.indexOf(c))) 
-    .replace(/&/g, '-and-') 
-    .replace(/[^\w\-]+/g, '') 
-    .replace(/\-\-+/g, '-') 
-    .replace(/^-+/, '') 
-    .replace(/-+$/, ''); 
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
+    .replace(/&/g, '-and-') // Replace & with 'and'
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars except -
+    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+    .replace(/^-+/, '') // Trim - from start of text
+    .replace(/-+$/, ''); // Trim - from end of text
 };
 
 const formSchema = z.object({
@@ -101,7 +101,7 @@ export default function PublicationsPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '', slug: '', author: '', publicationDate: new Date(), summary: '', content: '', imageUrl: '', topicId: ''
+      title: '', slug: '', author: '', publicationDate: new Date(), summary: '', content: '<h1>Main Title</h1>\n\n<p>Start writing your article here...</p>\n\n<h2>Subtitle</h2>\n\n<p>More content...</p>', imageUrl: '', topicId: ''
     },
   });
   
@@ -111,6 +111,15 @@ export default function PublicationsPage() {
       title: '', slug: '', author: '', publicationDate: new Date(), summary: '', content: '', imageUrl: '', topicId: ''
     },
   });
+
+  const titleValue = form.watch("title");
+
+  useEffect(() => {
+      if (titleValue && !isSlugManuallyEdited) {
+          form.setValue("slug", generateSlug(titleValue));
+      }
+  }, [titleValue, isSlugManuallyEdited, form]);
+
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -253,15 +262,15 @@ export default function PublicationsPage() {
             </div>
             <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
               <SheetTrigger asChild><Button><Plus className="h-4 w-4" /> Add Article</Button></SheetTrigger>
-              <SheetContent className="flex flex-col sm:max-w-xl">
+              <SheetContent className="flex flex-col sm:max-w-3xl">
                 <SheetHeader>
                   <SheetTitle>Add New Article</SheetTitle>
                 </SheetHeader>
                 <div className="flex-grow overflow-y-auto pr-4">
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
-                      <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} onBlur={(e) => { if (!form.getValues('slug')) { form.setValue('slug', generateSlug(e.target.value)); } }} /></FormControl> <FormMessage /> </FormItem> )} />
-                      <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} onChange={(e) => { field.onChange(e); setIsSlugManuallyEdited(true); }}/></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                        <FormField
                         control={form.control}
@@ -284,7 +293,7 @@ export default function PublicationsPage() {
                       />
                       <FormField control={form.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                      <FormField control={form.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={10} {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={15} {...field} className="font-mono text-sm" /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormItem>
                           <FormLabel>Image</FormLabel>
                           <FormControl><Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} /></FormControl>
@@ -363,7 +372,7 @@ export default function PublicationsPage() {
       </div>
       
       <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
-        <SheetContent className="flex flex-col sm:max-w-xl">
+        <SheetContent className="flex flex-col sm:max-w-3xl">
           <SheetHeader>
             <SheetTitle>Edit Article: {editingArticle?.title}</SheetTitle>
           </SheetHeader>
@@ -394,7 +403,7 @@ export default function PublicationsPage() {
                   />
                 <FormField control={editForm.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={editForm.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={10} {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="content" render={({ field }) => ( <FormItem> <FormLabel>Content</FormLabel> <FormControl><Textarea rows={15} {...field} className="font-mono text-sm" /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormItem>
                   <FormLabel>Image</FormLabel>
                   {editForm.watch('imageUrl') && <Image src={editForm.watch('imageUrl')!} alt="Current Image" width={100} height={60} className="rounded-sm object-cover" />}
