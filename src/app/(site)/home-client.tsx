@@ -122,7 +122,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations 
                           placeholder="Rechercher un thème..."
                           searchPlaceholder="Rechercher un thème..."
                           noResultsText="Aucun thème trouvé."
-                          className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10"
+                          className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10 hover:text-white"
                         />
                         <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90"><Search className="mr-2 h-4 w-4" />Rechercher</Button>
                     </div>
