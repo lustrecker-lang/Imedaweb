@@ -35,11 +35,11 @@ interface Article {
     topic?: { id: string; name: string };
 }
 interface NewsStory {
-    id: string;
-    title: string;
-    slug: string;
-    publicationDate: string;
-    mediaUrl?: string;
+  id: string;
+  title: string;
+  slug: string;
+  publicationDate: string;
+  mediaUrl?: string;
 }
 
 
@@ -183,27 +183,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
         </section>
       )}
 
-      <section className="py-16">
-        <div className="container px-4 md:px-6">
-          <div className="max-w-2xl">
-            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{featuresSectionHeader?.title}</h2>
-            <p className="mt-2 text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
-          </div>
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {featureSections.map((featureSection) => (
-                <Card key={featureSection.id} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2">
-                  <div className="aspect-video relative overflow-hidden">
-                    {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} width={600} height={400} className="object-cover w-full h-full"/>)}
-                  </div>
-                  <CardHeader><CardTitle className="font-headline font-normal">{featureSection.title}</CardTitle></CardHeader>
-                  <CardContent><CardDescription>{featureSection.content}</CardDescription></CardContent>
-                </Card>
-              ))}
-          </div>
-        </div>
-      </section>
-
-       <section className="py-16 bg-muted/30">
+      <section className="py-16 bg-muted/30">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
@@ -265,6 +245,26 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
               <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
             </div>
           </Carousel>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="container px-4 md:px-6">
+          <div className="max-w-2xl">
+            <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{featuresSectionHeader?.title}</h2>
+            <p className="mt-2 text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
+          </div>
+          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {featureSections.map((featureSection) => (
+                <Card key={featureSection.id} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-2">
+                  <div className="aspect-video relative overflow-hidden">
+                    {featureSection.imageUrl && (<Image src={featureSection.imageUrl} alt={featureSection.title} width={600} height={400} className="object-cover w-full h-full"/>)}
+                  </div>
+                  <CardHeader><CardTitle className="font-headline font-normal">{featureSection.title}</CardTitle></CardHeader>
+                  <CardContent><CardDescription>{featureSection.content}</CardDescription></CardContent>
+                </Card>
+              ))}
+          </div>
         </div>
       </section>
 
@@ -366,7 +366,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
               <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
             </div>
           </Carousel>
-           <div className="mt-8 text-center">
+           <div className="mt-8 text-left">
                 <Button asChild variant="outline">
                     <Link href="/publications">Voir toutes les publications</Link>
                 </Button>
@@ -431,7 +431,7 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
               <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
             </div>
           </Carousel>
-           <div className="mt-8 text-center">
+           <div className="mt-8 text-left">
                 <Button asChild variant="outline">
                     <Link href="/news">See All News</Link>
                 </Button>
