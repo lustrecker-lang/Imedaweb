@@ -1,3 +1,4 @@
+// src/app/admin/leads/page.tsx
 
 'use client';
 
@@ -53,7 +54,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 
-
 interface Lead {
   id: string;
   fullName: string;
@@ -101,7 +101,7 @@ export default function LeadsPage() {
     setSelectedLead(lead);
     setIsViewDialogOpen(true);
   };
-  
+
   const handleCopyToClipboard = () => {
     if (!selectedLead) return;
 
@@ -109,7 +109,7 @@ export default function LeadsPage() {
       `Name: ${selectedLead.fullName}`,
       `Email: ${selectedLead.email}`,
       selectedLead.phone ? `Phone: ${selectedLead.phone}` : null,
-      `Received: ${format(selectedLead.createdAt.toDate(), 'PP p')}`,
+      `Received: ${selectedLead.createdAt ? format(selectedLead.createdAt.toDate(), 'PP p') : 'N/A'}`,
       `Type: ${selectedLead.leadType || 'Contact Form'}`,
       selectedLead.courseName ? `Course: ${selectedLead.courseName}` : null,
       `\nMessage:\n${selectedLead.message}`
@@ -145,7 +145,7 @@ export default function LeadsPage() {
     setIsDeleteDialogOpen(false);
     setLeadToDelete(null);
   };
-  
+
   return (
     <>
       <div className="container mx-auto px-4 py-12 md:px-6">
@@ -244,16 +244,16 @@ export default function LeadsPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                     <h4 className="font-semibold">Name</h4>
-                    <p className="text-muted-foreground">{selectedLead?.fullName}</p>
+                    <div className="text-muted-foreground">{selectedLead?.fullName}</div>
                 </div>
                  <div>
                     <h4 className="font-semibold">Email</h4>
-                    <p className="text-muted-foreground">{selectedLead?.email}</p>
+                    <div className="text-muted-foreground">{selectedLead?.email}</div>
                 </div>
                 {selectedLead?.phone && (
                   <div>
                       <h4 className="font-semibold">Phone</h4>
-                      <p className="text-muted-foreground">{selectedLead.phone}</p>
+                      <div className="text-muted-foreground">{selectedLead.phone}</div>
                   </div>
                 )}
                 <div>
@@ -267,15 +267,15 @@ export default function LeadsPage() {
                  {selectedLead?.leadType === 'Course Inquiry' && selectedLead?.courseName && (
                   <div className="col-span-2">
                     <h4 className="font-semibold">Course Inquiry</h4>
-                    <p className="text-muted-foreground">{selectedLead.courseName}</p>
+                    <div className="text-muted-foreground">{selectedLead.courseName}</div>
                   </div>
                 )}
               </div>
               <div>
                 <h4 className="font-semibold">Message</h4>
-                <p className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border mt-2 whitespace-pre-wrap">
+                <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border mt-2 whitespace-pre-wrap">
                   {selectedLead?.message}
-                </p>
+                </div>
               </div>
           </div>
           <DialogFooter>
@@ -310,5 +310,3 @@ export default function LeadsPage() {
     </>
   );
 }
-
-    

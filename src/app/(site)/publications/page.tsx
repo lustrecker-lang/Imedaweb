@@ -54,7 +54,6 @@ async function getPublicationsData() {
         author: data.author,
         publicationDate: data.publicationDate ? format(data.publicationDate.toDate(), 'PPP', { locale: enUS }) : '',
         summary: data.summary,
-        content: data.content,
         imageUrl: data.imageUrl,
         topicId: data.topicId,
       };
@@ -102,5 +101,3 @@ export default async function PublicationsPageWrapper() {
     </Suspense>
   );
 }
-
-    
