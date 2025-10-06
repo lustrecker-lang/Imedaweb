@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
 import { collection, query, orderBy, Timestamp, doc } from 'firebase/firestore';
-import { format } from 'date-fns';
+import { format, getMonth, getYear } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 import {
   Card,
@@ -31,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Copy } from 'lucide-react';
+import { MoreHorizontal, Trash2, Copy, Search, ArrowLeft, ArrowRight } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,10 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination';
+
 
 interface Lead {
   id: string;
@@ -65,6 +70,8 @@ interface Lead {
   courseName?: string;
 }
 
+const LEADS_PER_PAGE = 10;
+
 export default function LeadsPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
@@ -75,6 +82,10 @@ export default function LeadsPage() {
   const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [leadTypeFilter, setLeadTypeFilter] = useState('all');
+  const [monthFilter, setMonthFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const leadsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -88,6 +99,52 @@ export default function LeadsPage() {
       router.push('/login');
     }
   }, [user, isUserLoading, router]);
+
+  const monthOptions = useMemo(() => {
+    if (!leads) return [];
+    const months = new Set<string>();
+    leads.forEach(lead => {
+        if (lead.createdAt) {
+            const monthYear = format(lead.createdAt.toDate(), 'MMMM yyyy', { locale: fr });
+            months.add(monthYear);
+        }
+    });
+    return Array.from(months).map(my => ({ value: my, label: my }));
+  }, [leads]);
+  
+  const filteredLeads = useMemo(() => {
+      if (!leads) return [];
+      let filtered = leads;
+
+      if (searchTerm) {
+          const lowercasedTerm = searchTerm.toLowerCase();
+          filtered = filtered.filter(lead => 
+              lead.fullName.toLowerCase().includes(lowercasedTerm) ||
+              lead.email.toLowerCase().includes(lowercasedTerm)
+          );
+      }
+
+      if (leadTypeFilter !== 'all') {
+          filtered = filtered.filter(lead => (lead.leadType || 'Contact Form') === leadTypeFilter);
+      }
+
+      if (monthFilter !== 'all') {
+          filtered = filtered.filter(lead => {
+              if (!lead.createdAt) return false;
+              const leadMonthYear = format(lead.createdAt.toDate(), 'MMMM yyyy', { locale: fr });
+              return leadMonthYear === monthFilter;
+          });
+      }
+
+      return filtered;
+  }, [leads, searchTerm, leadTypeFilter, monthFilter]);
+
+  const paginatedLeads = useMemo(() => {
+    const startIndex = (currentPage - 1) * LEADS_PER_PAGE;
+    return filteredLeads.slice(startIndex, startIndex + LEADS_PER_PAGE);
+  }, [filteredLeads, currentPage]);
+
+  const totalPages = Math.ceil(filteredLeads.length / LEADS_PER_PAGE);
 
   if (isUserLoading || !user) {
     return (
@@ -164,6 +221,39 @@ export default function LeadsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                        placeholder="Search by name or email..." 
+                        className="pl-10"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <Select value={leadTypeFilter} onValueChange={setLeadTypeFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Filter by type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Lead Types</SelectItem>
+                        <SelectItem value="Contact Form">Contact Form</SelectItem>
+                        <SelectItem value="Course Inquiry">Course Inquiry</SelectItem>
+                        <SelectItem value="Catalog Download">Catalog Download</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Filter by month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Months</SelectItem>
+                        {monthOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -176,7 +266,7 @@ export default function LeadsPage() {
               </TableHeader>
               <TableBody>
                 {areLeadsLoading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
+                  Array.from({ length: LEADS_PER_PAGE }).map((_, i) => (
                     <TableRow key={i}>
                       <TableCell className="py-2"><Skeleton className="h-5 w-24" /></TableCell>
                       <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
@@ -185,8 +275,8 @@ export default function LeadsPage() {
                       <TableCell className="py-2 text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
                   ))
-                ) : leads && leads.length > 0 ? (
-                  leads.map((lead) => (
+                ) : paginatedLeads && paginatedLeads.length > 0 ? (
+                  paginatedLeads.map((lead) => (
                     <TableRow key={lead.id}>
                       <TableCell className="py-2">
                         {lead.createdAt ? format(lead.createdAt.toDate(), 'PP p') : 'N/A'}
@@ -222,12 +312,31 @@ export default function LeadsPage() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center">
-                      No leads yet.
+                      No leads found for the current filters.
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
+            {totalPages > 1 && (
+                <Pagination className="mt-6">
+                    <PaginationContent>
+                        <PaginationItem>
+                            <Button variant="outline" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}>
+                                <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+                            </Button>
+                        </PaginationItem>
+                         <PaginationItem className="hidden sm:block text-sm text-muted-foreground">
+                            Page {currentPage} of {totalPages}
+                        </PaginationItem>
+                        <PaginationItem>
+                            <Button variant="outline" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>
+                                Next <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -244,16 +353,16 @@ export default function LeadsPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                     <h4 className="font-semibold">Name</h4>
-                    <div className="text-muted-foreground">{selectedLead?.fullName}</div>
+                    <p className="text-muted-foreground">{selectedLead?.fullName}</p>
                 </div>
                  <div>
                     <h4 className="font-semibold">Email</h4>
-                    <div className="text-muted-foreground">{selectedLead?.email}</div>
+                    <p className="text-muted-foreground">{selectedLead?.email}</p>
                 </div>
                 {selectedLead?.phone && (
                   <div>
                       <h4 className="font-semibold">Phone</h4>
-                      <div className="text-muted-foreground">{selectedLead.phone}</div>
+                      <p className="text-muted-foreground">{selectedLead.phone}</p>
                   </div>
                 )}
                 <div>
@@ -267,15 +376,15 @@ export default function LeadsPage() {
                  {selectedLead?.leadType === 'Course Inquiry' && selectedLead?.courseName && (
                   <div className="col-span-2">
                     <h4 className="font-semibold">Course Inquiry</h4>
-                    <div className="text-muted-foreground">{selectedLead.courseName}</div>
+                    <p className="text-muted-foreground">{selectedLead.courseName}</p>
                   </div>
                 )}
               </div>
               <div>
                 <h4 className="font-semibold">Message</h4>
-                <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border mt-2 whitespace-pre-wrap">
+                <p className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border mt-2 whitespace-pre-wrap">
                   {selectedLead?.message}
-                </div>
+                </p>
               </div>
           </div>
           <DialogFooter>
@@ -289,7 +398,7 @@ export default function LeadsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
