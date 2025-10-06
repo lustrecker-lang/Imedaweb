@@ -136,21 +136,31 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
   const handleCatalogSubmit = async () => {
     if (!isEmailValid || isSubmitting || !firestore) return;
-    
+
     setIsSubmitting(true);
     try {
-        await addDocumentNonBlocking(collection(firestore, 'leads'), {
-            email: catalogEmail,
-            leadType: 'Catalog Download',
-            fullName: 'Catalog Lead',
-            message: 'Catalog Download Request',
-            createdAt: serverTimestamp(),
-        });
-        setHasSubmitted(true);
+      // Save lead to Firestore
+      await addDocumentNonBlocking(collection(firestore, 'leads'), {
+        email: catalogEmail,
+        leadType: 'Catalog Download',
+        fullName: 'Catalog Lead', // This is a placeholder as the form only asks for email
+        message: 'Catalog Download Request from homepage.',
+        createdAt: serverTimestamp(),
+      });
+
+      // Trigger the download
+      const link = document.createElement('a');
+      link.href = 'https://firebasestorage.googleapis.com/v0/b/imedawebsite-98ced.firebasestorage.app/o/company-assets%2FCatalogue2025-26.pdf?alt=media&token=7742f046-32b4-4925-97ee-64d61a2e5f5e';
+      link.setAttribute('download', 'IMEDA-Catalogue-2025-26.pdf');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setHasSubmitted(true);
     } catch (error) {
-        console.error("Error submitting lead:", error);
+      console.error("Error submitting lead:", error);
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
