@@ -14,7 +14,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Handshake } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Handshake, Download } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -155,6 +155,14 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
+             <SidebarMenuItem asChild>
+              <Link href="/admin/seed-catalog-banner">
+                <SidebarMenuButton tooltip="Seed Catalog Banner">
+                  <Download />
+                  <span className="text-sm">Seed Catalog Banner</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
             <SidebarMenuItem asChild>
               <Link href="/admin/seed-approche">
                 <SidebarMenuButton tooltip="Seed Approche">
@@ -208,6 +216,14 @@ export default function AdminLayout({
                 <SidebarMenuButton tooltip="Seed Partnerships">
                   <Handshake />
                   <span className="text-sm">Seed Partnerships</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem asChild>
+              <Link href="/admin/seed">
+                <SidebarMenuButton tooltip="Seed All Data">
+                  <Database />
+                  <span className="text-sm">Seed All Data</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

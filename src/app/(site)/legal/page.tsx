@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { LegalContent } from '@/components/legal-content';
+import { LegalContent } from './legal-content';
 import { adminDb } from '@/firebase/admin';
 
 interface Section {

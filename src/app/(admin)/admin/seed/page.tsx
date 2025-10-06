@@ -36,12 +36,6 @@ const pagesToSeed = [
                 id: "feature-3",
                 title: "Collaborative Environment",
                 content: "Foster teamwork and innovation with collaborative tools that connect your team, wherever they are."
-            },
-            {
-                id: "catalog-download",
-                title: "Catalogue 2025-26",
-                content: "Entrez votre email pour recevoir notre catalogue complet et découvrir toutes nos formations.",
-                imageUrl: "https://picsum.photos/seed/catalog/800/600"
             }
         ]
     },
