@@ -210,7 +210,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                             src={companyProfile.iconUrl}
                             alt="Company Icon"
                             fill
-                            className="object-contain brightness-0 invert"
+                            className="object-contain"
                         />
                     </div>
                   )}
