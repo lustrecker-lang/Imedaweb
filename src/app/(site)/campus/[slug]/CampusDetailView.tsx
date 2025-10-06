@@ -10,7 +10,7 @@ import { collection, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Building, GraduationCap, MapPin, Sparkles, HelpCircle, Phone, Mail, ChevronRight, Download, CheckCircle, Loader2 } from "lucide-react";
+import { Building, GraduationCap, MapPin, Sparkles, HelpCircle, Phone, Mail, ChevronRight, Download, CheckCircle, Loader2, ArrowLeft } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { Sheet, SheetContent, SheetClose, SheetTrigger } from "@/components/ui/sheet";
+import { CourseInquiryForm } from "@/components/course-inquiry-form";
 
 
 interface CampusFeature {
@@ -133,6 +135,15 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
     const [isEmailValid, setIsEmailValid] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [hasSubmitted, setHasSubmitted] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+    useEffect(() => {
+        const checkIsMobile = () => setIsMobile(window.innerWidth < 1024); // Use lg breakpoint
+        checkIsMobile();
+        window.addEventListener('resize', checkIsMobile);
+        return () => window.removeEventListener('resize', checkIsMobile);
+      }, []);
 
     useEffect(() => {
         const emailSchema = z.string().email();
@@ -236,13 +247,13 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
         </header>
       <main className="container pt-12 pb-16 lg:pb-20">
 
-        <div className="grid md:grid-cols-12 gap-8 lg:gap-12">
-            <div className="md:col-span-8 space-y-12">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
+            <div className="lg:col-span-8 space-y-12">
                 
                 {/* 1. Campus Description */}
                 {campus.campusDescription && (campus.campusDescription.headline || campus.campusDescription.body) && (
                     <section id="description">
-                        <div className="max-w-2xl">
+                        <div className="max-w-3xl">
                             <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{campus.campusDescription.headline || `About ${campus.name}`}</h2>
                              <p className="mt-2 text-muted-foreground md:text-base/relaxed whitespace-pre-wrap">{campus.campusDescription.body}</p>
                         </div>
@@ -292,7 +303,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                     </Accordion>
                 </section>
                 
-                {/* 3. Campus Experience */}
+                 {/* 3. Campus Experience */}
                 {campus.campusExperience?.features && campus.campusExperience.features.length > 0 && (
                     <section id="experience">
                         <div className="max-w-2xl">
@@ -306,7 +317,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                         <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
                                     </div>
                                     {feature.mediaUrl && (
-                                         <div className="relative w-full md:w-[150px] aspect-video md:aspect-[4/3] shrink-0 rounded-md overflow-hidden">
+                                         <div className="relative w-full md:w-[150px] aspect-video md:aspect-[4/3] shrink-0 rounded-md overflow-hidden self-center md:self-start order-first md:order-last">
                                             <MediaPreview url={feature.mediaUrl} alt={feature.name} />
                                          </div>
                                     )}
@@ -355,32 +366,48 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                 )}
 
             </div>
-            <aside className="md:col-span-4 space-y-8 md:sticky top-24 self-start">
+            <aside className="lg:col-span-4 space-y-8 lg:sticky top-24 self-start">
                  {/* Contact Person */}
-                {campus.visitAndContact?.name && (
-                     <section id="contact-person">
-                        <Card>
-                             <CardContent className="pt-6">
-                                <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4">
-                                    {campus.visitAndContact.imageUrl && (
-                                        <div className="relative h-24 w-24 rounded-full overflow-hidden shrink-0">
-                                            <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name} fill className="object-cover" />
-                                        </div>
-                                    )}
-                                    <div>
-                                        <h3 className="font-headline font-normal text-xl">{campus.visitAndContact.name}</h3>
-                                        <p className="text-sm text-primary/80">{campus.visitAndContact.title}</p>
-                                        {campus.visitAndContact.description && <p className="text-sm text-muted-foreground mt-2">{campus.visitAndContact.description}</p>}
-                                        <div className="flex flex-col items-center md:items-start gap-2 mt-3">
-                                            {campus.visitAndContact.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Phone size={14} /><span>{campus.visitAndContact.phone}</span></a>}
-                                            {campus.visitAndContact.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline"><Mail size={14} /><span>{campus.visitAndContact.email}</span></a>}
-                                        </div>
+                 <section id="contact-person">
+                     <Card>
+                         <CardContent className="pt-6">
+                            <div className="flex items-center gap-4">
+                                {campus.visitAndContact?.imageUrl && (
+                                    <div className="relative h-20 w-20 rounded-full overflow-hidden shrink-0">
+                                        <Image src={campus.visitAndContact.imageUrl} alt={campus.visitAndContact.name || ''} fill className="object-cover" />
                                     </div>
+                                )}
+                                <div>
+                                    <h3 className="font-headline font-normal text-xl">{campus.visitAndContact?.name}</h3>
+                                    <p className="text-sm text-primary/80">{campus.visitAndContact?.title}</p>
                                 </div>
-                            </CardContent>
-                        </Card>
-                    </section>
-                )}
+                            </div>
+                            {campus.visitAndContact?.description && <p className="text-sm text-muted-foreground mt-3">{campus.visitAndContact.description}</p>}
+                            <div className="flex flex-col items-start gap-3 mt-4">
+                                {campus.visitAndContact?.phone && <a href={`tel:${campus.visitAndContact.phone}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Phone size={16} /><span>{campus.visitAndContact.phone}</span></a>}
+                                {campus.visitAndContact?.email && <a href={`mailto:${campus.visitAndContact.email}`} className="flex items-center gap-2 text-base text-primary hover:underline"><Mail size={16} /><span>{campus.visitAndContact.email}</span></a>}
+                            </div>
+                         </CardContent>
+                     </Card>
+                 </section>
+
+                 <section id="visit-campus">
+                    <Card>
+                         <CardHeader>
+                            <CardTitle className="font-headline font-normal text-xl">{campus.visitAndContact?.headline || "Visit Us"}</CardTitle>
+                             {campus.visitAndContact?.subtitle && (
+                                <CardDescription>{campus.visitAndContact.subtitle}</CardDescription>
+                            )}
+                         </CardHeader>
+                         <CardContent>
+                            {campus.visitAndContact?.address && (
+                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                {campus.visitAndContact.address}
+                            </p>
+                            )}
+                         </CardContent>
+                    </Card>
+                </section>
 
                 {/* Download Catalog */}
                 <section id="download-catalog">
@@ -415,27 +442,49 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                         </CardContent>
                     </Card>
                 </section>
-
-                <section id="visit-campus">
-                    <Card>
-                         <CardHeader>
-                            <CardTitle className="font-headline font-normal text-xl">{campus.visitAndContact?.headline || "Visit Us"}</CardTitle>
-                             {campus.visitAndContact?.subtitle && (
-                                <CardDescription>{campus.visitAndContact.subtitle}</CardDescription>
-                            )}
-                         </CardHeader>
-                         <CardContent>
-                            {campus.visitAndContact?.address && (
-                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                                {campus.visitAndContact.address}
-                            </p>
-                            )}
-                         </CardContent>
-                    </Card>
-                </section>
             </aside>
         </div>
       </main>
+
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm p-4 border-t lg:hidden">
+           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger asChild>
+                <Button className="w-full p-6">Voir les formations à {campus.name}</Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[90vh] flex flex-col">
+                <div className="overflow-y-auto p-2">
+                    <Accordion type="multiple" className="w-full">
+                        {categoriesWithThemes.map((category) => (
+                            <AccordionItem value={category.id} key={category.id}>
+                                <AccordionTrigger>
+                                    <h3 className="font-headline font-normal text-lg">{category.name}</h3>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="flex flex-col gap-2 pt-2">
+                                        {category.themes.map((theme) => (
+                                            <Link 
+                                                key={theme.id}
+                                                href={`/courses?themeId=${theme.id}`} 
+                                                className="block p-3 rounded-md hover:bg-muted"
+                                                onClick={() => setIsSheetOpen(false)}
+                                            >
+                                                {theme.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </div>
+                <SheetClose asChild>
+                    <Button variant="outline" className="mt-4">Fermer</Button>
+                </SheetClose>
+              </SheetContent>
+            </Sheet>
+        </div>
+      )}
     </div>
   );
 }
