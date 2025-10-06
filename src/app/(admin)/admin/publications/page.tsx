@@ -23,8 +23,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
-import { Trash2, Edit, Plus } from 'lucide-react';
-import { Combobox } from '@/components/ui/combobox'; // Assuming you have a reusable combobox
+import { Trash2, Edit, Plus, Search } from 'lucide-react';
+import { Combobox } from '@/components/ui/combobox';
 
 const generateSlug = (title: string) => {
   if (!title) return '';
@@ -78,7 +78,7 @@ export default function PublicationsPage() {
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
-  const [topicInputValue, setTopicInputValue] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const articlesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -143,6 +143,22 @@ export default function PublicationsPage() {
         return null;
     }
   };
+
+  const filteredArticles = useMemo(() => {
+    if (!articles) return [];
+    if (!searchTerm) return articles;
+
+    const lowercasedTerm = searchTerm.toLowerCase();
+    return articles.filter(article => {
+        const topicName = topics?.find(t => t.id === article.topicId)?.name || '';
+        return (
+            article.title.toLowerCase().includes(lowercasedTerm) ||
+            article.author.toLowerCase().includes(lowercasedTerm) ||
+            (article.content && article.content.toLowerCase().includes(lowercasedTerm)) ||
+            topicName.toLowerCase().includes(lowercasedTerm)
+        );
+    });
+  }, [articles, searchTerm, topics]);
 
   if (isUserLoading || !user) {
     return <div className="flex h-screen items-center justify-center"><p>Loading...</p></div>;
@@ -284,44 +300,61 @@ export default function PublicationsPage() {
             </Sheet>
           </CardHeader>
           <CardContent>
+            <div className="mb-4">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search by title, author, content, topic..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                    />
+                </div>
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Image</TableHead>
                   <TableHead>Title</TableHead>
+                  <TableHead>Topic</TableHead>
                   <TableHead>Author</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {areArticlesLoading ? (
+                {areArticlesLoading || areTopicsLoading ? (
                   Array.from({ length: 3 }).map((_, i) => (
                     <TableRow key={i}>
                       <TableCell><Skeleton className="h-10 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-48" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                       <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                     </TableRow>
                   ))
-                ) : articles && articles.length > 0 ? (
-                  articles.map((article) => (
-                    <TableRow key={article.id}>
-                      <TableCell>
-                        {article.imageUrl ? <Image src={article.imageUrl} alt={article.title} width={64} height={40} className="object-cover rounded-sm" /> : <div className="h-10 w-16 bg-muted rounded-sm" />}
-                      </TableCell>
-                      <TableCell className="font-medium">{article.title}</TableCell>
-                      <TableCell>{article.author}</TableCell>
-                      <TableCell>{format(article.publicationDate.toDate(), 'PPP')}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(article as Article)}><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(article as Article)}><Trash2 className="h-4 w-4 text-red-600" /></Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                ) : filteredArticles && filteredArticles.length > 0 ? (
+                  filteredArticles.map((article) => {
+                    const topic = topics?.find(t => t.id === article.topicId);
+                    return (
+                      <TableRow key={article.id}>
+                        <TableCell>
+                          {article.imageUrl ? <Image src={article.imageUrl} alt={article.title} width={64} height={40} className="object-cover rounded-sm" /> : <div className="h-10 w-16 bg-muted rounded-sm" />}
+                        </TableCell>
+                        <TableCell className="font-medium">{article.title}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{topic?.name || 'N/A'}</TableCell>
+                        <TableCell>{article.author}</TableCell>
+                        <TableCell>{format(article.publicationDate.toDate(), 'PPP')}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(article as Article)}><Edit className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(article as Article)}><Trash2 className="h-4 w-4 text-red-600" /></Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 ) : (
-                  <TableRow><TableCell colSpan={5} className="h-24 text-center">No articles found.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="h-24 text-center">No articles found.</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
