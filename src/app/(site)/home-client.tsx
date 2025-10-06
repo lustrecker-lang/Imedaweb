@@ -34,6 +34,13 @@ interface Article {
     topicId?: string;
     topic?: { id: string; name: string };
 }
+interface NewsStory {
+    id: string;
+    title: string;
+    slug: string;
+    publicationDate: string;
+    mediaUrl?: string;
+}
 
 
 // Props
@@ -45,6 +52,7 @@ interface HomeClientProps {
   formations: Formation[];
   articles: Article[];
   references: Reference[];
+  newsStories: NewsStory[];
 }
 
 const isVideoUrl = (url?: string | null) => {
@@ -76,7 +84,7 @@ const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: 
   };
 
 
-export function HomeClient({ homePage, campuses, categories, themes, formations, articles, references }: HomeClientProps) {
+export function HomeClient({ homePage, campuses, categories, themes, formations, articles, references, newsStories }: HomeClientProps) {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
@@ -361,6 +369,71 @@ export function HomeClient({ homePage, campuses, categories, themes, formations,
            <div className="mt-8 text-center">
                 <Button asChild variant="outline">
                     <Link href="/publications">Voir toutes les publications</Link>
+                </Button>
+            </div>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="container px-4 md:px-6">
+          <div className="flex items-center justify-between mb-8">
+            <div className="max-w-[75%]">
+                <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">IMEDA News</h2>
+                <p className="mt-2 text-muted-foreground md:text-base/relaxed">
+                  The latest news and announcements from our institution.
+                </p>
+            </div>
+          </div>
+          <Carousel opts={{ align: "start", loop: false }} className="w-full relative">
+            <CarouselContent className="-ml-4">
+              {newsStories.map((story) => {
+                const isVideo = isVideoUrl(story.mediaUrl);
+                return (
+                  <CarouselItem key={story.id} className="pl-4 basis-4/5 md:basis-1/2 lg:basis-1/4">
+                    <Link href={`/news/${story.slug || story.id}`} className="block group">
+                      <Card className="relative flex flex-col overflow-hidden h-[350px] justify-end text-white rounded-lg">
+                          {story.mediaUrl ? (
+                            isVideo ? (
+                               <video
+                                  src={story.mediaUrl}
+                                  autoPlay
+                                  loop
+                                  muted
+                                  playsInline
+                                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                               />
+                            ) : (
+                              <Image
+                                src={story.mediaUrl}
+                                alt={story.title}
+                                fill
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            )
+                          ) : (
+                            <div className="h-full w-full bg-muted" />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+                          <div className="relative z-10 p-6">
+                            <p className="text-xs text-white/80 mb-2">{story.publicationDate}</p>
+                            <h2 className="font-headline font-normal text-lg leading-tight text-white">
+                                {story.title}
+                            </h2>
+                          </div>
+                      </Card>
+                    </Link>
+                  </CarouselItem>
+                )
+              })}
+            </CarouselContent>
+             <div className="absolute top-[-3.5rem] right-0 flex gap-2">
+              <CarouselPrevious className="static translate-y-0 rounded-none sm:inline-flex" />
+              <CarouselNext className="static translate-y-0 rounded-none sm:inline-flex" />
+            </div>
+          </Carousel>
+           <div className="mt-8 text-center">
+                <Button asChild variant="outline">
+                    <Link href="/news">See All News</Link>
                 </Button>
             </div>
         </div>

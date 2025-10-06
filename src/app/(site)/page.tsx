@@ -32,6 +32,13 @@ interface Topic {
     id: string;
     name: string;
 }
+interface NewsStory {
+  id: string;
+  title: string;
+  slug: string;
+  publicationDate: string;
+  mediaUrl?: string;
+}
 
 // Dynamic Metadata Generation for Home Page
 export async function generateMetadata(): Promise<Metadata> {
@@ -72,7 +79,8 @@ async function getHomePageData() {
         articlesSnap,
         topicsSnap,
         campusesSnap,
-        referencesSnap
+        referencesSnap,
+        newsSnap
     ] = await Promise.all([
       adminDb.collection('pages').doc('home').get(),
       adminDb.collection('course_categories').orderBy('name', 'asc').get(),
@@ -82,6 +90,7 @@ async function getHomePageData() {
       adminDb.collection('article_topics').get(),
       adminDb.collection('campuses').orderBy('name', 'asc').get(),
       adminDb.collection('references').orderBy('name', 'asc').get(),
+      adminDb.collection('news').orderBy('publicationDate', 'desc').limit(6).get(),
     ]);
 
     const homePage = pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
@@ -105,11 +114,22 @@ async function getHomePageData() {
       } as Article;
     });
 
+    const newsStories = newsSnap.docs.map(doc => {
+        const data = doc.data() as DocumentData;
+        return {
+            id: doc.id,
+            title: data.title,
+            slug: data.slug,
+            publicationDate: data.publicationDate ? format(data.publicationDate.toDate(), 'PPP', { locale: enUS }) : '',
+            mediaUrl: data.mediaUrl,
+        } as NewsStory;
+    });
 
-    return { homePage, campuses, categories, themes, formations, articles, references };
+
+    return { homePage, campuses, categories, themes, formations, articles, references, newsStories };
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
-    return { homePage: null, campuses: [], categories: [], themes: [], formations: [], articles: [], references: [] };
+    return { homePage: null, campuses: [], categories: [], themes: [], formations: [], articles: [], references: [], newsStories: [] };
   }
 }
 

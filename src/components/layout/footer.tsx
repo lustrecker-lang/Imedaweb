@@ -65,7 +65,7 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
               <li><Link href="/services" className="text-xs text-muted-foreground hover:text-foreground">Services</Link></li>
               <li><Link href="/publications" className="text-xs text-muted-foreground hover:text-foreground">Publications</Link></li>
               <li><Link href="/partenariats" className="text-xs text-muted-foreground hover:text-foreground">Partenariats d'entreprise</Link></li>
-              <li><Link href="/news" className="text-xs text-muted-foreground hover:text-foreground">Actualités et Mises à jour</Link></li>
+              <li><Link href="/news" className="text-xs text-muted-foreground hover:text-foreground">Actualités</Link></li>
             </ul>
           </div>
           <div className="flex flex-col gap-4 items-start lg:items-end">
