@@ -61,9 +61,9 @@ export const metadata: Metadata = {
 const NewsPageSkeleton = () => {
   return (
     <div className="container mx-auto px-4 py-12 md:px-6">
-      <header className="mb-12 text-center">
-        <Skeleton className="h-10 w-1/3 mx-auto" />
-        <Skeleton className="h-5 w-1/2 mx-auto mt-4" />
+      <header className="mb-12 text-left">
+        <Skeleton className="h-10 w-1/3" />
+        <Skeleton className="h-5 w-1/2 mt-4" />
       </header>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
@@ -80,7 +80,7 @@ export default async function NewsPage() {
   return (
     <Suspense fallback={<NewsPageSkeleton />}>
       <div className="container mx-auto px-4 py-12 md:px-6">
-        <header className="mb-12 text-center">
+        <header className="mb-12 text-left">
           <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline text-primary">
             Company News
           </h1>
