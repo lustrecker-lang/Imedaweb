@@ -14,7 +14,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -102,8 +102,16 @@ export default function AdminLayout({
              <SidebarMenuItem asChild>
               <Link href="/admin/publications">
                 <SidebarMenuButton tooltip="Publications">
-                  <Newspaper />
+                  <Library />
                   <span className="text-sm">Publications</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem asChild>
+              <Link href="/admin/news">
+                <SidebarMenuButton tooltip="News">
+                  <Newspaper />
+                  <span className="text-sm">News</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -155,5 +163,3 @@ export default function AdminLayout({
     </SidebarProvider>
   );
 }
-
-    

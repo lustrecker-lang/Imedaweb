@@ -1,6 +1,23 @@
 
 {
   "entities": {
+    "NewsStory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "NewsStory",
+      "type": "object",
+      "description": "Represents a single company news story.",
+      "properties": {
+        "title": { "type": "string", "description": "The headline of the news story." },
+        "slug": { "type": "string", "description": "A URL-friendly version of the title." },
+        "publicationDate": { "type": "string", "format": "date-time", "description": "The date the story was published." },
+        "content": { "type": "string", "description": "The full content of the news story." },
+        "mediaUrl": { "type": "string", "description": "URL for the story's main image or video.", "format": "uri" },
+        "ogTitle": { "type": "string", "description": "Open Graph title for social sharing." },
+        "ogDescription": { "type": "string", "description": "Open Graph description for social sharing." },
+        "ogImage": { "type": "string", "description": "Open Graph image URL for social sharing.", "format": "uri" }
+      },
+      "required": ["title", "slug", "publicationDate", "content"]
+    },
     "Article": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Article",
@@ -431,6 +448,14 @@
   },
   "firestore": {
     "structure": [
+       {
+        "path": "/news/{newsId}",
+        "definition": {
+          "entityName": "NewsStory",
+          "schema": { "$ref": "#/backend/entities/NewsStory" },
+          "description": "Stores company news stories."
+        }
+      },
       {
         "path": "/pages/{pageId}",
         "definition": {
