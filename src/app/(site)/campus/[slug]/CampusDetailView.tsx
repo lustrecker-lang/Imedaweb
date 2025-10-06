@@ -227,7 +227,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                          <Image src={feature.mediaUrl} alt={feature.name} width={150} height={100} className="rounded-md object-cover hidden sm:block"/>
                                     )}
                                     <div>
-                                        <h3 className="font-semibold text-lg">{feature.name}</h3>
+                                        <h3 className="font-headline font-normal text-xl">{feature.name}</h3>
                                         <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
                                     </div>
                                  </div>
