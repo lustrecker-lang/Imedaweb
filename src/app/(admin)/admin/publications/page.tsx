@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react'; // Added useCallback
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking, useStorage } from '@/firebase';
 import { collection, doc, query, orderBy, Timestamp } from 'firebase/firestore';
@@ -53,6 +52,7 @@ const formSchema = z.object({
   imageUrl: z.string().optional(),
 });
 
+// Added slug to the Article interface
 interface Article extends z.infer<typeof formSchema> {
   id: string;
   publicationDate: Timestamp;
@@ -71,6 +71,8 @@ export default function PublicationsPage() {
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
+  // State to track if the slug has been manually edited
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
 
   const articlesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -91,7 +93,7 @@ export default function PublicationsPage() {
       imageUrl: '',
     },
   });
-
+  
   const editForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -104,21 +106,6 @@ export default function PublicationsPage() {
       imageUrl: '',
     },
   });
-
-  const addTitle = form.watch("title");
-  useEffect(() => {
-    if (addTitle) {
-      form.setValue('slug', generateSlug(addTitle));
-    }
-  }, [addTitle, form]);
-
-  const editTitle = editForm.watch("title");
-  useEffect(() => {
-    if (editTitle && editForm.formState.isDirty) {
-      editForm.setValue('slug', generateSlug(editTitle));
-    }
-  }, [editTitle, editForm]);
-
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -135,6 +122,8 @@ export default function PublicationsPage() {
         imageUrl: editingArticle.imageUrl || '',
         publicationDate: editingArticle.publicationDate.toDate(),
       });
+      // Reset the manual edit state when a new article is selected for editing
+      setIsSlugManuallyEdited(false);
     }
   }, [editingArticle, editForm]);
 
@@ -238,8 +227,15 @@ export default function PublicationsPage() {
                 <div className="flex-grow overflow-y-auto pr-4">
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
-                      <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                      <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} onBlur={(e) => {
+                        if (!isSlugManuallyEdited) {
+                            form.setValue('slug', generateSlug(e.target.value));
+                        }
+                      }} /></FormControl> <FormMessage /> </FormItem> )} />
+                      <FormField control={form.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} onChange={(e) => {
+                          field.onChange(e);
+                          setIsSlugManuallyEdited(true); // User changed slug, so stop auto-gen
+                      }} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                       <FormField control={form.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />
@@ -312,8 +308,15 @@ export default function PublicationsPage() {
           <div className="flex-grow overflow-y-auto pr-4">
             <Form {...editForm}>
               <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 py-4">
-                <FormField control={editForm.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={editForm.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Title</FormLabel> <FormControl><Input {...field} onBlur={(e) => {
+                    if (!isSlugManuallyEdited) {
+                        editForm.setValue('slug', generateSlug(e.target.value));
+                    }
+                }} /></FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={editForm.control} name="slug" render={({ field }) => ( <FormItem> <FormLabel>Slug</FormLabel> <FormControl><Input {...field} onChange={(e) => {
+                    field.onChange(e);
+                    setIsSlugManuallyEdited(true); // User changed slug, so stop auto-gen
+                }} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="author" render={({ field }) => ( <FormItem> <FormLabel>Author</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="publicationDate" render={({ field }) => ( <FormItem> <FormLabel>Publication Date</FormLabel> <FormControl><Input type="date" value={field.value ? format(field.value, 'yyyy-MM-dd') : ''} onChange={(e) => field.onChange(new Date(e.target.value))} /></FormControl> <FormMessage /> </FormItem> )} />
                 <FormField control={editForm.control} name="summary" render={({ field }) => ( <FormItem> <FormLabel>Summary</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )} />

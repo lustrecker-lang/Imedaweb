@@ -1,12 +1,10 @@
-
 // src/app/(site)/publications/[slug]/page.tsx
 import { adminDb } from '@/firebase/admin';
 import { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
-import { Timestamp } from 'firebase-admin/firestore';
-import { Badge } from '@/components/ui/badge';
+import { DocumentData } from 'firebase-admin/firestore';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,28 +12,47 @@ import { Button } from '@/components/ui/button';
 export const dynamic = 'force-dynamic';
 
 interface Article {
-  id: string; // Added id
+  id: string;
   title: string;
   slug: string;
   author: string;
-  publicationDate: Timestamp;
+  publicationDate: string;
   summary?: string;
   content?: string;
   imageUrl?: string;
 }
 
-async function getArticle(slug: string): Promise<Article | null> {
+async function getArticle(slugOrId: string): Promise<Article | null> {
   try {
+    console.log(`[getArticle] Starting search for slug: '${slugOrId}'`);
     const articlesRef = adminDb.collection('articles');
-    const querySnapshot = await articlesRef.where('slug', '==', slug).limit(1).get();
 
-    if (querySnapshot.empty) {
+    // Attempt to find the article by slug
+    const slugQuerySnapshot = await articlesRef.where('slug', '==', slugOrId).limit(1).get();
+
+    if (!slugQuerySnapshot.empty) {
+      console.log(`[getArticle] Article found by slug: '${slugOrId}'`);
+      const docSnap = slugQuerySnapshot.docs[0];
+      const data = docSnap.data() as DocumentData;
+      const publicationDate = data.publicationDate?.toDate();
+      const formattedDate = publicationDate ? format(publicationDate, 'MMMM d, yyyy') : '';
+
+      return {
+          id: docSnap.id,
+          title: data.title,
+          slug: data.slug,
+          author: data.author,
+          publicationDate: formattedDate,
+          summary: data.summary,
+          content: data.content,
+          imageUrl: data.imageUrl,
+      } as Article;
+    } else {
+      console.log(`[getArticle] No article found with slug: '${slugOrId}'`);
       return null;
     }
-    const docSnap = querySnapshot.docs[0];
-    return { id: docSnap.id, ...docSnap.data() } as Article;
   } catch (error) {
-    console.error("Error fetching article by slug:", error);
+    console.error("[getArticle] Error fetching article:", error);
     return null;
   }
 }
@@ -61,11 +78,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  console.log(`[ArticlePage] Rendering for params:`, params);
   const article = await getArticle(params.slug);
 
   if (!article) {
+    console.log(`[ArticlePage] Article not found. Triggering notFound()`);
     notFound();
   }
 
@@ -85,7 +103,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           {article.title}
         </h1>
         <p className="mt-4 text-sm text-muted-foreground">
-          By {article.author} • {format(article.publicationDate.toDate(), 'MMMM d, yyyy')}
+          By {article.author} • {article.publicationDate}
         </p>
       </header>
       
@@ -102,8 +120,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       )}
       
       <div className="prose prose-stone mx-auto max-w-3xl dark:prose-invert prose-p:text-base prose-p:leading-relaxed prose-headings:font-headline prose-headings:font-normal">
-        {/* We use dangerouslySetInnerHTML here assuming the content is trusted HTML from a rich text editor.
-            In a real-world app, this should be sanitized to prevent XSS attacks. */}
         <div dangerouslySetInnerHTML={{ __html: article.content || '' }} />
       </div>
 
