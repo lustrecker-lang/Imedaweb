@@ -147,25 +147,20 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
         message: 'Catalog Download Request from homepage.',
         createdAt: serverTimestamp(),
       });
-
+      
       const pdfUrl = 'https://firebasestorage.googleapis.com/v0/b/imedawebsite-98ced.firebasestorage.app/o/company-assets%2FCatalogue2025-26.pdf?alt=media&token=7742f046-32b4-4925-97ee-64d61a2e5f5e';
-
-      const response = await fetch(pdfUrl);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
       
       const link = document.createElement('a');
-      link.href = blobUrl;
+      link.href = pdfUrl;
       link.setAttribute('download', 'IMEDA-Catalogue-2025-26.pdf');
       document.body.appendChild(link);
       link.click();
       
       link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
 
       setHasSubmitted(true);
     } catch (error) {
-      console.error("Error submitting lead or downloading file:", error);
+      console.error("Error submitting lead:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -261,11 +256,11 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       </section>
 
       {catalogSection && (
-        <section className="py-16 bg-muted/30">
+        <section className="py-16">
           <div className="container">
             <Card className="overflow-hidden md:rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-                    <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 md:order-2">
+                    <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1 md:order-2">
                         {catalogSection.imageUrl && (
                             <Image
                                 src={catalogSection.imageUrl}
@@ -275,12 +270,12 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                             />
                         )}
                     </div>
-                    <div className="p-6 md:p-10 text-left md:order-1">
+                    <div className="p-6 md:p-10 text-left order-2 md:order-1">
                         {hasSubmitted ? (
                           <div className="flex flex-col items-center justify-center text-center">
                             <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
                             <h3 className="font-headline font-normal text-2xl">Merci!</h3>
-                            <p className="text-muted-foreground mt-2 text-sm">Le téléchargement commencera sous peu.</p>
+                            <p className="text-muted-foreground mt-2 text-sm">Votre téléchargement a commencé.</p>
                           </div>
                         ) : (
                           <>
