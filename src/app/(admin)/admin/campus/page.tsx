@@ -516,7 +516,9 @@ export default function CampusPage() {
                             <FormField control={form.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Description (for menus)</FormLabel> <FormControl> <Textarea placeholder="A short description of the campus." {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
                             <FormItem>
                                 <FormLabel>Campus Media (for listings)</FormLabel>
-                                <FormControl> <Input id="campus-image-input" type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]); } }} /> </FormControl>
+                                <FormControl>
+                                  <Input id="campus-image-input" type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]); } }} />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                              <DialogFooter>
@@ -591,7 +593,9 @@ export default function CampusPage() {
                                   <FormLabel>Campus Media (for listings)</FormLabel>
                                   <div className="flex items-center gap-4">
                                       {editForm.watch('imageUrl') && ( <div className="relative"> <MediaPreview url={editForm.watch('imageUrl')!} alt={editForm.watch('name')} /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('imageUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
-                                      <FormControl className="flex-1"> <Input type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]) } }}/> </FormControl>
+                                      <FormControl>
+                                        <Input type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setImageFile(e.target.files[0]) } }}/>
+                                      </FormControl>
                                   </div>
                                   <FormMessage />
                               </FormItem>
@@ -606,7 +610,9 @@ export default function CampusPage() {
                                   <FormLabel>Background Media</FormLabel>
                                   <div className="flex items-center gap-4">
                                       {editForm.watch('hero.backgroundMediaUrl') && ( <div className="relative"> <MediaPreview url={editForm.watch('hero.backgroundMediaUrl')!} alt="Hero Background"/> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('hero.backgroundMediaUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
-                                      <FormControl className="flex-1"> <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { setHeroBgFile(e.target.files[0]) } }}/> </FormControl>
+                                      <FormControl>
+                                        <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { setHeroBgFile(e.target.files[0]) } }}/>
+                                      </FormControl>
                                   </div>
                                   <FormMessage />
                               </FormItem>
@@ -628,7 +634,9 @@ export default function CampusPage() {
                                   <FormLabel>Banner Media</FormLabel>
                                   <div className="flex items-center gap-4">
                                       {editForm.watch('bannerSection.mediaUrl') && ( <div className="relative"> <MediaPreview url={editForm.watch('bannerSection.mediaUrl')!} alt="Banner media" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('bannerSection.mediaUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
-                                      <FormControl className="flex-1"> <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { setBannerFile(e.target.files[0]) } }}/> </FormControl>
+                                      <FormControl>
+                                        <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { setBannerFile(e.target.files[0]) } }}/>
+                                      </FormControl>
                                   </div>
                                   <FormMessage />
                               </FormItem>
@@ -657,7 +665,9 @@ export default function CampusPage() {
                                                 <FormLabel>Image or Video</FormLabel>
                                                 <div className="flex items-center gap-4">
                                                      {editForm.watch(`campusExperience.features.${index}.mediaUrl`) && ( <div className="relative"> <MediaPreview url={editForm.watch(`campusExperience.features.${index}.mediaUrl`)!} alt={`Feature ${index + 1}`} /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage(`campusExperience.features.${index}.mediaUrl`, index)}> <X className="h-4 w-4" /> </Button> </div> )}
-                                                    <FormControl className="flex-1"> <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { const newFiles = [...featureFiles]; newFiles[index] = e.target.files[0]; setFeatureFiles(newFiles); } }}/> </FormControl>
+                                                    <FormControl>
+                                                      <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { const newFiles = [...featureFiles]; newFiles[index] = e.target.files[0]; setFeatureFiles(newFiles); } }}/>
+                                                    </FormControl>
                                                 </div>
                                                 <FormMessage />
                                             </FormItem>
@@ -683,8 +693,8 @@ export default function CampusPage() {
                                     <FormItem className="mt-4">
                                         <FormLabel>Contact Person Image</FormLabel>
                                         <div className="flex items-center gap-4">
-                                            {editForm.watch('visitAndContact.imageUrl') && ( <div className="relative"> <Image src={editForm.watch('visitAndContact.imageUrl')!} alt="Contact Person" width={80} height={80} className="object-cover rounded-full" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('visitAndContact.imageUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
-                                            <FormControl className="flex-1">
+                                            {editForm.watch('visitAndContact.imageUrl') && ( <div className="relative"> <Image src={editForm.watch('visitAndContact.imageUrl')!} alt="Contact Person" width={80} height={80} className="object-cover rounded-full" /> <SheetClose asChild><Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('visitAndContact.imageUrl')}><X className="h-4 w-4" /></Button></SheetClose> </div> )}
+                                            <FormControl>
                                                 <Input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) { setContactImageFile(e.target.files[0]) } }}/>
                                             </FormControl>
                                         </div>
