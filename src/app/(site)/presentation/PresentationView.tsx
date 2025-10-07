@@ -1,3 +1,4 @@
+
 // src/app/(site)/presentation/PresentationView.tsx
 'use client';
 
@@ -29,7 +30,7 @@ interface PresentationViewProps {
 
 const ContentSection = ({ section, reverse = false }: { section: Section, reverse?: boolean}) => (
     <div className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${reverse ? 'md:grid-flow-col-dense' : ''}`}>
-        <div className={`relative aspect-video w-full h-64 md:h-full ${reverse ? 'md:col-start-2' : ''}`}>
+        <div className={`relative aspect-square w-full max-w-md mx-auto md:max-w-none md:h-full ${reverse ? 'md:col-start-2' : ''}`}>
             <Image 
                 src={section.imageUrl || "https://picsum.photos/seed/placeholder/800/600"} 
                 alt={section.title}
@@ -75,7 +76,7 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
                                     Nos Formations <ArrowRight className="ml-2 h-4 w-4" />
                                 </Link>
                             </Button>
-                            <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+                             <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
                                 <SheetTrigger asChild>
                                     <Button variant="outline">Contactez-nous</Button>
                                 </SheetTrigger>
@@ -90,7 +91,10 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
                         <Skeleton className="h-12 w-3/4" />
                         <Skeleton className="h-6 w-full" />
                         <Skeleton className="h-6 w-5/6" />
-                        <Skeleton className="h-10 w-36 mt-4" />
+                        <div className="flex gap-4">
+                            <Skeleton className="h-10 w-36" />
+                            <Skeleton className="h-10 w-36" />
+                        </div>
                     </div>
                  )}
             </div>
