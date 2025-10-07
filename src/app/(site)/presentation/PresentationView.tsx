@@ -81,7 +81,7 @@ const ClientDistributionSection = ({ section }: { section: Section }) => {
                     data-ai-hint="map africa"
                 />
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 text-center md:text-left">
                 <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline text-primary">{section.title}</h2>
                 <p className="text-muted-foreground">{mainContent}</p>
                 <div className="space-y-4 pt-4">
@@ -117,16 +117,16 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
     <div className="flex flex-col">
        <section className="container px-4 md:px-6 py-12 md:py-20">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-            <div className="order-2 md:order-1">
+            <div className="order-2 md:order-1 text-center md:text-left">
                  {pageData ? (
                     <>
                         <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline">
                             {heroSection?.title || "Présentation"}
                         </h1>
-                        <p className="mt-4 max-w-[600px] text-muted-foreground md:text-lg">
+                        <p className="mt-4 max-w-[600px] mx-auto md:mx-0 text-muted-foreground md:text-lg">
                            {heroSection?.content || "Découvrez qui nous sommes, notre vision et notre engagement envers l'excellence."}
                         </p>
-                        <div className="flex flex-wrap gap-4 mt-6">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6 justify-center md:justify-start">
                             <Button asChild>
                                 <Link href="/courses">
                                     Nos Formations <ArrowRight className="ml-2 h-4 w-4" />
@@ -174,7 +174,7 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
       </section>
       
       <section className="py-16 md:py-24 bg-muted/30 w-full">
-        <div className="container px-4 md:px-6 space-y-16">
+        <div className="container px-4 md:px-6 space-y-16 md:space-y-24">
           {missionSection && <ContentSection section={missionSection} />}
           {visionSection && <ContentSection section={visionSection} reverse />}
           {clientsSection && <ClientDistributionSection section={clientsSection} />}
