@@ -1,8 +1,7 @@
 
-
 "use client";
 
-import React, { useState, useEffect } from "react";
+import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
@@ -100,11 +99,12 @@ ListItem.displayName = "ListItem";
 
 
 export function Header({ companyProfile, campuses }: HeaderProps) {
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
+  const [isContactSheetOpen, setIsContactSheetOpen] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [isCatalogOpen, setIsCatalogOpen] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
     checkIsMobile();
     window.addEventListener('resize', checkIsMobile);
@@ -166,41 +166,44 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
           <LogoComponent />
         </Link>
         
-        <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList>
-                {finalNavStructure.map((category) => (
-                    <NavigationMenuItem key={category.title}>
-                        <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
-                        <NavigationMenuContent>
-                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                            {category.items.map((item) => (
-                                <li key={item.title}>
-                                    {item.isDialog ? (
-                                        <CatalogDialog>
-                                            <button className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-background/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left">
-                                                <div className="text-sm font-normal leading-none">{item.title}</div>
-                                                {item.description && (
-                                                    <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
-                                                    {item.description}
-                                                    </p>
-                                                )}
-                                            </button>
-                                        </CatalogDialog>
-                                    ) : (
-                                        <ListItem
-                                            href={item.href}
-                                            title={item.title}
-                                            description={item.description}
-                                        />
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                        </NavigationMenuContent>
-                    </NavigationMenuItem>
-                ))}
-            </NavigationMenuList>
-        </NavigationMenu>
+        {/* We lift the CatalogDialog out to prevent re-rendering issues */}
+        <CatalogDialog open={isCatalogOpen} onOpenChange={setIsCatalogOpen}>
+          <NavigationMenu className="hidden md:flex">
+              <NavigationMenuList>
+                  {finalNavStructure.map((category) => (
+                      <NavigationMenuItem key={category.title}>
+                          <NavigationMenuTrigger variant="ghost">{category.title}</NavigationMenuTrigger>
+                          <NavigationMenuContent>
+                          <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                              {category.items.map((item) => (
+                                  <li key={item.title}>
+                                      {item.isDialog ? (
+                                        <SheetTrigger asChild>
+                                          <button className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-background/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left">
+                                              <div className="text-sm font-normal leading-none">{item.title}</div>
+                                              {item.description && (
+                                                  <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                                                  {item.description}
+                                                  </p>
+                                              )}
+                                          </button>
+                                        </SheetTrigger>
+                                      ) : (
+                                          <ListItem
+                                              href={item.href}
+                                              title={item.title}
+                                              description={item.description}
+                                          />
+                                      )}
+                                  </li>
+                              ))}
+                          </ul>
+                          </NavigationMenuContent>
+                      </NavigationMenuItem>
+                  ))}
+              </NavigationMenuList>
+          </NavigationMenu>
+        </CatalogDialog>
 
         <div className="flex items-center gap-2">
             { !isMobile && <DesktopContactButton />}
