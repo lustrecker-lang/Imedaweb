@@ -28,7 +28,15 @@ interface PresentationViewProps {
   pageData: Page | null;
 }
 
-const ContentSection = ({ section, reverse = false }: { section: Section, reverse?: boolean}) => (
+const ContentSection = ({
+    section,
+    reverse = false,
+    cta,
+  }: {
+    section: Section;
+    reverse?: boolean;
+    cta?: React.ReactNode;
+  }) => (
     <div className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${reverse ? 'md:grid-flow-col-dense' : ''}`}>
         <div className={`relative aspect-square w-full max-w-md mx-auto md:max-w-none ${reverse ? 'md:col-start-2' : ''}`}>
             <Image 
@@ -42,6 +50,7 @@ const ContentSection = ({ section, reverse = false }: { section: Section, revers
         <div className="space-y-4">
             <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline text-primary">{section.title}</h2>
             <p className="text-muted-foreground whitespace-pre-wrap">{section.content.split('\n\n[DISTRIBUTION_DATA]')[0]}</p>
+            {cta && <div className="pt-2">{cta}</div>}
         </div>
     </div>
 );
@@ -169,8 +178,32 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
           {missionSection && <ContentSection section={missionSection} />}
           {visionSection && <ContentSection section={visionSection} reverse />}
           {clientsSection && <ClientDistributionSection section={clientsSection} />}
-          {storySection && <ContentSection section={storySection} reverse />}
-          {participantsSection && <ContentSection section={participantsSection} />}
+          {storySection && (
+            <ContentSection
+              section={storySection}
+              reverse
+              cta={
+                <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline">Contactez-nous</Button>
+                  </SheetTrigger>
+                  <SheetContent side="right">
+                    <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} showHeader={true} />
+                  </SheetContent>
+                </Sheet>
+              }
+            />
+          )}
+          {participantsSection && (
+            <ContentSection
+              section={participantsSection}
+              cta={
+                <Button asChild>
+                  <Link href="/partenariats">Devenez Partenaire</Link>
+                </Button>
+              }
+            />
+          )}
           {impactSection && <ContentSection section={impactSection} reverse />}
         </div>
       </section>
