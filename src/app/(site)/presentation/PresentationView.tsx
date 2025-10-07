@@ -1,4 +1,3 @@
-
 // src/app/(site)/presentation/PresentationView.tsx
 'use client';
 
@@ -10,6 +9,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ContactForm } from "@/components/contact-form";
+import { Progress } from "@/components/ui/progress";
 
 interface Section {
   id: string;
@@ -32,7 +32,7 @@ const ContentSection = ({ section, reverse = false }: { section: Section, revers
     <div className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${reverse ? 'md:grid-flow-col-dense' : ''}`}>
         <div className={`relative aspect-square w-full max-w-md mx-auto md:max-w-none md:h-full ${reverse ? 'md:col-start-2' : ''}`}>
             <Image 
-                src={section.imageUrl || "https://picsum.photos/seed/placeholder/800/600"} 
+                src={section.imageUrl || "https://picsum.photos/seed/placeholder/800/800"} 
                 alt={section.title}
                 fill
                 className="object-cover rounded-lg"
@@ -41,10 +41,56 @@ const ContentSection = ({ section, reverse = false }: { section: Section, revers
         </div>
         <div className="space-y-4">
             <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline text-primary">{section.title}</h2>
-            <p className="text-muted-foreground whitespace-pre-wrap">{section.content}</p>
+            <p className="text-muted-foreground whitespace-pre-wrap">{section.content.split('\n\n[DISTRIBUTION_DATA]')[0]}</p>
         </div>
     </div>
 );
+
+const ClientDistributionSection = ({ section }: { section: Section }) => {
+    let distributionData: Record<string, number> = {};
+    const contentParts = section.content.split('\n\n[DISTRIBUTION_DATA]\n');
+    const mainContent = contentParts[0];
+    
+    if (contentParts.length > 1) {
+        try {
+            distributionData = JSON.parse(contentParts[1]);
+        } catch (e) {
+            console.error("Failed to parse client distribution data:", e);
+        }
+    }
+
+    const sortedCountries = Object.entries(distributionData).sort(([, a], [, b]) => b - a);
+
+    return (
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="relative aspect-square w-full max-w-md mx-auto md:max-w-none md:h-full">
+                <Image 
+                    src={section.imageUrl || "https://picsum.photos/seed/clients/800/800"} 
+                    alt={section.title}
+                    fill
+                    className="object-cover rounded-lg"
+                    data-ai-hint="map africa"
+                />
+            </div>
+            <div className="space-y-4">
+                <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline text-primary">{section.title}</h2>
+                <p className="text-muted-foreground">{mainContent}</p>
+                <div className="space-y-4 pt-4">
+                    {sortedCountries.map(([country, percentage]) => (
+                        <div key={country}>
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm font-medium text-foreground">{country}</span>
+                                <span className="text-sm font-medium text-primary">{percentage}%</span>
+                            </div>
+                            <Progress value={percentage} className="h-2" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 export default function PresentationView({ pageData }: PresentationViewProps) {
   const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
@@ -53,6 +99,7 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
   
   const missionSection = pageData?.sections.find(s => s.id === 'mission');
   const visionSection = pageData?.sections.find(s => s.id === 'vision');
+  const clientsSection = pageData?.sections.find(s => s.id === 'clients');
   const storySection = pageData?.sections.find(s => s.id === 'story');
   const participantsSection = pageData?.sections.find(s => s.id === 'participants');
   const impactSection = pageData?.sections.find(s => s.id === 'impact');
@@ -121,9 +168,10 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
         <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-16">
           {missionSection && <ContentSection section={missionSection} />}
           {visionSection && <ContentSection section={visionSection} reverse />}
-          {storySection && <ContentSection section={storySection} />}
-          {participantsSection && <ContentSection section={participantsSection} reverse />}
-          {impactSection && <ContentSection section={impactSection} />}
+          {clientsSection && <ClientDistributionSection section={clientsSection} />}
+          {storySection && <ContentSection section={storySection} reverse />}
+          {participantsSection && <ContentSection section={participantsSection} />}
+          {impactSection && <ContentSection section={impactSection} reverse />}
         </div>
       </section>
     </div>

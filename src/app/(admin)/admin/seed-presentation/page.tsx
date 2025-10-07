@@ -30,22 +30,28 @@ const pageToSeed = {
             imageUrl: 'https://picsum.photos/seed/vision/800/600'
         },
         {
+            id: 'clients',
+            title: 'Nos Clients',
+            content: 'Nous sommes fiers de former des leaders issus de l\'ensemble du continent africain francophone. Notre répartition de participants témoigne de notre portée et de notre engagement panafricain.\n\n[DISTRIBUTION_DATA]\n{"Bénin": 15, "Burkina Faso": 12, "Cameroun": 10, "Congo": 8, "Côte d\'Ivoire": 18, "Gabon": 7, "Guinée": 5, "Mali": 6, "Niger": 4, "Sénégal": 11, "Togo": 4}',
+            imageUrl: 'https://picsum.photos/seed/clients/800/800'
+        },
+        {
             id: 'story',
-            title: 'Our Story',
+            title: 'Notre Histoire',
             content: 'Founded by a consortium of leading academics and industry veterans, IMEDA was born from a shared belief in the transformative power of leadership. We recognized a critical need for high-level, context-aware management training that could address the unique challenges and opportunities of the African continent. Since our inception, we have been committed to building a world-class institution that not only educates but also inspires.',
-            imageUrl: 'https://picsum.photos/seed/story/800/600'
+            imageUrl: 'https://picsum.photos/seed/story/800/800'
         },
         {
             id: 'participants',
             title: 'Our Participants and Partners',
             content: 'We are proud to collaborate with a diverse range of participants, from senior government officials and C-suite executives to promising entrepreneurs and managers. Our partners include prestigious international universities, multinational corporations, and development organizations, all united by a common goal: to invest in Africa’s human capital.',
-            imageUrl: 'https://picsum.photos/seed/participants/800/600'
+            imageUrl: 'https://picsum.photos/seed/participants/800/800'
         },
         {
             id: 'impact',
             title: 'A Lasting Impact',
             content: 'Our impact is measured by the success of our alumni and the transformative projects they lead. From modernizing public services to scaling innovative businesses, IMEDA graduates are at the forefront of change. We are dedicated to creating a lasting legacy of leadership that will ripple across communities, industries, and nations for generations to come.',
-            imageUrl: 'https://picsum.photos/seed/impact/800/600'
+            imageUrl: 'https://picsum.photos/seed/impact/800/800'
         }
     ]
 };
