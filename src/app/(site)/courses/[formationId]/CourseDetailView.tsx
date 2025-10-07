@@ -225,7 +225,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 {campuses && campuses.map(campus => (
                                                     <div key={campus.id} className="group relative overflow-hidden rounded-lg aspect-w-4 aspect-h-3">
                                                         <Link href={`/campus/${campus.slug}`} className="absolute inset-0 z-10">
-                                                            <span className="sr-only">View {campus.name}</span>
+                                                            <span className="sr-only">View ${campus.name}</span>
                                                         </Link>
                                                         <div className="relative w-full h-full min-h-[120px]">
                                                             {campus.imageUrl ? (
@@ -267,7 +267,21 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-                             <AccordionItem value="item-2">
+                             <AccordionItem value="item-details">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Détails de la formation</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="space-y-6 pt-4 whitespace-pre-wrap">
+                                        <DetailCard title="Public Concerné" content={formation.publicConcerne} />
+                                        <DetailCard title="Pré-requis" content={formation.preRequis} />
+                                        <DetailCard title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
+                                        <DetailCard title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
+                                        <DetailCard title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-2">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Tarifs</h2>
                                 </AccordionTrigger>
@@ -362,7 +376,33 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionContent>
                             </AccordionItem>
                             )}
-                             <AccordionItem value="item-6">
+                             <AccordionItem value="item-5">
+                                <AccordionTrigger>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-4">
+                                        {availability.length > 0 ? (
+                                            availability.map((month) => (
+                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg border text-center text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                                    <div className="">
+                                                        <p className="font-semibold capitalize text-xs sm:text-sm">{month.month}</p>
+                                                        <p className="text-xs">{month.year}</p>
+                                                    </div>
+                                                    {month.isAvailable ? (
+                                                        <Badge variant="secondary" className="mt-2 text-xs bg-green-100 text-green-800">Disponible</Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary" className="mt-2 text-xs bg-red-100 text-red-800">Complet</Badge>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)
+                                        )}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-6">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Services</h2>
                                 </AccordionTrigger>
@@ -395,46 +435,6 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 </div>
                                             </div>
                                         ))}
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                             <AccordionItem value="item-5">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-4">
-                                        {availability.length > 0 ? (
-                                            availability.map((month) => (
-                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg border text-center text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
-                                                    <div className="">
-                                                        <p className="font-semibold capitalize text-xs sm:text-sm">{month.month}</p>
-                                                        <p className="text-xs">{month.year}</p>
-                                                    </div>
-                                                    {month.isAvailable ? (
-                                                        <Badge variant="secondary" className="mt-2 text-xs bg-green-100 text-green-800">Disponible</Badge>
-                                                    ) : (
-                                                        <Badge variant="secondary" className="mt-2 text-xs bg-red-100 text-red-800">Complet</Badge>
-                                                    )}
-                                                </div>
-                                            ))
-                                        ) : (
-                                            Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)
-                                        )}
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-details">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">Détails de la formation</h2>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="space-y-6 pt-4 whitespace-pre-wrap">
-                                        <DetailCard title="Public Concerné" content={formation.publicConcerne} />
-                                        <DetailCard title="Pré-requis" content={formation.preRequis} />
-                                        <DetailCard title="Méthodes Mobilisées" content={formation.methodesMobilisees} />
-                                        <DetailCard title="Moyens Pédagogiques" content={formation.moyensPedagogiques} />
-                                        <DetailCard title="Modalités d'Évaluation" content={formation.modalitesEvaluation} />
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
