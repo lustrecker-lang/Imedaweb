@@ -20,12 +20,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ContactForm } from "@/components/contact-form";
-import { CatalogDialog } from "@/components/catalog-dialog";
 
 const formationsNavStructure = {
     title: "Formations",
     items: [
-        { href: "#", title: "Catalogue 2025-26", description: "Téléchargez notre catalogue complet pour la saison à venir.", isDialog: true },
+        { href: "/catalog", title: "Catalogue 2025-26", description: "Téléchargez notre catalogue complet pour la saison à venir." },
         { href: "/courses", title: "700+ Formations internationales", description: "Explorez notre catalogue complet de formations internationales." },
         { href: "#", title: "Formations en ligne", description: "Apprenez à votre rythme avec nos cours en ligne." },
     ]
@@ -101,16 +100,7 @@ ListItem.displayName = "ListItem";
 export function Header({ companyProfile, campuses }: HeaderProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
   const [isContactSheetOpen, setIsContactSheetOpen] = React.useState(false);
-  const [isMobile, setIsMobile] = React.useState(false);
-  const [isCatalogOpen, setIsCatalogOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-  
   const LogoComponent = () => {
     const fixedWidth = 'w-[96px]';
     const fixedHeight = 'h-6';
@@ -166,9 +156,6 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
           <LogoComponent />
         </Link>
         
-        {/* CatalogDialog is now outside the NavigationMenu */}
-        <CatalogDialog open={isCatalogOpen} onOpenChange={setIsCatalogOpen} />
-        
         <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
                 {finalNavStructure.map((category) => (
@@ -177,27 +164,12 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
                         <NavigationMenuContent>
                         <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
                             {category.items.map((item) => (
-                                <li key={item.title}>
-                                    {item.isDialog ? (
-                                      <button 
-                                        onClick={() => setIsCatalogOpen(true)}
-                                        className="block w-full select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-background/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-left"
-                                      >
-                                        <div className="text-sm font-normal leading-none">{item.title}</div>
-                                        {item.description && (
-                                          <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
-                                            {item.description}
-                                          </p>
-                                        )}
-                                      </button>
-                                    ) : (
-                                        <ListItem
-                                            href={item.href}
-                                            title={item.title}
-                                            description={item.description}
-                                        />
-                                    )}
-                                </li>
+                                <ListItem
+                                    key={item.title}
+                                    href={item.href}
+                                    title={item.title}
+                                    description={item.description}
+                                />
                             ))}
                         </ul>
                         </NavigationMenuContent>
@@ -207,7 +179,7 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
-            { !isMobile && <DesktopContactButton />}
+            <DesktopContactButton />
           <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -241,25 +213,14 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
                             <AccordionContent className="pl-4">
                                 <div className="flex flex-col gap-2 mt-2">
                                     {category.items.map((link) => (
-                                        link.isDialog ? (
-                                            <CatalogDialog key={link.title}>
-                                                <button
-                                                  className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal text-left"
-                                                  onClick={() => setIsMobileNavOpen(false)}
-                                                >
-                                                  {link.title}
-                                                </button>
-                                            </CatalogDialog>
-                                        ) : (
-                                            <Link
-                                                key={link.title}
-                                                href={link.href}
-                                                className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
-                                                onClick={() => setIsMobileNavOpen(false)}
-                                            >
-                                                {link.title}
-                                            </Link>
-                                        )
+                                        <Link
+                                            key={link.title}
+                                            href={link.href}
+                                            className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
+                                            onClick={() => setIsMobileNavOpen(false)}
+                                        >
+                                            {link.title}
+                                        </Link>
                                     ))}
                                 </div>
                             </AccordionContent>

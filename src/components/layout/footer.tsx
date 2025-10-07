@@ -4,8 +4,6 @@
 import Link from "next/link";
 import { Instagram, Youtube } from "lucide-react";
 import Image from "next/image";
-import { CatalogDialog } from "@/components/catalog-dialog";
-
 
 interface CompanyProfile {
   name?: string;
@@ -41,9 +39,7 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
             <h3 className="text-xs font-semibold tracking-wider uppercase">Formations</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <CatalogDialog>
-                   <button className="text-xs text-muted-foreground hover:text-foreground text-left">Catalogue 2025-26</button>
-                </CatalogDialog>
+                <Link href="/catalog" className="text-xs text-muted-foreground hover:text-foreground">Catalogue 2025-26</Link>
               </li>
               <li><Link href="/courses" className="text-xs text-muted-foreground hover:text-foreground">700+ Formations internationales</Link></li>
               <li><Link href="#" className="text-xs text-muted-foreground hover:text-foreground">Formations en ligne</Link></li>
