@@ -1,3 +1,4 @@
+
 // src/app/(site)/presentation/PresentationView.tsx
 'use client';
 
@@ -37,7 +38,7 @@ const ContentSection = ({
     reverse?: boolean;
     cta?: React.ReactNode;
   }) => (
-    <div className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${reverse ? 'md:grid-flow-col-dense' : ''}`}>
+    <div className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center`}>
         <div className={`relative aspect-square w-full max-w-md mx-auto md:max-w-none ${reverse ? 'md:col-start-2' : ''}`}>
             <Image 
                 src={section.imageUrl || "https://picsum.photos/seed/placeholder/800/800"} 
@@ -47,7 +48,7 @@ const ContentSection = ({
                 data-ai-hint="team business meeting"
             />
         </div>
-        <div className="space-y-4">
+        <div className={`space-y-4 ${reverse ? 'md:col-start-1 md:row-start-1' : ''}`}>
             <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline text-primary">{section.title}</h2>
             <p className="text-muted-foreground whitespace-pre-wrap">{section.content.split('\n\n[DISTRIBUTION_DATA]')[0]}</p>
             {cta && <div className="pt-2">{cta}</div>}
@@ -173,8 +174,8 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
         </div>
       </section>
       
-      <section className="container py-16 md:py-24 space-y-16 bg-muted/30 -mx-4 w-full max-w-full">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-16">
+      <section className="py-16 md:py-24 bg-muted/30 w-full max-w-full">
+        <div className="container px-4 md:px-6 space-y-16">
           {missionSection && <ContentSection section={missionSection} />}
           {visionSection && <ContentSection section={visionSection} reverse />}
           {clientsSection && <ClientDistributionSection section={clientsSection} />}
