@@ -74,15 +74,13 @@ interface HeaderProps {
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a"> & { description?: string, "data-dialog-trigger"?: boolean }
->(({ className, title, description, "data-dialog-trigger": isDialogTrigger, ...props }, ref) => {
-  const Comp = isDialogTrigger ? 'button' : Link;
+  React.ComponentPropsWithoutRef<"a"> & { description?: string }
+>(({ className, title, description, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <Comp
-          href={props.href || '#'}
-          ref={ref as any}
+        <Link
+          ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-background/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left",
             className
@@ -95,7 +93,7 @@ const ListItem = React.forwardRef<
               {description}
             </p>
           )}
-        </Comp>
+        </Link>
       </NavigationMenuLink>
     </li>
   );
@@ -178,23 +176,28 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
                         <NavigationMenuContent>
                         <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
                             {category.items.map((item) => (
-                                item.isDialog ? (
-                                    <CatalogDialog key={item.title}>
+                                <li key={item.title}>
+                                    {item.isDialog ? (
+                                        <CatalogDialog>
+                                            <NavigationMenuLink asChild>
+                                                <button className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-background/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left">
+                                                    <div className="text-sm font-normal leading-none">{item.title}</div>
+                                                    {item.description && (
+                                                        <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                                                        {item.description}
+                                                        </p>
+                                                    )}
+                                                </button>
+                                            </NavigationMenuLink>
+                                        </CatalogDialog>
+                                    ) : (
                                         <ListItem
-                                            key={item.title}
+                                            href={item.href}
                                             title={item.title}
                                             description={item.description}
-                                            data-dialog-trigger={true}
                                         />
-                                    </CatalogDialog>
-                                ) : (
-                                    <ListItem
-                                        key={item.title}
-                                        href={item.href}
-                                        title={item.title}
-                                        description={item.description}
-                                    />
-                                )
+                                    )}
+                                </li>
                             ))}
                         </ul>
                         </NavigationMenuContent>
