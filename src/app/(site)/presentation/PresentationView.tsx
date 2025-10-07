@@ -2,10 +2,13 @@
 'use client';
 
 import Image from "next/image";
+import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ContactForm } from "@/components/contact-form";
 
 interface Section {
   id: string;
@@ -43,6 +46,7 @@ const ContentSection = ({ section, reverse = false }: { section: Section, revers
 );
 
 export default function PresentationView({ pageData }: PresentationViewProps) {
+  const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
   const heroSection = pageData?.sections.find(s => s.id === 'hero');
   const heroImageUrl = heroSection?.imageUrl;
   
@@ -65,11 +69,21 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
                         <p className="mt-4 max-w-[600px] text-muted-foreground md:text-lg">
                            {heroSection?.content || "Découvrez qui nous sommes, notre vision et notre engagement envers l'excellence."}
                         </p>
-                        <Button asChild className="mt-6">
-                            <Link href="/courses">
-                                Our Courses <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
+                        <div className="flex flex-wrap gap-4 mt-6">
+                            <Button asChild>
+                                <Link href="/courses">
+                                    Nos Formations <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                            <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+                                <SheetTrigger asChild>
+                                    <Button variant="outline">Contactez-nous</Button>
+                                </SheetTrigger>
+                                <SheetContent side="right">
+                                    <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} showHeader={true} />
+                                </SheetContent>
+                            </Sheet>
+                        </div>
                     </>
                  ) : (
                     <div className="space-y-4">
