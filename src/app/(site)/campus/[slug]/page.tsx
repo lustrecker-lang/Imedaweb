@@ -14,6 +14,9 @@ interface Campus {
   slug: string;
   description?: string;
   imageUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
   hero?: {
     backgroundMediaUrl?: string;
     title?: string;
@@ -22,11 +25,6 @@ interface Campus {
   campusDescription?: {
     headline?: string;
     body?: string;
-  };
-  bannerSection?: {
-      title?: string;
-      text?: string;
-      mediaUrl?: string;
   };
   academicOffering?: {
     headline?: string;
@@ -107,13 +105,17 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     };
   }
 
+  const title = campus.ogTitle || `${campus.name} Campus`;
+  const description = campus.ogDescription || campus.description || `Explore the ${campus.name} campus, its programs, and campus life.`;
+  const imageUrl = campus.ogImage || campus.hero?.backgroundMediaUrl;
+
   return {
-    title: `${campus.name} Campus`,
-    description: campus.description || `Explore the ${campus.name} campus, its programs, and campus life.`,
+    title: title,
+    description: description,
     openGraph: {
-      title: `${campus.name} Campus`,
-      description: campus.description || `Explore our campus in ${campus.name}.`,
-      images: campus.hero?.backgroundMediaUrl ? [{ url: campus.hero.backgroundMediaUrl }] : [],
+      title: title,
+      description: description,
+      images: imageUrl ? [{ url: imageUrl }] : [],
     },
   };
 }

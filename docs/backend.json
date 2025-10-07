@@ -249,6 +249,19 @@
           "description": "A general image for the campus, used in listings.",
           "format": "uri"
         },
+        "ogTitle": {
+          "type": "string",
+          "description": "Open Graph title for social sharing."
+        },
+        "ogDescription": {
+          "type": "string",
+          "description": "Open Graph description for social sharing."
+        },
+        "ogImage": {
+          "type": "string",
+          "description": "Open Graph image URL for social sharing.",
+          "format": "uri"
+        },
         "hero": {
           "type": "object",
           "properties": {
@@ -626,6 +639,4 @@
     "reasoning": "This Firestore data structure allows for modular content management. Each page's content is stored in a separate document within the 'pages' collection. This makes it easy to add new pages and edit their content by section."
   }
 }
-    
-
     
