@@ -147,6 +147,8 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
     if (selectedThemeId) {
       setIsSearching(true);
       router.push(`/courses?themeId=${selectedThemeId}`);
+    } else if (isMobile) {
+        setIsThemeSheetOpen(true);
     }
   };
   
@@ -205,8 +207,10 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
     <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
         <SheetTrigger asChild>
             <Button variant="outline" className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white">
-                {selectedThemeId ? themeOptions.find(t => t.value === selectedThemeId)?.label : "Rechercher un thème..."}
-                <ChevronRight className="h-4 w-4 opacity-50" />
+                <span className="truncate">
+                    {selectedThemeId ? themeOptions.find(t => t.value === selectedThemeId)?.label : "Rechercher un thème..."}
+                </span>
+                <ChevronRight className="h-4 w-4 opacity-50 shrink-0" />
             </Button>
         </SheetTrigger>
         <SheetContent side="bottom" className="h-[90vh] flex flex-col p-0">
@@ -216,9 +220,11 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
             <div className="flex-grow overflow-y-auto px-6">
                 <Accordion type="multiple" className="w-full">
                     {categoriesWithThemes.map(category => (
-                        <AccordionItem value={category.id} key={category.id}>
-                            <AccordionTrigger className="text-lg font-headline font-normal">{category.name}</AccordionTrigger>
-                            <AccordionContent>
+                        <AccordionItem key={category.id} value={category.id} className="border-b-0">
+                            <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
+                                {category.name}
+                            </AccordionTrigger>
+                            <AccordionContent className="pl-4">
                                 <div className="flex flex-col items-start pt-2">
                                     {category.themes.map(theme => (
                                         <Button
@@ -284,7 +290,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                                 className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10 hover:text-white"
                             />
                         )}
-                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching || !selectedThemeId}>
+                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching || (!selectedThemeId && !isMobile)}>
                           {isSearching ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
