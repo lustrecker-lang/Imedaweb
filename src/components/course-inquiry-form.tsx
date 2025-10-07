@@ -91,9 +91,6 @@ export function CourseInquiryForm({ courseName, showHeader = false }: CourseInqu
         {!showHeader && (
           <div className="mb-4 text-left">
             <h3 className="font-headline text-2xl font-normal">Se renseigner</h3>
-            <p className="text-sm text-muted-foreground">
-              Remplissez le formulaire pour le cours: <span className="font-semibold">{courseName}</span>.
-            </p>
           </div>
         )}
         <Form {...form}>
