@@ -77,25 +77,23 @@ const ListItem = React.forwardRef<
   React.ComponentPropsWithoutRef<"a"> & { description?: string }
 >(({ className, title, description, ...props }, ref) => {
   return (
-    <li>
-      <NavigationMenuLink asChild>
-        <Link
-          ref={ref}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-background/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left",
-            className
-          )}
-          {...props}
-        >
-          <div className="text-sm font-normal leading-none">{title}</div>
-          {description && (
-            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
-              {description}
-            </p>
-          )}
-        </Link>
-      </NavigationMenuLink>
-    </li>
+    <NavigationMenuLink asChild>
+      <Link
+        ref={ref}
+        className={cn(
+          "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-background/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left",
+          className
+        )}
+        {...props}
+      >
+        <div className="text-sm font-normal leading-none">{title}</div>
+        {description && (
+          <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+            {description}
+          </p>
+        )}
+      </Link>
+    </NavigationMenuLink>
   );
 });
 ListItem.displayName = "ListItem";
