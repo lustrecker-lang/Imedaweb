@@ -115,60 +115,62 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
 
   return (
     <div className="flex flex-col">
-       <section className="container px-4 md:px-6 py-12 md:py-20">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-             <div className="relative aspect-video w-full h-64 md:h-full order-1 md:order-2">
-                {pageData ? (
-                    heroImageUrl && (
-                        <Image
-                            src={heroImageUrl}
-                            alt={heroSection?.title || "Présentation background"}
-                            fill
-                            className="object-cover rounded-lg"
-                            priority
-                            data-ai-hint="professional african leadership"
-                        />
-                    )
-                ) : (
-                    <Skeleton className="h-full w-full rounded-lg" />
-                )}
-            </div>
-            <div className="order-2 md:order-1 text-center md:text-left">
-                 {pageData ? (
-                    <>
-                        <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline">
-                            {heroSection?.title || "Présentation"}
-                        </h1>
-                        <p className="mt-4 max-w-[600px] mx-auto md:mx-0 text-muted-foreground md:text-lg">
-                           {heroSection?.content || "Découvrez qui nous sommes, notre vision et notre engagement envers l'excellence."}
-                        </p>
-                        <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-6 justify-center md:justify-start">
-                            <Button asChild>
-                                <Link href="/courses">
-                                    Nos Formations <ArrowRight className="ml-2 h-4 w-4" />
-                                </Link>
-                            </Button>
-                             <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
-                                <SheetTrigger asChild>
-                                    <Button variant="outline">Contactez-nous</Button>
-                                </SheetTrigger>
-                                <SheetContent side="right">
-                                    <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} showHeader={true} />
-                                </SheetContent>
-                            </Sheet>
+       <section className="py-12 md:py-20">
+        <div className="container px-4 md:px-6">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div className="relative w-full aspect-video h-auto md:h-full order-1 md:order-2">
+                    {pageData ? (
+                        heroImageUrl && (
+                            <Image
+                                src={heroImageUrl}
+                                alt={heroSection?.title || "Présentation background"}
+                                fill
+                                className="object-cover rounded-lg"
+                                priority
+                                data-ai-hint="professional african leadership"
+                            />
+                        )
+                    ) : (
+                        <Skeleton className="h-full w-full rounded-lg" />
+                    )}
+                </div>
+                <div className="order-2 md:order-1 text-center md:text-left">
+                    {pageData ? (
+                        <>
+                            <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline">
+                                {heroSection?.title || "Présentation"}
+                            </h1>
+                            <p className="mt-4 max-w-[600px] mx-auto md:mx-0 text-muted-foreground md:text-lg">
+                            {heroSection?.content || "Découvrez qui nous sommes, notre vision et notre engagement envers l'excellence."}
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-4 mt-6 justify-center md:justify-start">
+                                <Button asChild>
+                                    <Link href="/courses">
+                                        Nos Formations <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Link>
+                                </Button>
+                                <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+                                    <SheetTrigger asChild>
+                                        <Button variant="outline">Contactez-nous</Button>
+                                    </SheetTrigger>
+                                    <SheetContent side="right">
+                                        <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} showHeader={true} />
+                                    </SheetContent>
+                                </Sheet>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="space-y-4">
+                            <Skeleton className="h-12 w-3/4" />
+                            <Skeleton className="h-6 w-full" />
+                            <Skeleton className="h-6 w-5/6" />
+                            <div className="flex gap-4">
+                                <Skeleton className="h-10 w-36" />
+                                <Skeleton className="h-10 w-36" />
+                            </div>
                         </div>
-                    </>
-                 ) : (
-                    <div className="space-y-4">
-                        <Skeleton className="h-12 w-3/4" />
-                        <Skeleton className="h-6 w-full" />
-                        <Skeleton className="h-6 w-5/6" />
-                        <div className="flex gap-4">
-                            <Skeleton className="h-10 w-36" />
-                            <Skeleton className="h-10 w-36" />
-                        </div>
-                    </div>
-                 )}
+                    )}
+                </div>
             </div>
         </div>
       </section>
