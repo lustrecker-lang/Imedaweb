@@ -3,6 +3,9 @@
 
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 interface Section {
   id: string;
@@ -51,49 +54,59 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
 
   return (
     <div className="flex flex-col">
-      <section className="container py-8">
-        <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-            {!pageData ? (
-              <Skeleton className="h-full w-full" />
-            ) : (
-              heroImageUrl && (
-                <Image
-                    src={heroImageUrl}
-                    alt={heroSection?.title || "Présentation background"}
-                    fill
-                    className="object-cover"
-                    priority
-                    data-ai-hint="professional african business"
-                />
-              )
-            )}
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
-                {!pageData ? (
-                <div className="w-full max-w-3xl space-y-4">
-                    <Skeleton className="h-12 w-3/4 mx-auto bg-gray-400/50" />
-                    <Skeleton className="h-6 w-full max-w-2xl mx-auto bg-gray-400/50" />
-                </div>
+       <section className="container py-12 md:py-20">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div>
+                 {pageData ? (
+                    <>
+                        <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline">
+                            {heroSection?.title || "Présentation"}
+                        </h1>
+                        <p className="mt-4 max-w-[600px] text-muted-foreground md:text-lg">
+                           {heroSection?.content || "Découvrez qui nous sommes, notre vision et notre engagement envers l'excellence."}
+                        </p>
+                        <Button asChild className="mt-6">
+                            <Link href="/courses">
+                                Our Courses <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        </Button>
+                    </>
+                 ) : (
+                    <div className="space-y-4">
+                        <Skeleton className="h-12 w-3/4" />
+                        <Skeleton className="h-6 w-full" />
+                        <Skeleton className="h-6 w-5/6" />
+                        <Skeleton className="h-10 w-36 mt-4" />
+                    </div>
+                 )}
+            </div>
+            <div className="relative aspect-video w-full h-80 md:h-full">
+                {pageData ? (
+                    heroImageUrl && (
+                        <Image
+                            src={heroImageUrl}
+                            alt={heroSection?.title || "Présentation background"}
+                            fill
+                            className="object-cover rounded-lg"
+                            priority
+                            data-ai-hint="professional african leadership"
+                        />
+                    )
                 ) : (
-                <>
-                    <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
-                    {heroSection?.title || "Présentation"}
-                    </h1>
-                    <p className="mx-auto mt-4 max-w-[600px] text-sm text-gray-200 md:text-base">
-                    {heroSection?.content || "Découvrez qui nous sommes, notre vision et notre engagement envers l'excellence."}
-                    </p>
-                </>
+                    <Skeleton className="h-full w-full rounded-lg" />
                 )}
             </div>
         </div>
       </section>
       
-      <section className="container py-16 md:py-24 space-y-16">
-        {missionSection && <ContentSection section={missionSection} />}
-        {visionSection && <ContentSection section={visionSection} reverse />}
-        {storySection && <ContentSection section={storySection} />}
-        {participantsSection && <ContentSection section={participantsSection} reverse />}
-        {impactSection && <ContentSection section={impactSection} />}
+      <section className="container py-16 md:py-24 space-y-16 bg-muted/30 -mx-4 w-full max-w-full">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-16">
+          {missionSection && <ContentSection section={missionSection} />}
+          {visionSection && <ContentSection section={visionSection} reverse />}
+          {storySection && <ContentSection section={storySection} />}
+          {participantsSection && <ContentSection section={participantsSection} reverse />}
+          {impactSection && <ContentSection section={impactSection} />}
+        </div>
       </section>
     </div>
   );
