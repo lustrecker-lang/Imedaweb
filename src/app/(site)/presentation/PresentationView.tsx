@@ -9,7 +9,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ContactForm } from "@/components/contact-form";
-import { Progress } from "@/components/ui/progress";
+import { AnimatedProgress } from "@/components/ui/animated-progress";
 
 interface Section {
   id: string;
@@ -30,7 +30,7 @@ interface PresentationViewProps {
 
 const ContentSection = ({ section, reverse = false }: { section: Section, reverse?: boolean}) => (
     <div className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${reverse ? 'md:grid-flow-col-dense' : ''}`}>
-        <div className={`relative aspect-square w-full max-w-md mx-auto md:max-w-none md:h-full ${reverse ? 'md:col-start-2' : ''}`}>
+        <div className={`relative aspect-square w-full max-w-md mx-auto md:max-w-none ${reverse ? 'md:col-start-2' : ''}`}>
             <Image 
                 src={section.imageUrl || "https://picsum.photos/seed/placeholder/800/800"} 
                 alt={section.title}
@@ -63,7 +63,7 @@ const ClientDistributionSection = ({ section }: { section: Section }) => {
 
     return (
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-            <div className="relative aspect-square w-full max-w-md mx-auto md:max-w-none md:h-full">
+            <div className="relative aspect-square w-full max-w-md mx-auto md:max-w-none">
                 <Image 
                     src={section.imageUrl || "https://picsum.photos/seed/clients/800/800"} 
                     alt={section.title}
@@ -82,7 +82,7 @@ const ClientDistributionSection = ({ section }: { section: Section }) => {
                                 <span className="text-sm font-medium text-foreground">{country}</span>
                                 <span className="text-sm font-medium text-primary">{percentage}%</span>
                             </div>
-                            <Progress value={percentage} className="h-2" />
+                            <AnimatedProgress value={percentage} className="h-2" />
                         </div>
                     ))}
                 </div>
