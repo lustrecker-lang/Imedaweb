@@ -210,11 +210,11 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                 <ChevronRight className="h-4 w-4 opacity-50" />
             </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="h-[90vh] flex flex-col">
-            <SheetHeader>
+        <SheetContent side="bottom" className="h-[90vh] flex flex-col p-0">
+            <SheetHeader className="p-6 pb-2">
                 <SheetTitle className="sr-only">Selectionner un thème</SheetTitle>
             </SheetHeader>
-            <div className="flex-grow overflow-y-auto -mx-6 px-6">
+            <div className="flex-grow overflow-y-auto px-6">
                 <Accordion type="multiple" className="w-full">
                     {categoriesWithThemes.map(category => (
                         <AccordionItem value={category.id} key={category.id}>
@@ -225,7 +225,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                                         <Button
                                             key={theme.id}
                                             variant="link"
-                                            className="h-auto p-2 text-muted-foreground text-left justify-start"
+                                            className="h-auto p-2 text-sm text-primary text-left justify-start hover:no-underline"
                                             onClick={() => handleMobileThemeSelect(theme.id)}
                                         >
                                             {theme.name}
@@ -237,6 +237,11 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                     ))}
                 </Accordion>
             </div>
+            <SheetClose asChild>
+                 <div className="p-6 border-t">
+                    <Button variant="outline" className="w-full">Fermer</Button>
+                </div>
+            </SheetClose>
         </SheetContent>
     </Sheet>
   );
