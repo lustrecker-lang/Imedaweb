@@ -5,7 +5,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, Download, CheckCircle, Loader2, ChevronRight } from "lucide-react";
+import { Search, ArrowRight, Download, CheckCircle, Loader2, ChevronRight, X } from "lucide-react";
 import { useState, useMemo, useEffect } from 'react';
 import { z } from 'zod';
 import { useFirestore, addDocumentNonBlocking } from '@/firebase';
@@ -206,22 +206,28 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const MobileThemeSearch = () => (
     <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
         <SheetTrigger asChild>
-            <Button variant="outline" className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white">
+             <Button variant="outline" className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white" onClick={() => setIsThemeSheetOpen(true)}>
                 <span className="truncate">
                     {selectedThemeId ? themeOptions.find(t => t.value === selectedThemeId)?.label : "Rechercher un thème..."}
                 </span>
                 <ChevronRight className="h-4 w-4 opacity-50 shrink-0" />
             </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="h-[90vh] flex flex-col p-0">
-            <SheetHeader className="p-6 pb-2">
-                <SheetTitle className="sr-only">Selectionner un thème</SheetTitle>
+        <SheetContent side="bottom" className="h-[70vh] flex flex-col p-0 bg-white">
+            <SheetHeader className="p-6 pb-2 flex-row items-center justify-between">
+                <SheetTitle className="font-headline text-2xl font-normal text-left">Sélectionner un thème</SheetTitle>
+                 <SheetClose asChild>
+                  <Button variant="ghost" size="icon">
+                    <X className="h-6 w-6" />
+                    <span className="sr-only">Close menu</span>
+                  </Button>
+                </SheetClose>
             </SheetHeader>
             <div className="flex-grow overflow-y-auto px-6">
                 <Accordion type="multiple" className="w-full">
                     {categoriesWithThemes.map(category => (
-                        <AccordionItem key={category.id} value={category.id} className="border-b-0">
-                            <AccordionTrigger className="py-2 text-foreground/70 transition-colors hover:text-foreground hover:no-underline font-normal">
+                        <AccordionItem key={category.id} value={category.id} className="border-b last-of-type:border-b-0">
+                            <AccordionTrigger className="py-4 text-primary/80 transition-colors hover:text-primary hover:no-underline font-headline font-normal text-xl">
                                 {category.name}
                             </AccordionTrigger>
                             <AccordionContent className="pl-4">
@@ -230,7 +236,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                                         <Button
                                             key={theme.id}
                                             variant="link"
-                                            className="h-auto p-2 text-sm text-primary text-left justify-start hover:no-underline"
+                                            className="h-auto p-2 text-sm text-primary/90 text-left justify-start hover:no-underline"
                                             onClick={() => handleMobileThemeSelect(theme.id)}
                                         >
                                             {theme.name}
@@ -242,11 +248,6 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                     ))}
                 </Accordion>
             </div>
-            <SheetClose asChild>
-                 <div className="p-6 border-t">
-                    <Button variant="outline" className="w-full">Fermer</Button>
-                </div>
-            </SheetClose>
         </SheetContent>
     </Sheet>
   );
@@ -290,7 +291,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                                 className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10 hover:text-white"
                             />
                         )}
-                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching || (!selectedThemeId && !isMobile)}>
+                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching || (!selectedThemeId && !isMobile) }>
                           {isSearching ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
