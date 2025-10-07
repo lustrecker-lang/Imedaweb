@@ -5,7 +5,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, Download, CheckCircle, Loader2 } from "lucide-react";
+import { Search, ArrowRight, Download, CheckCircle, Loader2, ChevronRight } from "lucide-react";
 import { useState, useMemo, useEffect } from 'react';
 import { z } from 'zod';
 import { useFirestore, addDocumentNonBlocking } from '@/firebase';
@@ -19,6 +19,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+
 
 // Interfaces
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
@@ -100,6 +103,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const router = useRouter();
   const firestore = useFirestore();
   const [isMobile, setIsMobile] = useState(false);
+  const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
   const [catalogEmail, setCatalogEmail] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false);
@@ -144,6 +148,12 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       setIsSearching(true);
       router.push(`/courses?themeId=${selectedThemeId}`);
     }
+  };
+  
+  const handleMobileThemeSelect = (themeId: string) => {
+    setIsSearching(true);
+    setIsThemeSheetOpen(false);
+    router.push(`/courses?themeId=${themeId}`);
   };
 
   const handleCatalogSubmit = async () => {
@@ -192,6 +202,44 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
     });
   }, [coursesData.categories, coursesData.themes, coursesData.formations]);
 
+  const MobileThemeSearch = () => (
+    <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
+        <SheetTrigger asChild>
+            <Button variant="outline" className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white">
+                {selectedThemeId ? themeOptions.find(t => t.value === selectedThemeId)?.label : "Rechercher un thème..."}
+                <ChevronRight className="h-4 w-4 opacity-50" />
+            </Button>
+        </SheetTrigger>
+        <SheetContent side="bottom" className="h-[90vh] flex flex-col">
+            <SheetHeader>
+                <SheetTitle className="sr-only">Selectionner un thème</SheetTitle>
+            </SheetHeader>
+            <div className="flex-grow overflow-y-auto -mx-6 px-6">
+                <Accordion type="multiple" className="w-full">
+                    {categoriesWithThemes.map(category => (
+                        <AccordionItem value={category.id} key={category.id}>
+                            <AccordionTrigger className="text-lg font-headline font-normal">{category.name}</AccordionTrigger>
+                            <AccordionContent>
+                                <div className="flex flex-col items-start pt-2">
+                                    {category.themes.map(theme => (
+                                        <Button
+                                            key={theme.id}
+                                            variant="link"
+                                            className="h-auto p-2 text-muted-foreground text-left justify-start"
+                                            onClick={() => handleMobileThemeSelect(theme.id)}
+                                        >
+                                            {theme.name}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </div>
+        </SheetContent>
+    </Sheet>
+  );
 
   return (
     <div className="flex flex-col">
@@ -219,16 +267,20 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                   <p className="mx-auto mt-4 max-w-[600px] text-sm text-gray-200 md:text-base">{heroSection?.content}</p>
                   <div className="mt-8 w-full max-w-2xl">
                     <div className="flex flex-col sm:flex-row items-center gap-2 bg-white/20 backdrop-blur-sm p-3 rounded-lg border border-white/30">
-                        <Combobox
-                          items={themeOptions}
-                          value={selectedThemeId}
-                          onChange={setSelectedThemeId}
-                          placeholder="Rechercher un thème..."
-                          searchPlaceholder="Rechercher un thème..."
-                          noResultsText="Aucun thème trouvé."
-                          className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10 hover:text-white"
-                        />
-                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching}>
+                        {isMobile ? (
+                            <MobileThemeSearch />
+                        ) : (
+                            <Combobox
+                                items={themeOptions}
+                                value={selectedThemeId}
+                                onChange={setSelectedThemeId}
+                                placeholder="Rechercher un thème..."
+                                searchPlaceholder="Rechercher un thème..."
+                                noResultsText="Aucun thème trouvé."
+                                className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10 hover:text-white"
+                            />
+                        )}
+                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching || (!isMobile && !selectedThemeId)}>
                           {isSearching ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
