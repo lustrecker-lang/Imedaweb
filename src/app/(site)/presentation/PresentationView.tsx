@@ -21,9 +21,33 @@ interface PresentationViewProps {
   pageData: Page | null;
 }
 
+const ContentSection = ({ section, reverse = false }: { section: Section, reverse?: boolean}) => (
+    <div className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${reverse ? 'md:grid-flow-col-dense' : ''}`}>
+        <div className={`relative aspect-video w-full h-64 md:h-full ${reverse ? 'md:col-start-2' : ''}`}>
+            <Image 
+                src={section.imageUrl || "https://picsum.photos/seed/placeholder/800/600"} 
+                alt={section.title}
+                fill
+                className="object-cover rounded-lg"
+                data-ai-hint="team business meeting"
+            />
+        </div>
+        <div className="space-y-4">
+            <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline text-primary">{section.title}</h2>
+            <p className="text-muted-foreground whitespace-pre-wrap">{section.content}</p>
+        </div>
+    </div>
+);
+
 export default function PresentationView({ pageData }: PresentationViewProps) {
   const heroSection = pageData?.sections.find(s => s.id === 'hero');
   const heroImageUrl = heroSection?.imageUrl;
+  
+  const missionSection = pageData?.sections.find(s => s.id === 'mission');
+  const visionSection = pageData?.sections.find(s => s.id === 'vision');
+  const storySection = pageData?.sections.find(s => s.id === 'story');
+  const participantsSection = pageData?.sections.find(s => s.id === 'participants');
+  const impactSection = pageData?.sections.find(s => s.id === 'impact');
 
   return (
     <div className="flex flex-col">
@@ -39,6 +63,7 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
                     fill
                     className="object-cover"
                     priority
+                    data-ai-hint="professional african business"
                 />
               )
             )}
@@ -62,7 +87,14 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
             </div>
         </div>
       </section>
-      {/* Additional sections will be added here in the future */}
+      
+      <section className="container py-16 md:py-24 space-y-16">
+        {missionSection && <ContentSection section={missionSection} />}
+        {visionSection && <ContentSection section={visionSection} reverse />}
+        {storySection && <ContentSection section={storySection} />}
+        {participantsSection && <ContentSection section={participantsSection} reverse />}
+        {impactSection && <ContentSection section={impactSection} />}
+      </section>
     </div>
   );
 }
