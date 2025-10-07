@@ -151,9 +151,8 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   };
   
   const handleMobileThemeSelect = (themeId: string) => {
-    setIsSearching(true);
+    setSelectedThemeId(themeId);
     setIsThemeSheetOpen(false);
-    router.push(`/courses?themeId=${themeId}`);
   };
 
   const handleCatalogSubmit = async () => {
@@ -285,7 +284,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                                 className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10 hover:text-white"
                             />
                         )}
-                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching || (!isMobile && !selectedThemeId)}>
+                        <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching || !selectedThemeId}>
                           {isSearching ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
