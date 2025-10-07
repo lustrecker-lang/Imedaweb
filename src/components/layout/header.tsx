@@ -21,11 +21,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ContactForm } from "@/components/contact-form";
+import { CatalogDialog } from "@/components/catalog-dialog";
 
 const formationsNavStructure = {
     title: "Formations",
     items: [
-        { href: "#", title: "Catalogue 2025-26", description: "Téléchargez notre catalogue complet pour la saison à venir." },
+        { href: "#", title: "Catalogue 2025-26", description: "Téléchargez notre catalogue complet pour la saison à venir.", isDialog: true },
         { href: "/courses", title: "700+ Formations internationales", description: "Explorez notre catalogue complet de formations internationales." },
         { href: "#", title: "Formations en ligne", description: "Apprenez à votre rythme avec nos cours en ligne." },
     ]
@@ -73,16 +74,17 @@ interface HeaderProps {
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a"> & { description?: string }
->(({ className, title, description, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<"a"> & { description?: string, "data-dialog-trigger"?: boolean }
+>(({ className, title, description, "data-dialog-trigger": isDialogTrigger, ...props }, ref) => {
+  const Comp = isDialogTrigger ? 'button' : Link;
   return (
     <li>
       <NavigationMenuLink asChild>
-        <Link
+        <Comp
           href={props.href || '#'}
-          ref={ref}
+          ref={ref as any}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-background/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-background/80 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground w-full text-left",
             className
           )}
           {...props}
@@ -93,7 +95,7 @@ const ListItem = React.forwardRef<
               {description}
             </p>
           )}
-        </Link>
+        </Comp>
       </NavigationMenuLink>
     </li>
   );
@@ -176,12 +178,23 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
                         <NavigationMenuContent>
                         <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
                             {category.items.map((item) => (
-                                <ListItem
-                                    key={item.title}
-                                    href={item.href}
-                                    title={item.title}
-                                    description={item.description}
-                                />
+                                item.isDialog ? (
+                                    <CatalogDialog key={item.title}>
+                                        <ListItem
+                                            key={item.title}
+                                            title={item.title}
+                                            description={item.description}
+                                            data-dialog-trigger={true}
+                                        />
+                                    </CatalogDialog>
+                                ) : (
+                                    <ListItem
+                                        key={item.title}
+                                        href={item.href}
+                                        title={item.title}
+                                        description={item.description}
+                                    />
+                                )
                             ))}
                         </ul>
                         </NavigationMenuContent>
@@ -225,14 +238,25 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
                             <AccordionContent className="pl-4">
                                 <div className="flex flex-col gap-2 mt-2">
                                     {category.items.map((link) => (
-                                        <Link
-                                            key={link.title}
-                                            href={link.href}
-                                            className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
-                                            onClick={() => setIsMobileNavOpen(false)}
-                                        >
-                                            {link.title}
-                                        </Link>
+                                        link.isDialog ? (
+                                            <CatalogDialog key={link.title}>
+                                                <button
+                                                  className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal text-left"
+                                                  onClick={() => setIsMobileNavOpen(false)}
+                                                >
+                                                  {link.title}
+                                                </button>
+                                            </CatalogDialog>
+                                        ) : (
+                                            <Link
+                                                key={link.title}
+                                                href={link.href}
+                                                className="block py-1 text-foreground/70 transition-colors hover:text-foreground font-normal"
+                                                onClick={() => setIsMobileNavOpen(false)}
+                                            >
+                                                {link.title}
+                                            </Link>
+                                        )
                                     ))}
                                 </div>
                             </AccordionContent>
