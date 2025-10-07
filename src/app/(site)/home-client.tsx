@@ -5,7 +5,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, Download, CheckCircle, Loader2, ChevronRight, X } from "lucide-react";
+import { Search, ArrowRight, Download, CheckCircle, Loader2, ChevronRight,ChevronsUpDown, X,} from "lucide-react";
 import { useState, useMemo, useEffect } from 'react';
 import { z } from 'zod';
 import { useFirestore, addDocumentNonBlocking } from '@/firebase';
@@ -205,50 +205,75 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
   const MobileThemeSearch = () => (
     <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
-        <SheetTrigger asChild>
-             <Button variant="outline" className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white" onClick={() => setIsThemeSheetOpen(true)}>
-                <span className="truncate">
-                    {selectedThemeId ? themeOptions.find(t => t.value === selectedThemeId)?.label : "Rechercher un thème..."}
-                </span>
-                <ChevronRight className="h-4 w-4 opacity-50 shrink-0" />
-            </Button>
-        </SheetTrigger>
-        <SheetContent side="bottom" className="h-[70vh] flex flex-col p-0 bg-white">
-            <SheetHeader className="p-6 pb-2 flex-row items-center justify-between">
-                <SheetTitle className="font-headline text-2xl font-normal text-left">Sélectionner un thème</SheetTitle>
-                 <SheetClose asChild>
-                  <Button variant="ghost" size="icon">
-                    <X className="h-6 w-6" />
-                    <span className="sr-only">Close menu</span>
-                  </Button>
-                </SheetClose>
-            </SheetHeader>
-            <div className="flex-grow overflow-y-auto px-6">
-                <Accordion type="multiple" className="w-full">
-                    {categoriesWithThemes.map(category => (
-                        <AccordionItem key={category.id} value={category.id} className="border-b last-of-type:border-b-0">
-                            <AccordionTrigger className="py-4 text-primary/80 transition-colors hover:text-primary hover:no-underline font-headline font-normal text-xl">
-                                {category.name}
-                            </AccordionTrigger>
-                            <AccordionContent className="pl-4">
-                                <div className="flex flex-col items-start pt-2">
-                                    {category.themes.map(theme => (
-                                        <Button
-                                            key={theme.id}
-                                            variant="link"
-                                            className="h-auto p-2 text-sm text-primary/90 text-left justify-start hover:no-underline"
-                                            onClick={() => handleMobileThemeSelect(theme.id)}
-                                        >
-                                            {theme.name}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
+      <SheetTrigger asChild>
+        <Button
+          variant="outline"
+          className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white"
+          onClick={() => setIsThemeSheetOpen(true)}
+        >
+          <span className="truncate">
+            {selectedThemeId
+              ? themeOptions.find(t => t.value === selectedThemeId)?.label
+              : "Rechercher un thème..."}
+          </span>
+          <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
+        </Button>
+      </SheetTrigger>
+  
+      <SheetContent side="bottom" className="custom-sheet h-[70vh] flex flex-col p-0 bg-white">
+        <SheetHeader className="p-6 pb-2 flex-row items-center justify-between">
+          <SheetTitle className="font-headline text-2xl font-normal text-left">
+            Sélectionner un thème
+          </SheetTitle>
+          {/* removed close button */}
+        </SheetHeader>
+  
+        <div className="flex-grow overflow-y-auto px-6 relative">
+          <Accordion
+            type="multiple"
+            defaultValue={categoriesWithThemes.map(category => category.id)}
+            className="w-full"
+          >
+            {categoriesWithThemes.map(category => (
+              <AccordionItem
+                key={category.id}
+                value={category.id}
+                className="border-b last-of-type:border-b-0"
+              >
+                <AccordionTrigger className="py-4 text-primary/80 transition-colors hover:text-primary hover:no-underline font-headline font-normal text-xl">
+                  {category.name}
+                </AccordionTrigger>
+                <AccordionContent className="pl-4">
+                  <div className="flex flex-col items-start pt-2">
+                    {category.themes.map(theme => (
+                      <Button
+                        key={theme.id}
+                        variant="link"
+                        className="h-auto p-2 text-sm text-primary/90 text-left justify-start hover:no-underline"
+                        onClick={() => handleMobileThemeSelect(theme.id)}
+                      >
+                        {theme.name}
+                      </Button>
                     ))}
-                </Accordion>
-            </div>
-        </SheetContent>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+  
+          <style jsx>{`
+            /* Hide the ShadCN close button only inside this sheet */
+            :global(.custom-sheet button[aria-label='Close']) {
+              display: none !important;
+            }
+  
+            /* Hide the chevron icons inside AccordionTrigger for this sheet only */
+            :global(.custom-sheet .AccordionTrigger svg) {
+              display: none !important;
+            }
+          `}</style>
+        </div>
+      </SheetContent>
     </Sheet>
   );
 
@@ -313,7 +338,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
       {/* 2. Reference Carousel */}
       {referencesData && referencesData.length > 0 && (
-        <section className="py-8 bg-background">
+        <section className="py-8 md:py-8 bg-background">
             <div className="container">
                 <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
                     <div className="flex w-max animate-scroll">
@@ -324,7 +349,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                             alt={reference.name}
                             width={120}
                             height={40}
-                            className="max-h-10 w-auto object-contain"
+                            className="max-h-14 w-auto object-contain"
                         />
                         </div>
                     ))}
@@ -335,7 +360,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       )}
 
       {/* 3. Formations IMEDA Carousel */}
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
@@ -407,59 +432,75 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
 
       {/* 4. Catalog Download */}
       {catalogSection && (
-        <section className="py-16">
-          <div className="container">
+        <section className="py-8 md:py-16">
+        <div className="container">
+          <div className="-mx-4 sm:mx-0">
             <Card className="overflow-hidden md:rounded-lg">
-                <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-                    <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1 md:order-2">
-                        {catalogSection.imageUrl && (
-                            <Image
-                                src={catalogSection.imageUrl}
-                                alt={catalogSection.title || "Download Catalog"}
-                                fill
-                                className="object-cover"
-                            />
-                        )}
-                    </div>
-                    <div className="p-6 md:p-10 text-left order-2 md:order-1">
-                        {hasSubmitted ? (
-                          <div className="flex flex-col items-center justify-center text-center space-y-4">
-                            <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
-                            <h3 className="font-headline font-normal text-2xl">Merci!</h3>
-                            <p className="text-muted-foreground mt-1 text-sm">Votre téléchargement a commencé.</p>
-                            <Button variant="outline" onClick={handleResetForm} className="mt-4">
-                                Fermer
-                            </Button>
-                          </div>
-                        ) : (
-                          <>
-                            <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
-                            <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
-                            <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
-                                <Input
-                                    type="email"
-                                    placeholder="Votre adresse email"
-                                    className="w-full sm:flex-1"
-                                    value={catalogEmail}
-                                    onChange={(e) => setCatalogEmail(e.target.value)}
-                                    disabled={isSubmitting}
-                                />
-                                <Button className="w-full sm:w-auto" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
-                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                    Télécharger
-                                </Button>
-                            </div>
-                          </>
-                        )}
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+                <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1 md:order-2">
+                  {catalogSection.imageUrl && (
+                    <Image
+                      src={catalogSection.imageUrl}
+                      alt={catalogSection.title || "Download Catalog"}
+                      fill
+                      className="object-cover"
+                    />
+                  )}
                 </div>
+                <div className="p-6 md:p-10 text-left order-2 md:order-1">
+                  {hasSubmitted ? (
+                    <div className="flex flex-col items-center justify-center text-center space-y-4">
+                      <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
+                      <h3 className="font-headline font-normal text-2xl">Merci!</h3>
+                      <p className="text-muted-foreground mt-1 text-sm">
+                        Votre téléchargement a commencé.
+                      </p>
+                      <Button variant="outline" onClick={handleResetForm} className="mt-4">
+                        Fermer
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className="font-headline font-normal text-2xl">
+                        {catalogSection.title}
+                      </h3>
+                      <p className="text-muted-foreground mt-2 text-sm">
+                        {catalogSection.content}
+                      </p>
+                      <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
+                        <Input
+                          type="email"
+                          placeholder="Votre adresse email"
+                          className="w-full sm:flex-1"
+                          value={catalogEmail}
+                          onChange={e => setCatalogEmail(e.target.value)}
+                          disabled={isSubmitting}
+                        />
+                        <Button
+                          className="w-full sm:w-auto"
+                          disabled={!isEmailValid || isSubmitting}
+                          onClick={handleCatalogSubmit}
+                        >
+                          {isSubmitting ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Download className="mr-2 h-4 w-4" />
+                          )}
+                          Télécharger
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             </Card>
           </div>
-        </section>
+        </div>
+      </section>
       )}
 
       {/* 5. Excellence Academic (Features) */}
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="max-w-2xl">
             <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{featuresSectionHeader?.title}</h2>
@@ -482,7 +523,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       </section>
 
       {/* 6. Our Campuses */}
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
@@ -517,7 +558,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       </section>
       
       {/* 7. KPI Numbers */}
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 md:gap-x-8 text-left">
             <div>
@@ -540,7 +581,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       </section>
       
       {/* 8. Nos Publications */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-8 md:py-16 bg-muted/30">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
@@ -603,7 +644,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       </section>
 
       {/* 9. IMEDA News */}
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div className="max-w-[75%]">
