@@ -117,6 +117,22 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
     <div className="flex flex-col">
        <section className="container px-4 md:px-6 py-12 md:py-20">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+             <div className="relative aspect-video w-full h-64 md:h-full order-1 md:order-2">
+                {pageData ? (
+                    heroImageUrl && (
+                        <Image
+                            src={heroImageUrl}
+                            alt={heroSection?.title || "Présentation background"}
+                            fill
+                            className="object-cover rounded-lg"
+                            priority
+                            data-ai-hint="professional african leadership"
+                        />
+                    )
+                ) : (
+                    <Skeleton className="h-full w-full rounded-lg" />
+                )}
+            </div>
             <div className="order-2 md:order-1 text-center md:text-left">
                  {pageData ? (
                     <>
@@ -153,22 +169,6 @@ export default function PresentationView({ pageData }: PresentationViewProps) {
                         </div>
                     </div>
                  )}
-            </div>
-            <div className="order-1 md:order-2 relative aspect-video w-full h-64 md:h-full">
-                {pageData ? (
-                    heroImageUrl && (
-                        <Image
-                            src={heroImageUrl}
-                            alt={heroSection?.title || "Présentation background"}
-                            fill
-                            className="object-cover rounded-lg"
-                            priority
-                            data-ai-hint="professional african leadership"
-                        />
-                    )
-                ) : (
-                    <Skeleton className="h-full w-full rounded-lg" />
-                )}
             </div>
         </div>
       </section>
