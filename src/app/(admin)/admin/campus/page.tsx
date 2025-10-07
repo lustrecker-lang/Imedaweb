@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -108,6 +109,11 @@ const formSchema = z.object({
     headline: z.string().optional(),
     body: z.string().optional(),
   }).optional(),
+  bannerSection: z.object({
+    title: z.string().optional(),
+    text: z.string().optional(),
+    mediaUrl: z.string().optional(),
+  }).optional(),
   academicOffering: z.object({
       headline: z.string().optional(),
       subtitle: z.string().optional(),
@@ -179,6 +185,7 @@ export default function CampusPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [heroBgFile, setHeroBgFile] = useState<File | null>(null);
   const [ogImageFile, setOgImageFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [featureFiles, setFeatureFiles] = useState<(File | null)[]>([]);
   const [contactImageFile, setContactImageFile] = useState<File | null>(null);
 
@@ -247,6 +254,11 @@ export default function CampusPage() {
         campusDescription: {
           headline: editingCampus.campusDescription?.headline || '',
           body: editingCampus.campusDescription?.body || '',
+        },
+        bannerSection: {
+            title: editingCampus.bannerSection?.title || '',
+            text: editingCampus.bannerSection?.text || '',
+            mediaUrl: editingCampus.bannerSection?.mediaUrl || '',
         },
         academicOffering: {
           headline: editingCampus.academicOffering?.headline || '',
@@ -337,6 +349,7 @@ export default function CampusPage() {
     let heroBackgroundMediaUrl = values.hero?.backgroundMediaUrl;
     let contactImageUrl = values.visitAndContact?.imageUrl;
     let ogImageUrl = values.ogImage;
+    let bannerMediaUrl = values.bannerSection?.mediaUrl;
 
     if (imageFile) {
       if (editingCampus.imageUrl && storage) {
@@ -350,6 +363,13 @@ export default function CampusPage() {
         try { const oldImageRef = ref(storage, editingCampus.hero.backgroundMediaUrl); await deleteObject(oldImageRef); } catch (error) { console.error("Error deleting old hero background: ", error); }
       }
       heroBackgroundMediaUrl = await handleFileUpload(heroBgFile) || editingCampus.hero?.backgroundMediaUrl;
+    }
+    
+    if (bannerFile) {
+        if (editingCampus.bannerSection?.mediaUrl && storage) {
+          try { const oldImageRef = ref(storage, editingCampus.bannerSection.mediaUrl); await deleteObject(oldImageRef); } catch (error) { console.error("Error deleting old banner media: ", error); }
+        }
+        bannerMediaUrl = await handleFileUpload(bannerFile) || editingCampus.bannerSection?.mediaUrl;
     }
 
     if (ogImageFile) {
@@ -384,6 +404,7 @@ export default function CampusPage() {
       imageUrl,
       ogImage: ogImageUrl,
       hero: { ...values.hero, backgroundMediaUrl: heroBackgroundMediaUrl },
+      bannerSection: { ...values.bannerSection, mediaUrl: bannerMediaUrl },
       campusExperience: { ...values.campusExperience, features: updatedFeatures },
       visitAndContact: { ...values.visitAndContact, imageUrl: contactImageUrl }
     };
@@ -400,11 +421,12 @@ export default function CampusPage() {
     setImageFile(null);
     setHeroBgFile(null);
     setOgImageFile(null);
+    setBannerFile(null);
     setFeatureFiles([]);
     setContactImageFile(null);
   };
   
-  const handleRemoveImage = async (field: keyof Campus | `hero.backgroundMediaUrl` | `campusExperience.features.${number}.mediaUrl` | 'visitAndContact.imageUrl' | 'ogImage', index?: number) => {
+  const handleRemoveImage = async (field: keyof Campus | `hero.backgroundMediaUrl` | `campusExperience.features.${number}.mediaUrl` | 'visitAndContact.imageUrl' | 'ogImage' | 'bannerSection.mediaUrl', index?: number) => {
     if (!firestore || !editingCampus) return;
 
     let imageUrl: string | undefined;
@@ -413,6 +435,7 @@ export default function CampusPage() {
     else if (field === 'hero.backgroundMediaUrl') imageUrl = editingCampus.hero?.backgroundMediaUrl;
     else if (field === 'visitAndContact.imageUrl') imageUrl = editingCampus.visitAndContact?.imageUrl;
     else if (field === 'ogImage') imageUrl = editingCampus.ogImage;
+    else if (field === 'bannerSection.mediaUrl') imageUrl = editingCampus.bannerSection?.mediaUrl;
     else if (typeof index === 'number' && field.startsWith('campusExperience.features')) imageUrl = editingCampus.campusExperience?.features?.[index]?.mediaUrl;
 
     if (!imageUrl) return;
@@ -426,6 +449,7 @@ export default function CampusPage() {
     if (field === 'imageUrl') { updatedData = { imageUrl: '' }; editForm.setValue('imageUrl', ''); setEditingCampus(prev => prev ? { ...prev, imageUrl: '' } : null); } 
     else if (field === 'hero.backgroundMediaUrl') { updatedData = { 'hero.backgroundMediaUrl': '' }; editForm.setValue('hero.backgroundMediaUrl', ''); setEditingCampus(prev => prev ? { ...prev, hero: { ...prev.hero, backgroundMediaUrl: '' } } : null); }
     else if (field === 'ogImage') { updatedData = { 'ogImage': '' }; editForm.setValue('ogImage', ''); setEditingCampus(prev => prev ? { ...prev, ogImage: '' } : null); }
+    else if (field === 'bannerSection.mediaUrl') { updatedData = { 'bannerSection.mediaUrl': '' }; editForm.setValue('bannerSection.mediaUrl', ''); setEditingCampus(prev => prev ? { ...prev, bannerSection: { ...prev.bannerSection, mediaUrl: ''} } : null); }
     else if (field === 'visitAndContact.imageUrl') { updatedData = { 'visitAndContact.imageUrl': '' }; editForm.setValue('visitAndContact.imageUrl', ''); setEditingCampus(prev => prev ? { ...prev, visitAndContact: { ...prev.visitAndContact, imageUrl: ''} } : null); }
     else if (typeof index === 'number' && field.startsWith('campusExperience.features')) {
         const features = [...(editingCampus.campusExperience?.features || [])];
@@ -454,6 +478,7 @@ export default function CampusPage() {
     setImageFile(null);
     setHeroBgFile(null);
     setOgImageFile(null);
+    setBannerFile(null);
     setFeatureFiles([]);
     setContactImageFile(null);
   };
@@ -464,6 +489,7 @@ export default function CampusPage() {
     if (campusToDelete.imageUrl && storage) deleteObject(ref(storage, campusToDelete.imageUrl)).catch(error => console.error("Error deleting image: ", error));
     if (campusToDelete.hero?.backgroundMediaUrl && storage) deleteObject(ref(storage, campusToDelete.hero.backgroundMediaUrl)).catch(error => console.error("Error deleting hero image: ", error));
     if (campusToDelete.ogImage && storage) deleteObject(ref(storage, campusToDelete.ogImage)).catch(error => console.error("Error deleting OG image: ", error));
+    if (campusToDelete.bannerSection?.mediaUrl && storage) deleteObject(ref(storage, campusToDelete.bannerSection.mediaUrl)).catch(error => console.error("Error deleting banner image: ", error));
     if (campusToDelete.visitAndContact?.imageUrl && storage) deleteObject(ref(storage, campusToDelete.visitAndContact.imageUrl)).catch(error => console.error("Error deleting contact image: ", error));
     campusToDelete.campusExperience?.features?.forEach(f => {
       if(f.mediaUrl && storage) deleteObject(ref(storage, f.mediaUrl)).catch(error => console.error(`Error deleting feature image ${f.mediaUrl}: `, error));
@@ -620,6 +646,23 @@ export default function CampusPage() {
                                 <FormField control={editForm.control} name="campusDescription.body" render={({ field }) => ( <FormItem> <FormLabel>Body Text</FormLabel> <FormControl><Textarea {...field} rows={5} /></FormControl> <FormMessage /> </FormItem> )}/>
                            </AccordionContent>
                         </AccordionItem>
+                        <AccordionItem value="banner-section">
+                            <AccordionTrigger>Banner Section</AccordionTrigger>
+                            <AccordionContent className="space-y-4 p-1">
+                                <FormField control={editForm.control} name="bannerSection.title" render={({ field }) => ( <FormItem> <FormLabel>Banner Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={editForm.control} name="bannerSection.text" render={({ field }) => ( <FormItem> <FormLabel>Banner Text</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormItem>
+                                    <FormLabel>Banner Media</FormLabel>
+                                    <div className="flex items-center gap-4">
+                                        {editForm.watch('bannerSection.mediaUrl') && ( <div className="relative"> <MediaPreview url={editForm.watch('bannerSection.mediaUrl')!} alt="Banner Media"/> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('bannerSection.mediaUrl')}> <X className="h-4 w-4" /> </Button> </div> )}
+                                        <FormControl>
+                                            <Input type="file" accept="image/*,video/*" onChange={(e) => { if (e.target.files?.[0]) { setBannerFile(e.target.files[0]) } }}/>
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            </AccordionContent>
+                        </AccordionItem>
                          <AccordionItem value="academics">
                            <AccordionTrigger>Academic Offering</AccordionTrigger>
                            <AccordionContent className="space-y-4 p-1">
@@ -708,7 +751,7 @@ export default function CampusPage() {
                             <FormItem>
                                 <FormLabel>Social Media Image</FormLabel>
                                 <div className="flex items-center gap-4">
-                                    {editForm.watch('ogImage') && ( <div className="relative w-24 h-24"> <Image src={editForm.watch('ogImage')!} alt="OG Image" layout="fill" className="object-cover rounded-md" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('ogImage')}> <X className="h-4 w-4" /> </Button> d</div> )}
+                                    {editForm.watch('ogImage') && ( <div className="relative w-24 h-24"> <Image src={editForm.watch('ogImage')!} alt="OG Image" layout="fill" className="object-cover rounded-md" /> <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => handleRemoveImage('ogImage')}> <X className="h-4 w-4" /> </Button> </div> )}
                                     <FormControl>
                                       <Input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) { setOgImageFile(e.target.files[0]) } }}/>
                                     </FormControl>

@@ -26,6 +26,11 @@ interface Campus {
     headline?: string;
     body?: string;
   };
+  bannerSection?: {
+      title?: string;
+      text?: string;
+      mediaUrl?: string;
+  };
   academicOffering?: {
     headline?: string;
     subtitle?: string;

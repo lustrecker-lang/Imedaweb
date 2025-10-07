@@ -249,6 +249,19 @@
           "description": "A general image for the campus, used in listings.",
           "format": "uri"
         },
+        "ogTitle": {
+          "type": "string",
+          "description": "Open Graph title for social sharing."
+        },
+        "ogDescription": {
+          "type": "string",
+          "description": "Open Graph description for social sharing."
+        },
+        "ogImage": {
+          "type": "string",
+          "description": "Open Graph image URL for social sharing.",
+          "format": "uri"
+        },
         "hero": {
           "type": "object",
           "properties": {
