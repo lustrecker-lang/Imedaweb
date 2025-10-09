@@ -36,7 +36,7 @@ const ContentSection = ({
   reverse?: boolean;
   cta?: React.ReactNode;
 }) => (
-  <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+  <div className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center`}>
     <div className={`relative aspect-square w-full max-w-md mx-auto md:max-w-none ${reverse ? 'md:col-start-2' : ''}`}>
       <Image 
         src={section.imageUrl || "https://picsum.photos/seed/placeholder/800/800"} 
@@ -47,7 +47,7 @@ const ContentSection = ({
     </div>
     <div className={`space-y-4 text-center md:text-left ${reverse ? 'md:col-start-1 md:row-start-1' : ''}`}>
       <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline text-primary">{section.title}</h2>
-      <p className="text-muted-foreground whitespace-pre-wrap">{section.content}</p>
+      <p className="text-muted-foreground whitespace-pre-wrap">{section.content.split('\n\n[DISTRIBUTION_DATA]')[0]}</p>
       {cta && <div className="pt-2">{cta}</div>}
     </div>
   </div>
@@ -109,7 +109,6 @@ export default function NotreApprocheView({ pageData }: NotreApprocheViewProps) 
         <div className="container px-4 md:px-6">
             {introSection && (
                 <div className="text-center max-w-3xl mx-auto">
-                    <BrainCircuit className="mx-auto h-12 w-12 text-primary" />
                     <p className="mt-6 text-lg text-muted-foreground md:text-xl">{introSection.content}</p>
                 </div>
             )}
