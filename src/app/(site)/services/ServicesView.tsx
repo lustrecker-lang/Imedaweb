@@ -65,7 +65,7 @@ const ContentSection = ({
     return (
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             {section.imageUrl && (
-                <div className={`relative aspect-video w-full max-w-md mx-auto md:max-w-none ${reverse ? 'md:col-start-2' : ''}`}>
+                <div className={`relative aspect-square w-full max-w-md mx-auto md:max-w-none ${reverse ? 'md:col-start-2' : ''}`}>
                     <Image 
                         src={section.imageUrl} 
                         alt={section.title}

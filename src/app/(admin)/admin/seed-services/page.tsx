@@ -21,19 +21,19 @@ const pageToSeed = {
             id: "executive-training",
             title: "Executive Training Programs",
             content: "Parcourez nos programmes de formation inter-entreprises, conçus pour développer les compétences stratégiques de vos cadres et dirigeants.",
-            imageUrl: "" // No image needed for this section
+            imageUrl: "https://picsum.photos/seed/exec-training/800/800"
         },
         {
             id: "corporate-seminars",
             title: "Tailored Corporate Seminars",
             content: "Nous concevons des séminaires sur mesure pour répondre aux défis spécifiques de votre organisation. Nos programmes intra-entreprises sont élaborés en collaboration avec vos équipes pour garantir un impact maximal et un alignement parfait avec votre stratégie.",
-            imageUrl: "https://picsum.photos/seed/corp-seminars/800/600"
+            imageUrl: "https://picsum.photos/seed/corp-seminars/800/800"
         },
         {
             id: "imeda-online",
             title: "Imeda Online for Business",
             content: "Accédez à notre expertise où que vous soyez. Notre plateforme en ligne offre des parcours de formation flexibles et des ressources de pointe pour le développement continu de vos équipes, combinant la rigueur académique et la commodité du digital.",
-            imageUrl: "https://picsum.photos/seed/imeda-online/800/600"
+            imageUrl: "https://picsum.photos/seed/imeda-online/800/800"
         },
         {
             id: "geographic-reach",
