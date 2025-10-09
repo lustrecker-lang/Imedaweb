@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -28,6 +29,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
@@ -38,6 +40,7 @@ const formSchema = z.object({
   logoLightUrl: z.string().optional(),
   iconUrl: z.string().optional(),
   faviconUrl: z.string().optional(),
+  websiteDescription: z.string().optional(),
 });
 
 interface CompanyProfile {
@@ -46,6 +49,7 @@ interface CompanyProfile {
   logoLightUrl?: string;
   iconUrl?: string;
   faviconUrl?: string;
+  websiteDescription?: string;
 }
 
 export default function CompanyPage() {
@@ -75,6 +79,7 @@ export default function CompanyPage() {
       logoLightUrl: '',
       iconUrl: '',
       faviconUrl: '',
+      websiteDescription: '',
     },
   });
 
@@ -153,6 +158,7 @@ export default function CompanyPage() {
     
     const dataToSave = {
         name: values.name,
+        websiteDescription: values.websiteDescription,
         logoUrl: logoUrl,
         logoLightUrl: logoLightUrl,
         iconUrl: iconUrl,
@@ -175,14 +181,14 @@ export default function CompanyPage() {
     <div className="container mx-auto px-4 py-12 md:px-6">
       <header className="mb-8">
         <h1 className="text-xl font-bold tracking-tight">Company Profile</h1>
-        <p className="text-sm text-muted-foreground">Manage your company's branding.</p>
+        <p className="text-sm text-muted-foreground">Manage your company's branding and metadata.</p>
       </header>
 
       <Card>
         <CardHeader>
-          <CardTitle>Branding Details</CardTitle>
+          <CardTitle>Branding & SEO</CardTitle>
           <CardDescription>
-            Update your company name, logo, app icon, and favicon.
+            Update your company name, website description, logo, and icons.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -191,6 +197,7 @@ export default function CompanyPage() {
               {isProfileLoading ? (
                 <div className="space-y-4">
                   <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />
@@ -206,6 +213,19 @@ export default function CompanyPage() {
                         <FormLabel>Company Name</FormLabel>
                         <FormControl>
                           <Input placeholder="Your Company" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
+                    name="websiteDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Website Description</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="A short description for your website (for SEO)." {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

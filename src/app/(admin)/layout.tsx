@@ -1,5 +1,4 @@
-
-
+// src/app/(admin)/layout.tsx
 'use client';
 import {
   SidebarProvider,
@@ -21,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { doc } from 'firebase/firestore';
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CompanyProfile {
   name?: string;
@@ -63,7 +63,7 @@ export default function AdminLayout({
       <Sidebar>
         <SidebarHeader>
           <div className="flex h-[36px] items-center px-2">
-            <span className="text-lg font-semibold tracking-wider font-headline">Welcome</span>
+            <span className="text-lg font-semibold tracking-wider font-headline">{companyProfile?.name || "IMEDA"} Admin</span>
           </div>
         </SidebarHeader>
         <SidebarContent>

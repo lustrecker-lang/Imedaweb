@@ -1,4 +1,5 @@
 
+
 {
   "entities": {
     "Kpi": {
@@ -146,6 +147,10 @@
         "name": {
           "type": "string",
           "description": "The name of the company."
+        },
+        "websiteDescription": {
+          "type": "string",
+          "description": "A short description of the website for SEO purposes."
         },
         "logoUrl": {
           "type": "string",

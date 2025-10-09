@@ -1,7 +1,9 @@
+// src/app/(site)/layout.tsx
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { adminDb } from "@/firebase/admin";
 import { DocumentData } from 'firebase-admin/firestore';
+import { cache } from 'react';
 
 interface CompanyProfile {
   name?: string;
@@ -15,7 +17,8 @@ interface Campus {
   slug: string;
 }
 
-async function getLayoutData() {
+// Memoized data fetching for the site layout
+const getLayoutData = cache(async () => {
     try {
         const [companyProfileSnap, campusesSnap] = await Promise.all([
             adminDb.collection('companyProfile').doc('main').get(),
@@ -27,10 +30,10 @@ async function getLayoutData() {
         
         return { companyProfile, campuses };
     } catch (error) {
-        console.error("Error fetching layout data:", error);
+        console.error("Error fetching site layout data:", error);
         return { companyProfile: null, campuses: [] };
     }
-}
+});
 
 export default async function SiteLayout({
   children,
