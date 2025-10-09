@@ -2,7 +2,7 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
@@ -61,7 +61,7 @@ interface CareersViewProps {
 }
 
 // Application Form Component
-function ApplicationForm({ positionName, onFormSubmit }: { positionName: string, onFormSubmit: () => void }) {
+function ApplicationForm({ positionName, onFormSubmit, inDialog = false }: { positionName: string, onFormSubmit: () => void, inDialog?: boolean }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const firestore = useFirestore();
   const storage = useStorage();
@@ -132,12 +132,18 @@ function ApplicationForm({ positionName, onFormSubmit }: { positionName: string,
             <FormMessage />
           </FormItem>
         )} />
-        <DialogFooter>
-          <DialogClose asChild><Button type="button" variant="ghost">Annuler</Button></DialogClose>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Envoi...</> : 'Postuler'}
-          </Button>
-        </DialogFooter>
+        {inDialog ? (
+            <DialogFooter>
+                <DialogClose asChild><Button type="button" variant="ghost">Annuler</Button></DialogClose>
+                <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Envoi...</> : 'Postuler'}
+                </Button>
+            </DialogFooter>
+        ) : (
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Envoi...</> : 'Postuler'}
+            </Button>
+        )}
       </form>
     </Form>
   );
@@ -166,10 +172,6 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
   const handleFormSubmit = () => {
     setFormSubmitted(true);
   };
-
-  const MemoizedApplicationForm = useMemo(() => {
-    return <ApplicationForm positionName="Formateur / Formatrice" onFormSubmit={() => {}} />;
-  }, []);
 
   return (
     <div className="flex flex-col">
@@ -229,7 +231,7 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
                 <CardDescription>Envoyez-nous vos informations et votre CV. Nous vous contacterons.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ApplicationForm positionName="Spontaneous Trainer Application" onFormSubmit={() => {}} />
+                <ApplicationForm positionName="Spontaneous Trainer Application" onFormSubmit={() => {}} inDialog={false} />
               </CardContent>
             </Card>
           </div>
@@ -317,7 +319,7 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
                         <DialogTitle>Postuler pour {selectedJob?.positionName}</DialogTitle>
                         <DialogDescription>Veuillez remplir le formulaire ci-dessous.</DialogDescription>
                     </DialogHeader>
-                    <ApplicationForm positionName={selectedJob?.positionName || ''} onFormSubmit={handleFormSubmit} />
+                    <ApplicationForm positionName={selectedJob?.positionName || ''} onFormSubmit={handleFormSubmit} inDialog={true} />
                  </>
             )}
         </DialogContent>
