@@ -53,15 +53,26 @@ const PageSkeleton = () => (
     <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
         <Skeleton className="h-full w-full" />
     </div>
+    <div className="py-16 md:py-24">
+        <Skeleton className="h-10 w-2/3 mx-auto mb-4" />
+        <Skeleton className="h-6 w-1/2 mx-auto" />
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <Skeleton className="h-56 w-full" />
+            <Skeleton className="h-56 w-full" />
+            <Skeleton className="h-56 w-full" />
+            <Skeleton className="h-56 w-full" />
+        </div>
+    </div>
   </div>
 );
 
 export default async function PartnershipsPage() {
   const pageData = await getPageData();
 
-  if (!pageData) {
-    notFound();
-  }
+  // If there's no data and we want to show a 404, we can uncomment this
+  // if (!pageData) {
+  //   notFound();
+  // }
 
   return (
     <Suspense fallback={<PageSkeleton />}>

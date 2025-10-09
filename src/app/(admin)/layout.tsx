@@ -148,6 +148,14 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
+            <SidebarMenuItem asChild>
+              <Link href="/admin/partenariats/seed-partenariats">
+                <SidebarMenuButton tooltip="Partenariats">
+                  <Handshake />
+                  <span className="text-sm">Partenariats</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
