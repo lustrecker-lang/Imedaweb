@@ -3,10 +3,15 @@
 
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect } from 'react';
+import { ArrowRight, Search, Loader2, ChevronsUpDown } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ContactForm } from "@/components/contact-form";
+import { Combobox } from "@/components/ui/combobox";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface Section {
   id: string;
@@ -86,6 +91,7 @@ const ContentSection = ({
 
 
 export default function ServicesView({ pageData, categories, themes, formations }: ServicesViewProps) {
+  const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
   const heroSection = pageData?.sections.find(s => s.id === 'hero');
   const trainingSection = pageData?.sections.find(s => s.id === 'executive-training');
   const seminarsSection = pageData?.sections.find(s => s.id === 'corporate-seminars');
@@ -93,15 +99,104 @@ export default function ServicesView({ pageData, categories, themes, formations 
   const reachSection = pageData?.sections.find(s => s.id === 'geographic-reach');
   const heroImageUrl = heroSection?.imageUrl;
 
-  const categoriesWithThemes: CategoryWithThemes[] = categories.map(category => {
-    const categoryThemes = themes.filter(theme => theme.categoryId === category.id);
-    const formationCount = formations.filter(formation => categoryThemes.some(theme => theme.id === formation.themeId)).length;
-    return {
-      ...category,
-      themes: categoryThemes,
-      formationCount
-    };
-  }).filter(c => c.formationCount > 0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
+  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  const themeOptions = useMemo(() => themes.map(theme => ({ value: theme.id, label: theme.name })), [themes]);
+
+  const handleSearch = () => {
+    if (selectedThemeId) {
+      setIsSearching(true);
+      router.push(`/courses?themeId=${selectedThemeId}`);
+    } else if (isMobile) {
+        setIsThemeSheetOpen(true);
+    }
+  };
+
+  const handleMobileThemeSelect = (themeId: string) => {
+    setSelectedThemeId(themeId);
+    setIsThemeSheetOpen(false);
+  };
+  
+  const categoriesWithThemes = useMemo(() => {
+    return categories.map(category => {
+      const categoryThemes = themes.filter(theme => theme.categoryId === category.id);
+      return {
+        ...category,
+        themes: categoryThemes
+      };
+    }).filter(c => c.themes.length > 0);
+  }, [categories, themes]);
+
+  const MobileThemeSearch = () => (
+    <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="outline"
+          className="w-full justify-between"
+          onClick={() => setIsThemeSheetOpen(true)}
+        >
+          <span className="truncate">
+            {selectedThemeId
+              ? themeOptions.find(t => t.value === selectedThemeId)?.label
+              : "Rechercher un thème..."}
+          </span>
+          <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
+        </Button>
+      </SheetTrigger>
+  
+      <SheetContent side="bottom" className="h-[70vh] flex flex-col p-0 bg-white">
+        <SheetHeader className="p-6 pb-2">
+          <SheetTitle className="font-headline text-2xl font-normal text-left">
+            Sélectionner un thème
+          </SheetTitle>
+        </SheetHeader>
+  
+        <div className="flex-grow overflow-y-auto px-6">
+          <Accordion
+            type="multiple"
+            defaultValue={categoriesWithThemes.map(category => category.id)}
+            className="w-full"
+          >
+            {categoriesWithThemes.map(category => (
+              <AccordionItem
+                key={category.id}
+                value={category.id}
+              >
+                <AccordionTrigger className="py-3 text-primary/80 transition-colors hover:text-primary hover:no-underline font-headline font-normal text-lg">
+                  {category.name}
+                </AccordionTrigger>
+                <AccordionContent className="pl-4">
+                  <div className="flex flex-col items-start pt-2">
+                    {category.themes.map(theme => (
+                      <Button
+                        key={theme.id}
+                        variant="link"
+                        className="h-auto p-2 text-sm text-primary/90 text-left justify-start hover:no-underline"
+                        onClick={() => handleMobileThemeSelect(theme.id)}
+                      >
+                        {theme.name}
+                      </Button>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
 
   return (
     <div className="flex flex-col">
@@ -147,27 +242,35 @@ export default function ServicesView({ pageData, categories, themes, formations 
         <div className="container px-4 md:px-6 space-y-16 md:space-y-24">
             {trainingSection && (
                 <ContentSection section={trainingSection}>
-                     <Accordion type="multiple" className="w-full mt-6">
-                        {categoriesWithThemes.map((category) => (
-                            <AccordionItem value={category.id} key={category.id}>
-                                <AccordionTrigger>
-                                    <div className="flex items-center justify-between w-full text-left">
-                                        <h3 className="font-headline font-normal text-lg">{category.name}</h3>
-                                        <p className="text-sm text-muted-foreground mr-4">{category.formationCount} formations</p>
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent className="pl-4">
-                                     <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2 pt-2">
-                                        {category.themes.map(theme => (
-                                            <Button key={theme.id} variant="link" asChild className="h-auto p-2 text-sm text-muted-foreground justify-start hover:text-primary hover:no-underline">
-                                                <Link href={`/courses?themeId=${theme.id}`}>{theme.name}</Link>
-                                            </Button>
-                                        ))}
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
+                    <div className="mt-6 w-full max-w-2xl mx-auto md:mx-0">
+                        <div className="flex flex-col sm:flex-row items-center gap-2 p-3 rounded-lg">
+                           {isMobile ? (
+                            <MobileThemeSearch />
+                        ) : (
+                            <Combobox
+                                items={themeOptions}
+                                value={selectedThemeId}
+                                onChange={setSelectedThemeId}
+                                placeholder="Rechercher un thème de formation..."
+                                searchPlaceholder="Rechercher un thème..."
+                                noResultsText="Aucun thème trouvé."
+                            />
+                        )}
+                        <Button onClick={handleSearch} className="w-full sm:w-auto" disabled={isSearching || (!selectedThemeId && !isMobile) }>
+                          {isSearching ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Recherche...
+                            </>
+                          ) : (
+                            <>
+                              <Search className="mr-2 h-4 w-4" />
+                              Rechercher
+                            </>
+                          )}
+                        </Button>
+                        </div>
+                    </div>
                 </ContentSection>
             )}
 
