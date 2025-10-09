@@ -2,7 +2,7 @@
 
 'use client';
 import Link from "next/link";
-import { Instagram, Youtube } from "lucide-react";
+import { Linkedin, Youtube } from "lucide-react";
 import Image from "next/image";
 
 interface CompanyProfile {
@@ -86,8 +86,8 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
               Institut de Management, Économie et Développement Appliqué.
             </p>
              <div className="flex items-center gap-6">
-              <Link href="#" aria-label="Instagram">
-                <Instagram className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
+              <Link href="https://www.linkedin.com/company/institut-imeda/" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
+                <Linkedin className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
               </Link>
               <Link href="#" aria-label="YouTube">
                 <Youtube className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
