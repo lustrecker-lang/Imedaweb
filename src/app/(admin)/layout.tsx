@@ -164,6 +164,14 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
+             <SidebarMenuItem asChild>
+              <Link href="/admin/seed-notre-approche">
+                <SidebarMenuButton tooltip="Notre Approche">
+                  <BrainCircuit />
+                  <span className="text-sm">Notre Approche</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>

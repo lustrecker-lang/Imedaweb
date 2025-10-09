@@ -49,18 +49,36 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const PageSkeleton = () => (
-  <div className="container mx-auto px-4 py-12 md:px-6">
-    <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-        <Skeleton className="h-full w-full" />
+    <div className="flex flex-col">
+        <div className="container py-8">
+            <Skeleton className="h-[40vh] w-full" />
+        </div>
+        <div className="py-16 bg-muted/30">
+            <div className="container text-center space-y-4 max-w-3xl mx-auto">
+                 <Skeleton className="h-12 w-12 mx-auto" />
+                 <Skeleton className="h-6 w-full" />
+                 <Skeleton className="h-6 w-5/6" />
+            </div>
+        </div>
+         <div className="py-16">
+            <div className="container space-y-16">
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <Skeleton className="aspect-square w-full" />
+                    <div className="space-y-4"><Skeleton className="h-8 w-1/2" /><Skeleton className="h-5 w-full" /><Skeleton className="h-5 w-full" /><Skeleton className="h-10 w-40 mt-4" /></div>
+                </div>
+                 <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-4 md:col-start-2"><Skeleton className="h-8 w-1/2" /><Skeleton className="h-5 w-full" /><Skeleton className="h-5 w-full" /><Skeleton className="h-10 w-40 mt-4" /></div>
+                    <Skeleton className="aspect-square w-full md:row-start-1" />
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 );
 
 export default async function NotreApprochePage() {
   const pageData = await getPageData();
 
   if (!pageData) {
-    // This will render the not-found.tsx file if it exists, otherwise a default 404 page
     notFound();
   }
 
