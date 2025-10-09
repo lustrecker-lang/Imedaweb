@@ -10,6 +10,7 @@ import { FirebaseClientProvider } from "@/firebase";
 interface CompanyProfile {
   name?: string;
   faviconUrl?: string;
+  websiteDescription?: string;
 }
 
 // Memoized data fetching for the company profile
@@ -27,13 +28,15 @@ const getCompanyProfile = cache(async () => {
 export async function generateMetadata(): Promise<Metadata> {
   const companyProfile = await getCompanyProfile();
   const faviconUrl = companyProfile?.faviconUrl || '/favicon.ico';
+  const siteName = companyProfile?.name || 'IMEDA';
+  const description = companyProfile?.websiteDescription || `Formation et conseil pour les leaders de demain.`;
   
   return {
     title: {
-      template: '%s | ' + (companyProfile?.name || 'IMEDA'),
-      default: companyProfile?.name || 'IMEDA',
+      template: '%s | ' + siteName,
+      default: siteName,
     },
-    description: "A clean and professional web application.",
+    description: description,
     manifest: "/manifest.json",
     icons: {
       icon: faviconUrl,
