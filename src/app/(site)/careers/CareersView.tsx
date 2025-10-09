@@ -137,7 +137,7 @@ function ApplicationForm({ positionName, onFormSubmit, inDialog = false }: { pos
         )} />
         {inDialog ? (
             <DialogFooter>
-                <DialogClose asChild><Button type="button" variant="ghost">Annuler</Button></DialogClose>
+                {inDialog && <DialogClose asChild><Button type="button" variant="ghost">Annuler</Button></DialogClose>}
                 <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Envoi...</> : 'Postuler'}
                 </Button>
@@ -233,15 +233,17 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
               <div className="container px-4 md:px-6">
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                        {valueSections.map(section => (
-                           <Card key={section.id} className="text-center border-0 shadow-none bg-transparent">
-                               <CardContent className="p-0">
-                                   {section.imageUrl && (
-                                       <div className="relative aspect-square w-full max-w-[300px] mx-auto overflow-hidden rounded-lg mb-6">
-                                            <Image src={section.imageUrl} alt={section.title} fill className="object-cover" />
-                                       </div>
-                                   )}
-                                   <h3 className="font-headline text-2xl font-normal">{section.title}</h3>
-                                   <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">{section.content}</p>
+                           <Card key={section.id} className="flex flex-col overflow-hidden">
+                               {section.imageUrl && (
+                                   <div className="relative aspect-video w-full">
+                                        <Image src={section.imageUrl} alt={section.title} fill className="object-cover" />
+                                   </div>
+                               )}
+                               <CardHeader>
+                                   <CardTitle className="font-headline text-2xl font-normal">{section.title}</CardTitle>
+                               </CardHeader>
+                               <CardContent className="flex-grow">
+                                   <p className="text-sm text-muted-foreground">{section.content}</p>
                                </CardContent>
                            </Card>
                        ))}
