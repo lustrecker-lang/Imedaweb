@@ -101,7 +101,10 @@ function ApplicationForm({ positionName, onFormSubmit, inDialog = false }: { pos
 
       onFormSubmit();
       form.reset();
-      toast({ title: "Candidature envoyée!", description: "Merci. Nous examinerons votre candidature." });
+      if (!inDialog) {
+        // Only show toast for non-dialog form
+        toast({ title: "Candidature envoyée!", description: "Merci. Nous examinerons votre candidature." });
+      }
 
     } catch (error) {
       console.error("Erreur lors de l'envoi de la candidature:", error);
@@ -152,6 +155,10 @@ function ApplicationForm({ positionName, onFormSubmit, inDialog = false }: { pos
 export default function CareersView({ pageData, jobOpenings }: CareersViewProps) {
   const heroSection = pageData?.sections.find(s => s.id === 'hero');
   const heroImageUrl = heroSection?.imageUrl;
+  
+  const valueSections = useMemo(() => {
+    return pageData?.sections.filter(s => s.id.startsWith('value-')) || [];
+  }, [pageData]);
 
   const [selectedJob, setSelectedJob] = useState<JobOpening | null>(null);
   const [isApplyDialogOpen, setIsApplyDialogOpen] = useState(false);
@@ -172,6 +179,15 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
   const handleFormSubmit = () => {
     setFormSubmitted(true);
   };
+
+  useEffect(() => {
+    // This allows the success message to be shown before the dialog closes.
+    if (formSubmitted && !isApplyDialogOpen) {
+      setTimeout(() => {
+        setFormSubmitted(false);
+      }, 500);
+    }
+  }, [formSubmitted, isApplyDialogOpen]);
 
   return (
     <div className="flex flex-col">
@@ -211,7 +227,30 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      {/* Values Section */}
+      {valueSections.length > 0 && (
+          <section className="py-16 md:py-24">
+              <div className="container px-4 md:px-6">
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                       {valueSections.map(section => (
+                           <Card key={section.id} className="text-center border-0 shadow-none bg-transparent">
+                               <CardContent className="p-0">
+                                   {section.imageUrl && (
+                                       <div className="relative aspect-square w-full max-w-[300px] mx-auto overflow-hidden rounded-lg mb-6">
+                                            <Image src={section.imageUrl} alt={section.title} fill className="object-cover" />
+                                       </div>
+                                   )}
+                                   <h3 className="font-headline text-2xl font-normal">{section.title}</h3>
+                                   <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">{section.content}</p>
+                               </CardContent>
+                           </Card>
+                       ))}
+                   </div>
+              </div>
+          </section>
+      )}
+
+      <section className="py-16 md:py-24 bg-muted/30">
         <div className="container px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="space-y-4">
@@ -238,7 +277,7 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
         </div>
       </section>
       
-      <section className="py-16 md:py-24 bg-muted/30">
+      <section className="py-16 md:py-24">
         <div className="container px-4 md:px-6">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">Nos Offres d'Emploi</h2>

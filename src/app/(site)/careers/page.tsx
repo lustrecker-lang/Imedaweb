@@ -88,9 +88,11 @@ const PageSkeleton = () => (
 
 export default async function CareersPage() {
   const { pageData, jobOpenings } = await getPageData();
+  
+  let finalPageData = pageData;
 
-  if (!pageData) {
-    const defaultPageData = {
+  if (!finalPageData) {
+    finalPageData = {
         id: "careers",
         title: "Carrières",
         sections: [
@@ -99,19 +101,54 @@ export default async function CareersPage() {
                 title: "Travaillez avec nous",
                 content: "Rejoignez une équipe dynamique et innovante.",
                 imageUrl: "https://picsum.photos/seed/careers-hero/1200/400"
+            },
+            {
+                id: "value-1",
+                title: "Innovation",
+                content: "Nous encourageons la créativité et la recherche constante de nouvelles solutions pour façonner l'avenir.",
+                imageUrl: "https://picsum.photos/seed/careers-value-1/600/600"
+            },
+            {
+                id: "value-2",
+                title: "Excellence",
+                content: "Nous visons les plus hauts standards dans tout ce que nous entreprenons, de la pédagogie à nos relations partenaires.",
+                imageUrl: "https://picsum.photos/seed/careers-value-2/600/600"
+            },
+            {
+                id: "value-3",
+                title: "Impact",
+                content: "Notre objectif est de générer un impact positif et mesurable pour nos participants, nos partenaires et la société.",
+                imageUrl: "https://picsum.photos/seed/careers-value-3/600/600"
             }
         ]
     };
-     return (
-        <Suspense fallback={<PageSkeleton />}>
-            <CareersView pageData={defaultPageData} jobOpenings={jobOpenings} />
-        </Suspense>
+  } else if (!finalPageData.sections.some(s => s.id.startsWith('value-'))) {
+    finalPageData.sections.push(
+        {
+            id: "value-1",
+            title: "Innovation",
+            content: "Nous encourageons la créativité et la recherche constante de nouvelles solutions pour façonner l'avenir.",
+            imageUrl: "https://picsum.photos/seed/careers-value-1/600/600"
+        },
+        {
+            id: "value-2",
+            title: "Excellence",
+            content: "Nous visons les plus hauts standards dans tout ce que nous entreprenons, de la pédagogie à nos relations partenaires.",
+            imageUrl: "https://picsum.photos/seed/careers-value-2/600/600"
+        },
+        {
+            id: "value-3",
+            title: "Impact",
+            content: "Notre objectif est de générer un impact positif et mesurable pour nos participants, nos partenaires et la société.",
+            imageUrl: "https://picsum.photos/seed/careers-value-3/600/600"
+        }
     );
   }
 
+
   return (
     <Suspense fallback={<PageSkeleton />}>
-      <CareersView pageData={pageData} jobOpenings={jobOpenings} />
+      <CareersView pageData={finalPageData} jobOpenings={jobOpenings} />
     </Suspense>
   );
 }
