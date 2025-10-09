@@ -1,6 +1,36 @@
 
 {
   "entities": {
+    "JobOpening": {
+      "title": "JobOpening",
+      "type": "object",
+      "description": "Represents a single job opening at the company.",
+      "properties": {
+        "positionName": {
+          "type": "string",
+          "description": "The name of the job position."
+        },
+        "type": {
+          "type": "string",
+          "description": "The category of the job.",
+          "enum": ["Trainer", "Administrator", "Marketing", "Tech", "Other"]
+        },
+        "workMode": {
+          "type": "string",
+          "description": "The work arrangement for the job.",
+          "enum": ["Full-time", "Part-time"]
+        },
+        "description": {
+          "type": "string",
+          "description": "A short summary of the job opening."
+        },
+        "fullDescription": {
+          "type": "string",
+          "description": "A detailed description of the job, responsibilities, and requirements."
+        }
+      },
+      "required": ["positionName", "type", "workMode", "description"]
+    },
     "NewsStory": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "NewsStory",
@@ -191,11 +221,11 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Lead",
       "type": "object",
-      "description": "Represents a lead submitted through a contact form.",
+      "description": "Represents a lead submitted through a contact form or application.",
       "properties": {
         "fullName": {
           "type": "string",
-          "description": "The full name of the person who submitted the form."
+          "description": "The full name of the person."
         },
         "email": {
           "type": "string",
@@ -217,11 +247,20 @@
         },
         "leadType": {
             "type": "string",
-            "description": "Type of lead, e.g., 'Contact Form' or 'Course Inquiry'."
+            "description": "Type of lead, e.g., 'Contact Form', 'Course Inquiry', 'Job Application'."
         },
         "courseName": {
             "type": "string",
             "description": "Name of the course if the lead is a course inquiry."
+        },
+        "positionAppliedFor": {
+            "type": "string",
+            "description": "The job position the person is applying for."
+        },
+        "cvUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the applicant's CV stored in Firebase Storage."
         }
       },
       "required": ["email", "createdAt"]
@@ -491,6 +530,14 @@
   },
   "firestore": {
     "structure": [
+       {
+        "path": "/jobOpenings/{jobId}",
+        "definition": {
+          "entityName": "JobOpening",
+          "schema": { "$ref": "#/backend/entities/JobOpening" },
+          "description": "Stores company job openings."
+        }
+      },
        {
         "path": "/news/{newsId}",
         "definition": {

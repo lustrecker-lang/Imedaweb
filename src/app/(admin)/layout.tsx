@@ -141,6 +141,14 @@ export default function AdminLayout({
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem asChild>
+              <Link href="/admin/jobs">
+                <SidebarMenuButton tooltip="Jobs">
+                  <BriefcaseBusiness />
+                  <span className="text-sm">Jobs</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem asChild>
               <Link href="/admin/leads">
                 <SidebarMenuButton tooltip="Leads">
                   <Mail />
