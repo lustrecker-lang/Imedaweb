@@ -31,6 +31,7 @@ interface Category { id: string; name: string; description?: string; mediaUrl?: 
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
 interface Reference { id: string; name: string; logoUrl: string; }
+interface Kpi { id: string; number: number; title: string; description: string; order: number; }
 interface Article {
     id: string;
     title: string;
@@ -68,6 +69,7 @@ interface HomeClientProps {
   articlesData: Article[];
   newsData: NewsStory[];
   companyProfile: CompanyProfile | null;
+  kpis: Kpi[];
 }
 
 const isVideoUrl = (url?: string | null) => {
@@ -99,7 +101,7 @@ const CampusCardDisplay = ({ campus, className }: { campus: Campus, className?: 
   };
 
 
-export function HomeClient({ heroData, referencesData, featuresData, catalogData, coursesData, campusesData, articlesData, newsData, companyProfile }: HomeClientProps) {
+export function HomeClient({ heroData, referencesData, featuresData, catalogData, coursesData, campusesData, articlesData, newsData, companyProfile, kpis }: HomeClientProps) {
   const router = useRouter();
   const firestore = useFirestore();
   const [isMobile, setIsMobile] = useState(false);
@@ -363,7 +365,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
-            <div className="max-w-[75%]">
+            <div className="max-w-[75%] text-left">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Formations IMEDA</h2>
                 <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">
                   <span className="md:hidden">Explorez nos thèmes de formation</span>
@@ -502,7 +504,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       {/* 5. Excellence Academic (Features) */}
       <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl text-left">
             <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">{featuresSectionHeader?.title}</h2>
             <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">{featuresSectionHeader?.content}</p>
           </div>
@@ -526,7 +528,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
-            <div className="max-w-[75%]">
+            <div className="max-w-[75%] text-left">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Our Campuses</h2>
                 <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">
                     <span className="md:hidden">Explore our world-class campuses</span>
@@ -561,21 +563,33 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-y-8 md:gap-x-8 text-left">
-            <div>
-              <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={700} />+</p>
-              <p className="mt-2 font-normal">Formations Internationales</p>
-              <p className="text-sm text-muted-foreground">Disponibles dans nos campus et en ligne.</p>
-            </div>
-            <div>
-              <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={95} />%</p>
-              <p className="mt-2 font-normal">Taux de placement</p>
-              <p className="text-sm text-muted-foreground">De nos diplômés dans les 6 mois.</p>
-            </div>
-            <div>
-              <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={120} />+</p>
-              <p className="mt-2 font-normal">Nationalités</p>
-              <p className="text-sm text-muted-foreground">Représentées parmi nos étudiants.</p>
-            </div>
+            {kpis && kpis.length > 0 ? (
+                kpis.map((kpi) => (
+                    <div key={kpi.id}>
+                        <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={kpi.number} />{kpi.title.includes('%') ? '%' : '+'}</p>
+                        <p className="mt-2 font-normal">{kpi.title.replace('%', '')}</p>
+                        <p className="text-sm text-muted-foreground">{kpi.description}</p>
+                    </div>
+                ))
+            ) : (
+                <>
+                    <div>
+                        <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={700} />+</p>
+                        <p className="mt-2 font-normal">Formations Internationales</p>
+                        <p className="text-sm text-muted-foreground">Disponibles dans nos campus et en ligne.</p>
+                    </div>
+                    <div>
+                        <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={95} />%</p>
+                        <p className="mt-2 font-normal">Taux de placement</p>
+                        <p className="text-sm text-muted-foreground">De nos diplômés dans les 6 mois.</p>
+                    </div>
+                    <div>
+                        <p className="text-4xl lg:text-5xl font-headline text-primary"><AnimatedCounter to={120} />+</p>
+                        <p className="mt-2 font-normal">Nationalités</p>
+                        <p className="text-sm text-muted-foreground">Représentées parmi nos étudiants.</p>
+                    </div>
+                </>
+            )}
           </div>
         </div>
       </section>
@@ -584,7 +598,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       <section className="py-8 md:py-16 bg-muted/30">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
-            <div className="max-w-[75%]">
+            <div className="max-w-[75%] text-left">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">Nos Publications</h2>
                 <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">
                   Découvrez nos dernières analyses, recherches et perspectives de nos experts.
@@ -647,7 +661,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       <section className="py-8 md:py-16">
         <div className="container px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
-            <div className="max-w-[75%]">
+            <div className="max-w-[75%] text-left">
                 <h2 className="text-xl font-normal tracking-tighter sm:text-2xl font-headline">IMEDA News</h2>
                 <p className="mt-2 text-sm text-muted-foreground md:text-base/relaxed">
                   The latest news and announcements from our institution.

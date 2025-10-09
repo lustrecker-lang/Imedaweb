@@ -17,6 +17,7 @@ interface Category { id: string; name: string; description?: string; mediaUrl?: 
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
 interface Reference { id: string; name: string; logoUrl: string; }
+interface Kpi { id: string; number: number; title: string; description: string; order: number; }
 interface Article {
   id: string;
   title: string;
@@ -164,6 +165,11 @@ async function getCompanyProfile() {
     return snap.exists ? snap.data() as CompanyProfile : null;
 }
 
+async function getKpis() {
+    const snap = await adminDb.collection('kpis').orderBy('order', 'asc').get();
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Kpi[];
+}
+
 // Main component that fetches data and passes it to the client component
 export default async function Home() {
   const [
@@ -176,6 +182,7 @@ export default async function Home() {
     articlesData,
     newsData,
     companyProfile,
+    kpis,
   ] = await Promise.all([
     getHeroData(),
     getReferencesData(),
@@ -186,6 +193,7 @@ export default async function Home() {
     getArticlesData(),
     getNewsData(),
     getCompanyProfile(),
+    getKpis(),
   ]);
 
   const data = {
@@ -198,6 +206,7 @@ export default async function Home() {
     articlesData,
     newsData,
     companyProfile,
+    kpis,
   };
 
   return (

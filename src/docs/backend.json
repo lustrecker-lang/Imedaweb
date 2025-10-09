@@ -1,6 +1,18 @@
 
 {
   "entities": {
+    "Kpi": {
+      "title": "KPI",
+      "type": "object",
+      "description": "Represents a Key Performance Indicator for the homepage.",
+      "properties": {
+        "number": { "type": "number", "description": "The numerical value of the KPI." },
+        "title": { "type": "string", "description": "The title or label for the KPI." },
+        "description": { "type": "string", "description": "A short description of the KPI." },
+        "order": { "type": "number", "description": "The display order of the KPI." }
+      },
+      "required": ["number", "title", "description", "order"]
+    },
     "JobOpening": {
       "title": "JobOpening",
       "type": "object",
@@ -226,6 +238,10 @@
         "fullName": {
           "type": "string",
           "description": "The full name of the person."
+        },
+        "companyName": {
+            "type": "string",
+            "description": "The name of the company the person represents."
         },
         "email": {
           "type": "string",
@@ -530,6 +546,14 @@
   },
   "firestore": {
     "structure": [
+       {
+        "path": "/kpis/{kpiId}",
+        "definition": {
+          "entityName": "Kpi",
+          "schema": { "$ref": "#/backend/entities/Kpi" },
+          "description": "Stores Key Performance Indicators for the homepage."
+        }
+       },
        {
         "path": "/jobOpenings/{jobId}",
         "definition": {
