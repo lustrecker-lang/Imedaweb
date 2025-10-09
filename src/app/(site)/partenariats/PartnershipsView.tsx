@@ -14,6 +14,7 @@ import { collection, serverTimestamp } from 'firebase/firestore';
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Stepper, Step } from "@/components/ui/stepper";
+import { ContactForm } from "@/components/contact-form";
 
 interface Section {
   id: string;
@@ -58,6 +59,7 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
     const [isEmailValid, setIsEmailValid] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [hasSubmitted, setHasSubmitted] = useState(false);
+    const [contactFormSubmitted, setContactFormSubmitted] = useState(false);
 
     useState(() => {
         const emailSchema = z.string().email();
@@ -116,7 +118,7 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
   return (
     <div className="flex flex-col">
       <section className="container py-8">
-        <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
+        <div className="relative min-h-[500px] md:min-h-[450px] w-full overflow-hidden rounded-lg">
             {!pageData ? (
               <Skeleton className="h-full w-full" />
             ) : (
@@ -130,23 +132,30 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
                 />
               )
             )}
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
-                {!pageData ? (
-                <div className="w-full max-w-3xl space-y-4">
-                    <Skeleton className="h-12 w-3/4 mx-auto bg-gray-400/50" />
-                    <Skeleton className="h-6 w-full max-w-2xl mx-auto bg-gray-400/50" />
+            <div className="absolute inset-0 bg-black/60" />
+            <div className="relative z-10 h-full flex items-center justify-center p-4 md:p-6">
+                <div className="grid md:grid-cols-2 gap-8 items-center w-full max-w-6xl">
+                    <div className="text-white text-center md:text-left">
+                        {pageData ? (
+                            <>
+                                <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline">
+                                {heroSection?.title || "Partenariats d'entreprise"}
+                                </h1>
+                                <p className="mx-auto mt-4 max-w-[500px] text-gray-200 md:text-lg">
+                                {heroSection?.content || "Collaborez avec nous pour un succès mutuel."}
+                                </p>
+                            </>
+                        ) : (
+                            <div className="w-full max-w-lg space-y-4">
+                                <Skeleton className="h-12 w-3/4 bg-gray-400/50" />
+                                <Skeleton className="h-6 w-full bg-gray-400/50" />
+                            </div>
+                        )}
+                    </div>
+                    <div className="bg-card text-card-foreground p-6 rounded-lg shadow-xl">
+                        <ContactForm onFormSubmit={() => setContactFormSubmitted(true)} showHeader={false} />
+                    </div>
                 </div>
-                ) : (
-                <>
-                    <h1 className="text-2xl font-normal tracking-tighter sm:text-3xl md:text-4xl font-headline text-white">
-                    {heroSection?.title || "Partenariats d'entreprise"}
-                    </h1>
-                    <p className="mx-auto mt-4 max-w-[600px] text-sm text-gray-200 md:text-base">
-                    {heroSection?.content || "Collaborez avec nous pour un succès mutuel."}
-                    </p>
-                </>
-                )}
             </div>
         </div>
       </section>
@@ -199,7 +208,7 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
                     <div className="mt-12 max-w-4xl mx-auto">
                         <Stepper>
                             {howWeWorkSteps.map((step, index) => (
-                                <Step key={step.id} step={index + 1}>
+                                <Step key={step.id} step={index + 1} isLast={index === howWeWorkSteps.length - 1}>
                                     <h3 className="font-headline font-normal text-lg">{step.title}</h3>
                                     <p className="text-sm text-muted-foreground">{step.content}</p>
                                 </Step>
