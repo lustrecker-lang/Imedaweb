@@ -136,8 +136,8 @@ function ApplicationForm({ positionName, onFormSubmit, inDialog = false }: { pos
           </FormItem>
         )} />
         {inDialog ? (
-            <DialogFooter>
-                {inDialog && <DialogClose asChild><Button type="button" variant="ghost">Annuler</Button></DialogClose>}
+             <DialogFooter>
+                <DialogClose asChild><Button type="button" variant="ghost">Annuler</Button></DialogClose>
                 <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Envoi...</> : 'Postuler'}
                 </Button>
@@ -164,6 +164,14 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
   const [isApplyDialogOpen, setIsApplyDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const handleApplyClick = (job: JobOpening) => {
     setSelectedJob(job);
@@ -272,7 +280,7 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
                 <CardDescription>Envoyez-nous vos informations et votre CV. Nous vous contacterons.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ApplicationForm positionName="Spontaneous Trainer Application" onFormSubmit={() => {}} inDialog={false} />
+                <ApplicationForm positionName="Spontaneous Trainer Application" onFormSubmit={() => {}} />
               </CardContent>
             </Card>
           </div>
@@ -287,43 +295,76 @@ export default function CareersView({ pageData, jobOpenings }: CareersViewProps)
                 Découvrez les opportunités pour rejoindre nos équipes administratives, marketing, et techniques.
             </p>
           </div>
-          <Card>
-            <CardContent className="p-0">
-               <Table>
-                <TableHeader>
-                    <TableRow>
-                    <TableHead>Poste</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Mode</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {jobOpenings && jobOpenings.length > 0 ? (
-                    jobOpenings.map((job) => (
-                        <TableRow key={job.id}>
-                        <TableCell className="font-medium">{job.positionName}</TableCell>
-                        <TableCell><Badge variant="outline">{job.type}</Badge></TableCell>
-                        <TableCell><Badge variant="secondary">{job.workMode}</Badge></TableCell>
-                        <TableCell className="text-sm text-muted-foreground max-w-sm truncate">{job.description}</TableCell>
-                        <TableCell className="text-right space-x-2">
-                           {job.fullDescription && (
-                             <Button variant="ghost" size="sm" onClick={() => handleDetailClick(job)}>
-                                <Info className="h-4 w-4 mr-2" /> Détails
-                             </Button>
-                           )}
-                           <Button size="sm" onClick={() => handleApplyClick(job)}>Postuler</Button>
-                        </TableCell>
+          {isMobile ? (
+            <div className="space-y-4">
+              {jobOpenings && jobOpenings.length > 0 ? (
+                jobOpenings.map((job) => (
+                  <Card key={job.id}>
+                    <CardHeader>
+                      <CardTitle className="font-headline text-xl font-normal">{job.positionName}</CardTitle>
+                      <div className="flex gap-2 pt-1">
+                        <Badge variant="outline">{job.type}</Badge>
+                        <Badge variant="secondary">{job.workMode}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4">{job.description}</p>
+                      <div className="flex gap-2">
+                        {job.fullDescription && (
+                          <Button variant="outline" size="sm" onClick={() => handleDetailClick(job)}>
+                            <Info className="h-4 w-4 mr-2" /> Détails
+                          </Button>
+                        )}
+                        <Button size="sm" onClick={() => handleApplyClick(job)}>Postuler</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-muted-foreground">Aucune offre d'emploi pour le moment.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+             <Card>
+                <CardContent className="p-0">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead>Poste</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Mode</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                    ))
-                    ) : (
-                    <TableRow><TableCell colSpan={5} className="h-24 text-center">Aucune offre d'emploi pour le moment.</TableCell></TableRow>
-                    )}
-                </TableBody>
-                </Table>
-            </CardContent>
-          </Card>
+                    </TableHeader>
+                    <TableBody>
+                        {jobOpenings && jobOpenings.length > 0 ? (
+                        jobOpenings.map((job) => (
+                            <TableRow key={job.id}>
+                            <TableCell className="font-medium">{job.positionName}</TableCell>
+                            <TableCell><Badge variant="outline">{job.type}</Badge></TableCell>
+                            <TableCell><Badge variant="secondary">{job.workMode}</Badge></TableCell>
+                            <TableCell className="text-sm text-muted-foreground max-w-sm truncate">{job.description}</TableCell>
+                            <TableCell className="text-right space-x-2">
+                            {job.fullDescription && (
+                                <Button variant="ghost" size="sm" onClick={() => handleDetailClick(job)}>
+                                    <Info className="h-4 w-4 mr-2" /> Détails
+                                </Button>
+                            )}
+                            <Button size="sm" onClick={() => handleApplyClick(job)}>Postuler</Button>
+                            </TableCell>
+                            </TableRow>
+                        ))
+                        ) : (
+                        <TableRow><TableCell colSpan={5} className="h-24 text-center">Aucune offre d'emploi pour le moment.</TableCell></TableRow>
+                        )}
+                    </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+          )}
         </div>
       </section>
 
