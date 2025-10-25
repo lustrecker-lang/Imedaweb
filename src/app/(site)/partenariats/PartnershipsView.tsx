@@ -145,7 +145,7 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
               )
             )}
             <div className="absolute inset-0 bg-black/60" />
-            <div className="relative z-10 h-full flex items-center justify-center p-4 md:p-6">
+            <div className="relative z-10 h-full flex flex-col items-center justify-center p-4 md:p-6">
                 <div className="grid md:grid-cols-2 gap-8 items-center w-full max-w-6xl">
                     <div className="text-white text-center md:text-left">
                         {pageData ? (
