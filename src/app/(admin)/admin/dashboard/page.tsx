@@ -116,6 +116,12 @@ export default function DashboardPage() {
                   >
                     <TableCell className="font-medium">Legal Page</TableCell>
                   </TableRow>
+                   <TableRow
+                    onClick={() => router.push('/admin/editor/catalog')}
+                    className="cursor-pointer"
+                  >
+                    <TableCell className="font-medium">Catalog Page</TableCell>
+                  </TableRow>
                 </>
               )}
             </TableBody>

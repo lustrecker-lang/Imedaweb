@@ -13,7 +13,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Handshake, Download, Wrench, Sigma } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Handshake, Download, Wrench, Sigma, BookDown } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -165,7 +165,7 @@ export default function AdminLayout({
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem asChild>
-              <Link href="/admin/partenariats/seed-partenariats">
+              <Link href="/admin/seed-partenariats">
                 <SidebarMenuButton tooltip="Partenariats">
                   <Handshake />
                   <span className="text-sm">Partenariats</span>
@@ -177,6 +177,14 @@ export default function AdminLayout({
                 <SidebarMenuButton tooltip="Notre Approche">
                   <BrainCircuit />
                   <span className="text-sm">Notre Approche</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem asChild>
+              <Link href="/admin/seed-catalog">
+                <SidebarMenuButton tooltip="Seed Catalog">
+                  <BookDown />
+                  <span className="text-sm">Seed Catalog</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
