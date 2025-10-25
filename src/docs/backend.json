@@ -31,7 +31,7 @@
         "workMode": {
           "type": "string",
           "description": "The work arrangement for the job.",
-          "enum": ["Full-time", "Part-time"]
+          "enum": ["Full-time", "Part-time", "Hourly"]
         },
         "description": {
           "type": "string",

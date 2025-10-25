@@ -64,7 +64,7 @@ import { Badge } from '@/components/ui/badge';
 const jobOpeningSchema = z.object({
   positionName: z.string().min(1, 'Position name is required.'),
   type: z.enum(['Trainer', 'Administrator', 'Marketing', 'Tech', 'Other']),
-  workMode: z.enum(['Full-time', 'Part-time']),
+  workMode: z.enum(['Full-time', 'Part-time', 'Hourly']),
   description: z.string().min(1, 'A short description is required.'),
   fullDescription: z.string().optional(),
 });
@@ -195,6 +195,7 @@ export default function JobsPage() {
                     <SelectContent>
                         <SelectItem value="Full-time">Full-time</SelectItem>
                         <SelectItem value="Part-time">Part-time</SelectItem>
+                        <SelectItem value="Hourly">Hourly</SelectItem>
                     </SelectContent>
                 </Select><FormMessage />
               </FormItem>
