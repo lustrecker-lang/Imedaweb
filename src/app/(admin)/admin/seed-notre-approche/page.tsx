@@ -20,7 +20,8 @@ const pageToSeed = {
         {
             id: "intro",
             title: "", // No title for this section
-            content: "At IMEDA, we believe professional development must create real change — not just deliver knowledge. Every programme we design is built to strengthen leadership capacity, accelerate organisational performance, and spark new ways of thinking that endure well beyond the classroom."
+            content: "At IMEDA, we believe professional development must create real change — not just deliver knowledge. Every programme we design is built to strengthen leadership capacity, accelerate organisational performance, and spark new ways of thinking that endure well beyond the classroom.",
+            imageUrl: null
         },
         {
             id: "grounded",
