@@ -2,7 +2,7 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Stepper, Step } from "@/components/ui/stepper";
 import { ContactForm } from "@/components/contact-form";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface Section {
   id: string;
@@ -60,12 +61,22 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const [contactFormSubmitted, setContactFormSubmitted] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
 
-    useState(() => {
+    useEffect(() => {
+        const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
+        checkIsMobile();
+        window.addEventListener('resize', checkIsMobile);
+        return () => window.removeEventListener('resize', checkIsMobile);
+    }, []);
+
+    useEffect(() => {
         const emailSchema = z.string().email();
         const result = emailSchema.safeParse(catalogEmail);
         setIsEmailValid(result.success);
-    });
+    }, [catalogEmail]);
+
 
   const heroSection = pageData?.sections.find(s => s.id === 'hero');
   const whyUsHeader = pageData?.sections.find(s => s.id === 'why-us-header');
@@ -144,6 +155,20 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
                                 <p className="mx-auto mt-4 max-w-[500px] text-gray-200 md:text-lg">
                                 {heroSection?.content || "Collaborez avec nous pour un succès mutuel."}
                                 </p>
+                                {isMobile && (
+                                    <div className="mt-6">
+                                        <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+                                            <SheetTrigger asChild>
+                                                <Button size="lg">Contactez-nous</Button>
+                                            </SheetTrigger>
+                                            <SheetContent side="bottom" className="h-[90vh] flex flex-col">
+                                                 <div className="overflow-y-auto p-2">
+                                                    <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} showHeader={true} />
+                                                 </div>
+                                            </SheetContent>
+                                        </Sheet>
+                                    </div>
+                                )}
                             </>
                         ) : (
                             <div className="w-full max-w-lg space-y-4">
@@ -152,9 +177,11 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
                             </div>
                         )}
                     </div>
-                    <div className="bg-card text-card-foreground p-6 rounded-lg shadow-xl">
-                        <ContactForm onFormSubmit={() => setContactFormSubmitted(true)} showHeader={false} />
-                    </div>
+                     {!isMobile && (
+                        <div className="bg-card text-card-foreground p-6 rounded-lg shadow-xl">
+                            <ContactForm onFormSubmit={() => setContactFormSubmitted(true)} showHeader={false} />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -251,7 +278,7 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
             <div className="container">
                 <Card className="overflow-hidden">
                     <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-                        <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1">
+                        <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1 md:order-2">
                             <Image
                                 src={catalogSection.imageUrl || "https://picsum.photos/seed/catalog-banner/800/600"}
                                 alt={catalogSection.title}
@@ -259,7 +286,7 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
                                 className="object-cover"
                             />
                         </div>
-                        <div className="p-6 md:p-10 text-left order-2">
+                        <div className="p-6 md:p-10 text-left order-2 md:order-1">
                             {hasSubmitted ? (
                                 <div className="flex flex-col items-center justify-center text-center space-y-4">
                                 <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
