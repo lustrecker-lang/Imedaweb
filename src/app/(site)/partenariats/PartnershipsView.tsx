@@ -1,3 +1,4 @@
+
 // src/app/(site)/partenariats/PartnershipsView.tsx
 'use client';
 
