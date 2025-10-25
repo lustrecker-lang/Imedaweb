@@ -1,3 +1,4 @@
+
 // src/app/(site)/notre-approche/NotreApprocheView.tsx
 'use client';
 
@@ -9,6 +10,8 @@ import { ArrowRight, BrainCircuit } from "lucide-react";
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ContactForm } from "@/components/contact-form";
+import { cn } from "@/lib/utils";
+
 
 interface Section {
   id: string;
@@ -27,6 +30,29 @@ interface NotreApprocheViewProps {
   pageData: Page | null;
 }
 
+const isVideoUrl = (url?: string | null) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    try {
+      const pathname = new URL(url).pathname.split('?')[0];
+      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+    } catch (e) {
+      return false; // Invalid URL
+    }
+};
+
+const MediaPreview = ({ url, alt, className }: { url: string; alt: string; className?: string }) => {
+    if (isVideoUrl(url)) {
+        return (
+            <video src={url} autoPlay loop muted playsInline className={cn("absolute inset-0 h-full w-full object-cover", className)}/>
+        );
+    }
+    return (
+        <Image src={url} alt={alt} fill className={cn("object-cover", className)} />
+    );
+}
+
+
 const ContentSection = ({
   section,
   reverse = false,
@@ -38,12 +64,7 @@ const ContentSection = ({
 }) => (
   <div className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center`}>
     <div className={`relative aspect-square w-full max-w-md mx-auto md:max-w-none ${reverse ? 'md:col-start-2' : ''}`}>
-      <Image 
-        src={section.imageUrl || "https://picsum.photos/seed/placeholder/800/800"} 
-        alt={section.title}
-        fill
-        className="object-cover rounded-lg"
-      />
+      {section.imageUrl && <MediaPreview url={section.imageUrl} alt={section.title} className="rounded-lg" />}
     </div>
     <div className={`space-y-4 text-center md:text-left ${reverse ? 'md:col-start-1 md:row-start-1' : ''}`}>
       <h2 className="text-2xl font-normal tracking-tighter sm:text-3xl font-headline text-primary">{section.title}</h2>
@@ -75,13 +96,7 @@ export default function NotreApprocheView({ pageData }: NotreApprocheViewProps) 
               <Skeleton className="h-full w-full" />
             ) : (
               heroImageUrl && (
-                <Image
-                    src={heroImageUrl}
-                    alt={heroSection?.title || "Notre Approche background"}
-                    fill
-                    className="object-cover"
-                    priority
-                />
+                <MediaPreview url={heroImageUrl} alt={heroSection?.title || "Notre Approche background"} />
               )
             )}
             <div className="absolute inset-0 bg-black/50" />
