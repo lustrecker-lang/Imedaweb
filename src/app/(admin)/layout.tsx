@@ -1,3 +1,4 @@
+
 // src/app/(admin)/layout.tsx
 'use client';
 import {
@@ -13,7 +14,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Handshake, Download, Wrench, Sigma, BookDown } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Handshake, Download, Wrench, Sigma, BookDown, Users } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -177,6 +178,22 @@ export default function AdminLayout({
                 <SidebarMenuButton tooltip="Notre Approche">
                   <BrainCircuit />
                   <span className="text-sm">Notre Approche</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+             <SidebarMenuItem asChild>
+              <Link href="/admin/seed-presentation">
+                <SidebarMenuButton tooltip="Présentation">
+                  <Presentation />
+                  <span className="text-sm">Présentation</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+             <SidebarMenuItem asChild>
+              <Link href="/admin/seed-careers">
+                <SidebarMenuButton tooltip="Careers">
+                  <Users />
+                  <span className="text-sm">Seed Careers</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
