@@ -27,7 +27,6 @@ const getCompanyProfile = cache(async () => {
 // Global metadata generation
 export async function generateMetadata(): Promise<Metadata> {
   const companyProfile = await getCompanyProfile();
-  const faviconUrl = companyProfile?.faviconUrl || '/favicon.ico';
   const siteName = companyProfile?.name || 'IMEDA';
   const description = companyProfile?.websiteDescription || `Formation et conseil pour les leaders de demain.`;
   
@@ -39,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: description,
     manifest: "/manifest.json",
     icons: {
-      icon: faviconUrl,
+      icon: '/favicon.ico',
     },
   };
 }

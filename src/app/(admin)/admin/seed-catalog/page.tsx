@@ -29,7 +29,7 @@ export default function SeedCatalogPage() {
     if (!firestore) return;
 
     const pageRef = doc(firestore, 'pages', pageToSeed.id);
-    setDocumentNonBlocking(pageRef, pageToD seed, {});
+    setDocumentNonBlocking(pageRef, pageToSeed, {});
 
     toast({
         title: "Seeding Initiated",
