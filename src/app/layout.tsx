@@ -1,5 +1,7 @@
+
 // src/app/layout.tsx
 import { Metadata } from "next";
+import Script from "next/script";
 import { adminDb } from "@/firebase/admin";
 import { cache } from "react";
 import "./globals.css";
@@ -60,6 +62,18 @@ export default async function RootLayout({
           {children}
           <Toaster />
         </FirebaseClientProvider>
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-0HZRN72X6H"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0HZRN72X6H');
+          `}
+        </Script>
       </body>
     </html>
   );
