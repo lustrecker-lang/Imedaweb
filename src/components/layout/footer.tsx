@@ -105,7 +105,7 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
 
         <div className="mt-8 border-t pt-6 text-center">
             <p className="text-xs text-muted-foreground">
-              © 2025 {companyProfile?.name ? companyProfile.name : 'Imeda International – IMEDA'}.
+              © 2025-26 {companyProfile?.name ? companyProfile.name : 'Imeda International – IMEDA'}.
             </p>
              <p className="text-xs text-muted-foreground mt-1">
               L’institution Licences 4700-9288 (Dubaï) et 1671-3512 (Europe).
