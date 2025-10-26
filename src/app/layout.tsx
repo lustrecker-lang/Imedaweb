@@ -32,6 +32,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteName = companyProfile?.name || 'IMEDA';
   const description = companyProfile?.websiteDescription || `Formation et conseil pour les leaders de demain.`;
   
+  const faviconUrl = companyProfile?.faviconUrl || '/favicon.ico';
+
   return {
     title: {
       template: '%s | ' + siteName,

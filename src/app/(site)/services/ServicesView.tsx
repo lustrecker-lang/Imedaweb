@@ -5,13 +5,13 @@ import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, useMemo, useEffect } from 'react';
 import { ArrowRight, Search, Loader2, ChevronsUpDown } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ContactForm } from "@/components/contact-form";
 import { Combobox } from "@/components/ui/combobox";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Section {
   id: string;
@@ -241,37 +241,7 @@ export default function ServicesView({ pageData, categories, themes, formations 
       <section className="py-16 md:py-24 bg-muted/30 w-full">
         <div className="container px-4 md:px-6 space-y-16 md:space-y-24">
             {trainingSection && (
-                <ContentSection section={trainingSection}>
-                    <div className="mt-6 w-full max-w-2xl mx-auto md:mx-0">
-                        <div className="flex flex-col sm:flex-row items-center gap-2 p-3 rounded-lg">
-                           {isMobile ? (
-                            <MobileThemeSearch />
-                        ) : (
-                            <Combobox
-                                items={themeOptions}
-                                value={selectedThemeId}
-                                onChange={setSelectedThemeId}
-                                placeholder="Rechercher un thème de formation..."
-                                searchPlaceholder="Rechercher un thème..."
-                                noResultsText="Aucun thème trouvé."
-                            />
-                        )}
-                        <Button onClick={handleSearch} className="w-full sm:w-auto" disabled={isSearching || (!selectedThemeId && !isMobile) }>
-                          {isSearching ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Recherche...
-                            </>
-                          ) : (
-                            <>
-                              <Search className="mr-2 h-4 w-4" />
-                              Rechercher
-                            </>
-                          )}
-                        </Button>
-                        </div>
-                    </div>
-                </ContentSection>
+                <ContentSection section={trainingSection} />
             )}
 
             {seminarsSection && (
