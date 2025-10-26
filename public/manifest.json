@@ -1,7 +1,7 @@
 {
-  "name": "IMEDA",
+  "name": "IMEDA | Institut de Management Économie et de Développement Appliqué.",
   "short_name": "IMEDA",
-  "description": "A clean and professional web application.",
+  "description": "AIMEDA propose plus de 700 formations professionnelles dans 23 thématiques pour renforcer le leadership, les compétences et la performance des dirigeants africains et de leurs équipes à l’international.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F6F1EB",
