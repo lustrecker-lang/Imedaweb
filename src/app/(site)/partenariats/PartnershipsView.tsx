@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Download, CheckCircle, Loader2 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
@@ -130,7 +130,7 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
   return (
     <div className="flex flex-col">
       <section className="container py-8">
-        <div className="relative min-h-[500px] md:min-h-[450px] w-full overflow-hidden rounded-lg">
+        <div className="relative min-h-[500px] md:min-h-[450px] w-full flex flex-col items-center justify-center overflow-hidden rounded-lg">
             {!pageData ? (
               <Skeleton className="h-full w-full" />
             ) : (
@@ -145,7 +145,7 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
               )
             )}
             <div className="absolute inset-0 bg-black/60" />
-            <div className="relative z-10 h-full flex flex-col items-center justify-center p-4 md:p-6">
+            <div className="relative z-10 h-full flex flex-col items-center justify-center p-4 md:p-6 w-full">
                 <div className="grid md:grid-cols-2 gap-8 items-center w-full max-w-6xl">
                     <div className="text-white text-center md:text-left">
                         {pageData ? (
@@ -173,8 +173,8 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
                             </>
                         ) : (
                             <div className="w-full max-w-lg space-y-4">
-                                <Skeleton className="h-12 w-3/4 bg-gray-400/50" />
-                                <Skeleton className="h-6 w-full bg-gray-400/50" />
+                                <Skeleton className="h-12 w-3/4" />
+                                <Skeleton className="h-6 w-full" />
                             </div>
                         )}
                     </div>
@@ -233,15 +233,37 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
                         <h2 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">{howWeWorkHeader.title}</h2>
                         <p className="mt-4 text-muted-foreground md:text-lg">{howWeWorkHeader.content}</p>
                     </div>
+                    {/* Responsive How We Work Section */}
                     <div className="mt-12 max-w-4xl mx-auto">
-                        <Stepper>
+                        {/* Mobile View: Cards */}
+                        <div className="grid md:hidden gap-6">
                             {howWeWorkSteps.map((step, index) => (
-                                <Step key={step.id} step={index + 1} isLast={index === howWeWorkSteps.length - 1}>
-                                    <h3 className="font-headline font-normal text-lg">{step.title}</h3>
-                                    <p className="text-sm text-muted-foreground">{step.content}</p>
-                                </Step>
+                                <Card key={step.id}>
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                                                {index + 1}
+                                            </div>
+                                            <div>
+                                                <h3 className="font-headline font-normal text-lg">{step.title}</h3>
+                                                <p className="text-sm text-muted-foreground">{step.content}</p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             ))}
-                        </Stepper>
+                        </div>
+                        {/* Desktop View: Stepper */}
+                        <div className="hidden md:block">
+                            <Stepper>
+                                {howWeWorkSteps.map((step, index) => (
+                                    <Step key={step.id} step={index + 1} isLast={index === howWeWorkSteps.length - 1}>
+                                        <h3 className="font-headline font-normal text-lg">{step.title}</h3>
+                                        <p className="text-sm text-muted-foreground">{step.content}</p>
+                                    </Step>
+                                ))}
+                            </Stepper>
+                        </div>
                     </div>
                 </div>
             </section>
