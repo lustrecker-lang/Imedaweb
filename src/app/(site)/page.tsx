@@ -45,6 +45,8 @@ interface CompanyProfile {
   logoUrl?: string;
   logoLightUrl?: string;
   iconUrl?: string;
+  websiteDescription?: string;
+  faviconUrl?: string;
 }
 // ------------------------------------------------------------------------------------------
 
@@ -55,19 +57,21 @@ export async function generateMetadata(): Promise<Metadata> {
     adminDb.collection('companyProfile').doc('main').get(),
   ]);
 
-  const pageContent = pageSnap.exists ? pageSnap.data() as DocumentData : null;
-  const companyProfile = companyProfileSnap.exists ? companyProfileSnap.data() as DocumentData : null;
+  const pageContent = pageSnap.exists ? pageSnap.data() as Page : null;
+  const companyProfile = companyProfileSnap.exists ? companyProfileSnap.data() as CompanyProfile : null;
 
-  const ogTitle = pageContent?.ogTitle || companyProfile?.name || 'IMEDA | Institut de Management Économie et de Développement Appliqué.';
-  const ogDescription = pageContent?.ogDescription || 'IMEDA propose plus de 700 formations professionnelles dans 23 thématiques pour renforcer le leadership, les compétences et la performance des dirigeants africains et de leurs équipes à linternational.';
-  const ogImage = pageContent?.ogImage || null;
+  const siteName = companyProfile?.name || 'IMEDA';
+  const pageTitle = pageContent?.title || 'Institut de Management Économie et de Développement Appliqué.';
+  const ogTitle = pageContent?.ogTitle || pageTitle;
+  const ogDescription = pageContent?.ogDescription || companyProfile?.websiteDescription || 'IMEDA propose plus de 700 formations professionnelles dans 23 thématiques pour renforcer le leadership, les compétences et la performance des dirigeants africains et de leurs équipes à linternational.';
+  const ogImage = pageContent?.ogImage || companyProfile?.logoUrl || null;
   const canonicalUrl = 'https://imeda.com/';
-
   const faviconUrl = companyProfile?.faviconUrl || '/favicon.ico';
 
+
   return {
-    title: pageContent?.title || 'IMEDA | Institut de Management Économie et de Développement Appliqué.',
-    description: pageContent?.description || 'IMEDA propose plus de 700 formations professionnelles dans 23 thématiques pour renforcer le leadership, les compétences et la performance des dirigeants africains et de leurs équipes à linternational.',
+    title: pageTitle,
+    description: ogDescription,
     openGraph: {
       title: ogTitle,
       description: ogDescription,
