@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteName = companyProfile?.name || 'IMEDA';
   const description = companyProfile?.websiteDescription || `Formation et conseil pour les leaders de demain.`;
   
-  const faviconUrl = companyProfile?.faviconUrl || '/favicon.ico';
+  const faviconUrl = '/favicon.ico'; // Always use the local favicon.ico
 
   return {
     title: {
@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: description,
     manifest: "/manifest.json",
     icons: {
-      icon: '/favicon.ico',
+      icon: faviconUrl,
     },
   };
 }
