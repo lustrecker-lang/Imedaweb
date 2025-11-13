@@ -1,3 +1,4 @@
+
 // src/app/admin/leads/page.tsx
 
 'use client';
@@ -32,7 +33,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Copy, Search, ArrowLeft, ArrowRight } from 'lucide-react';
+import { MoreHorizontal, Trash2, Copy, Search, ArrowLeft, ArrowRight, Download } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -68,6 +69,8 @@ interface Lead {
   createdAt: Timestamp;
   leadType?: string;
   courseName?: string;
+  positionAppliedFor?: string;
+  cvUrl?: string;
 }
 
 const LEADS_PER_PAGE = 10;
@@ -120,7 +123,8 @@ export default function LeadsPage() {
           const lowercasedTerm = searchTerm.toLowerCase();
           filtered = filtered.filter(lead => 
               lead.fullName.toLowerCase().includes(lowercasedTerm) ||
-              lead.email.toLowerCase().includes(lowercasedTerm)
+              lead.email.toLowerCase().includes(lowercasedTerm) ||
+              (lead.positionAppliedFor && lead.positionAppliedFor.toLowerCase().includes(lowercasedTerm))
           );
       }
 
@@ -169,6 +173,8 @@ export default function LeadsPage() {
       `Received: ${selectedLead.createdAt ? format(selectedLead.createdAt.toDate(), 'PP p') : 'N/A'}`,
       `Type: ${selectedLead.leadType || 'Contact Form'}`,
       selectedLead.courseName ? `Course: ${selectedLead.courseName}` : null,
+      selectedLead.positionAppliedFor ? `Applied for: ${selectedLead.positionAppliedFor}` : null,
+      selectedLead.cvUrl ? `CV: ${selectedLead.cvUrl}` : null,
       `\nMessage:\n${selectedLead.message}`
     ].filter(Boolean).join('\n');
 
@@ -203,6 +209,15 @@ export default function LeadsPage() {
     setLeadToDelete(null);
   };
 
+  const leadTypeColor = (leadType?: string) => {
+      switch (leadType) {
+          case 'Course Inquiry': return 'default';
+          case 'Job Application': return 'destructive';
+          case 'Catalog Download': return 'outline';
+          default: return 'secondary';
+      }
+  };
+
   return (
     <>
       <div className="container mx-auto px-4 py-12 md:px-6">
@@ -222,7 +237,7 @@ export default function LeadsPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="relative w-full sm:max-w-xs">
+                <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
                         placeholder="Search by name or email..." 
@@ -240,6 +255,7 @@ export default function LeadsPage() {
                         <SelectItem value="Contact Form">Contact Form</SelectItem>
                         <SelectItem value="Course Inquiry">Course Inquiry</SelectItem>
                         <SelectItem value="Catalog Download">Catalog Download</SelectItem>
+                        <SelectItem value="Job Application">Job Application</SelectItem>
                     </SelectContent>
                 </Select>
                 <Select value={monthFilter} onValueChange={setMonthFilter}>
@@ -284,7 +300,7 @@ export default function LeadsPage() {
                       <TableCell className="py-2 font-medium">{lead.fullName}</TableCell>
                       <TableCell className="py-2">{lead.email}</TableCell>
                       <TableCell className="py-2">
-                        <Badge variant={lead.leadType === 'Course Inquiry' ? 'default' : 'secondary'}>
+                        <Badge variant={leadTypeColor(lead.leadType)}>
                           {lead.leadType || 'Contact Form'}
                         </Badge>
                       </TableCell>
@@ -298,7 +314,7 @@ export default function LeadsPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleViewLead(lead)}>
-                              View Message
+                              View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openDeleteDialog(lead)} className="text-red-600 focus:text-red-600">
                                <Trash2 className="mr-2 h-4 w-4" />
@@ -368,7 +384,7 @@ export default function LeadsPage() {
                 <div>
                   <h4 className="font-semibold">Lead Type</h4>
                   <div className="text-muted-foreground">
-                    <Badge variant={selectedLead?.leadType === 'Course Inquiry' ? 'default' : 'secondary'}>
+                    <Badge variant={leadTypeColor(selectedLead?.leadType)}>
                       {selectedLead?.leadType || 'Contact Form'}
                     </Badge>
                   </div>
@@ -379,13 +395,31 @@ export default function LeadsPage() {
                     <p className="text-muted-foreground">{selectedLead.courseName}</p>
                   </div>
                 )}
+                {selectedLead?.leadType === 'Job Application' && selectedLead?.positionAppliedFor && (
+                  <div className="col-span-2">
+                    <h4 className="font-semibold">Position Applied For</h4>
+                    <p className="text-muted-foreground">{selectedLead.positionAppliedFor}</p>
+                  </div>
+                )}
+                 {selectedLead?.leadType === 'Job Application' && selectedLead?.cvUrl && (
+                  <div className="col-span-2">
+                    <h4 className="font-semibold">Curriculum Vitae</h4>
+                     <Button asChild variant="outline" size="sm" className="mt-1">
+                        <a href={selectedLead.cvUrl} target="_blank" rel="noopener noreferrer">
+                           <Download className="mr-2 h-4 w-4" /> Download CV
+                        </a>
+                    </Button>
+                  </div>
+                )}
               </div>
-              <div>
-                <h4 className="font-semibold">Message</h4>
-                <p className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border mt-2 whitespace-pre-wrap">
-                  {selectedLead?.message}
-                </p>
-              </div>
+              {selectedLead?.message && (
+                <div>
+                  <h4 className="font-semibold">Message</h4>
+                  <p className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border mt-2 whitespace-pre-wrap">
+                    {selectedLead?.message}
+                  </p>
+                </div>
+              )}
           </div>
           <DialogFooter>
              <DialogClose asChild>

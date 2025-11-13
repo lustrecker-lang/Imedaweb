@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const catalogFormSchema = z.object({
   email: z.string().email({ message: "Veuillez saisir une adresse e-mail valide." }),
+  phone: z.string().optional(),
 });
 
 interface Section {
@@ -49,7 +50,7 @@ export default function CatalogView({ pageData }: CatalogViewProps) {
 
     const form = useForm<z.infer<typeof catalogFormSchema>>({
         resolver: zodResolver(catalogFormSchema),
-        defaultValues: { email: "" },
+        defaultValues: { email: "", phone: "" },
     });
 
     const { formState: { isSubmitting } } = form;
@@ -63,6 +64,7 @@ export default function CatalogView({ pageData }: CatalogViewProps) {
         try {
             await addDocumentNonBlocking(collection(firestore, 'leads'), {
                 email: values.email,
+                phone: values.phone,
                 leadType: 'Catalog Download',
                 fullName: 'Catalog Lead (Page)',
                 message: 'Catalog Download Request from Catalog page.',
@@ -119,6 +121,18 @@ export default function CatalogView({ pageData }: CatalogViewProps) {
                                                 <FormItem>
                                                     <FormControl>
                                                     <Input placeholder="Votre adresse email" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="phone"
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                    <Input placeholder="Téléphone/WhatsApp (facultatif)" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>

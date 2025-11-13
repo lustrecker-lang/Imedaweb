@@ -268,7 +268,7 @@
         },
         "leadType": {
             "type": "string",
-            "description": "Type of lead, e.g., 'Contact Form', 'Course Inquiry', 'Job Application'."
+            "description": "Type of lead, e.g., 'Contact Form', 'Course Inquiry', 'Job Application', 'Catalog Download'."
         },
         "courseName": {
             "type": "string",
@@ -319,7 +319,7 @@
         },
         "ogImage": {
           "type": "string",
-          "description": "Open Graph image URL for social sharing.",
+          "description": "Open Graph image URL for social media sharing.",
           "format": "uri"
         },
         "hero": {
