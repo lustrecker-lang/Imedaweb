@@ -70,17 +70,55 @@ function SitemapSection({ title, links }: { title: string; links: { href: string
     );
 }
 
+function SitemapGroupedSection({ title, groups }: { title: string; groups: { groupTitle: string; links: { href: string; title: string }[] }[] }) {
+    if (groups.length === 0) return null;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline font-normal text-2xl text-primary">{title}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {groups.map(group => (
+                    group.links.length > 0 && (
+                        <div key={group.groupTitle}>
+                            <h3 className="font-semibold mb-3">{group.groupTitle}</h3>
+                            <ul className="space-y-2 list-disc list-inside ml-4">
+                                {group.links.map(link => (
+                                    <li key={link.href}>
+                                        <Link href={link.href} className="text-muted-foreground hover:text-primary hover:underline">
+                                            {link.title}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )
+                ))}
+            </CardContent>
+        </Card>
+    );
+}
+
 
 export default async function SitemapPage() {
-    const [campuses, formations, publications, news] = await Promise.all([
+    const [campuses, themes, formations, publications, news] = await Promise.all([
         getCollectionItems('campuses'),
+        getCollectionItems('course_themes'),
         getCollectionItems('course_formations'),
-        getCollectionItems('publications'),
+        getCollectionItems('articles'),
         getCollectionItems('news'),
     ]);
 
     const campusLinks = campuses.map(item => ({ href: `/campus/${item.slug || item.id}`, title: item.name || item.id }));
-    const formationLinks = formations.map(item => ({ href: `/courses/${item.id}`, title: item.name || `Formation ${item.id}` }));
+
+    const formationGroups = themes.map(theme => {
+        const themeFormations = formations
+            .filter((f: any) => f.themeId === theme.id)
+            .map(f => ({ href: `/courses/${f.id}`, title: f.name || `Formation ${f.id}` }));
+        return { groupTitle: theme.name || theme.id, links: themeFormations };
+    }).filter(group => group.links.length > 0);
+
     const publicationLinks = publications.map(item => ({ href: `/publications/${item.slug || item.id}`, title: item.title || item.id }));
     const newsLinks = news.map(item => ({ href: `/news/${item.slug || item.id}`, title: item.title || item.id }));
 
@@ -94,7 +132,7 @@ export default async function SitemapPage() {
             <div className="grid gap-8">
                 <SitemapSection title="Pages Principales" links={mainPages} />
                 <SitemapSection title="Nos Campus" links={campusLinks} />
-                <SitemapSection title="Nos Formations" links={formationLinks} />
+                <SitemapGroupedSection title="Nos Formations par Thème" groups={formationGroups} />
                 <SitemapSection title="Nos Publications" links={publicationLinks} />
                 <SitemapSection title="Nos Actualités" links={newsLinks} />
             </div>
