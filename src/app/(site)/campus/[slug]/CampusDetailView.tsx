@@ -129,10 +129,17 @@ const MediaPreview = ({ url, alt, className }: { url: string; alt: string; class
     );
 }
 
+const catalogFormSchema = z.object({
+    email: z.string().email({ message: "Veuillez saisir une adresse e-mail valide." }),
+    phone: z.string().optional(),
+});
+
+
 export default function CampusDetailView({ campus, categories, themes }: CampusDetailViewProps) {
     const firestore = useFirestore();
     const { toast } = useToast();
     const [catalogEmail, setCatalogEmail] = useState('');
+    const [catalogPhone, setCatalogPhone] = useState('');
     const [isEmailValid, setIsEmailValid] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -159,6 +166,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
         if (firestore) {
             await addDocumentNonBlocking(collection(firestore, 'leads'), {
                 email: catalogEmail,
+                phone: catalogPhone,
                 leadType: 'Catalog Download',
                 fullName: 'Catalog Lead (Campus Page)',
                 message: `Catalog download request from campus page: ${campus?.name}`,
@@ -189,6 +197,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
     const handleResetForm = () => {
         setHasSubmitted(false);
         setCatalogEmail('');
+        setCatalogPhone('');
     };
 
   if (!campus) {
@@ -424,7 +433,7 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                             ) : (
                                 <>
                                     <h3 className="font-headline font-normal text-lg">Télécharger le catalogue 2025-26</h3>
-                                    <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
+                                    <div className="space-y-3 mt-4">
                                         <Input
                                             type="email"
                                             placeholder="Votre adresse email"
@@ -433,7 +442,15 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                             onChange={(e) => setCatalogEmail(e.target.value)}
                                             disabled={isSubmitting}
                                         />
-                                        <Button className="w-full sm:w-auto" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
+                                        <Input
+                                            type="tel"
+                                            placeholder="Téléphone/WhatsApp (facultatif)"
+                                            className="w-full"
+                                            value={catalogPhone}
+                                            onChange={(e) => setCatalogPhone(e.target.value)}
+                                            disabled={isSubmitting}
+                                        />
+                                        <Button className="w-full" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
                                             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
                                             Télécharger
                                         </Button>
