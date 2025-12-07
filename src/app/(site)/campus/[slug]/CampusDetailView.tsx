@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Image from "next/image";
@@ -444,15 +443,15 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                         />
                                         <Input
                                             type="tel"
-                                            placeholder="Téléphone/WhatsApp (facultatif)"
+                                            placeholder="Téléphone/WhatsApp"
                                             className="w-full"
                                             value={catalogPhone}
                                             onChange={(e) => setCatalogPhone(e.target.value)}
                                             disabled={isSubmitting}
                                         />
                                         <Button className="w-full" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
-                                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                            Télécharger
+                                            <Download className="mr-0 md:mr-2 h-4 w-4" />
+                                            <span className="hidden md:inline">Télécharger</span>
                                         </Button>
                                     </div>
                                 </>

@@ -483,7 +483,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                         />
                          <Input
                           type="tel"
-                          placeholder="Téléphone/WhatsApp (facultatif)"
+                          placeholder="Téléphone/WhatsApp"
                           className="w-full sm:col-span-1"
                           value={catalogPhone}
                           onChange={e => setCatalogPhone(e.target.value)}
@@ -494,12 +494,8 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                           disabled={!isEmailValid || isSubmitting}
                           onClick={handleCatalogSubmit}
                         >
-                          {isSubmitting ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <Download className="mr-2 h-4 w-4" />
-                          )}
-                          Télécharger
+                          <Download className="mr-0 md:mr-2 h-4 w-4" />
+                          <span className="hidden md:inline">Télécharger</span>
                         </Button>
                       </div>
                     </>
