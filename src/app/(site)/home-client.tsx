@@ -108,6 +108,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
   const [catalogEmail, setCatalogEmail] = useState('');
+  const [catalogPhone, setCatalogPhone] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -166,8 +167,9 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
       if (firestore) {
         await addDocumentNonBlocking(collection(firestore, 'leads'), {
             email: catalogEmail,
+            phone: catalogPhone,
             leadType: 'Catalog Download',
-            fullName: 'Catalog Lead',
+            fullName: 'Catalog Lead (Homepage)',
             message: 'Catalog Download Request from homepage.',
             createdAt: serverTimestamp(),
         });
@@ -191,6 +193,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const handleResetForm = () => {
     setHasSubmitted(false);
     setCatalogEmail('');
+    setCatalogPhone('');
   };
 
   const categoriesWithThemes = useMemo(() => {
@@ -469,17 +472,25 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                       <p className="text-muted-foreground mt-2 text-sm">
                         {catalogSection.content}
                       </p>
-                      <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
+                      <div className="grid sm:grid-cols-3 items-start gap-2 mt-6">
                         <Input
                           type="email"
                           placeholder="Votre adresse email"
-                          className="w-full sm:flex-1"
+                          className="w-full sm:col-span-1"
                           value={catalogEmail}
                           onChange={e => setCatalogEmail(e.target.value)}
                           disabled={isSubmitting}
                         />
+                         <Input
+                          type="tel"
+                          placeholder="Téléphone/WhatsApp (facultatif)"
+                          className="w-full sm:col-span-1"
+                          value={catalogPhone}
+                          onChange={e => setCatalogPhone(e.target.value)}
+                          disabled={isSubmitting}
+                        />
                         <Button
-                          className="w-full sm:w-auto"
+                          className="w-full sm:col-span-1"
                           disabled={!isEmailValid || isSubmitting}
                           onClick={handleCatalogSubmit}
                         >
