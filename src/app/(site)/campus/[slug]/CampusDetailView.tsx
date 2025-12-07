@@ -450,8 +450,8 @@ export default function CampusDetailView({ campus, categories, themes }: CampusD
                                             disabled={isSubmitting}
                                         />
                                         <Button className="w-full" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
-                                            <Download className="mr-0 md:mr-2 h-4 w-4" />
-                                            <span className="hidden md:inline">Télécharger</span>
+                                            <Download className="mr-2 h-4 w-4" />
+                                            <span className="sm:hidden lg:inline">Télécharger</span>
                                         </Button>
                                     </div>
                                 </>
