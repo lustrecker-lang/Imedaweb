@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -43,15 +44,28 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
     },
   });
 
+  async function sendEmailNotification(values: z.infer<typeof contactFormSchema>) {
+    try {
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+    } catch (error) {
+      console.error("Failed to send email notification:", error);
+      // This failure is silent to the user as the lead is already saved.
+    }
+  }
+
   async function onSubmit(values: z.infer<typeof contactFormSchema>) {
     if (!firestore) {
       console.error("Firestore not available");
+      // Optionally show an error toast to the user
       return;
     }
 
     try {
       const leadsCollection = collection(firestore, 'leads');
-      // Here is the key change: adding the leadType field
       await addDoc(leadsCollection, {
         ...values,
         leadType: "Contact Form",
@@ -60,6 +74,10 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
 
       form.reset();
       setHasSubmitted(true);
+
+      // Send email in the background without blocking UI
+      sendEmailNotification(values);
+
     } catch (error) {
       console.error("Erreur lors de l'envoi du message:", error);
       // You can add a more visible error message here if needed.
