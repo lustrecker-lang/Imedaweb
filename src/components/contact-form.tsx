@@ -53,14 +53,12 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
       });
     } catch (error) {
       console.error("Failed to send email notification:", error);
-      // This failure is silent to the user as the lead is already saved.
     }
   }
 
   async function onSubmit(values: z.infer<typeof contactFormSchema>) {
     if (!firestore) {
       console.error("Firestore not available");
-      // Optionally show an error toast to the user
       return;
     }
 
@@ -74,13 +72,15 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
 
       form.reset();
       setHasSubmitted(true);
-
-      // Send email in the background without blocking UI
+      
+      // Send email notification in the background
       sendEmailNotification(values);
+
+      // Call the passed-in submit handler, e.g., to close a sheet
+      onFormSubmit();
 
     } catch (error) {
       console.error("Erreur lors de l'envoi du message:", error);
-      // You can add a more visible error message here if needed.
     }
   }
 
