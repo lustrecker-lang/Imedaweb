@@ -27,9 +27,9 @@ interface Campus {
     body?: string;
   };
   bannerSection?: {
-      title?: string;
-      text?: string;
-      mediaUrl?: string;
+    title?: string;
+    text?: string;
+    mediaUrl?: string;
   };
   academicOffering?: {
     headline?: string;
@@ -58,15 +58,15 @@ interface Campus {
 }
 
 interface Category {
-    id: string;
-    name: string;
-    mediaUrl?: string;
+  id: string;
+  name: string;
+  mediaUrl?: string;
 }
 
 interface Theme {
-    id: string;
-    name: string;
-    categoryId: string;
+  id: string;
+  name: string;
+  categoryId: string;
 }
 
 async function getCampusDetails(slug: string) {
@@ -103,7 +103,7 @@ async function getCampusDetails(slug: string) {
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const { campus } = await getCampusDetails(params.slug);
-  
+
   if (!campus) {
     return {
       title: 'Campus Not Found',
@@ -122,29 +122,30 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description: description,
       images: imageUrl ? [{ url: imageUrl }] : [],
     },
+    alternates: { canonical: `/campus/${campus.slug}` },
   };
 }
 
 const CampusPageSkeleton = () => {
-    return (
-        <div className="container py-8 space-y-12">
-            <Skeleton className="h-[40vh] w-full" />
-            <div className="grid md:grid-cols-3 gap-8">
-                <div className="md:col-span-2 space-y-8">
-                    <Skeleton className="h-48 w-full" />
-                    <Skeleton className="h-48 w-full" />
-                </div>
-                <div className="space-y-8">
-                     <Skeleton className="h-64 w-full" />
-                </div>
-            </div>
+  return (
+    <div className="container py-8 space-y-12">
+      <Skeleton className="h-[40vh] w-full" />
+      <div className="grid md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 space-y-8">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
         </div>
-    )
-  }
+        <div className="space-y-8">
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default async function CampusPage({ params }: { params: { slug: string } }) {
   const { campus, categories, themes } = await getCampusDetails(params.slug);
-  
+
   if (!campus) {
     notFound();
   }

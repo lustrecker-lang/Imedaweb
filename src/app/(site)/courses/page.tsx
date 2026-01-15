@@ -28,16 +28,16 @@ interface Formation {
 }
 
 interface Section {
-  id: string;
-  title: string;
-  content: string;
-  imageUrl?: string;
+    id: string;
+    title: string;
+    content: string;
+    imageUrl?: string;
 }
 
 interface Page {
-  id: string;
-  title: string;
-  sections: Section[];
+    id: string;
+    title: string;
+    sections: Section[];
 }
 
 // 1. Dynamic Metadata Generation
@@ -49,6 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
         return {
             title: `Découvrez nos ${numberOfFormations} formations professionnelles`,
             description: `Parcourez notre catalogue complet de ${numberOfFormations} formations pour trouver le programme idéal.`,
+            alternates: { canonical: '/courses' },
         };
     } catch (error) {
         console.error("Error fetching metadata:", error);
@@ -73,7 +74,7 @@ async function getCoursesData() {
         const themes = themesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Theme[];
         const categories = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Category[];
         const pageData = pageSnap.exists ? pageSnap.data() as Page : null;
-        
+
         return {
             formations,
             themes,
@@ -105,9 +106,9 @@ export default async function CoursesPage() {
     const coursesData = await getCoursesData();
 
     return (
-      <Suspense fallback={<CoursesPageSkeleton />}>
-        {/* Pass the hero section data to the client component */}
-        <CoursesView {...coursesData} />
-      </Suspense>
+        <Suspense fallback={<CoursesPageSkeleton />}>
+            {/* Pass the hero section data to the client component */}
+            <CoursesView {...coursesData} />
+        </Suspense>
     );
 }

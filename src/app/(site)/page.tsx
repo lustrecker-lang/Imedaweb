@@ -30,8 +30,8 @@ interface Article {
   topic?: { id: string; name: string };
 }
 interface Topic {
-    id: string;
-    name: string;
+  id: string;
+  name: string;
 }
 interface NewsStory {
   id: string;
@@ -86,7 +86,10 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [ogImage || ''],
     },
     icons: {
-        icon: faviconUrl,
+      icon: faviconUrl,
+    },
+    alternates: {
+      canonical: '/',
     },
   };
 }
@@ -103,13 +106,13 @@ async function getReferencesData() {
 }
 
 async function getFeaturesData() {
-    const pageSnap = await adminDb.collection('pages').doc('home').get();
-    return pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
+  const pageSnap = await adminDb.collection('pages').doc('home').get();
+  return pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
 }
 
 async function getCatalogData() {
-    const pageSnap = await adminDb.collection('pages').doc('home').get();
-    return pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
+  const pageSnap = await adminDb.collection('pages').doc('home').get();
+  return pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
 }
 
 async function getCourseData() {
@@ -165,13 +168,13 @@ async function getNewsData() {
 }
 
 async function getCompanyProfile() {
-    const snap = await adminDb.collection('companyProfile').doc('main').get();
-    return snap.exists ? snap.data() as CompanyProfile : null;
+  const snap = await adminDb.collection('companyProfile').doc('main').get();
+  return snap.exists ? snap.data() as CompanyProfile : null;
 }
 
 async function getKpis() {
-    const snap = await adminDb.collection('kpis').orderBy('order', 'asc').get();
-    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Kpi[];
+  const snap = await adminDb.collection('kpis').orderBy('order', 'asc').get();
+  return snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Kpi[];
 }
 
 // Main component that fetches data and passes it to the client component

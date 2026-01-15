@@ -8,25 +8,25 @@ import { Metadata } from 'next';
 
 // Interfaces for server-side data fetching
 interface Formation {
-    id: string;
-    name: string;
-    formationId: string;
-    themeId: string;
-    objectifPedagogique?: string;
-    preRequis?: string;
-    publicConcerne?: string;
-    methodesMobilisees?: string;
-    moyensPedagogiques?: string;
-    modalitesEvaluation?: string;
-    prixAvecHebergement?: string;
-    prixSansHebergement?: string;
-    format?: string;
+  id: string;
+  name: string;
+  formationId: string;
+  themeId: string;
+  objectifPedagogique?: string;
+  preRequis?: string;
+  publicConcerne?: string;
+  methodesMobilisees?: string;
+  moyensPedagogiques?: string;
+  modalitesEvaluation?: string;
+  prixAvecHebergement?: string;
+  prixSansHebergement?: string;
+  format?: string;
 }
 
 interface Theme {
-    id: string;
-    name: string;
-    categoryId: string;
+  id: string;
+  name: string;
+  categoryId: string;
 }
 
 interface CourseCategory {
@@ -37,23 +37,23 @@ interface CourseCategory {
 }
 
 interface Module {
-    id: string;
-    name: string;
-    description?: string;
+  id: string;
+  name: string;
+  description?: string;
 }
 
 interface Campus {
-    id: string;
-    name: string;
-    imageUrl?: string;
-    slug: string;
+  id: string;
+  name: string;
+  imageUrl?: string;
+  slug: string;
 }
 
 interface Service {
-    id: string;
-    name: string;
-    isOptional: boolean;
-    mediaUrl?: string;
+  id: string;
+  name: string;
+  isOptional: boolean;
+  mediaUrl?: string;
 }
 
 interface CourseDetailPageContent {
@@ -102,6 +102,7 @@ export async function generateMetadata({ params }: { params: { formationId: stri
           description: description,
           images: openGraphImages,
         },
+        alternates: { canonical: `/courses/${formationId}` },
       };
     } else {
       return {
@@ -120,73 +121,73 @@ export async function generateMetadata({ params }: { params: { formationId: stri
 
 // Data fetching function on the server
 async function getCourseDetails(formationId: string) {
-    try {
-        const formationRef = adminDb.collection('course_formations').doc(formationId);
-        const formationSnap = await formationRef.get();
+  try {
+    const formationRef = adminDb.collection('course_formations').doc(formationId);
+    const formationSnap = await formationRef.get();
 
-        if (!formationSnap.exists) {
-            return { formation: null, theme: null, modules: [], campuses: [], allServices: [], coursePageContent: null };
-        }
-
-        const formationData = { id: formationSnap.id, ...formationSnap.data() } as Formation;
-
-        const [themeSnap, modulesSnap, campusesSnap, servicesSnap, coursePageContentSnap] = await Promise.all([
-            formationData.themeId ? adminDb.collection('course_themes').doc(formationData.themeId).get() : Promise.resolve(null),
-            adminDb.collection('course_modules').where('formationId', '==', formationId).get(),
-            adminDb.collection('campuses').orderBy('name', 'asc').get(),
-            adminDb.collection('services').get(),
-            adminDb.collection('courseDetailPage').doc('main').get()
-        ]);
-
-        const theme = themeSnap?.exists ? { id: themeSnap.id, ...themeSnap.data() } as Theme : null;
-        const modules = modulesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Module[];
-        const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
-        const coursePageContent = coursePageContentSnap.exists ? coursePageContentSnap.data() as CourseDetailPageContent : null;
-        
-        const allServices = servicesSnap.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }) as Service)
-            .sort((a, b) => a.name.localeCompare(b.name));
-        
-        return {
-            formation: formationData,
-            theme,
-            modules,
-            campuses,
-            allServices,
-            coursePageContent,
-        };
-
-    } catch (error) {
-        console.error("Error fetching course details:", error);
-        return { formation: null, theme: null, modules: [], campuses: [], allServices: [], coursePageContent: null };
+    if (!formationSnap.exists) {
+      return { formation: null, theme: null, modules: [], campuses: [], allServices: [], coursePageContent: null };
     }
+
+    const formationData = { id: formationSnap.id, ...formationSnap.data() } as Formation;
+
+    const [themeSnap, modulesSnap, campusesSnap, servicesSnap, coursePageContentSnap] = await Promise.all([
+      formationData.themeId ? adminDb.collection('course_themes').doc(formationData.themeId).get() : Promise.resolve(null),
+      adminDb.collection('course_modules').where('formationId', '==', formationId).get(),
+      adminDb.collection('campuses').orderBy('name', 'asc').get(),
+      adminDb.collection('services').get(),
+      adminDb.collection('courseDetailPage').doc('main').get()
+    ]);
+
+    const theme = themeSnap?.exists ? { id: themeSnap.id, ...themeSnap.data() } as Theme : null;
+    const modules = modulesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Module[];
+    const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
+    const coursePageContent = coursePageContentSnap.exists ? coursePageContentSnap.data() as CourseDetailPageContent : null;
+
+    const allServices = servicesSnap.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }) as Service)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    return {
+      formation: formationData,
+      theme,
+      modules,
+      campuses,
+      allServices,
+      coursePageContent,
+    };
+
+  } catch (error) {
+    console.error("Error fetching course details:", error);
+    return { formation: null, theme: null, modules: [], campuses: [], allServices: [], coursePageContent: null };
+  }
 }
 
 const CourseDetailPageSkeleton = () => {
-    return (
-        <div className="container mx-auto px-4 py-12 md:px-6">
-            <header className="mb-12">
-                <Skeleton className="h-6 w-1/3 mb-4" />
-                <Skeleton className="h-10 w-3/4" />
-                <Skeleton className="h-6 w-1/2 mt-4" />
-            </header>
-            <div className="grid lg:grid-cols-3 gap-12">
-                <div className="lg:col-span-2 space-y-10">
-                    <Skeleton className="h-32 w-full" />
-                    <Skeleton className="h-32 w-full" />
-                    <Skeleton className="h-48 w-full" />
-                </div>
-                <aside className="space-y-6">
-                    <Skeleton className="h-64 w-full" />
-                </aside>
-            </div>
+  return (
+    <div className="container mx-auto px-4 py-12 md:px-6">
+      <header className="mb-12">
+        <Skeleton className="h-6 w-1/3 mb-4" />
+        <Skeleton className="h-10 w-3/4" />
+        <Skeleton className="h-6 w-1/2 mt-4" />
+      </header>
+      <div className="grid lg:grid-cols-3 gap-12">
+        <div className="lg:col-span-2 space-y-10">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-48 w-full" />
         </div>
-    );
+        <aside className="space-y-6">
+          <Skeleton className="h-64 w-full" />
+        </aside>
+      </div>
+    </div>
+  );
 }
 
 export default async function FormationDetailPage({ params }: { params: { formationId: string } }) {
   const courseData = await getCourseDetails(params.formationId);
-  
+
   if (!courseData.formation) {
     notFound();
   }

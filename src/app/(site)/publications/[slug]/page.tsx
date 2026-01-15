@@ -44,34 +44,34 @@ async function getArticle(slugOrId: string): Promise<(Article & { topic: Topic |
     } else {
       docSnap = await articlesRef.doc(slugOrId).get();
     }
-    
+
     if (docSnap && docSnap.exists) {
-        const data = docSnap.data() as DocumentData;
-        const publicationDate = data.publicationDate?.toDate();
-        const formattedDate = publicationDate ? format(publicationDate, 'MMMM d, yyyy') : '';
+      const data = docSnap.data() as DocumentData;
+      const publicationDate = data.publicationDate?.toDate();
+      const formattedDate = publicationDate ? format(publicationDate, 'MMMM d, yyyy') : '';
 
-        let topic: Topic | null = null;
-        if(data.topicId) {
-            const topicSnap = await adminDb.collection('article_topics').doc(data.topicId).get();
-            if(topicSnap.exists) {
-                topic = { id: topicSnap.id, ...topicSnap.data() } as Topic;
-            }
+      let topic: Topic | null = null;
+      if (data.topicId) {
+        const topicSnap = await adminDb.collection('article_topics').doc(data.topicId).get();
+        if (topicSnap.exists) {
+          topic = { id: topicSnap.id, ...topicSnap.data() } as Topic;
         }
+      }
 
-        return {
-            id: docSnap.id,
-            title: data.title,
-            slug: data.slug,
-            author: data.author,
-            publicationDate: formattedDate,
-            summary: data.summary,
-            sections: data.sections,
-            imageUrl: data.imageUrl,
-            topicId: data.topicId,
-            topic: topic,
-        } as (Article & { topic: Topic | null });
+      return {
+        id: docSnap.id,
+        title: data.title,
+        slug: data.slug,
+        author: data.author,
+        publicationDate: formattedDate,
+        summary: data.summary,
+        sections: data.sections,
+        imageUrl: data.imageUrl,
+        topicId: data.topicId,
+        topic: topic,
+      } as (Article & { topic: Topic | null });
     }
-    
+
     return null;
   } catch (error) {
     console.error("[getArticle] Error fetching article:", error);
@@ -91,6 +91,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         description: article.summary || '',
         images: article.imageUrl ? [{ url: article.imageUrl }] : [],
       },
+      alternates: { canonical: `/publications/${article.slug || params.slug}` },
     };
   } else {
     return {

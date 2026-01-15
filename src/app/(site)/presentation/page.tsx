@@ -45,13 +45,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${heroSection?.title || pageData.title} | IMEDA`,
     description: heroSection?.content.substring(0, 160) || 'Découvrez qui nous sommes, notre vision et notre engagement.',
+    alternates: { canonical: '/presentation' },
   };
 }
 
 const PageSkeleton = () => (
   <div className="container mx-auto px-4 py-12 md:px-6">
     <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-        <Skeleton className="h-full w-full" />
+      <Skeleton className="h-full w-full" />
     </div>
   </div>
 );

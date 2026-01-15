@@ -31,10 +31,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const companyProfile = await getCompanyProfile();
   const siteName = companyProfile?.name || 'IMEDA';
   const description = companyProfile?.websiteDescription || `Formation et conseil pour les leaders de demain.`;
-  
+
   const faviconUrl = '/favicon.ico'; // Always use the local favicon.ico
 
   return {
+    metadataBase: new URL('https://imeda.fr'),
     title: {
       template: '%s | ' + siteName,
       default: siteName,
@@ -43,6 +44,9 @@ export async function generateMetadata(): Promise<Metadata> {
     manifest: "/manifest.json",
     icons: {
       icon: faviconUrl,
+    },
+    alternates: {
+      canonical: '/',
     },
   };
 }
