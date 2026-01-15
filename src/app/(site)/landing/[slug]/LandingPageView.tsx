@@ -203,14 +203,12 @@ export default function LandingPageView({ landingPage, heroData, referencesData,
                 </div>
             </section>
 
-            {/* 2. Companies Carousel */}
+            {/* 2. Companies Carousel & Authority Banner */}
             {referencesData && referencesData.length > 0 && (
                 <section className="py-12 bg-muted/30">
                     <div className="container px-4 md:px-6">
-                        <p className="text-center text-lg font-medium text-muted-foreground mb-8 uppercase tracking-widest">
-                            ILS TRAVAILLENT AVEC NOUS
-                        </p>
-                        <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)]">
+                        {/* Carousel (No Title) */}
+                        <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_10%,white_90%,transparent)] mb-16">
                             <div className="flex w-max animate-scroll">
                                 {[...referencesData, ...referencesData].map((reference, index) => (
                                     <div key={`${reference.id}-${index}`} className="flex items-center justify-center h-20 w-48 px-8">
@@ -223,6 +221,21 @@ export default function LandingPageView({ landingPage, heroData, referencesData,
                                         />
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Authority Statement Box (Below Carousel) */}
+                        <div className="max-w-4xl mx-auto">
+                            <div className="bg-background/80 backdrop-blur-sm border border-border shadow-sm p-8 md:p-12 text-center">
+                                <h2 className="text-2xl md:text-3xl font-headline font-normal mb-6">
+                                    La référence en formation exécutive pour l’élite économique d’Afrique francophone
+                                </h2>
+                                <p className="text-lg text-muted-foreground leading-relaxed mb-6">
+                                    IMEDA accompagne les dirigeants et cadres supérieurs des secteurs stratégique pétrolier, minier, bancaire et portuaire dans le renforcement de leur leadership et de leur performance.
+                                </p>
+                                <p className="font-medium text-primary tracking-wide uppercase text-sm">
+                                    Programmes intensifs. Sur mesure. À impact mesurable.
+                                </p>
                             </div>
                         </div>
                     </div>
