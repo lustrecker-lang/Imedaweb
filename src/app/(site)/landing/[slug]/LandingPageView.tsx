@@ -13,6 +13,7 @@ import { CheckCircle, Download, Loader2, MessageCircle } from "lucide-react";
 import { useFirestore, addDocumentNonBlocking } from '@/firebase';
 import { collection, serverTimestamp } from 'firebase/firestore';
 import { z } from 'zod';
+import { PremiumInfoSection } from '@/components/landing/PremiumInfoSection';
 
 // Interfaces (Redefined for Client Safety)
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
@@ -228,6 +229,11 @@ export default function LandingPageView({ landingPage, heroData, referencesData,
                 </section>
             )}
 
+            {/* 2.5 Premium Information Section */}
+            <PremiumInfoSection
+                ctaHref={ctaHref}
+                leadCaptureSlug={landingPage.slug}
+            />
 
             {/* 3. Catalogue Download Section */}
             {catalogSection && (
