@@ -100,7 +100,7 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
           <Link href="/legal#terms" className="text-xs text-primary-foreground/80 transition-colors hover:text-primary-foreground">Conditions d’utilisation</Link>
           <Link href="/legal#privacy" className="text-xs text-primary-foreground/80 transition-colors hover:text-primary-foreground">Politique de confidentialité</Link>
           <Link href="/legal#branding" className="text-xs text-primary-foreground/80 transition-colors hover:text-primary-foreground">Protection de nos marques</Link>
-          <Link href="/sitemap" className="text-xs text-primary-foreground/80 transition-colors hover:text-primary-foreground">Sitemap</Link>
+          <Link href="/plan-du-site" className="text-xs text-primary-foreground/80 transition-colors hover:text-primary-foreground">Sitemap</Link>
           <Link href="/login" className="text-xs text-primary-foreground/80 transition-colors hover:text-primary-foreground">Login éditeur</Link>
         </div>
 

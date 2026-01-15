@@ -14,7 +14,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Handshake, Download, Wrench, Sigma, BookDown, Users, FileQuestion } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Wrench, Sigma } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -58,7 +58,7 @@ export default function AdminLayout({
       </div>
     );
   }
-  
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -85,7 +85,7 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-             <SidebarMenuItem asChild>
+            <SidebarMenuItem asChild>
               <Link href="/admin/kpis">
                 <SidebarMenuButton tooltip="KPIs">
                   <Sigma />
@@ -109,7 +109,7 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-             <SidebarMenuItem asChild>
+            <SidebarMenuItem asChild>
               <Link href="/admin/publications">
                 <SidebarMenuButton tooltip="Publications">
                   <Library />
@@ -133,7 +133,7 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-             <SidebarMenuItem asChild>
+            <SidebarMenuItem asChild>
               <Link href="/admin/references">
                 <SidebarMenuButton tooltip="References">
                   <Star />
@@ -165,54 +165,7 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-            <SidebarMenuItem asChild>
-              <Link href="/admin/seed-partenariats">
-                <SidebarMenuButton tooltip="Partenariats">
-                  <Handshake />
-                  <span className="text-sm">Seed Partenariats</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-             <SidebarMenuItem asChild>
-              <Link href="/admin/seed-notre-approche">
-                <SidebarMenuButton tooltip="Notre Approche">
-                  <BrainCircuit />
-                  <span className="text-sm">Seed Notre Approche</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-             <SidebarMenuItem asChild>
-              <Link href="/admin/seed-presentation">
-                <SidebarMenuButton tooltip="Présentation">
-                  <Presentation />
-                  <span className="text-sm">Seed Présentation</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-             <SidebarMenuItem asChild>
-              <Link href="/admin/seed-careers">
-                <SidebarMenuButton tooltip="Careers">
-                  <Users />
-                  <span className="text-sm">Seed Careers</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem asChild>
-              <Link href="/admin/seed-catalog">
-                <SidebarMenuButton tooltip="Seed Catalog">
-                  <BookDown />
-                  <span className="text-sm">Seed Catalog</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-             <SidebarMenuItem asChild>
-              <Link href="/admin/seed-not-found">
-                <SidebarMenuButton tooltip="Seed 404">
-                  <FileQuestion />
-                  <span className="text-sm">Seed 404 Page</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
+
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
