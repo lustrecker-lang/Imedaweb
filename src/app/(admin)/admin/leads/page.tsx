@@ -63,6 +63,7 @@ import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/p
 interface Lead {
   id: string;
   fullName: string;
+  name?: string;
   email: string;
   phone?: string;
   message: string;
@@ -107,40 +108,41 @@ export default function LeadsPage() {
     if (!leads) return [];
     const months = new Set<string>();
     leads.forEach(lead => {
-        if (lead.createdAt) {
-            const monthYear = format(lead.createdAt.toDate(), 'MMMM yyyy', { locale: fr });
-            months.add(monthYear);
-        }
+      if (lead.createdAt) {
+        const monthYear = format(lead.createdAt.toDate(), 'MMMM yyyy', { locale: fr });
+        months.add(monthYear);
+      }
     });
     return Array.from(months).map(my => ({ value: my, label: my }));
   }, [leads]);
-  
+
   const filteredLeads = useMemo(() => {
-      if (!leads) return [];
-      let filtered = leads;
+    if (!leads) return [];
+    let filtered = leads;
 
-      if (searchTerm) {
-          const lowercasedTerm = searchTerm.toLowerCase();
-          filtered = filtered.filter(lead => 
-              lead.fullName.toLowerCase().includes(lowercasedTerm) ||
-              lead.email.toLowerCase().includes(lowercasedTerm) ||
-              (lead.positionAppliedFor && lead.positionAppliedFor.toLowerCase().includes(lowercasedTerm))
-          );
-      }
+    if (searchTerm) {
+      const lowercasedTerm = searchTerm.toLowerCase();
+      filtered = filtered.filter(lead =>
+        (lead.fullName && lead.fullName.toLowerCase().includes(lowercasedTerm)) ||
+        (lead.name && lead.name.toLowerCase().includes(lowercasedTerm)) ||
+        (lead.email && lead.email.toLowerCase().includes(lowercasedTerm)) ||
+        (lead.positionAppliedFor && lead.positionAppliedFor.toLowerCase().includes(lowercasedTerm))
+      );
+    }
 
-      if (leadTypeFilter !== 'all') {
-          filtered = filtered.filter(lead => (lead.leadType || 'Contact Form') === leadTypeFilter);
-      }
+    if (leadTypeFilter !== 'all') {
+      filtered = filtered.filter(lead => (lead.leadType || 'Contact Form') === leadTypeFilter);
+    }
 
-      if (monthFilter !== 'all') {
-          filtered = filtered.filter(lead => {
-              if (!lead.createdAt) return false;
-              const leadMonthYear = format(lead.createdAt.toDate(), 'MMMM yyyy', { locale: fr });
-              return leadMonthYear === monthFilter;
-          });
-      }
+    if (monthFilter !== 'all') {
+      filtered = filtered.filter(lead => {
+        if (!lead.createdAt) return false;
+        const leadMonthYear = format(lead.createdAt.toDate(), 'MMMM yyyy', { locale: fr });
+        return leadMonthYear === monthFilter;
+      });
+    }
 
-      return filtered;
+    return filtered;
   }, [leads, searchTerm, leadTypeFilter, monthFilter]);
 
   const paginatedLeads = useMemo(() => {
@@ -167,7 +169,7 @@ export default function LeadsPage() {
     if (!selectedLead) return;
 
     const leadDetails = [
-      `Name: ${selectedLead.fullName}`,
+      `Name: ${selectedLead.fullName || selectedLead.name}`,
       `Email: ${selectedLead.email}`,
       selectedLead.phone ? `Phone: ${selectedLead.phone}` : null,
       `Received: ${selectedLead.createdAt ? format(selectedLead.createdAt.toDate(), 'PP p') : 'N/A'}`,
@@ -210,12 +212,12 @@ export default function LeadsPage() {
   };
 
   const leadTypeColor = (leadType?: string) => {
-      switch (leadType) {
-          case 'Course Inquiry': return 'default';
-          case 'Job Application': return 'destructive';
-          case 'Catalog Download': return 'outline';
-          default: return 'secondary';
-      }
+    switch (leadType) {
+      case 'Course Inquiry': return 'default';
+      case 'Job Application': return 'destructive';
+      case 'Catalog Download': return 'outline';
+      default: return 'secondary';
+    }
   };
 
   return (
@@ -237,38 +239,38 @@ export default function LeadsPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                        placeholder="Search by name or email..." 
-                        className="pl-10"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <Select value={leadTypeFilter} onValueChange={setLeadTypeFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Filter by type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Lead Types</SelectItem>
-                        <SelectItem value="Contact Form">Contact Form</SelectItem>
-                        <SelectItem value="Course Inquiry">Course Inquiry</SelectItem>
-                        <SelectItem value="Catalog Download">Catalog Download</SelectItem>
-                        <SelectItem value="Job Application">Job Application</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select value={monthFilter} onValueChange={setMonthFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Filter by month" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Months</SelectItem>
-                        {monthOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name or email..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Select value={leadTypeFilter} onValueChange={setLeadTypeFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Lead Types</SelectItem>
+                  <SelectItem value="Contact Form">Contact Form</SelectItem>
+                  <SelectItem value="Course Inquiry">Course Inquiry</SelectItem>
+                  <SelectItem value="Catalog Download">Catalog Download</SelectItem>
+                  <SelectItem value="Job Application">Job Application</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={monthFilter} onValueChange={setMonthFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Months</SelectItem>
+                  {monthOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Table>
               <TableHeader>
@@ -297,7 +299,7 @@ export default function LeadsPage() {
                       <TableCell className="py-2">
                         {lead.createdAt ? format(lead.createdAt.toDate(), 'PP p') : 'N/A'}
                       </TableCell>
-                      <TableCell className="py-2 font-medium">{lead.fullName}</TableCell>
+                      <TableCell className="py-2 font-medium">{lead.fullName || lead.name}</TableCell>
                       <TableCell className="py-2">{lead.email}</TableCell>
                       <TableCell className="py-2">
                         <Badge variant={leadTypeColor(lead.leadType)}>
@@ -317,7 +319,7 @@ export default function LeadsPage() {
                               View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openDeleteDialog(lead)} className="text-red-600 focus:text-red-600">
-                               <Trash2 className="mr-2 h-4 w-4" />
+                              <Trash2 className="mr-2 h-4 w-4" />
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -335,23 +337,23 @@ export default function LeadsPage() {
               </TableBody>
             </Table>
             {totalPages > 1 && (
-                <Pagination className="mt-6">
-                    <PaginationContent>
-                        <PaginationItem>
-                            <Button variant="outline" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}>
-                                <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-                            </Button>
-                        </PaginationItem>
-                         <PaginationItem className="hidden sm:block text-sm text-muted-foreground">
-                            Page {currentPage} of {totalPages}
-                        </PaginationItem>
-                        <PaginationItem>
-                            <Button variant="outline" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>
-                                Next <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+              <Pagination className="mt-6">
+                <PaginationContent>
+                  <PaginationItem>
+                    <Button variant="outline" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1}>
+                      <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                  </PaginationItem>
+                  <PaginationItem className="hidden sm:block text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                  </PaginationItem>
+                  <PaginationItem>
+                    <Button variant="outline" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>
+                      Next <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
           </CardContent>
         </Card>
@@ -361,72 +363,72 @@ export default function LeadsPage() {
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Lead Details</DialogTitle>
-             <DialogDescription>
+            <DialogDescription>
               Received on {selectedLead?.createdAt ? format(selectedLead.createdAt.toDate(), 'PP p') : 'N/A'}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 grid gap-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                    <h4 className="font-semibold">Name</h4>
-                    <p className="text-muted-foreground">{selectedLead?.fullName}</p>
-                </div>
-                 <div>
-                    <h4 className="font-semibold">Email</h4>
-                    <p className="text-muted-foreground">{selectedLead?.email}</p>
-                </div>
-                {selectedLead?.phone && (
-                  <div>
-                      <h4 className="font-semibold">Phone</h4>
-                      <p className="text-muted-foreground">{selectedLead.phone}</p>
-                  </div>
-                )}
-                <div>
-                  <h4 className="font-semibold">Lead Type</h4>
-                  <div className="text-muted-foreground">
-                    <Badge variant={leadTypeColor(selectedLead?.leadType)}>
-                      {selectedLead?.leadType || 'Contact Form'}
-                    </Badge>
-                  </div>
-                </div>
-                 {selectedLead?.leadType === 'Course Inquiry' && selectedLead?.courseName && (
-                  <div className="col-span-2">
-                    <h4 className="font-semibold">Course Inquiry</h4>
-                    <p className="text-muted-foreground">{selectedLead.courseName}</p>
-                  </div>
-                )}
-                {selectedLead?.leadType === 'Job Application' && selectedLead?.positionAppliedFor && (
-                  <div className="col-span-2">
-                    <h4 className="font-semibold">Position Applied For</h4>
-                    <p className="text-muted-foreground">{selectedLead.positionAppliedFor}</p>
-                  </div>
-                )}
-                 {selectedLead?.leadType === 'Job Application' && selectedLead?.cvUrl && (
-                  <div className="col-span-2">
-                    <h4 className="font-semibold">Curriculum Vitae</h4>
-                     <Button asChild variant="outline" size="sm" className="mt-1">
-                        <a href={selectedLead.cvUrl} target="_blank" rel="noopener noreferrer">
-                           <Download className="mr-2 h-4 w-4" /> Download CV
-                        </a>
-                    </Button>
-                  </div>
-                )}
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <h4 className="font-semibold">Name</h4>
+                <p className="text-muted-foreground">{selectedLead?.fullName || selectedLead?.name || 'N/A'}</p>
               </div>
-              {selectedLead?.message && (
+              <div>
+                <h4 className="font-semibold">Email</h4>
+                <p className="text-muted-foreground">{selectedLead?.email}</p>
+              </div>
+              {selectedLead?.phone && (
                 <div>
-                  <h4 className="font-semibold">Message</h4>
-                  <p className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border mt-2 whitespace-pre-wrap">
-                    {selectedLead?.message}
-                  </p>
+                  <h4 className="font-semibold">Phone</h4>
+                  <p className="text-muted-foreground">{selectedLead.phone}</p>
                 </div>
               )}
+              <div>
+                <h4 className="font-semibold">Lead Type</h4>
+                <div className="text-muted-foreground">
+                  <Badge variant={leadTypeColor(selectedLead?.leadType)}>
+                    {selectedLead?.leadType || 'Contact Form'}
+                  </Badge>
+                </div>
+              </div>
+              {selectedLead?.leadType === 'Course Inquiry' && selectedLead?.courseName && (
+                <div className="col-span-2">
+                  <h4 className="font-semibold">Course Inquiry</h4>
+                  <p className="text-muted-foreground">{selectedLead.courseName}</p>
+                </div>
+              )}
+              {selectedLead?.leadType === 'Job Application' && selectedLead?.positionAppliedFor && (
+                <div className="col-span-2">
+                  <h4 className="font-semibold">Position Applied For</h4>
+                  <p className="text-muted-foreground">{selectedLead.positionAppliedFor}</p>
+                </div>
+              )}
+              {selectedLead?.leadType === 'Job Application' && selectedLead?.cvUrl && (
+                <div className="col-span-2">
+                  <h4 className="font-semibold">Curriculum Vitae</h4>
+                  <Button asChild variant="outline" size="sm" className="mt-1">
+                    <a href={selectedLead.cvUrl} target="_blank" rel="noopener noreferrer">
+                      <Download className="mr-2 h-4 w-4" /> Download CV
+                    </a>
+                  </Button>
+                </div>
+              )}
+            </div>
+            {selectedLead?.message && (
+              <div>
+                <h4 className="font-semibold">Message</h4>
+                <p className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-md border mt-2 whitespace-pre-wrap">
+                  {selectedLead?.message}
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
-             <DialogClose asChild>
+            <DialogClose asChild>
               <Button variant="outline">Close</Button>
             </DialogClose>
             <Button onClick={handleCopyToClipboard}>
-              <Copy className="mr-2 h-4 w-4"/>
+              <Copy className="mr-2 h-4 w-4" />
               Copy to Clipboard
             </Button>
           </DialogFooter>

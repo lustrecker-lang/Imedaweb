@@ -10,13 +10,13 @@ import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 
 // --- (Centralized Interfaces - This should ideally be in a separate file like `src/types.ts`) ---
-interface Section { id: string; title: string; content: string; imageUrl?: string; }
-interface Page { id: string; title: string; sections: Section[]; ogTitle?: string; ogDescription?: string; ogImage?: string; }
+export interface Section { id: string; title: string; content: string; imageUrl?: string; }
+export interface Page { id: string; title: string; sections: Section[]; ogTitle?: string; ogDescription?: string; ogImage?: string; }
 interface Campus { id: string; name: string; slug: string; description?: string; imageUrl?: string; }
 interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
 interface Formation { id: string; themeId: string; }
-interface Reference { id: string; name: string; logoUrl: string; }
+export interface Reference { id: string; name: string; logoUrl: string; }
 interface Kpi { id: string; number: number; title: string; description: string; order: number; }
 interface Article {
   id: string;
@@ -95,22 +95,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // Separate data fetching functions for each section
-async function getHeroData() {
+export async function getHeroData() {
   const pageSnap = await adminDb.collection('pages').doc('home').get();
   return pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
 }
 
-async function getReferencesData() {
+export async function getReferencesData() {
   const referencesSnap = await adminDb.collection('references').orderBy('name', 'asc').get();
   return referencesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Reference[];
 }
 
-async function getFeaturesData() {
+export async function getFeaturesData() {
   const pageSnap = await adminDb.collection('pages').doc('home').get();
   return pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
 }
 
-async function getCatalogData() {
+export async function getCatalogData() {
   const pageSnap = await adminDb.collection('pages').doc('home').get();
   return pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
 }

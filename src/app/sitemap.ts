@@ -48,11 +48,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // Dynamic pages
-    const [campusSlugs, formationIds, publicationSlugs, newsSlugs] = await Promise.all([
+    const [campusSlugs, formationIds, publicationSlugs, newsSlugs, landingPageSlugs] = await Promise.all([
         getCollectionSlugs('campuses'),
         getCollectionSlugs('course_formations'),
         getCollectionSlugs('articles'),
         getCollectionSlugs('news'),
+        getCollectionSlugs('landing_pages'),
     ]);
 
     const campusEntries: MetadataRoute.Sitemap = campusSlugs.map((slug) => ({
@@ -83,11 +84,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.6,
     }));
 
+    const landingPageEntries: MetadataRoute.Sitemap = landingPageSlugs.map((slug) => ({
+        url: `${BASE_URL}/landing/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.9,
+    }));
+
     return [
         ...staticEntries,
         ...campusEntries,
         ...formationEntries,
         ...publicationEntries,
         ...newsEntries,
+        ...landingPageEntries,
     ];
 }

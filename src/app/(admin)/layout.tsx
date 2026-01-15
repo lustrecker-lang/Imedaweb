@@ -14,7 +14,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Wrench, Sigma } from "lucide-react";
+import { Mountain, LayoutDashboard, Home, Building, Pencil, Database, Mail, School, Briefcase, GraduationCap, Newspaper, DatabaseZap, Tag, Library, Star, BrainCircuit, Presentation, FolderKanban, BriefcaseBusiness, Construction, Landmark, Wrench, Sigma, FileQuestion } from "lucide-react";
 import { UserNav } from './_components/user-nav';
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -162,6 +162,14 @@ export default function AdminLayout({
                 <SidebarMenuButton tooltip="Leads">
                   <Mail />
                   <span className="text-sm">Leads</span>
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem asChild>
+              <Link href="/admin/landing-pages">
+                <SidebarMenuButton tooltip="Landing Pages">
+                  <FileQuestion />
+                  <span className="text-sm">Landing Pages</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

@@ -53,6 +53,21 @@ service cloud.firestore {
       allow delete: if isSignedIn();
     }
 
+    /**
+     * @description Controls access to landing pages content.
+     * @path /landing_pages/{pageId}
+     * @allow (get, list) if isSignedIn() - Allows any authenticated user to read landing pages.
+     * @allow (create, update, delete) if isSignedIn() - Allows any authenticated user to modify landing pages.
+     * @principle Requires authentication for all operations.
+     */
+    match /landing_pages/{pageId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn();
+    }
+
     function isSignedIn() {
       return request.auth != null;
     }
