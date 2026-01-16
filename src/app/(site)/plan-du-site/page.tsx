@@ -4,13 +4,16 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
-  title: 'Sitemap',
-  description: 'A complete overview of all pages available on the site.',
-  robots: {
-    index: false, // Generally, sitemaps aren't meant to be indexed themselves
-    follow: true,
-  },
+    title: 'Sitemap',
+    description: 'A complete overview of all pages available on the site.',
+    robots: {
+        index: false, // Generally, sitemaps aren't meant to be indexed themselves
+        follow: true,
+    },
 };
 
 interface DynamicItem {

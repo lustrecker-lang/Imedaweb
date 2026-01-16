@@ -8,6 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import CampusDetailView from './CampusDetailView';
 import { Metadata } from 'next';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Campus {
   id: string;
   name: string;

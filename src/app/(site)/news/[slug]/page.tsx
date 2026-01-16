@@ -8,6 +8,9 @@ import { Metadata } from 'next';
 import NewsStoryView from './NewsStoryView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface NewsStory {
   id: string;
   title: string;

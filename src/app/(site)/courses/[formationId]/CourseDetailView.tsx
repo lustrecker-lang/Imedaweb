@@ -63,9 +63,9 @@ interface Service {
 }
 
 interface CourseDetailPageContent {
-  valeurImeda: { title: string; content: string; imageUrl: string };
-  faq: { id: string; question: string; answer: string }[];
-  contact: { name: string; title: string; description: string; francePhone: string; uaePhone: string; email: string; imageUrl: string };
+    valeurImeda: { title: string; content: string; imageUrl: string };
+    faq: { id: string; question: string; answer: string }[];
+    contact: { name: string; title: string; description: string; francePhone: string; uaePhone: string; email: string; imageUrl: string };
 }
 
 interface CourseDetailViewProps {
@@ -87,17 +87,17 @@ const isVideoUrl = (url?: string | null) => {
     if (!url) return false;
     const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
     try {
-      const pathname = new URL(url).pathname.split('?')[0];
-      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+        const pathname = new URL(url).pathname.split('?')[0];
+        return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
     } catch (e) {
-      return false; // Invalid URL
+        return false; // Invalid URL
     }
 };
 
 const MediaPreview = ({ url, alt, className }: { url: string; alt: string; className?: string }) => {
     if (isVideoUrl(url)) {
         return (
-            <video src={url} autoPlay loop muted playsInline className={cn("absolute inset-0 h-full w-full object-cover", className)}/>
+            <video src={url} autoPlay loop muted playsInline className={cn("absolute inset-0 h-full w-full object-cover", className)} />
         );
     }
     return (
@@ -111,7 +111,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
     const [numberOfPeople, setNumberOfPeople] = useState(3);
     const [isMobile, setIsMobile] = useState(false);
     const [isEnquirySheetOpen, setIsEnquirySheetOpen] = useState(false);
-    
+
     const cameFromCatalog = useMemo(() => searchParams.get('from') === 'catalog', [searchParams]);
 
     useEffect(() => {
@@ -119,7 +119,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
         checkIsMobile();
         window.addEventListener('resize', checkIsMobile);
         return () => window.removeEventListener('resize', checkIsMobile);
-      }, []);
+    }, []);
 
     useEffect(() => {
         const today = new Date();
@@ -143,7 +143,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             return numA - numB;
         });
     }, [modules]);
-    
+
     const calculatePrice = (basePriceString: string | undefined) => {
         if (!basePriceString) return 'N/A';
         const basePrice = parseFloat(basePriceString);
@@ -156,7 +156,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             finalPrice = basePrice * 1.2;
         }
 
-        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(finalPrice);
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(finalPrice);
     };
 
     if (!formation) {
@@ -175,7 +175,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
     return (
         <div className="bg-background">
-             {isMobile && (
+            {isMobile && (
                 <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b md:hidden">
                     <div className="container px-4 h-12 flex items-center">
                         <Button variant="ghost" size="sm" asChild>
@@ -212,7 +212,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             <main className="container mx-auto px-4 py-12 md:px-6">
                 <div className="grid lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
-                         <Accordion type="multiple" defaultValue={['item-1', 'item-details', 'item-contact']} className="w-full">
+                        <Accordion type="multiple" defaultValue={['item-1', 'item-details', 'item-contact']} className="w-full">
                             <AccordionItem value="item-1">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Informations</h2>
@@ -221,7 +221,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <div className="space-y-8 pt-4">
                                         <div>
                                             <h3 className="font-normal mb-3">Cette formation est disponible dans tous ces campus.</h3>
-                                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                                 {campuses && campuses.map(campus => (
                                                     <div key={campus.id} className="group relative overflow-hidden rounded-lg aspect-w-4 aspect-h-3">
                                                         <Link href={`/campus/${campus.slug}`} className="absolute inset-0 z-10">
@@ -233,7 +233,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                             ) : (
                                                                 <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                             )}
-                                                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                                             <p className="absolute bottom-2 left-3 text-sm font-semibold text-white">{campus.name}</p>
                                                         </div>
                                                     </div>
@@ -245,17 +245,17 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <h3 className="font-normal">Durée</h3>
                                                 <p className="text-sm text-muted-foreground">14 jours</p>
                                             </div>
-                                             <div className="border-l pl-4">
+                                            <div className="border-l pl-4">
                                                 <h3 className="font-normal">Heures de cours</h3>
                                                 <p className="text-sm text-muted-foreground">55 heures</p>
                                             </div>
-                                             {formation.format && (
+                                            {formation.format && (
                                                 <div className="border-l pl-4">
                                                     <h3 className="font-normal">Format</h3>
                                                     <p className="text-sm text-muted-foreground">{formation.format}</p>
                                                 </div>
-                                             )}
-                                             <div className="border-l pl-4">
+                                            )}
+                                            <div className="border-l pl-4">
                                                 <h3 className="font-normal">Langue</h3>
                                                 <p className="text-sm text-muted-foreground">Français</p>
                                             </div>
@@ -267,7 +267,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
-                             <AccordionItem value="item-details">
+                            <AccordionItem value="item-details">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Détails de la formation</h2>
                                 </AccordionTrigger>
@@ -305,7 +305,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <Card className="border-primary/50">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
-                                                            <div className="flex items-center justify-center gap-2 text-muted-foreground"><GraduationCap size={18}/></div>
+                                                            <div className="flex items-center justify-center gap-2 text-muted-foreground"><GraduationCap size={18} /></div>
                                                             <h4 className="font-semibold mt-2 text-xs sm:text-base">Formation seule</h4>
                                                         </div>
                                                         <div className="text-center">
@@ -320,7 +320,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                 <Card className="border-primary/50 bg-primary/5">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
-                                                             <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18}/></div>
+                                                            <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18} /></div>
                                                             <h4 className="font-semibold mt-2 text-sm sm:text-base">Forfait avec hébergement</h4>
                                                         </div>
                                                         <div className="text-center">
@@ -342,41 +342,41 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             </AccordionItem>
                             {sortedModules && sortedModules.length > 0 && (
                                 <AccordionItem value="item-4">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">Programme de la formation</h2>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="pt-4">
-                                        <Table>
-                                            <TableBody>
-                                                {sortedModules.map((module, index) => (
-                                                    <TableRow 
-                                                        key={module.id} 
-                                                        className={cn(
-                                                            "flex flex-col md:table-row hover:bg-transparent",
-                                                            index === sortedModules.length - 1 ? "border-b-0" : "border-b-[0.5px] md:border-b"
-                                                        )}
-                                                    >
-                                                        <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-3 md:py-4 border-b-[0.5px] border-b-border/50 md:border-b-0 md:border-r">
-                                                            <div className="flex items-start gap-4">
-                                                                <div className="w-[100px] shrink-0">
-                                                                    <div className="font-semibold text-xs">Module {index + 1}</div>
-                                                                    <div className="text-xs text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</div>
+                                    <AccordionTrigger>
+                                        <h2 className="text-2xl font-headline font-normal text-primary">Programme de la formation</h2>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="pt-4">
+                                            <Table>
+                                                <TableBody>
+                                                    {sortedModules.map((module, index) => (
+                                                        <TableRow
+                                                            key={module.id}
+                                                            className={cn(
+                                                                "flex flex-col md:table-row hover:bg-transparent",
+                                                                index === sortedModules.length - 1 ? "border-b-0" : "border-b-[0.5px] md:border-b"
+                                                            )}
+                                                        >
+                                                            <TableCell className="w-full md:w-[150px] shrink-0 font-medium py-3 md:py-4 border-b-[0.5px] border-b-border/50 md:border-b-0 md:border-r">
+                                                                <div className="flex items-start gap-4">
+                                                                    <div className="w-[100px] shrink-0">
+                                                                        <div className="font-semibold text-xs">Module {index + 1}</div>
+                                                                        <div className="text-xs text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</div>
+                                                                    </div>
+                                                                    <div className="md:hidden flex-1 text-sm">{module.name}</div>
                                                                 </div>
-                                                                <div className="md:hidden flex-1 text-sm">{module.name}</div>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell className="hidden md:table-cell py-3 md:py-4 text-sm">{module.name}</TableCell>
-                                                        <TableCell className="hidden md:table-cell text-right py-3 md:py-4 text-sm text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
+                                                            </TableCell>
+                                                            <TableCell className="hidden md:table-cell py-3 md:py-4 text-sm">{module.name}</TableCell>
+                                                            <TableCell className="hidden md:table-cell text-right py-3 md:py-4 text-sm text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
                             )}
-                             <AccordionItem value="item-5">
+                            <AccordionItem value="item-5">
                                 <AccordionTrigger>
                                     <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
                                 </AccordionTrigger>
@@ -407,14 +407,14 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                     <h2 className="text-2xl font-headline font-normal text-primary">Services</h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 pt-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 pt-4">
                                         {allServices.map((service, index) => (
                                             <div key={service.id} className={cn(
                                                 "flex items-center justify-between gap-4 py-3",
                                                 (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1)) && "sm:border-b"
                                             )}>
                                                 <div className="flex items-center gap-4">
-                                                     {service.mediaUrl ? (
+                                                    {service.mediaUrl ? (
                                                         <div className="relative h-10 w-10 shrink-0 rounded-sm overflow-hidden">
                                                             <MediaPreview url={service.mediaUrl} alt={service.name} />
                                                         </div>
@@ -423,7 +423,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     )}
                                                     <span className="text-sm font-medium">{service.name}</span>
                                                 </div>
-                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     {!service.isOptional ? (
                                                         <>
                                                             <Check size={16} className="text-green-600" />
@@ -439,112 +439,112 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionContent>
                             </AccordionItem>
                             {coursePageContent?.valeurImeda && (
-                            <AccordionItem value="item-valeur">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">
-                                        {coursePageContent.valeurImeda.title}
-                                    </h2>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
-                                        <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full overflow-hidden">
-                                            <Image 
-                                                src={coursePageContent.valeurImeda.imageUrl}
-                                                alt={coursePageContent.valeurImeda.title}
-                                                fill
-                                                className="object-cover"
-                                                data-ai-hint="network growth"
-                                            />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-muted-foreground mt-2">
-                                               {coursePageContent.valeurImeda.content}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                            )}
-                            {coursePageContent?.faq && coursePageContent.faq.length > 0 && (
-                             <AccordionItem value="faq">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">FAQ</h2>
-                                </AccordionTrigger>
-                                <AccordionContent className="whitespace-pre-wrap">
-                                    <Accordion type="single" collapsible className="w-full">
-                                        {coursePageContent.faq.map(item => (
-                                            <AccordionItem value={item.id} key={item.id}>
-                                                <AccordionTrigger>{item.question}</AccordionTrigger>
-                                                <AccordionContent className="text-sm text-muted-foreground whitespace-pre-wrap">
-                                                    {item.answer}
-                                                </AccordionContent>
-                                            </AccordionItem>
-                                        ))}
-                                    </Accordion>
-                                </AccordionContent>
-                            </AccordionItem>
-                            )}
-                            {coursePageContent?.contact && (
-                            <AccordionItem value="item-contact">
-                                <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">Contactez-nous</h2>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
-                                        <div className="relative aspect-square md:aspect-auto h-full w-full mx-auto md:mx-0 max-w-[200px] md:max-w-none overflow-hidden self-stretch">
-                                            <Image 
-                                                src={coursePageContent.contact.imageUrl}
-                                                alt={coursePageContent.contact.name}
-                                                fill
-                                                className="object-cover"
-                                                data-ai-hint="professional woman portrait"
-                                            />
-                                        </div>
-                                        <div className="text-center md:text-left">
-                                            <h3 className="text-2xl font-headline font-normal text-foreground">{coursePageContent.contact.name}</h3>
-                                            <p className="text-sm text-primary/80">{coursePageContent.contact.title}</p>
-                                            <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto md:mx-0">
-                                               {coursePageContent.contact.description}
-                                            </p>
-                                            <div className="flex flex-col items-center md:items-start gap-4 mt-4">
-                                                <a href={`tel:${coursePageContent.contact.francePhone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
-                                                    <Phone size={16} />
-                                                    <span>France: {coursePageContent.contact.francePhone}</span>
-                                                </a>
-                                                <a href={`tel:${coursePageContent.contact.uaePhone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
-                                                    <Phone size={16} />
-                                                    <span>EAU: {coursePageContent.contact.uaePhone}</span>
-                                                </a>
-                                                 <a href={`mailto:${coursePageContent.contact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
-                                                    <Mail size={16} />
-                                                    <span>{coursePageContent.contact.email}</span>
-                                                </a>
+                                <AccordionItem value="item-valeur">
+                                    <AccordionTrigger>
+                                        <h2 className="text-2xl font-headline font-normal text-primary">
+                                            {coursePageContent.valeurImeda.title}
+                                        </h2>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
+                                            <div className="relative aspect-video md:aspect-auto h-full min-h-[250px] w-full overflow-hidden">
+                                                <Image
+                                                    src={coursePageContent.valeurImeda.imageUrl}
+                                                    alt={coursePageContent.valeurImeda.title}
+                                                    fill
+                                                    className="object-cover"
+                                                    data-ai-hint="network growth"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-muted-foreground mt-2">
+                                                    {coursePageContent.valeurImeda.content}
+                                                </p>
                                             </div>
                                         </div>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
+                                    </AccordionContent>
+                                </AccordionItem>
                             )}
-                         </Accordion>
+                            {coursePageContent?.faq && coursePageContent.faq.length > 0 && (
+                                <AccordionItem value="faq">
+                                    <AccordionTrigger>
+                                        <h2 className="text-2xl font-headline font-normal text-primary">FAQ</h2>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="whitespace-pre-wrap">
+                                        <Accordion type="single" collapsible className="w-full">
+                                            {coursePageContent.faq.map(item => (
+                                                <AccordionItem value={item.id} key={item.id}>
+                                                    <AccordionTrigger>{item.question}</AccordionTrigger>
+                                                    <AccordionContent className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                                        {item.answer}
+                                                    </AccordionContent>
+                                                </AccordionItem>
+                                            ))}
+                                        </Accordion>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            )}
+                            {coursePageContent?.contact && (
+                                <AccordionItem value="item-contact">
+                                    <AccordionTrigger>
+                                        <h2 className="text-2xl font-headline font-normal text-primary">Contactez-nous</h2>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="grid md:grid-cols-2 gap-8 items-center pt-4">
+                                            <div className="relative aspect-square md:aspect-auto h-full w-full mx-auto md:mx-0 max-w-[200px] md:max-w-none overflow-hidden self-stretch">
+                                                <Image
+                                                    src={coursePageContent.contact.imageUrl}
+                                                    alt={coursePageContent.contact.name}
+                                                    fill
+                                                    className="object-cover"
+                                                    data-ai-hint="professional woman portrait"
+                                                />
+                                            </div>
+                                            <div className="text-center md:text-left">
+                                                <h3 className="text-2xl font-headline font-normal text-foreground">{coursePageContent.contact.name}</h3>
+                                                <p className="text-sm text-primary/80">{coursePageContent.contact.title}</p>
+                                                <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto md:mx-0">
+                                                    {coursePageContent.contact.description}
+                                                </p>
+                                                <div className="flex flex-col items-center md:items-start gap-4 mt-4">
+                                                    <a href={`tel:${coursePageContent.contact.francePhone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
+                                                        <Phone size={16} />
+                                                        <span>France: {coursePageContent.contact.francePhone}</span>
+                                                    </a>
+                                                    <a href={`tel:${coursePageContent.contact.uaePhone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
+                                                        <Phone size={16} />
+                                                        <span>EAU: {coursePageContent.contact.uaePhone}</span>
+                                                    </a>
+                                                    <a href={`mailto:${coursePageContent.contact.email}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
+                                                        <Mail size={16} />
+                                                        <span>{coursePageContent.contact.email}</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            )}
+                        </Accordion>
                     </div>
-                    
+
                     <aside className="sticky top-24 self-start hidden lg:block">
-                         <div className="bg-white p-6 rounded-lg border">
-                           <CourseInquiryForm courseName={formation.name} showHeader={false} />
-                         </div>
+                        <div className="bg-white p-6 rounded-lg border">
+                            <CourseInquiryForm courseName={formation.name} showHeader={false} />
+                        </div>
                     </aside>
                 </div>
             </main>
-             {isMobile && (
+            {isMobile && (
                 <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm p-4 border-t lg:hidden pb-[calc(1rem+env(safe-area-inset-bottom))] [clip-path:inset(0_0_calc(-1*env(safe-area-inset-bottom))_0)]">
                     <Sheet open={isEnquirySheetOpen} onOpenChange={setIsEnquirySheetOpen}>
                         <SheetTrigger asChild>
                             <Button className="w-full p-5">En Savoir Plus</Button>
                         </SheetTrigger>
                         <SheetContent side="bottom" className="h-[90vh] flex flex-col">
-                           <div className="overflow-y-auto p-2">
-                             <CourseInquiryForm courseName={formation.name} showHeader={true} />
-                           </div>
+                            <div className="overflow-y-auto p-2">
+                                <CourseInquiryForm courseName={formation.name} showHeader={true} />
+                            </div>
                         </SheetContent>
                     </Sheet>
                 </div>
