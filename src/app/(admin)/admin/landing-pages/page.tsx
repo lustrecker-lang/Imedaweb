@@ -5,7 +5,15 @@ import { useState } from 'react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { Pencil, Trash2, Plus, ExternalLink } from 'lucide-react';
@@ -78,47 +86,60 @@ export default function LandingPagesPage() {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="grid gap-4">
-                    {landingPages?.map((page) => (
-                        <Card key={page.id}>
-                            <CardHeader>
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <CardTitle className="text-xl font-normal">
-                                            {page.headline}
-                                            {!page.published && (
-                                                <span className="ml-2 text-sm text-muted-foreground">(Draft)</span>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Title</TableHead>
+                                <TableHead>Slug</TableHead>
+                                <TableHead className="w-[100px]">Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {landingPages?.map((page) => (
+                                <TableRow key={page.id}>
+                                    <TableCell className="font-medium">{page.headline}</TableCell>
+                                    <TableCell className="text-muted-foreground">/landing/{page.slug}</TableCell>
+                                    <TableCell>
+                                        {page.published ? (
+                                            <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ring-green-600/20 text-green-700 bg-green-50">
+                                                Published
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ring-yellow-600/20 text-yellow-800 bg-yellow-50">
+                                                Draft
+                                            </span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-2">
+                                            {page.published && (
+                                                <Button variant="ghost" size="icon" asChild title="View Live Page">
+                                                    <Link href={`/landing/${page.slug}`} target="_blank">
+                                                        <ExternalLink className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
                                             )}
-                                        </CardTitle>
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                            /landing/{page.slug}
-                                        </p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        {page.published && (
-                                            <Button variant="ghost" size="icon" asChild>
-                                                <Link href={`/landing/${page.slug}`} target="_blank">
-                                                    <ExternalLink className="h-4 w-4" />
+                                            <Button variant="ghost" size="icon" asChild title="Edit Page">
+                                                <Link href={`/admin/landing-pages/${page.id}`}>
+                                                    <Pencil className="h-4 w-4" />
                                                 </Link>
                                             </Button>
-                                        )}
-                                        <Button variant="ghost" size="icon" asChild>
-                                            <Link href={`/admin/landing-pages/${page.id}`}>
-                                                <Pencil className="h-4 w-4" />
-                                            </Link>
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setDeleteId(page.id)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                        </Card>
-                    ))}
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                title="Delete Page"
+                                                onClick={() => setDeleteId(page.id)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </div>
             )}
 

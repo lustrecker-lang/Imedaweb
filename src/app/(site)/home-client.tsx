@@ -14,7 +14,8 @@ import { collection, serverTimestamp } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Combobox } from "@/components/ui/combobox";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +30,7 @@ interface Page { id: string; title: string; sections: Section[]; }
 interface Campus { id: string; name: string; slug: string; description?: string; imageUrl?: string; }
 interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
 interface Theme { id: string; name: string; description?: string; categoryId: string; }
-interface Formation { id: string; themeId: string; }
+interface Formation { id: string; themeId: string; name: string; formationId: string; }
 interface Reference { id: string; name: string; logoUrl: string; }
 interface Kpi { id: string; number: number; title: string; description: string; order: number; }
 interface Article {
@@ -106,13 +107,15 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const firestore = useFirestore();
   const [isMobile, setIsMobile] = useState(false);
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
-  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedItem, setSelectedItem] = useState<{ type: 'theme' | 'formation', id: string } | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const [catalogEmail, setCatalogEmail] = useState('');
   const [catalogPhone, setCatalogPhone] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
 
 
   useEffect(() => {
@@ -144,21 +147,53 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
     return sections;
   }, [featuresData]);
 
-  const themeOptions = useMemo(() => coursesData.themes.map(theme => ({ value: theme.id, label: theme.name })), [coursesData.themes]);
+  // Unified search: filter themes and courses based on search query
+  const filteredThemes = useMemo(() => {
+    if (!searchQuery.trim()) return coursesData.themes;
+    const query = searchQuery.toLowerCase();
+    return coursesData.themes.filter(theme =>
+      theme.name.toLowerCase().includes(query)
+    );
+  }, [coursesData.themes, searchQuery]);
 
-  const handleSearch = () => {
-    if (selectedThemeId) {
+  const filteredFormations = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return coursesData.formations.filter(formation =>
+      formation.name?.toLowerCase().includes(query) ||
+      formation.formationId?.toLowerCase().includes(query)
+    ).slice(0, 100);
+  }, [coursesData.formations, searchQuery]);
+
+  const handleThemeSelect = (themeId: string, themeName: string) => {
+    setIsSearchOpen(false);
+    setIsThemeSheetOpen(false);
+    setSearchQuery(themeName);
+    setSelectedItem({ type: 'theme', id: themeId });
+  };
+
+  const handleFormationSelect = (formationId: string, formationName: string) => {
+    setIsSearchOpen(false);
+    setIsThemeSheetOpen(false);
+    setSearchQuery(formationName);
+    setSelectedItem({ type: 'formation', id: formationId });
+  };
+
+  const handleManualSearch = () => {
+    if (selectedItem) {
       setIsSearching(true);
-      router.push(`/courses?themeId=${selectedThemeId}`);
-    } else if (isMobile) {
-      setIsThemeSheetOpen(true);
+      if (selectedItem.type === 'theme') {
+        router.push(`/courses?themeId=${selectedItem.id}`);
+      } else {
+        router.push(`/courses/${selectedItem.id}?from=search`);
+      }
+    } else {
+      // If no valid item selected but user typed something, maybe try to search by query in the future
+      // For now we require a selection from the list
     }
   };
 
-  const handleMobileThemeSelect = (themeId: string) => {
-    setSelectedThemeId(themeId);
-    setIsThemeSheetOpen(false);
-  };
+
 
   const handleCatalogSubmit = async () => {
     if (!isEmailValid || isSubmitting) return;
@@ -208,79 +243,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
     });
   }, [coursesData.categories, coursesData.themes, coursesData.formations]);
 
-  const MobileThemeSearch = () => (
-    <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white"
-          onClick={() => setIsThemeSheetOpen(true)}
-        >
-          <span className="truncate">
-            {selectedThemeId
-              ? themeOptions.find(t => t.value === selectedThemeId)?.label
-              : "Rechercher un thème..."}
-          </span>
-          <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
-        </Button>
-      </SheetTrigger>
 
-      <SheetContent side="bottom" className="custom-sheet h-[70vh] flex flex-col p-0 bg-white">
-        <SheetHeader className="p-6 pb-2 flex-row items-center justify-between">
-          <SheetTitle className="font-headline text-2xl font-normal text-left">
-            Sélectionner un thème
-          </SheetTitle>
-          {/* removed close button */}
-        </SheetHeader>
-
-        <div className="flex-grow overflow-y-auto px-6 relative">
-          <Accordion
-            type="multiple"
-            defaultValue={categoriesWithThemes.map(category => category.id)}
-            className="w-full"
-          >
-            {categoriesWithThemes.map(category => (
-              <AccordionItem
-                key={category.id}
-                value={category.id}
-                className="border-b last-of-type:border-b-0"
-              >
-                <AccordionTrigger className="py-4 text-primary/80 transition-colors hover:text-primary hover:no-underline font-headline font-normal text-xl">
-                  {category.name}
-                </AccordionTrigger>
-                <AccordionContent className="pl-4">
-                  <div className="flex flex-col items-start pt-2">
-                    {category.themes.map(theme => (
-                      <Button
-                        key={theme.id}
-                        variant="link"
-                        className="h-auto p-2 text-sm text-primary/90 text-left justify-start hover:no-underline"
-                        onClick={() => handleMobileThemeSelect(theme.id)}
-                      >
-                        {theme.name}
-                      </Button>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-
-          <style jsx>{`
-            /* Hide the ShadCN close button only inside this sheet */
-            :global(.custom-sheet button[aria-label='Close']) {
-              display: none !important;
-            }
-  
-            /* Hide the chevron icons inside AccordionTrigger for this sheet only */
-            :global(.custom-sheet .AccordionTrigger svg) {
-              display: none !important;
-            }
-          `}</style>
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
 
   return (
     <div className="flex flex-col">
@@ -309,28 +272,153 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
               <div className="mt-8 w-full max-w-2xl">
                 <div className="flex flex-col sm:flex-row items-center gap-2 bg-white/20 backdrop-blur-sm p-3 rounded-lg border border-white/30">
                   {isMobile ? (
-                    <MobileThemeSearch />
+                    <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
+                      <SheetTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white"
+                        >
+                          <span className="flex items-center flex-1 min-w-0 text-left">
+                            <Search className="mr-2 h-4 w-4 shrink-0" />
+                            <span className="truncate">{searchQuery || "Rechercher un thème ou formation..."}</span>
+                          </span>
+                          <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="bottom" className="h-[80vh] flex flex-col p-0">
+                        <SheetHeader className="p-4 pb-0">
+                          <SheetTitle className="font-headline text-xl font-normal text-left">
+                            Rechercher
+                          </SheetTitle>
+                        </SheetHeader>
+                        <Command className="flex-1" shouldFilter={false}>
+                          <CommandInput
+                            placeholder="Tapez un nom de formation ou code..."
+                            value={searchQuery}
+                            onValueChange={(val) => {
+                              setSearchQuery(val);
+                              setSelectedItem(null); // Reset selection on typing
+                            }}
+                          />
+                          <CommandList className="flex-1 max-h-none">
+                            <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
+                            {filteredThemes.length > 0 && (
+                              <CommandGroup heading="Thèmes">
+                                {filteredThemes.map(theme => (
+                                  <CommandItem
+                                    key={theme.id}
+                                    value={`theme-${theme.name}`}
+                                    onSelect={() => handleThemeSelect(theme.id, theme.name)}
+                                    className="cursor-pointer"
+                                  >
+                                    <ChevronRight className="mr-2 h-4 w-4 text-muted-foreground" />
+                                    <span>{theme.name}</span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            )}
+                            {filteredFormations.length > 0 && (
+                              <CommandGroup heading="Formations">
+                                {filteredFormations.map(formation => (
+                                  <CommandItem
+                                    key={formation.id}
+                                    value={`formation-${formation.name}-${formation.formationId}`}
+                                    onSelect={() => handleFormationSelect(formation.id, formation.name)}
+                                    className="cursor-pointer"
+                                  >
+                                    <ArrowRight className="mr-2 h-4 w-4 text-muted-foreground" />
+                                    <div className="flex flex-col">
+                                      <span>{formation.name}</span>
+                                      <span className="text-xs text-muted-foreground">{formation.formationId}</span>
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            )}
+                          </CommandList>
+                        </Command>
+                      </SheetContent>
+                    </Sheet>
                   ) : (
-                    <Combobox
-                      items={themeOptions}
-                      value={selectedThemeId}
-                      onChange={setSelectedThemeId}
-                      placeholder="Rechercher un thème..."
-                      searchPlaceholder="Rechercher un thème..."
-                      noResultsText="Aucun thème trouvé."
-                      className="bg-transparent text-white border-white/50 placeholder:text-gray-200 hover:bg-white/10 hover:text-white"
-                    />
+                    <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={isSearchOpen}
+                          className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white"
+                        >
+                          <span className="flex items-center flex-1 min-w-0 text-left">
+                            <Search className="mr-2 h-4 w-4 shrink-0" />
+                            <span className="truncate">{searchQuery || "Rechercher un thème ou formation..."}</span>
+                          </span>
+                          <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                        <Command shouldFilter={false}>
+                          <CommandInput
+                            placeholder="Tapez un nom de formation ou code..."
+                            value={searchQuery}
+                            onValueChange={(val) => {
+                              setSearchQuery(val);
+                              setSelectedItem(null); // Reset selection on typing
+                            }}
+                          />
+                          <CommandList>
+                            <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
+                            {filteredThemes.length > 0 && (
+                              <CommandGroup heading="Thèmes">
+                                {filteredThemes.map(theme => (
+                                  <CommandItem
+                                    key={theme.id}
+                                    value={`theme-${theme.name}`}
+                                    onSelect={() => handleThemeSelect(theme.id, theme.name)}
+                                    className="cursor-pointer"
+                                  >
+                                    <ChevronRight className="mr-2 h-4 w-4 text-muted-foreground" />
+                                    <span>{theme.name}</span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            )}
+                            {filteredFormations.length > 0 && (
+                              <CommandGroup heading="Formations">
+                                {filteredFormations.map(formation => (
+                                  <CommandItem
+                                    key={formation.id}
+                                    value={`formation-${formation.name}-${formation.formationId}`}
+                                    onSelect={() => handleFormationSelect(formation.id, formation.name)}
+                                    className="cursor-pointer"
+                                  >
+                                    <ArrowRight className="mr-2 h-4 w-4 text-muted-foreground" />
+                                    <div className="flex flex-col">
+                                      <span>{formation.name}</span>
+                                      <span className="text-xs text-muted-foreground">{formation.formationId}</span>
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            )}
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   )}
-                  <Button onClick={handleSearch} className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90" disabled={isSearching || (!selectedThemeId && !isMobile)}>
+                  <Button
+                    onClick={handleManualSearch}
+                    className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 min-w-[120px]"
+                    disabled={!selectedItem || isSearching}
+                  >
                     {isSearching ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Recherche...
+                        <span>Wait...</span>
                       </>
                     ) : (
                       <>
                         <Search className="mr-2 h-4 w-4" />
-                        Rechercher
+                        <span>Rechercher</span>
                       </>
                     )}
                   </Button>
