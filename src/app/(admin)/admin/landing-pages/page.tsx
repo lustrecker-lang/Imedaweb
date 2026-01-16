@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import {
     Table,
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { Pencil, Trash2, Plus, ExternalLink } from 'lucide-react';
+import { Pencil, Trash2, Plus, ExternalLink, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -39,6 +40,9 @@ interface LandingPage {
 export default function LandingPagesPage() {
     const firestore = useFirestore();
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     const landingPagesQuery = useMemoFirebase(() => {
         if (!firestore) return null;
@@ -47,6 +51,26 @@ export default function LandingPagesPage() {
     }, [firestore]);
 
     const { data: landingPages, isLoading } = useCollection<LandingPage>(landingPagesQuery);
+
+    const filteredPages = landingPages?.filter(page => {
+        const query = searchQuery.toLowerCase();
+        return (
+            page.title?.toLowerCase().includes(query) ||
+            page.headline?.toLowerCase().includes(query) ||
+            page.slug?.toLowerCase().includes(query)
+        );
+    }) || [];
+
+    const totalPages = Math.ceil(filteredPages.length / ITEMS_PER_PAGE);
+    const paginatedPages = filteredPages.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    // Reset page when search changes
+    if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(1);
+    }
 
     const handleDelete = async () => {
         if (!firestore || !deleteId) return;
@@ -79,6 +103,23 @@ export default function LandingPagesPage() {
                 </Button>
             </div>
 
+            {/* Search Bar */}
+            <div className="flex items-center space-x-2">
+                <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search by title, headline or slug..."
+                        className="pl-8"
+                        value={searchQuery}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setCurrentPage(1);
+                        }}
+                    />
+                </div>
+            </div>
+
             {landingPages && landingPages.length === 0 ? (
                 <Card>
                     <CardContent className="pt-6">
@@ -97,7 +138,7 @@ export default function LandingPagesPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {landingPages?.map((page) => (
+                            {paginatedPages.map((page) => (
                                 <TableRow key={page.id}>
                                     <TableCell className="font-medium">{page.headline}</TableCell>
                                     <TableCell className="text-muted-foreground">/landing/{page.slug}</TableCell>
@@ -140,6 +181,52 @@ export default function LandingPagesPage() {
                             ))}
                         </TableBody>
                     </Table>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between px-4 py-4 border-t">
+                            <div className="text-sm text-muted-foreground">
+                                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredPages.length)} of {filteredPages.length}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setCurrentPage(1)}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronsLeft className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </Button>
+                                <span className="text-sm font-medium mx-2">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setCurrentPage(totalPages)}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    <ChevronsRight className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
