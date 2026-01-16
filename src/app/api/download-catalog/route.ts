@@ -15,7 +15,7 @@ export async function GET() {
 
     // Get the response body as a stream
     const body = response.body as ReadableStream<Uint8Array>;
-    
+
     // Create new headers to force download
     const headers = new Headers();
     headers.set('Content-Type', 'application/pdf');

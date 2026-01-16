@@ -22,7 +22,7 @@ import { ContactForm } from "@/components/contact-form";
 const formationsNavStructure = {
   title: "Formations",
   items: [
-    { href: "/catalog", title: "Catalogue 2025-26", description: "Téléchargez notre catalogue complet pour la saison à venir." },
+    { href: "/catalog", title: "Catalogue 2026", description: "Téléchargez notre catalogue complet pour la saison à venir." },
     { href: "/courses", title: "700+ Formations internationales", description: "Explorez notre catalogue complet de formations internationales." },
     { href: "#", title: "Formations en ligne", description: "Apprenez à votre rythme avec nos cours en ligne." },
   ]

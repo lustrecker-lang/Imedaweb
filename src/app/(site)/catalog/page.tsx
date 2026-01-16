@@ -82,7 +82,7 @@ export default async function CatalogPageWrapper() {
         {
           id: "hero",
           title: "Télécharger le catalogue",
-          content: "Entrez votre e-mail pour recevoir le catalogue complet de nos formations 2025-26.",
+          content: "Entrez votre e-mail pour recevoir le catalogue complet de nos formations 2026.",
           imageUrl: "https://picsum.photos/seed/catalog-page/600/800",
         },
       ],

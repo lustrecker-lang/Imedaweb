@@ -19,25 +19,25 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const catalogFormSchema = z.object({
-  email: z.string().email({ message: "Veuillez saisir une adresse e-mail valide." }),
-  phone: z.string().optional(),
+    email: z.string().email({ message: "Veuillez saisir une adresse e-mail valide." }),
+    phone: z.string().optional(),
 });
 
 interface Section {
-  id: string;
-  title: string;
-  content: string;
-  imageUrl?: string;
+    id: string;
+    title: string;
+    content: string;
+    imageUrl?: string;
 }
 
 interface Page {
-  id: string;
-  title: string;
-  sections: Section[];
+    id: string;
+    title: string;
+    sections: Section[];
 }
 
 interface CatalogViewProps {
-  pageData: Page | null;
+    pageData: Page | null;
 }
 
 
@@ -79,13 +79,13 @@ export default function CatalogView({ pageData }: CatalogViewProps) {
             document.body.removeChild(link);
 
             setHasSubmitted(true);
-            
+
         } catch (error) {
             console.error("Error submitting lead:", error);
             toast({ variant: "destructive", title: "Erreur", description: "Impossible de traiter votre demande de téléchargement de catalogue." });
         }
     };
-    
+
     const handleResetForm = () => {
         setHasSubmitted(false);
         form.reset();
@@ -109,7 +109,7 @@ export default function CatalogView({ pageData }: CatalogViewProps) {
                             <>
                                 <CardHeader className="p-0 text-left">
                                     <CardTitle className="font-headline text-2xl font-normal">{heroSection?.title || 'Télécharger le catalogue'}</CardTitle>
-                                    <CardDescription>{heroSection?.content || 'Entrez votre e-mail pour recevoir le catalogue complet de nos formations 2025-26.'}</CardDescription>
+                                    <CardDescription>{heroSection?.content || 'Entrez votre e-mail pour recevoir le catalogue complet de nos formations 2026.'}</CardDescription>
                                 </CardHeader>
                                 <div className="mt-6">
                                     <Form {...form}>
@@ -118,24 +118,24 @@ export default function CatalogView({ pageData }: CatalogViewProps) {
                                                 control={form.control}
                                                 name="email"
                                                 render={({ field }) => (
-                                                <FormItem>
-                                                    <FormControl>
-                                                    <Input placeholder="Votre adresse email" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input placeholder="Votre adresse email" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
                                                 )}
                                             />
                                             <FormField
                                                 control={form.control}
                                                 name="phone"
                                                 render={({ field }) => (
-                                                <FormItem>
-                                                    <FormControl>
-                                                    <Input placeholder="Téléphone/WhatsApp (facultatif)" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input placeholder="Téléphone/WhatsApp (facultatif)" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
                                                 )}
                                             />
                                             <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -159,7 +159,7 @@ export default function CatalogView({ pageData }: CatalogViewProps) {
                     </div>
                     <div className="relative aspect-[3/4] w-full order-1 md:order-2">
                         {heroSection?.imageUrl ? (
-                             <Image
+                            <Image
                                 src={heroSection.imageUrl}
                                 alt="Catalogue"
                                 fill

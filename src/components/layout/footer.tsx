@@ -39,7 +39,7 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
             <h3 className="text-xs font-semibold tracking-wider uppercase">Formations</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <Link href="/catalog" className="text-xs text-primary-foreground/80 hover:text-primary-foreground">Catalogue 2025-26</Link>
+                <Link href="/catalog" className="text-xs text-primary-foreground/80 hover:text-primary-foreground">Catalogue 2026</Link>
               </li>
               <li><Link href="/courses" className="text-xs text-primary-foreground/80 hover:text-primary-foreground">700+ Formations internationales</Link></li>
               <li><Link href="#" className="text-xs text-primary-foreground/80 hover:text-primary-foreground">Formations en ligne</Link></li>
@@ -106,7 +106,7 @@ export function Footer({ companyProfile, campuses }: FooterProps) {
 
         <div className="mt-8 border-t pt-6 text-center">
           <p className="text-xs text-primary-foreground/60">
-            © 2025-26 {companyProfile?.name ? companyProfile.name : 'Imeda International – IMEDA'}.
+            © 2026 {companyProfile?.name ? companyProfile.name : 'Imeda International – IMEDA'}.
           </p>
           <p className="text-xs text-primary-foreground/60 mt-1">
             L’institution Licences 4700-9288 (Dubaï) et 1671-3512 (Europe).
