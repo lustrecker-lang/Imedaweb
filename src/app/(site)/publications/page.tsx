@@ -8,6 +8,9 @@ import { enUS } from 'date-fns/locale';
 import PublicationsView from './PublicationsView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Article {
   id: string;
   title: string;
@@ -20,8 +23,8 @@ interface Article {
 }
 
 interface Topic {
-    id: string;
-    name: string;
+  id: string;
+  name: string;
 }
 
 interface Section {
@@ -58,10 +61,10 @@ async function getPublicationsData() {
         topicId: data.topicId,
       };
     }) as Article[];
-    
+
     const pageData = pageSnap.exists ? pageSnap.data() as Page : null;
     const topics = topicsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Topic[];
-    
+
     return { articles, pageData, topics };
   } catch (error) {
     console.error("Error fetching publications data:", error);
@@ -75,21 +78,21 @@ export const metadata: Metadata = {
 };
 
 const PublicationsPageSkeleton = () => {
-    return (
-        <div className="container mx-auto px-4 py-12 md:px-6">
-            <Skeleton className="mb-8 h-[250px] w-full" />
-            <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({length: 6}).map((_, i) => (
-                    <div key={i} className="space-y-4">
-                        <Skeleton className="aspect-video w-full" />
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-12 w-full" />
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+  return (
+    <div className="container mx-auto px-4 py-12 md:px-6">
+      <Skeleton className="mb-8 h-[250px] w-full" />
+      <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="space-y-4">
+            <Skeleton className="aspect-video w-full" />
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default async function PublicationsPageWrapper() {

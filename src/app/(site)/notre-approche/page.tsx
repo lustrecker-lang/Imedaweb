@@ -7,6 +7,9 @@ import { Metadata } from 'next';
 import NotreApprocheView from './NotreApprocheView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Section {
   id: string;
   title: string;
@@ -49,30 +52,30 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const PageSkeleton = () => (
-    <div className="flex flex-col">
-        <div className="container py-8">
-            <Skeleton className="h-[40vh] w-full" />
-        </div>
-        <div className="py-16 bg-muted/30">
-            <div className="container text-center space-y-4 max-w-3xl mx-auto">
-                 <Skeleton className="h-12 w-12 mx-auto" />
-                 <Skeleton className="h-6 w-full" />
-                 <Skeleton className="h-6 w-5/6" />
-            </div>
-        </div>
-         <div className="py-16">
-            <div className="container space-y-16">
-                <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <Skeleton className="aspect-square w-full" />
-                    <div className="space-y-4"><Skeleton className="h-8 w-1/2" /><Skeleton className="h-5 w-full" /><Skeleton className="h-5 w-full" /><Skeleton className="h-10 w-40 mt-4" /></div>
-                </div>
-                 <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-4 md:col-start-2"><Skeleton className="h-8 w-1/2" /><Skeleton className="h-5 w-full" /><Skeleton className="h-5 w-full" /><Skeleton className="h-10 w-40 mt-4" /></div>
-                    <Skeleton className="aspect-square w-full md:row-start-1" />
-                </div>
-            </div>
-        </div>
+  <div className="flex flex-col">
+    <div className="container py-8">
+      <Skeleton className="h-[40vh] w-full" />
     </div>
+    <div className="py-16 bg-muted/30">
+      <div className="container text-center space-y-4 max-w-3xl mx-auto">
+        <Skeleton className="h-12 w-12 mx-auto" />
+        <Skeleton className="h-6 w-full" />
+        <Skeleton className="h-6 w-5/6" />
+      </div>
+    </div>
+    <div className="py-16">
+      <div className="container space-y-16">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <Skeleton className="aspect-square w-full" />
+          <div className="space-y-4"><Skeleton className="h-8 w-1/2" /><Skeleton className="h-5 w-full" /><Skeleton className="h-5 w-full" /><Skeleton className="h-10 w-40 mt-4" /></div>
+        </div>
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-4 md:col-start-2"><Skeleton className="h-8 w-1/2" /><Skeleton className="h-5 w-full" /><Skeleton className="h-5 w-full" /><Skeleton className="h-10 w-40 mt-4" /></div>
+          <Skeleton className="aspect-square w-full md:row-start-1" />
+        </div>
+      </div>
+    </div>
+  </div>
 );
 
 export default async function NotreApprochePage() {

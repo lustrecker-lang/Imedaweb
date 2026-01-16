@@ -8,6 +8,9 @@ import { Metadata } from 'next';
 import ReferencesView from './ReferencesView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Section {
   id: string;
   title: string;
@@ -30,13 +33,13 @@ interface Reference {
 async function getPageData(): Promise<{ pageData: Page | null; references: Reference[] }> {
   try {
     const [pageSnap, referencesSnap] = await Promise.all([
-        adminDb.collection('pages').doc('references').get(),
-        adminDb.collection('references').orderBy('name', 'asc').get()
+      adminDb.collection('pages').doc('references').get(),
+      adminDb.collection('references').orderBy('name', 'asc').get()
     ]);
-    
+
     const pageData = pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
     const references = referencesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Reference[];
-    
+
     return { pageData, references };
   } catch (error) {
     console.error("Error fetching 'Références' page data:", error);
@@ -62,10 +65,10 @@ export async function generateMetadata(): Promise<Metadata> {
 const PageSkeleton = () => (
   <div className="container mx-auto px-4 py-12 md:px-6">
     <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-        <Skeleton className="h-full w-full" />
+      <Skeleton className="h-full w-full" />
     </div>
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mt-12">
-        {Array.from({length: 12}).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+      {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
     </div>
   </div>
 );

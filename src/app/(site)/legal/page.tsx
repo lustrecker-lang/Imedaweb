@@ -2,6 +2,9 @@ import { Suspense } from 'react';
 import { LegalContent } from './legal-content';
 import { adminDb } from '@/firebase/admin';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Section {
   id: string;
   title: string;

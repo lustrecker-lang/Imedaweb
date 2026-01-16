@@ -8,6 +8,9 @@ import { Metadata } from 'next';
 import CatalogView from './CatalogView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Section {
   id: string;
   title: string;
@@ -50,21 +53,21 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const PageSkeleton = () => (
-    <div className="container mx-auto max-w-4xl px-4 py-12 md:px-6 flex items-center justify-center min-h-[calc(100vh-10rem)]">
-        <div className="w-full overflow-hidden border rounded-lg">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div className="p-8 space-y-4">
-                     <Skeleton className="h-8 w-3/4" />
-                     <Skeleton className="h-5 w-full" />
-                     <div className="space-y-4 pt-4">
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                     </div>
-                </div>
-                <Skeleton className="aspect-[3/4] w-full" />
-            </div>
+  <div className="container mx-auto max-w-4xl px-4 py-12 md:px-6 flex items-center justify-center min-h-[calc(100vh-10rem)]">
+    <div className="w-full overflow-hidden border rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div className="p-8 space-y-4">
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-5 w-full" />
+          <div className="space-y-4 pt-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
         </div>
+        <Skeleton className="aspect-[3/4] w-full" />
+      </div>
     </div>
+  </div>
 );
 
 export default async function CatalogPageWrapper() {
@@ -73,19 +76,19 @@ export default async function CatalogPageWrapper() {
   if (!pageData) {
     // If no data in Firestore, create default data
     pageData = {
-        id: "catalog",
-        title: "Catalogue",
-        sections: [
-            {
-                id: "hero",
-                title: "Télécharger le catalogue",
-                content: "Entrez votre e-mail pour recevoir le catalogue complet de nos formations 2025-26.",
-                imageUrl: "https://picsum.photos/seed/catalog-page/600/800",
-            },
-        ],
+      id: "catalog",
+      title: "Catalogue",
+      sections: [
+        {
+          id: "hero",
+          title: "Télécharger le catalogue",
+          content: "Entrez votre e-mail pour recevoir le catalogue complet de nos formations 2025-26.",
+          imageUrl: "https://picsum.photos/seed/catalog-page/600/800",
+        },
+      ],
     };
   }
-  
+
   return (
     <Suspense fallback={<PageSkeleton />}>
       <CatalogView pageData={pageData} />

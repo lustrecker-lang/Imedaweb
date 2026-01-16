@@ -9,6 +9,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 // --- (Centralized Interfaces - This should ideally be in a separate file like `src/types.ts`) ---
 export interface Section { id: string; title: string; content: string; imageUrl?: string; }
 export interface Page { id: string; title: string; sections: Section[]; ogTitle?: string; ogDescription?: string; ogImage?: string; }

@@ -7,6 +7,9 @@ import { Metadata } from 'next';
 import PartnershipsView from './PartnershipsView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Section {
   id: string;
   title: string;
@@ -51,17 +54,17 @@ export async function generateMetadata(): Promise<Metadata> {
 const PageSkeleton = () => (
   <div className="container mx-auto px-4 py-12 md:px-6">
     <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-        <Skeleton className="h-full w-full" />
+      <Skeleton className="h-full w-full" />
     </div>
     <div className="py-16 md:py-24">
-        <Skeleton className="h-10 w-2/3 mx-auto mb-4" />
-        <Skeleton className="h-6 w-1/2 mx-auto" />
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-8">
-            <Skeleton className="h-56 w-full" />
-            <Skeleton className="h-56 w-full" />
-            <Skeleton className="h-56 w-full" />
-            <Skeleton className="h-56 w-full" />
-        </div>
+      <Skeleton className="h-10 w-2/3 mx-auto mb-4" />
+      <Skeleton className="h-6 w-1/2 mx-auto" />
+      <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+        <Skeleton className="h-56 w-full" />
+        <Skeleton className="h-56 w-full" />
+        <Skeleton className="h-56 w-full" />
+        <Skeleton className="h-56 w-full" />
+      </div>
     </div>
   </div>
 );

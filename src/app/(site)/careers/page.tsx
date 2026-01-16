@@ -8,6 +8,9 @@ import { Metadata } from 'next';
 import CareersView from './CareersView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Section {
   id: string;
   title: string;
@@ -29,19 +32,19 @@ const jobOpeningSchema = {
   fullDescription: ''
 };
 interface JobOpening {
-    id: string;
-    positionName: string;
-    type: string;
-    workMode: string;
-    description: string;
-    fullDescription?: string;
+  id: string;
+  positionName: string;
+  type: string;
+  workMode: string;
+  description: string;
+  fullDescription?: string;
 }
 
 async function getPageData(): Promise<{ pageData: Page | null; jobOpenings: JobOpening[] }> {
   try {
     const pageSnap = await adminDb.collection('pages').doc('careers').get();
     const pageData = pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
-    
+
     const jobsSnap = await adminDb.collection('jobOpenings').orderBy('positionName', 'asc').get();
     const jobOpenings = jobsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOpening));
 
@@ -71,9 +74,9 @@ export async function generateMetadata(): Promise<Metadata> {
 const PageSkeleton = () => (
   <div className="container mx-auto px-4 py-12 md:px-6">
     <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden rounded-lg">
-        <Skeleton className="h-full w-full" />
+      <Skeleton className="h-full w-full" />
     </div>
-     <div className="py-16 md:py-24">
+    <div className="py-16 md:py-24">
       <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         <div className="space-y-4">
           <Skeleton className="h-10 w-3/4" />

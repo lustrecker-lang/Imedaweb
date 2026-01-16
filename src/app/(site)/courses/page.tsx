@@ -6,6 +6,9 @@ import { Metadata } from 'next';
 import CoursesView from './CoursesView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 // Interfaces for server-side data fetching
 interface Category {
     id: string;

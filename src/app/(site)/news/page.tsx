@@ -8,6 +8,9 @@ import { enUS } from 'date-fns/locale';
 import NewsListView from './NewsListView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface NewsStory {
   id: string;
   title: string;
@@ -33,10 +36,10 @@ interface Page {
 async function getNewsData() {
   try {
     const [newsSnap, pageSnap] = await Promise.all([
-        adminDb.collection('news').orderBy('publicationDate', 'desc').get(),
-        adminDb.collection('pages').doc('news').get()
+      adminDb.collection('news').orderBy('publicationDate', 'desc').get(),
+      adminDb.collection('pages').doc('news').get()
     ]);
-    
+
     const newsStories = newsSnap.docs.map(doc => {
       const data = doc.data() as DocumentData;
       return {

@@ -7,6 +7,9 @@ import { Metadata } from 'next';
 import ServicesView from './ServicesView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Section {
   id: string;
   title: string;
@@ -32,17 +35,17 @@ interface Theme {
 }
 
 interface Formation {
-    id: string;
-    themeId: string;
+  id: string;
+  themeId: string;
 }
 
 async function getPageData(): Promise<{ pageData: Page | null; categories: Category[]; themes: Theme[]; formations: Formation[] }> {
   try {
     const [pageSnap, categoriesSnap, themesSnap, formationsSnap] = await Promise.all([
-        adminDb.collection('pages').doc('services').get(),
-        adminDb.collection('course_categories').orderBy('name').get(),
-        adminDb.collection('course_themes').orderBy('name').get(),
-        adminDb.collection('course_formations').get(),
+      adminDb.collection('pages').doc('services').get(),
+      adminDb.collection('course_categories').orderBy('name').get(),
+      adminDb.collection('course_themes').orderBy('name').get(),
+      adminDb.collection('course_formations').get(),
     ]);
 
     const pageData = pageSnap.exists ? { id: pageSnap.id, ...pageSnap.data() } as Page : null;
@@ -76,7 +79,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const PageSkeleton = () => (
   <div className="container mx-auto px-4 py-12 md:px-6">
     <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
-        <Skeleton className="h-full w-full" />
+      <Skeleton className="h-full w-full" />
     </div>
   </div>
 );

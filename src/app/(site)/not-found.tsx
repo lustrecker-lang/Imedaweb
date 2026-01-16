@@ -8,6 +8,9 @@ import { Metadata } from 'next';
 import NotFoundView from './not-found-view';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Section {
   id: string;
   title: string;
@@ -39,15 +42,15 @@ export const metadata: Metadata = {
 };
 
 const PageSkeleton = () => (
-    <div className="container mx-auto max-w-2xl px-4 py-12 md:px-6 text-center min-h-[50vh] flex flex-col items-center justify-center">
-        <Skeleton className="h-20 w-48 mb-4" />
-        <Skeleton className="h-10 w-2/3 mb-4" />
-        <Skeleton className="h-6 w-full max-w-md mb-8" />
-        <div className="flex gap-4">
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
-        </div>
+  <div className="container mx-auto max-w-2xl px-4 py-12 md:px-6 text-center min-h-[50vh] flex flex-col items-center justify-center">
+    <Skeleton className="h-20 w-48 mb-4" />
+    <Skeleton className="h-10 w-2/3 mb-4" />
+    <Skeleton className="h-6 w-full max-w-md mb-8" />
+    <div className="flex gap-4">
+      <Skeleton className="h-10 w-32" />
+      <Skeleton className="h-10 w-32" />
     </div>
+  </div>
 );
 
 export default async function NotFoundPage() {
@@ -56,15 +59,15 @@ export default async function NotFoundPage() {
   if (!pageData) {
     // Provide default content if it's not in the database
     pageData = {
-        id: "not-found",
-        title: "Page Not Found",
-        sections: [
-            {
-                id: "main",
-                title: "Page Introuvable",
-                content: "Désolé, la page que vous recherchez n'existe pas ou a été déplacée.",
-            },
-        ],
+      id: "not-found",
+      title: "Page Not Found",
+      sections: [
+        {
+          id: "main",
+          title: "Page Introuvable",
+          content: "Désolé, la page que vous recherchez n'existe pas ou a été déplacée.",
+        },
+      ],
     };
   }
 

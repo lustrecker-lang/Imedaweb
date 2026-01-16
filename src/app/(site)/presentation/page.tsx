@@ -7,6 +7,9 @@ import { Metadata } from 'next';
 import PresentationView from './PresentationView';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Force dynamic rendering to ensure fresh data from Firestore on each request
+export const dynamic = 'force-dynamic';
+
 interface Section {
   id: string;
   title: string;
