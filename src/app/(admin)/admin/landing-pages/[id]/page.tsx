@@ -14,9 +14,23 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Check, ChevronsUpDown } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from "@/lib/utils";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface LandingPageData {
     slug: string;
@@ -37,6 +51,7 @@ interface LandingPageData {
 interface Course {
     id: string;
     name: string;
+    formationId?: string;
 }
 
 interface Theme {
@@ -100,6 +115,7 @@ export default function LandingPageEditorPage() {
             courseId: '',
         },
     });
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         if (landingPage && !isNew) {
@@ -332,24 +348,57 @@ export default function LandingPageEditorPage() {
                     {formData.cta.type === 'pdp' && (
                         <div className="space-y-2">
                             <Label htmlFor="courseId">Select Course</Label>
-                            <Select
-                                value={formData.cta.courseId || ''}
-                                onValueChange={(value) => setFormData({
-                                    ...formData,
-                                    cta: { ...formData.cta, courseId: value }
-                                })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a course" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {courses?.map((course) => (
-                                        <SelectItem key={course.id} value={course.id}>
-                                            {course.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Popover open={open} onOpenChange={setOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={open}
+                                        className="w-full justify-between"
+                                    >
+                                        {formData.cta.courseId
+                                            ? courses?.find((course) => course.id === formData.cta.courseId)?.name
+                                            : "Select a course..."}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[400px] p-0" align="start">
+                                    <Command>
+                                        <CommandInput placeholder="Search course by name or code..." />
+                                        <CommandList>
+                                            <CommandEmpty>No course found.</CommandEmpty>
+                                            <CommandGroup>
+                                                {courses?.map((course) => (
+                                                    <CommandItem
+                                                        key={course.id}
+                                                        value={`${course.name} ${course.formationId || ''}`}
+                                                        onSelect={() => {
+                                                            setFormData({
+                                                                ...formData,
+                                                                cta: { ...formData.cta, courseId: course.id }
+                                                            });
+                                                            setOpen(false);
+                                                        }}
+                                                    >
+                                                        <Check
+                                                            className={cn(
+                                                                "mr-2 h-4 w-4",
+                                                                formData.cta.courseId === course.id ? "opacity-100" : "opacity-0"
+                                                            )}
+                                                        />
+                                                        <div className="flex flex-col">
+                                                            <span>{course.name}</span>
+                                                            {course.formationId && (
+                                                                <span className="text-xs text-muted-foreground">{course.formationId}</span>
+                                                            )}
+                                                        </div>
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
                         </div>
                     )}
                 </CardContent>

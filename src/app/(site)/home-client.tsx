@@ -5,7 +5,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight, Download, CheckCircle, Loader2, ChevronRight, ChevronsUpDown, X, } from "lucide-react";
+import { Search, ArrowRight, Download, CheckCircle, Loader2, ChevronRight, ChevronsUpDown, X, ArrowLeft } from "lucide-react";
 import { useState, useMemo, useEffect } from 'react';
 import { z } from 'zod';
 import { useFirestore, addDocumentNonBlocking } from '@/firebase';
@@ -111,6 +111,8 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<{ type: 'theme' | 'formation', id: string } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'browse' | 'search'>('browse');
+  const [mobileBrowseTheme, setMobileBrowseTheme] = useState<{ id: string, name: string } | null>(null);
   const [catalogEmail, setCatalogEmail] = useState('');
   const [catalogPhone, setCatalogPhone] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false);
@@ -147,20 +149,27 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
     return sections;
   }, [featuresData]);
 
+  const normalizeText = (text: string) => {
+    return text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  };
+
   // Unified search: filter themes and courses based on search query
   const filteredThemes = useMemo(() => {
     if (!searchQuery.trim()) return coursesData.themes;
-    const query = searchQuery.toLowerCase();
+    const query = normalizeText(searchQuery);
     return coursesData.themes.filter(theme =>
-      theme.name.toLowerCase().includes(query)
+      normalizeText(theme.name).includes(query)
     );
   }, [coursesData.themes, searchQuery]);
 
   const filteredFormations = useMemo(() => {
     if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase();
+    const query = normalizeText(searchQuery);
     return coursesData.formations.filter(formation =>
-      formation.name?.toLowerCase().includes(query) ||
+      normalizeText(formation.name || "").includes(query) ||
       formation.formationId?.toLowerCase().includes(query)
     ).slice(0, 100);
   }, [coursesData.formations, searchQuery]);
@@ -276,7 +285,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                       <SheetTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white"
+                          className="w-full sm:flex-1 sm:w-auto min-w-0 justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white"
                         >
                           <span className="flex items-center flex-1 min-w-0 text-left">
                             <Search className="mr-2 h-4 w-4 shrink-0" />
@@ -285,58 +294,166 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                           <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
                         </Button>
                       </SheetTrigger>
-                      <SheetContent side="bottom" className="h-[80vh] flex flex-col p-0">
-                        <SheetHeader className="p-4 pb-0">
-                          <SheetTitle className="font-headline text-xl font-normal text-left">
-                            Rechercher
-                          </SheetTitle>
-                        </SheetHeader>
-                        <Command className="flex-1" shouldFilter={false}>
-                          <CommandInput
-                            placeholder="Tapez un nom de formation ou code..."
-                            value={searchQuery}
-                            onValueChange={(val) => {
-                              setSearchQuery(val);
-                              setSelectedItem(null); // Reset selection on typing
-                            }}
-                          />
-                          <CommandList className="flex-1 max-h-none">
-                            <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
-                            {filteredThemes.length > 0 && (
-                              <CommandGroup heading="Thèmes">
-                                {filteredThemes.map(theme => (
-                                  <CommandItem
+                      <SheetContent side="bottom" className="h-[85vh] flex flex-col p-0 gap-0">
+                        <div className="p-4 border-b border-border/10 bg-background z-10">
+                          <SheetHeader className="mb-4">
+                            <SheetTitle className="font-headline text-xl font-normal text-left">
+                              {mobileTab === 'search' ? 'Rechercher' : (mobileBrowseTheme ? mobileBrowseTheme.name : 'Parcourir par Thème')}
+                            </SheetTitle>
+                          </SheetHeader>
+                          <div className="flex p-1 bg-muted rounded-lg border border-border/10">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setMobileTab('browse');
+                                setMobileBrowseTheme(null);
+                              }}
+                              className={cn(
+                                "flex-1 rounded-md text-sm font-medium transition-all",
+                                mobileTab === 'browse'
+                                  ? "bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                                  : "text-muted-foreground hover:bg-transparent hover:text-foreground"
+                              )}
+                            >
+                              Par Thème
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setMobileTab('search')}
+                              className={cn(
+                                "flex-1 rounded-md text-sm font-medium transition-all",
+                                mobileTab === 'search'
+                                  ? "bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+                                  : "text-muted-foreground hover:bg-transparent hover:text-foreground"
+                              )}
+                            >
+                              Par Nom
+                            </Button>
+                          </div>
+                        </div>
+
+                        {mobileTab === 'browse' ? (
+                          <div className="flex-1 overflow-y-auto">
+                            {mobileBrowseTheme ? (
+                              <div className="p-4 space-y-2">
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-start pl-0 hover:bg-transparent mb-2 text-muted-foreground hover:text-foreground"
+                                  onClick={() => setMobileBrowseTheme(null)}
+                                >
+                                  <ArrowLeft className="mr-2 h-4 w-4" />
+                                  Retour aux thèmes
+                                </Button>
+                                <div className="space-y-1">
+                                  {coursesData.formations
+                                    .filter(f => f.themeId === mobileBrowseTheme.id)
+                                    .map(formation => (
+                                      <Button
+                                        key={formation.id}
+                                        variant="outline"
+                                        className="w-full justify-between h-auto py-3 text-left border-border/10 bg-card/5 hover:bg-card/10"
+                                        onClick={() => handleFormationSelect(formation.id, formation.name || '')}
+                                      >
+                                        <div className="flex flex-col gap-1 overflow-hidden">
+                                          <span className="font-medium truncate">{formation.name}</span>
+                                          <span className="text-xs text-muted-foreground">{formation.formationId}</span>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 opacity-30 shrink-0 ml-2" />
+                                      </Button>
+                                    ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-4 space-y-3">
+                                {coursesData.themes.map(theme => (
+                                  <Button
                                     key={theme.id}
-                                    value={`theme-${theme.name}`}
-                                    onSelect={() => handleThemeSelect(theme.id, theme.name)}
-                                    className="cursor-pointer"
+                                    variant="outline"
+                                    className="w-full justify-between h-auto py-4 px-4 text-left border border-border/20 bg-card shadow-sm hover:bg-muted/50 whitespace-normal"
+                                    onClick={() => setMobileBrowseTheme({ id: theme.id, name: theme.name })}
                                   >
-                                    <ChevronRight className="mr-2 h-4 w-4 text-muted-foreground" />
-                                    <span>{theme.name}</span>
-                                  </CommandItem>
+                                    <span className="font-medium text-base leading-snug">{theme.name}</span>
+                                    <ChevronRight className="h-4 w-4 opacity-50 shrink-0 ml-3" />
+                                  </Button>
                                 ))}
-                              </CommandGroup>
+                              </div>
                             )}
-                            {filteredFormations.length > 0 && (
-                              <CommandGroup heading="Formations">
-                                {filteredFormations.map(formation => (
-                                  <CommandItem
-                                    key={formation.id}
-                                    value={`formation-${formation.name}-${formation.formationId}`}
-                                    onSelect={() => handleFormationSelect(formation.id, formation.name)}
-                                    className="cursor-pointer"
-                                  >
-                                    <ArrowRight className="mr-2 h-4 w-4 text-muted-foreground" />
-                                    <div className="flex flex-col">
-                                      <span>{formation.name}</span>
-                                      <span className="text-xs text-muted-foreground">{formation.formationId}</span>
-                                    </div>
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            )}
-                          </CommandList>
-                        </Command>
+                          </div>
+                        ) : (
+                          <Command className="flex-1 w-full" shouldFilter={false}>
+                            <div className="p-4 pb-0">
+                              <CommandInput
+                                placeholder="Tapez un nom de formation ou code..."
+                                value={searchQuery}
+                                onValueChange={(val) => {
+                                  setSearchQuery(val);
+                                  setSelectedItem(null); // Reset selection on typing
+                                }}
+                                className="border rounded-md px-3"
+                              />
+                            </div>
+                            <CommandList className="flex-1 max-h-none p-2">
+                              {/* Show recent searches or empty state if no query? For now existing logic */}
+                              <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+                                {searchQuery ? "Aucun résultat trouvé." : "Commencez à taper pour rechercher..."}
+                              </CommandEmpty>
+                              {filteredThemes.length > 0 && searchQuery && (
+                                <CommandGroup heading="Thèmes">
+                                  {filteredThemes.map(theme => (
+                                    <CommandItem
+                                      key={theme.id}
+                                      value={`theme-${theme.name}`}
+                                      onSelect={() => handleThemeSelect(theme.id, theme.name)}
+                                      className="cursor-pointer"
+                                    >
+                                      <ChevronRight className="mr-2 h-4 w-4 text-muted-foreground" />
+                                      <span>{theme.name}</span>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              )}
+                              {filteredFormations.length > 0 && searchQuery && (
+                                <CommandGroup heading="Formations">
+                                  {filteredFormations.map(formation => (
+                                    <CommandItem
+                                      key={formation.id}
+                                      value={`formation-${formation.name}-${formation.formationId}`}
+                                      onSelect={() => handleFormationSelect(formation.id, formation.name || '')}
+                                      className="cursor-pointer"
+                                    >
+                                      <ArrowRight className="mr-2 h-4 w-4 text-muted-foreground" />
+                                      <div className="flex flex-col">
+                                        <span>{formation.name}</span>
+                                        <span className="text-xs text-muted-foreground">{formation.formationId}</span>
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              )}
+                            </CommandList>
+                            <div className="p-4 border-t border-border/10">
+                              <Button
+                                onClick={handleManualSearch}
+                                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                                disabled={!selectedItem || isSearching}
+                              >
+                                {isSearching ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <span>Wait...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Search className="mr-2 h-4 w-4" />
+                                    <span>Rechercher</span>
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </Command>
+                        )}
                       </SheetContent>
                     </Sheet>
                   ) : (
@@ -346,7 +463,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                           variant="outline"
                           role="combobox"
                           aria-expanded={isSearchOpen}
-                          className="w-full justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white"
+                          className="w-full sm:flex-1 sm:w-auto min-w-0 justify-between bg-white/10 text-white border-white/50 hover:bg-white/20 hover:text-white"
                         >
                           <span className="flex items-center flex-1 min-w-0 text-left">
                             <Search className="mr-2 h-4 w-4 shrink-0" />
