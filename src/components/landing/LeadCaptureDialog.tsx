@@ -43,6 +43,13 @@ export function LeadCaptureDialog({ children, landingPageSlug }: LeadCaptureDial
                 });
             }
 
+            // Fire Google Ads conversion event
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'conversion', {
+                    'send_to': 'AW-17882391668/I96gCMrFmucbEPTI_s5C',
+                });
+            }
+
             // Redirect to WhatsApp
             window.open('https://wa.me/33651653144', '_blank');
             setOpen(false);

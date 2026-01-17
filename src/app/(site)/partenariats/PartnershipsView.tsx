@@ -19,20 +19,20 @@ import { ContactForm } from "@/components/contact-form";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface Section {
-  id: string;
-  title: string;
-  content: string;
-  imageUrl?: string;
+    id: string;
+    title: string;
+    content: string;
+    imageUrl?: string;
 }
 
 interface Page {
-  id: string;
-  title: string;
-  sections: Section[];
+    id: string;
+    title: string;
+    sections: Section[];
 }
 
 interface PartnershipsViewProps {
-  pageData: Page | null;
+    pageData: Page | null;
 }
 
 const WhyUsCard = ({ section }: { section: Section }) => (
@@ -79,271 +79,280 @@ export default function PartnershipsView({ pageData }: PartnershipsViewProps) {
     }, [catalogEmail]);
 
 
-  const heroSection = pageData?.sections.find(s => s.id === 'hero');
-  const whyUsHeader = pageData?.sections.find(s => s.id === 'why-us-header');
-  const whyUsCards = pageData?.sections.filter(s => s.id.startsWith('why-us-') && s.id !== 'why-us-header') || [];
-  const specialisationsHeader = pageData?.sections.find(s => s.id === 'specialisations-header');
-  const specialisations = pageData?.sections.filter(s => s.id.startsWith('spec-')) || [];
-  const howWeWorkHeader = pageData?.sections.find(s => s.id === 'how-we-work-header');
-  const howWeWorkSteps = pageData?.sections.filter(s => s.id.startsWith('step-')) || [];
-  const formatCards = pageData?.sections.filter(s => s.id.startsWith('format-')) || [];
-  const catalogSection = pageData?.sections.find(s => s.id === 'catalog-download');
-  
-  const heroImageUrl = heroSection?.imageUrl;
+    const heroSection = pageData?.sections.find(s => s.id === 'hero');
+    const whyUsHeader = pageData?.sections.find(s => s.id === 'why-us-header');
+    const whyUsCards = pageData?.sections.filter(s => s.id.startsWith('why-us-') && s.id !== 'why-us-header') || [];
+    const specialisationsHeader = pageData?.sections.find(s => s.id === 'specialisations-header');
+    const specialisations = pageData?.sections.filter(s => s.id.startsWith('spec-')) || [];
+    const howWeWorkHeader = pageData?.sections.find(s => s.id === 'how-we-work-header');
+    const howWeWorkSteps = pageData?.sections.filter(s => s.id.startsWith('step-')) || [];
+    const formatCards = pageData?.sections.filter(s => s.id.startsWith('format-')) || [];
+    const catalogSection = pageData?.sections.find(s => s.id === 'catalog-download');
 
-  const handleCatalogSubmit = async () => {
-    if (!isEmailValid || isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      if (firestore) {
-        await addDocumentNonBlocking(collection(firestore, 'leads'), {
-            email: catalogEmail,
-            leadType: 'Catalog Download',
-            fullName: 'Catalog Lead (Partnerships Page)',
-            message: 'Catalog Download Request from Partnerships page.',
-            createdAt: serverTimestamp(),
-        });
-      }
-      
-      const link = document.createElement('a');
-      link.href = '/api/download-catalog';
-      link.download = 'IMEDA-Catalogue-2025-26.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      setHasSubmitted(true);
-    } catch (error) {
-      console.error("Error submitting lead:", error);
-      toast({ variant: 'destructive', title: "Error", description: "Could not process your request." });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-  const handleResetForm = () => {
-    setHasSubmitted(false);
-    setCatalogEmail('');
-  };
+    const heroImageUrl = heroSection?.imageUrl;
+
+    const handleCatalogSubmit = async () => {
+        if (!isEmailValid || isSubmitting) return;
+        setIsSubmitting(true);
+        try {
+            if (firestore) {
+                await addDocumentNonBlocking(collection(firestore, 'leads'), {
+                    email: catalogEmail,
+                    leadType: 'Catalog Download',
+                    fullName: 'Catalog Lead (Partnerships Page)',
+                    message: 'Catalog Download Request from Partnerships page.',
+                    createdAt: serverTimestamp(),
+                });
+            }
+
+            // Fire Google Ads conversion event
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'conversion', {
+                    'send_to': 'AW-17882391668/-mr-CMbbnOcbEPTI_s5C',
+                    'value': 20.0,
+                    'currency': 'AED',
+                });
+            }
+
+            const link = document.createElement('a');
+            link.href = '/api/download-catalog';
+            link.download = 'IMEDA-Catalogue-2025-26.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            setHasSubmitted(true);
+        } catch (error) {
+            console.error("Error submitting lead:", error);
+            toast({ variant: 'destructive', title: "Error", description: "Could not process your request." });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleResetForm = () => {
+        setHasSubmitted(false);
+        setCatalogEmail('');
+    };
 
 
-  return (
-    <div className="flex flex-col">
-      <section className="container py-8">
-        <div className="relative min-h-[500px] md:min-h-[450px] w-full flex flex-col items-center justify-center overflow-hidden rounded-lg">
-            {!pageData ? (
-              <Skeleton className="h-full w-full" />
-            ) : (
-              heroImageUrl && (
-                <Image
-                    src={heroImageUrl}
-                    alt={heroSection?.title || "Partenariats background"}
-                    fill
-                    className="object-cover"
-                    priority
-                />
-              )
-            )}
-            <div className="absolute inset-0 bg-black/60" />
-            <div className="relative z-10 h-full flex flex-col items-center justify-center p-4 md:p-6 w-full">
-                <div className="grid md:grid-cols-2 gap-8 items-center w-full max-w-6xl">
-                    <div className="text-white text-center md:text-left">
-                        {pageData ? (
-                            <>
-                                <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline">
-                                {heroSection?.title || "Partenariats d'entreprise"}
-                                </h1>
-                                <p className="mx-auto mt-4 max-w-[500px] text-gray-200 md:text-lg">
-                                {heroSection?.content || "Collaborez avec nous pour un succès mutuel."}
-                                </p>
-                                {isMobile && (
-                                    <div className="mt-6">
-                                        <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
-                                            <SheetTrigger asChild>
-                                                <Button size="lg">Contactez-nous</Button>
-                                            </SheetTrigger>
-                                            <SheetContent side="bottom" className="h-[90vh] flex flex-col">
-                                                 <div className="overflow-y-auto p-2">
-                                                    <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} showHeader={true} />
-                                                 </div>
-                                            </SheetContent>
-                                        </Sheet>
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            <div className="w-full max-w-lg space-y-4">
-                                <Skeleton className="h-12 w-3/4" />
-                                <Skeleton className="h-6 w-full" />
-                            </div>
-                        )}
-                    </div>
-                     {!isMobile && (
-                        <div className="bg-card text-card-foreground p-6 rounded-lg shadow-xl">
-                            <ContactForm onFormSubmit={() => setContactFormSubmitted(true)} showHeader={false} />
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-      </section>
-
-        <section className="py-16 md:py-24">
-            <div className="container px-4 md:px-6 space-y-16">
-                 {/* Why Us Section */}
-                {whyUsHeader && (
-                    <div className="text-center max-w-3xl mx-auto">
-                        <h2 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">{whyUsHeader.title}</h2>
-                        <p className="mt-4 text-muted-foreground md:text-lg">{whyUsHeader.content}</p>
-                    </div>
-                )}
-                {whyUsCards.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mt-12">
-                        {whyUsCards.map(card => <WhyUsCard key={card.id} section={card} />)}
-                    </div>
-                )}
-            </div>
-        </section>
-
-         {/* Specialisations Section */}
-        {specialisationsHeader && (
-            <section className="py-16 md:py-24 bg-muted/30">
-                <div className="container px-4 md:px-6">
-                    <div className="text-center max-w-3xl mx-auto">
-                        <h2 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">{specialisationsHeader.title}</h2>
-                        <p className="mt-4 text-muted-foreground md:text-lg">{specialisationsHeader.content}</p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
-                        {specialisations.map(spec => (
-                            <div key={spec.id}>
-                                <h3 className="font-headline font-normal text-lg">{spec.title}</h3>
-                                <p className="text-sm text-muted-foreground mt-1">{spec.content}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-        )}
-
-        {/* How We Work Section */}
-        {howWeWorkHeader && (
-            <section className="py-16 md:py-24">
-                <div className="container px-4 md:px-6">
-                     <div className="text-center max-w-3xl mx-auto">
-                        <h2 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">{howWeWorkHeader.title}</h2>
-                        <p className="mt-4 text-muted-foreground md:text-lg">{howWeWorkHeader.content}</p>
-                    </div>
-                    {/* Responsive How We Work Section */}
-                    <div className="mt-12 max-w-4xl mx-auto">
-                        {/* Mobile View: Cards */}
-                        <div className="grid md:hidden gap-6">
-                            {howWeWorkSteps.map((step, index) => (
-                                <Card key={step.id}>
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
-                                                {index + 1}
-                                            </div>
-                                            <div>
-                                                <h3 className="font-headline font-normal text-lg">{step.title}</h3>
-                                                <p className="text-sm text-muted-foreground">{step.content}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                        {/* Desktop View: Stepper */}
-                        <div className="hidden md:block">
-                            <Stepper>
-                                {howWeWorkSteps.map((step, index) => (
-                                    <Step key={step.id} step={index + 1} isLast={index === howWeWorkSteps.length - 1}>
-                                        <h3 className="font-headline font-normal text-lg">{step.title}</h3>
-                                        <p className="text-sm text-muted-foreground">{step.content}</p>
-                                    </Step>
-                                ))}
-                            </Stepper>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        )}
-
-        {/* Format Section */}
-        {formatCards.length > 0 && (
-            <section className="py-16 md:py-24 bg-muted/30">
-                 <div className="container px-4 md:px-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {formatCards.map(card => (
-                            <Card key={card.id} className="overflow-hidden group">
-                                 <div className="relative aspect-video w-full">
-                                    <Image
-                                        src={card.imageUrl || `https://picsum.photos/seed/${card.id}/800/450`}
-                                        alt={card.title}
-                                        fill
-                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                </div>
-                                <div className="p-6">
-                                    <h3 className="font-headline font-normal text-xl">{card.title}</h3>
-                                    <p className="text-sm text-muted-foreground mt-2">{card.content}</p>
-                                </div>
-                            </Card>
-                        ))}
-                    </div>
-                 </div>
-            </section>
-        )}
-        
-        {/* Catalog Download Banner */}
-        {catalogSection && (
-        <section className="py-16 md:py-24">
-            <div className="container">
-                <Card className="overflow-hidden">
-                    <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-                        <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1 md:order-2">
+    return (
+        <div className="flex flex-col">
+            <section className="container py-8">
+                <div className="relative min-h-[500px] md:min-h-[450px] w-full flex flex-col items-center justify-center overflow-hidden rounded-lg">
+                    {!pageData ? (
+                        <Skeleton className="h-full w-full" />
+                    ) : (
+                        heroImageUrl && (
                             <Image
-                                src={catalogSection.imageUrl || "https://picsum.photos/seed/catalog-banner/800/600"}
-                                alt={catalogSection.title}
+                                src={heroImageUrl}
+                                alt={heroSection?.title || "Partenariats background"}
                                 fill
                                 className="object-cover"
+                                priority
                             />
-                        </div>
-                        <div className="p-6 md:p-10 text-left order-2 md:order-1">
-                            {hasSubmitted ? (
-                                <div className="flex flex-col items-center justify-center text-center space-y-4">
-                                <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
-                                <h3 className="font-headline font-normal text-2xl">Merci!</h3>
-                                <p className="text-muted-foreground mt-1 text-sm">Votre téléchargement a commencé.</p>
-                                <Button variant="outline" onClick={handleResetForm} className="mt-4">Fermer</Button>
+                        )
+                    )}
+                    <div className="absolute inset-0 bg-black/60" />
+                    <div className="relative z-10 h-full flex flex-col items-center justify-center p-4 md:p-6 w-full">
+                        <div className="grid md:grid-cols-2 gap-8 items-center w-full max-w-6xl">
+                            <div className="text-white text-center md:text-left">
+                                {pageData ? (
+                                    <>
+                                        <h1 className="text-3xl font-normal tracking-tighter sm:text-4xl md:text-5xl font-headline">
+                                            {heroSection?.title || "Partenariats d'entreprise"}
+                                        </h1>
+                                        <p className="mx-auto mt-4 max-w-[500px] text-gray-200 md:text-lg">
+                                            {heroSection?.content || "Collaborez avec nous pour un succès mutuel."}
+                                        </p>
+                                        {isMobile && (
+                                            <div className="mt-6">
+                                                <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
+                                                    <SheetTrigger asChild>
+                                                        <Button size="lg">Contactez-nous</Button>
+                                                    </SheetTrigger>
+                                                    <SheetContent side="bottom" className="h-[90vh] flex flex-col">
+                                                        <div className="overflow-y-auto p-2">
+                                                            <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} showHeader={true} />
+                                                        </div>
+                                                    </SheetContent>
+                                                </Sheet>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="w-full max-w-lg space-y-4">
+                                        <Skeleton className="h-12 w-3/4" />
+                                        <Skeleton className="h-6 w-full" />
+                                    </div>
+                                )}
+                            </div>
+                            {!isMobile && (
+                                <div className="bg-card text-card-foreground p-6 rounded-lg shadow-xl">
+                                    <ContactForm onFormSubmit={() => setContactFormSubmitted(true)} showHeader={false} />
                                 </div>
-                            ) : (
-                                <>
-                                <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
-                                <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
-                                <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
-                                    <Input
-                                        type="email"
-                                        placeholder="Votre adresse email"
-                                        className="w-full sm:flex-1"
-                                        value={catalogEmail}
-                                        onChange={e => setCatalogEmail(e.target.value)}
-                                        disabled={isSubmitting}
-                                    />
-                                    <Button className="w-full sm:w-auto" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
-                                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                        Télécharger
-                                    </Button>
-                                </div>
-                                </>
                             )}
                         </div>
                     </div>
-                </Card>
-            </div>
-        </section>
-        )}
+                </div>
+            </section>
 
-    </div>
-  );
+            <section className="py-16 md:py-24">
+                <div className="container px-4 md:px-6 space-y-16">
+                    {/* Why Us Section */}
+                    {whyUsHeader && (
+                        <div className="text-center max-w-3xl mx-auto">
+                            <h2 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">{whyUsHeader.title}</h2>
+                            <p className="mt-4 text-muted-foreground md:text-lg">{whyUsHeader.content}</p>
+                        </div>
+                    )}
+                    {whyUsCards.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mt-12">
+                            {whyUsCards.map(card => <WhyUsCard key={card.id} section={card} />)}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* Specialisations Section */}
+            {specialisationsHeader && (
+                <section className="py-16 md:py-24 bg-muted/30">
+                    <div className="container px-4 md:px-6">
+                        <div className="text-center max-w-3xl mx-auto">
+                            <h2 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">{specialisationsHeader.title}</h2>
+                            <p className="mt-4 text-muted-foreground md:text-lg">{specialisationsHeader.content}</p>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+                            {specialisations.map(spec => (
+                                <div key={spec.id}>
+                                    <h3 className="font-headline font-normal text-lg">{spec.title}</h3>
+                                    <p className="text-sm text-muted-foreground mt-1">{spec.content}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* How We Work Section */}
+            {howWeWorkHeader && (
+                <section className="py-16 md:py-24">
+                    <div className="container px-4 md:px-6">
+                        <div className="text-center max-w-3xl mx-auto">
+                            <h2 className="text-3xl font-normal tracking-tighter sm:text-4xl font-headline">{howWeWorkHeader.title}</h2>
+                            <p className="mt-4 text-muted-foreground md:text-lg">{howWeWorkHeader.content}</p>
+                        </div>
+                        {/* Responsive How We Work Section */}
+                        <div className="mt-12 max-w-4xl mx-auto">
+                            {/* Mobile View: Cards */}
+                            <div className="grid md:hidden gap-6">
+                                {howWeWorkSteps.map((step, index) => (
+                                    <Card key={step.id}>
+                                        <CardContent className="p-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                                                    {index + 1}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-headline font-normal text-lg">{step.title}</h3>
+                                                    <p className="text-sm text-muted-foreground">{step.content}</p>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                            {/* Desktop View: Stepper */}
+                            <div className="hidden md:block">
+                                <Stepper>
+                                    {howWeWorkSteps.map((step, index) => (
+                                        <Step key={step.id} step={index + 1} isLast={index === howWeWorkSteps.length - 1}>
+                                            <h3 className="font-headline font-normal text-lg">{step.title}</h3>
+                                            <p className="text-sm text-muted-foreground">{step.content}</p>
+                                        </Step>
+                                    ))}
+                                </Stepper>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* Format Section */}
+            {formatCards.length > 0 && (
+                <section className="py-16 md:py-24 bg-muted/30">
+                    <div className="container px-4 md:px-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {formatCards.map(card => (
+                                <Card key={card.id} className="overflow-hidden group">
+                                    <div className="relative aspect-video w-full">
+                                        <Image
+                                            src={card.imageUrl || `https://picsum.photos/seed/${card.id}/800/450`}
+                                            alt={card.title}
+                                            fill
+                                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                        />
+                                    </div>
+                                    <div className="p-6">
+                                        <h3 className="font-headline font-normal text-xl">{card.title}</h3>
+                                        <p className="text-sm text-muted-foreground mt-2">{card.content}</p>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* Catalog Download Banner */}
+            {catalogSection && (
+                <section className="py-16 md:py-24">
+                    <div className="container">
+                        <Card className="overflow-hidden">
+                            <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+                                <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1 md:order-2">
+                                    <Image
+                                        src={catalogSection.imageUrl || "https://picsum.photos/seed/catalog-banner/800/600"}
+                                        alt={catalogSection.title}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="p-6 md:p-10 text-left order-2 md:order-1">
+                                    {hasSubmitted ? (
+                                        <div className="flex flex-col items-center justify-center text-center space-y-4">
+                                            <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
+                                            <h3 className="font-headline font-normal text-2xl">Merci!</h3>
+                                            <p className="text-muted-foreground mt-1 text-sm">Votre téléchargement a commencé.</p>
+                                            <Button variant="outline" onClick={handleResetForm} className="mt-4">Fermer</Button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <h3 className="font-headline font-normal text-2xl">{catalogSection.title}</h3>
+                                            <p className="text-muted-foreground mt-2 text-sm">{catalogSection.content}</p>
+                                            <div className="flex flex-col sm:flex-row items-center gap-2 mt-6">
+                                                <Input
+                                                    type="email"
+                                                    placeholder="Votre adresse email"
+                                                    className="w-full sm:flex-1"
+                                                    value={catalogEmail}
+                                                    onChange={e => setCatalogEmail(e.target.value)}
+                                                    disabled={isSubmitting}
+                                                />
+                                                <Button className="w-full sm:w-auto" disabled={!isEmailValid || isSubmitting} onClick={handleCatalogSubmit}>
+                                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                                    Télécharger
+                                                </Button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </section>
+            )}
+
+        </div>
+    );
 }

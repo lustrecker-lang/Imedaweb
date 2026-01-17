@@ -47,7 +47,7 @@ export function CourseInquiryForm({ courseName, showHeader = false }: CourseInqu
       console.error("Firestore not available");
       return;
     }
-    
+
     try {
       const leadsCollection = collection(firestore, 'leads');
       await addDoc(leadsCollection, {
@@ -56,10 +56,17 @@ export function CourseInquiryForm({ courseName, showHeader = false }: CourseInqu
         courseName: courseName,
         createdAt: serverTimestamp(),
       });
-      
+
+      // Fire Google Ads conversion event
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'conversion', {
+          'send_to': 'AW-17882391668/6z7uCNbPjucbEPTI_s5C',
+        });
+      }
+
       setHasSubmitted(true);
       form.reset();
-      
+
     } catch (error) {
       console.error("Erreur lors de l'envoi de la demande:", error);
     }
@@ -68,22 +75,22 @@ export function CourseInquiryForm({ courseName, showHeader = false }: CourseInqu
   if (hasSubmitted) {
     return (
       <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
-          <CheckCircle className="h-16 w-16 text-green-500" />
-          <h3 className="text-xl font-headline font-normal">Demande envoyée!</h3>
-          <p className="text-xs text-muted-foreground max-w-xs">
-            Merci! Un de nos conseillers vous contactera sous peu.
-          </p>
+        <CheckCircle className="h-16 w-16 text-green-500" />
+        <h3 className="text-xl font-headline font-normal">Demande envoyée!</h3>
+        <p className="text-xs text-muted-foreground max-w-xs">
+          Merci! Un de nos conseillers vous contactera sous peu.
+        </p>
       </div>
     );
   }
-  
+
   return (
     <>
       {showHeader && (
         <SheetHeader className="mb-4 text-left">
           <SheetTitle className="font-headline text-2xl font-normal">Se renseigner</SheetTitle>
           <SheetDescription>
-              Remplissez le formulaire pour le cours : <span className="font-semibold">{courseName}</span>.
+            Remplissez le formulaire pour le cours : <span className="font-semibold">{courseName}</span>.
           </SheetDescription>
         </SheetHeader>
       )}

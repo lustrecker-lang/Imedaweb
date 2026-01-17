@@ -71,6 +71,15 @@ export default function CatalogView({ pageData }: CatalogViewProps) {
                 createdAt: serverTimestamp(),
             });
 
+            // Fire Google Ads conversion event
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'conversion', {
+                    'send_to': 'AW-17882391668/-mr-CMbbnOcbEPTI_s5C',
+                    'value': 20.0,
+                    'currency': 'AED',
+                });
+            }
+
             const link = document.createElement('a');
             link.href = '/api/download-catalog';
             link.download = 'IMEDA-Catalogue-2025-26.pdf';

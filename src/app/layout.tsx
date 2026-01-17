@@ -51,6 +51,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// ... inside src/app/layout.tsx
+
 // Root layout is a Server Component that wraps the entire app
 export default async function RootLayout({
   children,
@@ -68,6 +70,8 @@ export default async function RootLayout({
           {children}
           <Toaster />
         </FirebaseClientProvider>
+
+        {/* --- MODIFY THIS SECTION --- */}
         <Script
           strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=G-0HZRN72X6H"
@@ -77,9 +81,16 @@ export default async function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-0HZRN72X6H');
+            
+            // Your existing Analytics
+            gtag('config', 'G-0HZRN72X6H'); 
+
+            // NEW: Your Google Ads Config (Add this line)
+            gtag('config', 'AW-17882391668'); 
           `}
         </Script>
+        {/* --- END MODIFICATION --- */}
+
       </body>
     </html>
   );

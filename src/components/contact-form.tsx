@@ -72,9 +72,16 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
 
       form.reset();
       setHasSubmitted(true);
-      
+
       // Send email notification in the background
       sendEmailNotification(values);
+
+      // Fire Google Ads conversion event
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'conversion', {
+          'send_to': 'AW-17882391668/xZe-COf0j-cbEPTI_s5C',
+        });
+      }
 
       // Call the passed-in submit handler, e.g., to close a sheet
       onFormSubmit();
@@ -87,24 +94,24 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
   if (hasSubmitted) {
     return (
       <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
-          <CheckCircle className="h-16 w-16 text-green-500" />
-          <h3 className="text-xl font-headline font-normal">Message envoyé!</h3>
-          <p className="text-xs text-muted-foreground max-w-xs">
-            Merci de nous avoir contactés. Nous reviendrons vers vous rapidement.
-          </p>
-          <Button onClick={onFormSubmit} className="w-full">Fermer</Button>
+        <CheckCircle className="h-16 w-16 text-green-500" />
+        <h3 className="text-xl font-headline font-normal">Message envoyé!</h3>
+        <p className="text-xs text-muted-foreground max-w-xs">
+          Merci de nous avoir contactés. Nous reviendrons vers vous rapidement.
+        </p>
+        <Button onClick={onFormSubmit} className="w-full">Fermer</Button>
       </div>
     );
   }
-  
+
   return (
     <>
       {showHeader && (
         <SheetHeader>
-            <SheetTitle>Contactez-nous</SheetTitle>
-            <SheetDescription>
-                Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais.
-            </SheetDescription>
+          <SheetTitle>Contactez-nous</SheetTitle>
+          <SheetDescription>
+            Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais.
+          </SheetDescription>
         </SheetHeader>
       )}
       <div className={cn(showHeader && "py-6")}>

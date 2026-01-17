@@ -118,6 +118,15 @@ export default function LandingPageView({ landingPage, heroData, referencesData,
                 });
             }
 
+            // Fire Google Ads conversion event
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'conversion', {
+                    'send_to': 'AW-17882391668/-mr-CMbbnOcbEPTI_s5C',
+                    'value': 20.0,
+                    'currency': 'AED',
+                });
+            }
+
             const link = document.createElement('a');
             link.href = '/api/download-catalog';
             link.download = 'IMEDA-Catalogue-2025-26.pdf';
@@ -167,7 +176,7 @@ export default function LandingPageView({ landingPage, heroData, referencesData,
                                     >
                                         <span className="flex items-center gap-2">
                                             <MessageCircle className="w-5 h-5" />
-                                            Parler avec nous
+                                            Whatsapp
                                         </span>
                                     </Button>
                                 </LeadCaptureDialog>

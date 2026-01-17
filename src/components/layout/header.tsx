@@ -230,8 +230,11 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
                 </div>
               </div>
               <div className="mt-auto p-6 border-t">
-                <Button size="sm" className="w-full" asChild>
-                  <Link href="/contact" onClick={() => setIsMobileNavOpen(false)}>Contactez-nous</Link>
+                <Button size="sm" className="w-full" onClick={() => {
+                  setIsMobileNavOpen(false);
+                  setIsContactSheetOpen(true);
+                }}>
+                  Contactez-nous
                 </Button>
               </div>
             </SheetContent>
