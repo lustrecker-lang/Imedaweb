@@ -33,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         '/references',
         '/careers',
         '/courses',
+        '/online',
         '/publications',
         '/news',
         '/contact',

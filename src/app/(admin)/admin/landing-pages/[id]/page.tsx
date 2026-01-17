@@ -1,7 +1,7 @@
 // src/app/(admin)/admin/landing-pages/[id]/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, serverTimestamp, collection, query, orderBy } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
@@ -45,23 +45,28 @@ interface LandingPageData {
         themeId?: string;
         categoryId?: string;
         courseId?: string;
+        targetPLP?: 'catalog' | 'online';
     };
+}
+
+interface Category {
+    id: string;
+    name: string;
+    isOnline?: boolean;
+}
+
+interface Theme {
+    id: string;
+    name: string;
+    categoryId?: string;
 }
 
 interface Course {
     id: string;
     name: string;
     formationId?: string;
-}
-
-interface Theme {
-    id: string;
-    name: string;
-}
-
-interface Category {
-    id: string;
-    name: string;
+    isOnline?: boolean;
+    themeId?: string;
 }
 
 export default function LandingPageEditorPage() {
@@ -113,9 +118,36 @@ export default function LandingPageEditorPage() {
             themeId: '',
             categoryId: '',
             courseId: '',
+            targetPLP: 'catalog',
         },
     });
     const [open, setOpen] = useState(false);
+
+    const filteredCategories = useMemo(() => {
+        if (!categories) return [];
+        if (formData.cta.targetPLP === 'online') {
+            return categories.filter(c => c.isOnline);
+        }
+        return categories.filter(c => !c.isOnline);
+    }, [categories, formData.cta.targetPLP]);
+
+    const filteredThemes = useMemo(() => {
+        if (!themes || !categories) return [];
+        if (formData.cta.targetPLP === 'online') {
+            const onlineCatIds = categories.filter(c => c.isOnline).map(c => c.id);
+            return themes.filter(t => onlineCatIds.includes(t.categoryId || ''));
+        }
+        const standardCatIds = categories.filter(c => !c.isOnline).map(c => c.id);
+        return themes.filter(t => standardCatIds.includes(t.categoryId || ''));
+    }, [themes, categories, formData.cta.targetPLP]);
+
+    const filteredCourses = useMemo(() => {
+        if (!courses) return [];
+        if (formData.cta.targetPLP === 'online') {
+            return courses.filter(c => c.isOnline);
+        }
+        return courses.filter(c => !c.isOnline);
+    }, [courses, formData.cta.targetPLP]);
 
     useEffect(() => {
         if (landingPage && !isNew) {
@@ -267,6 +299,33 @@ export default function LandingPageEditorPage() {
                     </div>
 
                     <div className="space-y-4">
+                        <Label>Destination Environment</Label>
+                        <RadioGroup
+                            value={formData.cta.targetPLP || 'catalog'}
+                            onValueChange={(value: 'catalog' | 'online') => setFormData({
+                                ...formData,
+                                cta: {
+                                    ...formData.cta,
+                                    targetPLP: value,
+                                    themeId: '',
+                                    categoryId: '',
+                                    courseId: '',
+                                }
+                            })}
+                            className="flex flex-col space-y-2 sm:flex-row sm:space-x-4 sm:space-y-0"
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="catalog" id="env-catalog" />
+                                <Label htmlFor="env-catalog">Standard Catalog (/courses)</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="online" id="env-online" />
+                                <Label htmlFor="env-online">IMEDA Online (/online)</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+
+                    <div className="space-y-2">
                         <Label>Link Destination Type</Label>
                         <RadioGroup
                             value={formData.cta.type || 'plp'}
@@ -307,7 +366,7 @@ export default function LandingPageEditorPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="none">No filter</SelectItem>
-                                        {themes?.map((theme) => (
+                                        {filteredThemes?.map((theme: Theme) => (
                                             <SelectItem key={theme.id} value={theme.id}>
                                                 {theme.name}
                                             </SelectItem>
@@ -331,7 +390,7 @@ export default function LandingPageEditorPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="none">No filter</SelectItem>
-                                        {categories?.map((category) => (
+                                        {filteredCategories?.map((category: Category) => (
                                             <SelectItem key={category.id} value={category.id}>
                                                 {category.name}
                                             </SelectItem>
@@ -368,7 +427,7 @@ export default function LandingPageEditorPage() {
                                         <CommandList>
                                             <CommandEmpty>No course found.</CommandEmpty>
                                             <CommandGroup>
-                                                {courses?.map((course) => (
+                                                {filteredCourses?.map((course: Course) => (
                                                     <CommandItem
                                                         key={course.id}
                                                         value={`${course.name} ${course.formationId || ''}`}

@@ -32,6 +32,7 @@ interface LandingPageProps {
             themeId?: string;
             categoryId?: string;
             courseId?: string;
+            targetPLP?: 'catalog' | 'online';
         };
     };
     heroData: Page | null;
@@ -49,7 +50,7 @@ export default function LandingPageView({ landingPage, heroData, referencesData,
     const [hasSubmitted, setHasSubmitted] = useState(false);
 
     // Build CTA URL
-    let ctaHref = '/courses';
+    let ctaHref = landingPage.cta.targetPLP === 'online' ? '/online' : '/courses';
     if (landingPage.cta.type === 'pdp' && landingPage.cta.courseId) {
         ctaHref = `/courses/${landingPage.cta.courseId}`;
     } else {
