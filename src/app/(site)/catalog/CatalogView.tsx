@@ -73,10 +73,17 @@ export default function CatalogView({ pageData }: CatalogViewProps) {
 
             // Fire Google Ads conversion event
             if (typeof window !== 'undefined' && (window as any).gtag) {
+                // Signal 1: Google Ads (Medium Value Conversion)
                 (window as any).gtag('event', 'conversion', {
                     'send_to': 'AW-17882391668/-mr-CMbbnOcbEPTI_s5C',
                     'value': 20.0,
                     'currency': 'AED',
+                });
+
+                // Signal 2: Google Analytics (File Download Event)
+                (window as any).gtag('event', 'file_download', {
+                    'file_name': 'Catalog 2026',
+                    'link_text': 'Download Catalog Form'
                 });
             }
 

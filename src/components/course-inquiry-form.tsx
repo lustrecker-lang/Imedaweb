@@ -59,8 +59,16 @@ export function CourseInquiryForm({ courseName, showHeader = false }: CourseInqu
 
       // Fire Google Ads conversion event
       if (typeof window !== 'undefined' && (window as any).gtag) {
+        // Signal 1: Google Ads (High Value Conversion)
         (window as any).gtag('event', 'conversion', {
           'send_to': 'AW-17882391668/6z7uCNbPjucbEPTI_s5C',
+        });
+
+        // Signal 2: Google Analytics (High Value Report)
+        (window as any).gtag('event', 'generate_lead', {
+          'method': 'Course Sidebar Form',
+          'value': 100,
+          'currency': 'AED'
         });
       }
 

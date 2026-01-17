@@ -78,8 +78,15 @@ export function ContactForm({ onFormSubmit, showHeader = false }: ContactFormPro
 
       // Fire Google Ads conversion event
       if (typeof window !== 'undefined' && (window as any).gtag) {
+        // Signal 1: Google Ads (Standard Conversion)
         (window as any).gtag('event', 'conversion', {
           'send_to': 'AW-17882391668/xZe-COf0j-cbEPTI_s5C',
+        });
+
+        // Signal 2: Google Analytics (Standard Report)
+        (window as any).gtag('event', 'generate_lead', {
+          'method': 'General Contact Form',
+          'value': 0
         });
       }
 

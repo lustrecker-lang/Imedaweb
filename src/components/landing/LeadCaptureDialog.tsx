@@ -45,8 +45,16 @@ export function LeadCaptureDialog({ children, landingPageSlug }: LeadCaptureDial
 
             // Fire Google Ads conversion event
             if (typeof window !== 'undefined' && (window as any).gtag) {
+                // Signal 1: Google Ads (Conversion)
                 (window as any).gtag('event', 'conversion', {
                     'send_to': 'AW-17882391668/I96gCMrFmucbEPTI_s5C',
+                });
+
+                // Signal 2: Google Analytics (Reporting)
+                (window as any).gtag('event', 'generate_lead', {
+                    'method': 'WhatsApp',
+                    'value': 10,
+                    'currency': 'AED'
                 });
             }
 
