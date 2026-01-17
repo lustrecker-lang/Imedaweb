@@ -24,7 +24,7 @@ const formationsNavStructure = {
   items: [
     { href: "/catalog", title: "Catalogue 2026", description: "Téléchargez notre catalogue complet pour la saison à venir." },
     { href: "/courses", title: "700+ Formations internationales", description: "Explorez notre catalogue complet de formations internationales." },
-    { href: "#", title: "Formations en ligne", description: "Apprenez à votre rythme avec nos cours en ligne." },
+    { href: "/online", title: "Formations en ligne", description: "Apprenez à votre rythme avec nos cours en ligne." },
   ]
 };
 

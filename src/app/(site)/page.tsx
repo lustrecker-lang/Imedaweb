@@ -16,9 +16,9 @@ export const dynamic = 'force-dynamic';
 export interface Section { id: string; title: string; content: string; imageUrl?: string; }
 export interface Page { id: string; title: string; sections: Section[]; ogTitle?: string; ogDescription?: string; ogImage?: string; }
 interface Campus { id: string; name: string; slug: string; description?: string; imageUrl?: string; }
-interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
-interface Theme { id: string; name: string; description?: string; categoryId: string; }
-interface Formation { id: string; themeId: string; name: string; formationId: string; }
+interface Category { id: string; name: string; description?: string; mediaUrl?: string; isOnline?: boolean; }
+interface Theme { id: string; name: string; description?: string; categoryId: string; isOnline?: boolean; }
+interface Formation { id: string; themeId: string; name: string; formationId: string; isOnline?: boolean; }
 export interface Reference { id: string; name: string; logoUrl: string; }
 interface Kpi { id: string; number: number; title: string; description: string; order: number; }
 interface Article {

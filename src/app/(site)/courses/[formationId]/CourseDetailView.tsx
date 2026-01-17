@@ -35,6 +35,9 @@ interface Formation {
     prixAvecHebergement?: string;
     prixSansHebergement?: string;
     format?: string;
+    isOnline?: boolean;
+    pricePerMonth?: string;
+    durationMonths?: string;
 }
 
 interface Theme {
@@ -51,30 +54,17 @@ interface Module {
 interface Campus {
     id: string;
     name: string;
-    imageUrl?: string;
     slug: string;
+    imageUrl?: string;
 }
 
 interface Service {
     id: string;
     name: string;
-    isOptional: boolean;
     mediaUrl?: string;
-}
-
-interface CourseDetailPageContent {
-    valeurImeda: { title: string; content: string; imageUrl: string };
-    faq: { id: string; question: string; answer: string }[];
-    contact: { name: string; title: string; description: string; francePhone: string; uaePhone: string; email: string; imageUrl: string };
-}
-
-interface CourseDetailViewProps {
-    formation: Formation | null;
-    theme: Theme | null;
-    modules: Module[];
-    campuses: Campus[];
-    allServices: Service[];
-    coursePageContent: CourseDetailPageContent | null;
+    isOptional: boolean;
+    appliesToOnline?: boolean;
+    appliesToStandard?: boolean;
 }
 
 interface MonthAvailability {
@@ -83,26 +73,51 @@ interface MonthAvailability {
     isAvailable: boolean;
 }
 
-const isVideoUrl = (url?: string | null) => {
-    if (!url) return false;
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    try {
-        const pathname = new URL(url).pathname.split('?')[0];
-        return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
-    } catch (e) {
-        return false; // Invalid URL
-    }
-};
+interface CoursePageContent {
+    valeurImeda?: {
+        title: string;
+        content: string;
+        imageUrl: string;
+    };
+    faq?: {
+        id: string;
+        question: string;
+        answer: string;
+    }[];
+    contact?: {
+        name: string;
+        title: string;
+        description: string;
+        francePhone: string;
+        uaePhone: string;
+        email: string;
+        imageUrl: string;
+    };
+}
 
-const MediaPreview = ({ url, alt, className }: { url: string; alt: string; className?: string }) => {
-    if (isVideoUrl(url)) {
-        return (
-            <video src={url} autoPlay loop muted playsInline className={cn("absolute inset-0 h-full w-full object-cover", className)} />
-        );
+interface CourseDetailViewProps {
+    formation: Formation;
+    theme?: Theme;
+    modules?: Module[];
+    campuses?: Campus[];
+    allServices: Service[];
+    coursePageContent?: CoursePageContent;
+}
+
+// Helper for availability
+const getNextStartDates = (count = 6) => {
+    const dates = [];
+    const today = new Date();
+    // Start from next month
+    let current = addMonths(today, 1);
+    // Set to 1st
+    current.setDate(1);
+
+    for (let i = 0; i < count; i++) {
+        dates.push(current);
+        current = addMonths(current, 1);
     }
-    return (
-        <Image src={url} alt={alt} fill className={cn("object-cover", className)} />
-    );
+    return dates;
 }
 
 export default function CourseDetailView({ formation, theme, modules, campuses, allServices, coursePageContent }: CourseDetailViewProps) {
@@ -135,6 +150,11 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
         setAvailability(months);
     }, []);
 
+    const nextStartDates = useMemo(() => {
+        if (!formation?.isOnline) return [];
+        return getNextStartDates();
+    }, [formation?.isOnline]);
+
     const sortedModules = useMemo(() => {
         if (!modules) return [];
         return [...modules].sort((a, b) => {
@@ -143,6 +163,16 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
             return numA - numB;
         });
     }, [modules]);
+
+    const filteredServices = useMemo(() => {
+        return allServices.filter(service => {
+            if (formation.isOnline) {
+                return service.appliesToOnline;
+            } else {
+                return service.appliesToStandard !== false;
+            }
+        });
+    }, [allServices, formation?.isOnline]);
 
     const calculatePrice = (basePriceString: string | undefined) => {
         if (!basePriceString) return 'N/A';
@@ -219,35 +249,45 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="space-y-8 pt-4">
-                                        <div>
-                                            <h3 className="font-normal mb-3">Cette formation est disponible dans tous ces campus.</h3>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                                {campuses && campuses.map(campus => (
-                                                    <div key={campus.id} className="group relative overflow-hidden rounded-lg aspect-w-4 aspect-h-3">
-                                                        <Link href={`/campus/${campus.slug}`} className="absolute inset-0 z-10">
-                                                            <span className="sr-only">View ${campus.name}</span>
-                                                        </Link>
-                                                        <div className="relative w-full h-full min-h-[120px]">
-                                                            {campus.imageUrl ? (
-                                                                <MediaPreview url={campus.imageUrl} alt={campus.name} className="transition-transform duration-300 group-hover:scale-105" />
-                                                            ) : (
-                                                                <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
-                                                            )}
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                                            <p className="absolute bottom-2 left-3 text-sm font-semibold text-white">{campus.name}</p>
+                                        {!formation.isOnline && (
+                                            <div>
+                                                <h3 className="font-normal mb-3">Cette formation est disponible dans tous ces campus.</h3>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                                    {campuses && campuses.map(campus => (
+                                                        <div key={campus.id} className="group relative overflow-hidden rounded-lg aspect-w-4 aspect-h-3">
+                                                            <Link href={`/campus/${campus.slug}`} className="absolute inset-0 z-10">
+                                                                <span className="sr-only">View ${campus.name}</span>
+                                                            </Link>
+                                                            <div className="relative w-full h-full min-h-[120px]">
+                                                                {campus.imageUrl ? (
+                                                                    <Image src={campus.imageUrl} alt={campus.name} fill className="transition-transform duration-300 group-hover:scale-105 object-cover" />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
+                                                                )}
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                                                <p className="absolute bottom-2 left-3 text-sm font-semibold text-white">{campus.name}</p>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
                                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-y-4">
-                                            <div className="sm:pl-0">
+                                            <div className="border-l pl-4 sm:border-l-0 sm:pl-0">
                                                 <h3 className="font-normal">Durée</h3>
-                                                <p className="text-sm text-muted-foreground">14 jours</p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {formation.isOnline && formation.durationMonths
+                                                        ? `${formation.durationMonths} Mois`
+                                                        : "14 jours"}
+                                                </p>
                                             </div>
                                             <div className="border-l pl-4">
                                                 <h3 className="font-normal">Heures de cours</h3>
-                                                <p className="text-sm text-muted-foreground">55 heures</p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {formation.isOnline
+                                                        ? "12 sessions / mois"
+                                                        : "55 heures"}
+                                                </p>
                                             </div>
                                             {formation.format && (
                                                 <div className="border-l pl-4">
@@ -287,49 +327,73 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="pt-4">
-                                        <div className="flex items-center gap-2 mb-6">
-                                            <Label htmlFor="people-select">Personnes:</Label>
-                                            <Select value={String(numberOfPeople)} onValueChange={(val) => setNumberOfPeople(Number(val))}>
-                                                <SelectTrigger id="people-select" className="w-full sm:w-[80px]">
-                                                    <SelectValue placeholder="3" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
-                                                        <SelectItem key={num} value={String(num)}>{num}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {formation.prixSansHebergement && (
+                                        {!formation.isOnline && (
+                                            <div className="flex items-center gap-2 mb-6">
+                                                <Label htmlFor="people-select">Personnes:</Label>
+                                                <Select value={String(numberOfPeople)} onValueChange={(val) => setNumberOfPeople(Number(val))}>
+                                                    <SelectTrigger id="people-select" className="w-full sm:w-[80px]">
+                                                        <SelectValue placeholder="3" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
+                                                            <SelectItem key={num} value={String(num)}>{num}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        )}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {formation.isOnline ? (
                                                 <Card className="border-primary/50">
                                                     <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
                                                         <div className="text-center">
                                                             <div className="flex items-center justify-center gap-2 text-muted-foreground"><GraduationCap size={18} /></div>
-                                                            <h4 className="font-semibold mt-2 text-xs sm:text-base">Formation seule</h4>
+                                                            <h4 className="font-semibold mt-2 text-xs sm:text-base">Formation en Ligne</h4>
                                                         </div>
                                                         <div className="text-center">
-                                                            <p className="text-xs text-muted-foreground">à partir de</p>
-                                                            <p className="font-semibold text-lg sm:text-2xl mt-1">{calculatePrice(formation.prixSansHebergement)}</p>
-                                                            <p className="text-xs text-muted-foreground mt-2">Par personne</p>
+                                                            <p className="font-semibold text-lg sm:text-2xl mt-1">{formation.pricePerMonth ? `$${formation.pricePerMonth}` : 'N/A'}</p>
+                                                            <p className="text-xs text-muted-foreground mt-2">Par mois</p>
+                                                            {formation.durationMonths && (
+                                                                <p className="text-xs text-muted-foreground mt-1">Durée: {formation.durationMonths} Mois</p>
+                                                            )}
+                                                            <p className="text-xs text-muted-foreground mt-1">12 sessions par mois</p>
                                                         </div>
                                                     </CardContent>
                                                 </Card>
-                                            )}
-                                            {formation.prixAvecHebergement && (
-                                                <Card className="border-primary/50 bg-primary/5">
-                                                    <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
-                                                        <div className="text-center">
-                                                            <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18} /></div>
-                                                            <h4 className="font-semibold mt-2 text-sm sm:text-base">Forfait avec hébergement</h4>
-                                                        </div>
-                                                        <div className="text-center">
-                                                            <p className="text-xs text-muted-foreground">à partir de</p>
-                                                            <p className="font-semibold text-lg sm:text-2xl mt-1">{calculatePrice(formation.prixAvecHebergement)}</p>
-                                                            <p className="text-xs text-muted-foreground mt-2">Par personne</p>
-                                                        </div>
-                                                    </CardContent>
-                                                </Card>
+                                            ) : (
+                                                <>
+                                                    {formation.prixSansHebergement && (
+                                                        <Card className="border-primary/50">
+                                                            <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
+                                                                <div className="text-center">
+                                                                    <div className="flex items-center justify-center gap-2 text-muted-foreground"><GraduationCap size={18} /></div>
+                                                                    <h4 className="font-semibold mt-2 text-xs sm:text-base">Formation seule</h4>
+                                                                </div>
+                                                                <div className="text-center">
+                                                                    <p className="text-xs text-muted-foreground">à partir de</p>
+                                                                    <p className="font-semibold text-lg sm:text-2xl mt-1">{calculatePrice(formation.prixSansHebergement)}</p>
+                                                                    <p className="text-xs text-muted-foreground mt-2">Par personne</p>
+                                                                </div>
+                                                            </CardContent>
+                                                        </Card>
+                                                    )}
+                                                    {formation.prixAvecHebergement && (
+                                                        <Card className="border-primary/50 bg-primary/5">
+                                                            <CardContent className="pt-6 min-h-[180px] flex flex-col items-center justify-between">
+                                                                <div className="text-center">
+                                                                    <div className="flex items-center justify-center gap-2 text-muted-foreground"><Building size={18} /></div>
+                                                                    <h4 className="font-semibold mt-2 text-sm sm:text-base">Forfait avec hébergement</h4>
+                                                                </div>
+                                                                <div className="text-center">
+                                                                    <p className="text-xs text-muted-foreground">à partir de</p>
+                                                                    <p className="font-semibold text-lg sm:text-2xl mt-1">{calculatePrice(formation.prixAvecHebergement)}</p>
+                                                                    <p className="text-xs text-muted-foreground mt-2">Par personne</p>
+                                                                </div>
+                                                            </CardContent>
+                                                        </Card>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                         <div className="text-left mt-6">
@@ -361,13 +425,17 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                                 <div className="flex items-start gap-4">
                                                                     <div className="w-[100px] shrink-0">
                                                                         <div className="font-semibold text-xs">Module {index + 1}</div>
-                                                                        <div className="text-xs text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</div>
+                                                                        {!formation.isOnline && (
+                                                                            <div className="text-xs text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</div>
+                                                                        )}
                                                                     </div>
                                                                     <div className="md:hidden flex-1 text-sm">{module.name}</div>
                                                                 </div>
                                                             </TableCell>
                                                             <TableCell className="hidden md:table-cell py-3 md:py-4 text-sm">{module.name}</TableCell>
-                                                            <TableCell className="hidden md:table-cell text-right py-3 md:py-4 text-sm text-muted-foreground">{index % 2 === 0 ? '1 Jour' : '2 Jours'}</TableCell>
+                                                            <TableCell className="hidden md:table-cell text-right py-3 md:py-4 text-sm text-muted-foreground">
+                                                                {!formation.isOnline && (index % 2 === 0 ? '1 Jour' : '2 Jours')}
+                                                            </TableCell>
                                                         </TableRow>
                                                     ))}
                                                 </TableBody>
@@ -378,28 +446,60 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                             )}
                             <AccordionItem value="item-5">
                                 <AccordionTrigger>
-                                    <h2 className="text-2xl font-headline font-normal text-primary">Disponibilité</h2>
+                                    <h2 className="text-2xl font-headline font-normal text-primary">
+                                        {formation.isOnline ? "Prochaines dates de début" : "Disponibilité"}
+                                    </h2>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-4">
-                                        {availability.length > 0 ? (
-                                            availability.map((month) => (
-                                                <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg border text-center text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
-                                                    <div className="">
-                                                        <p className="font-semibold capitalize text-xs sm:text-sm">{month.month}</p>
-                                                        <p className="text-xs">{month.year}</p>
+                                    {formation.isOnline ? (
+                                        <div className="space-y-4 pt-4">
+                                            <p className="text-sm text-muted-foreground">
+                                                Vous pouvez commencer votre formation au début de chaque mois. Voici les prochaines dates de début disponibles :
+                                            </p>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                                {nextStartDates.map((date, i) => {
+                                                    const endDate = formation.durationMonths ? addMonths(date, parseInt(formation.durationMonths)) : null;
+                                                    return (
+                                                        <Card key={i} className="border bg-card">
+                                                            <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
+                                                                <span className="font-semibold text-primary mb-1">
+                                                                    {format(date, '1 MMMM yyyy', { locale: fr })}
+                                                                </span>
+                                                                {endDate && (
+                                                                    <span className="text-xs text-muted-foreground">
+                                                                        Fin: {format(endDate, 'MMMM yyyy', { locale: fr })}
+                                                                    </span>
+                                                                )}
+                                                                <Badge variant="outline" className="mt-2 text-green-600 border-green-200 bg-green-50">
+                                                                    Disponible
+                                                                </Badge>
+                                                            </CardContent>
+                                                        </Card>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-4">
+                                            {availability.length > 0 ? (
+                                                availability.map((month) => (
+                                                    <div key={month.month + month.year} className={cn("flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg border text-center text-sm aspect-square", month.isAvailable ? "bg-green-50/50 border-green-200" : "bg-red-50/50 border-red-200 text-muted-foreground")}>
+                                                        <div className="">
+                                                            <p className="font-semibold capitalize text-xs sm:text-sm">{month.month}</p>
+                                                            <p className="text-xs">{month.year}</p>
+                                                        </div>
+                                                        {month.isAvailable ? (
+                                                            <Badge variant="secondary" className="mt-2 text-xs bg-green-100 text-green-800">Disponible</Badge>
+                                                        ) : (
+                                                            <Badge variant="secondary" className="mt-2 text-xs bg-red-100 text-red-800">Complet</Badge>
+                                                        )}
                                                     </div>
-                                                    {month.isAvailable ? (
-                                                        <Badge variant="secondary" className="mt-2 text-xs bg-green-100 text-green-800">Disponible</Badge>
-                                                    ) : (
-                                                        <Badge variant="secondary" className="mt-2 text-xs bg-red-100 text-red-800">Complet</Badge>
-                                                    )}
-                                                </div>
-                                            ))
-                                        ) : (
-                                            Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)
-                                        )}
-                                    </div>
+                                                ))
+                                            ) : (
+                                                Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)
+                                            )}
+                                        </div>
+                                    )}
                                 </AccordionContent>
                             </AccordionItem>
                             <AccordionItem value="item-6">
@@ -408,15 +508,15 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 pt-4">
-                                        {allServices.map((service, index) => (
+                                        {filteredServices.map((service, index) => (
                                             <div key={service.id} className={cn(
                                                 "flex items-center justify-between gap-4 py-3",
-                                                (index < allServices.length - (allServices.length % 2 === 0 ? 2 : 1)) && "sm:border-b"
+                                                (index < filteredServices.length - (filteredServices.length % 2 === 0 ? 2 : 1)) && "sm:border-b"
                                             )}>
                                                 <div className="flex items-center gap-4">
                                                     {service.mediaUrl ? (
                                                         <div className="relative h-10 w-10 shrink-0 rounded-sm overflow-hidden">
-                                                            <MediaPreview url={service.mediaUrl} alt={service.name} />
+                                                            <Image src={service.mediaUrl} alt={service.name} fill className="object-cover" />
                                                         </div>
                                                     ) : (
                                                         <div className="h-10 w-10 shrink-0 rounded-sm bg-muted-foreground/20" />
@@ -453,6 +553,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     alt={coursePageContent.valeurImeda.title}
                                                     fill
                                                     className="object-cover"
+                                                    sizes="(max-width: 768px) 100vw, 50vw"
                                                     data-ai-hint="network growth"
                                                 />
                                             </div>
@@ -497,6 +598,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                     alt={coursePageContent.contact.name}
                                                     fill
                                                     className="object-cover"
+                                                    sizes="(max-width: 768px) 100vw, 33vw"
                                                     data-ai-hint="professional woman portrait"
                                                 />
                                             </div>

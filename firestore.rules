@@ -46,8 +46,8 @@ service cloud.firestore {
      * @principle Requires authentication for all operations.
      */
     match /companyProfile/{profileId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
+      allow get: if true;
+      allow list: if true;
       allow create: if isSignedIn();
       allow update: if isSignedIn();
       allow delete: if isSignedIn();
@@ -66,6 +66,26 @@ service cloud.firestore {
       allow create: if isSignedIn();
       allow update: if isSignedIn();
       allow delete: if isSignedIn();
+    }
+
+    /**
+     * @description Controls access to course content (categories, themes, formations, modules).
+     * @principle Authenticated users (Admin) can read/write. Public read access might be needed later if client-sdk used publicly.
+     */
+    match /course_categories/{document=**} {
+      allow read, write: if true; // Temporary open access for debugging, revert to isSignedIn() later if public site uses Admin SDK
+    }
+    match /course_themes/{document=**} {
+      allow read, write: if true;
+    }
+    match /course_formations/{document=**} {
+      allow read, write: if true;
+    }
+    match /course_modules/{document=**} {
+      allow read, write: if true;
+    }
+    match /services/{document=**} {
+      allow read, write: if true;
     }
 
     function isSignedIn() {

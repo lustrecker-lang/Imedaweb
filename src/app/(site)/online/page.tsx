@@ -1,9 +1,9 @@
-// src/app/courses/page.tsx
+// src/app/online/page.tsx
 
 import { Suspense } from 'react';
 import { adminDb } from '@/firebase/admin';
 import { Metadata } from 'next';
-import CoursesView from './CoursesView';
+import CoursesView from '../courses/CoursesView';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Force dynamic rendering to ensure fresh data from Firestore on each request
@@ -50,22 +50,11 @@ interface Page {
 
 // 1. Dynamic Metadata Generation
 export async function generateMetadata(): Promise<Metadata> {
-    try {
-        const formationsSnap = await adminDb.collection('course_formations').get();
-        const numberOfFormations = formationsSnap.size;
-
-        return {
-            title: `Découvrez nos ${numberOfFormations} formations professionnelles`,
-            description: `Parcourez notre catalogue complet de ${numberOfFormations} formations pour trouver le programme idéal.`,
-            alternates: { canonical: '/courses' },
-        };
-    } catch (error) {
-        console.error("Error fetching metadata:", error);
-        return {
-            title: 'Catalogue des Formations',
-            description: 'Découvrez notre catalogue complet de formations professionnelles.',
-        };
-    }
+    return {
+        title: 'Formations en Ligne | IMEDA',
+        description: 'Découvrez nos formations en ligne pour les entreprises et les professionnels.',
+        alternates: { canonical: '/online' },
+    };
 }
 
 // Data fetching function on the server
@@ -75,19 +64,42 @@ async function getCoursesData() {
             adminDb.collection('course_formations').get(),
             adminDb.collection('course_themes').get(),
             adminDb.collection('course_categories').get(),
-            adminDb.collection('pages').doc('courses').get() // Fetch the hero section data
+            adminDb.collection('pages').doc('online').get() // Fetch specific hero section for online if exists, else fallback or use 'courses'
         ]);
+
+        // Fallback to courses hero if online doesn't exist, or just use it. 
+        // For now, let's assume we might want to use the 'courses' one if 'online' page content isn't defined yet, 
+        // or just pass null and let CoursesView handle a default.
+        // Actually, let's fetch 'courses' page data as fallback if 'online' doc is missing, 
+        // but ideally we should have a separate page doc.
+        // Let's stick to simple: try 'online', if empty use 'courses'.
+        let pageData = pageSnap.exists ? pageSnap.data() as Page : null;
+        if (!pageData) {
+            const coursesPageSnap = await adminDb.collection('pages').doc('courses').get();
+            pageData = coursesPageSnap.exists ? coursesPageSnap.data() as Page : null;
+            // Override title for the fallback
+            if (pageData && pageData.sections) {
+                const heroValues = pageData.sections.find(s => s.id === 'hero');
+                if (heroValues) {
+                    // We create a new object to avoid mutating if cached (though it's fresh request)
+                    pageData = {
+                        ...pageData,
+                        sections: pageData.sections.map(s => s.id === 'hero' ? { ...s, title: "Formations en Ligne", content: "Solutions de formation flexibles pour les entreprises" } : s)
+                    };
+                }
+            }
+        }
+
 
         const formations = formationsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Formation[];
         const themes = themesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Theme[];
         const categories = categoriesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Category[];
-        const pageData = pageSnap.exists ? pageSnap.data() as Page : null;
 
         return {
             formations,
             themes,
             categories,
-            pageData, // Return the hero section data
+            pageData,
         };
     } catch (error) {
         console.error("Error fetching courses data:", error);
@@ -110,13 +122,13 @@ const CoursesPageSkeleton = () => {
 };
 
 // 3. The main page component
-export default async function CoursesPage() {
+export default async function OnlineCoursesPage() {
     const coursesData = await getCoursesData();
 
     return (
         <Suspense fallback={<CoursesPageSkeleton />}>
-            {/* Pass the hero section data to the client component */}
-            <CoursesView {...coursesData} />
+            {/* Pass mode='online' to filter accordingly */}
+            <CoursesView {...coursesData} mode="online" />
         </Suspense>
     );
 }

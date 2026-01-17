@@ -70,33 +70,45 @@ const categorySchema = z.object({
   name: z.string().min(1, "Category name is required."),
   description: z.string().optional(),
   mediaUrl: z.string().optional(),
+  isOnline: z.boolean().default(false).optional(),
 });
 
 const themeSchema = z.object({
   name: z.string().min(1, "Theme name is required."),
   description: z.string().optional(),
+  isOnline: z.boolean().default(false).optional(),
   categoryId: z.string(),
 });
 
 const formationSchema = z.object({
-    name: z.string().min(1, "Formation name is required."),
-    themeId: z.string(),
-    formationId: z.string().min(1, "Formation ID is required."),
-    objectifPedagogique: z.string().optional(),
-    preRequis: z.string().optional(),
-    publicConcerne: z.string().optional(),
-    methodesMobilisees: z.string().optional(),
-    moyensPedagogiques: z.string().optional(),
-    modalitesEvaluation: z.string().optional(),
-    prixAvecHebergement: z.string().optional(),
-    prixSansHebergement: z.string().optional(),
-    format: z.string().optional(),
+  name: z.string().min(1, "Formation name is required."),
+  themeId: z.string(),
+  formationId: z.string().min(1, "Formation ID is required."),
+  description: z.string().optional(),
+  isOnline: z.boolean().default(false).optional(),
+  objectifPedagogique: z.string().optional(),
+  preRequis: z.string().optional(),
+  publicConcerne: z.string().optional(),
+  methodesMobilisees: z.string().optional(),
+  moyensPedagogiques: z.string().optional(),
+  modalitesEvaluation: z.string().optional(),
+  prixAvecHebergement: z.string().optional(),
+  prixSansHebergement: z.string().optional(),
+  pricePerMonth: z.string().optional(),
+  durationMonths: z.string().optional(),
+  format: z.string().optional(),
+  accessibilite: z.string().optional(),
+  duree: z.string().optional(),
+  modalitesDelaisAcces: z.string().optional(),
+  tarifs: z.string().optional(),
+  contacts: z.string().optional(),
+  objectifsPedagogiques: z.string().optional(),
 });
 
 const moduleSchema = z.object({
-    name: z.string().min(1, "Module name is required."),
-    description: z.string().optional(),
-    formationId: z.string(),
+  name: z.string().min(1, "Module name is required."),
+  description: z.string().optional(),
+  formationId: z.string(),
 });
 
 // Interfaces
@@ -109,34 +121,67 @@ interface Theme extends z.infer<typeof themeSchema> {
 }
 
 interface Formation extends z.infer<typeof formationSchema> {
-    id: string;
+  id: string;
+  Theme?: string;
+  Formation?: string;
+  FormationID?: string;
+  'Objectif Pédagogique'?: string;
+  'Pré-requis'?: string;
+  'Public Concerné'?: string;
+  'Méthodes Mobilisées'?: string;
+  'Moyens Pédagogiques'?: string;
+  'Modalités d\'Évaluation'?: string;
+  'Prix avec hebergement'?: string;
+  'Prix sans hebergement'?: string;
+  Format?: string;
+  pricePerMonth?: string;
+  durationMonths?: string;
 }
 
 interface Module extends z.infer<typeof moduleSchema> {
-    id: string;
+  id: string;
+}
+
+// Interfaces
+interface Category extends z.infer<typeof categorySchema> {
+  id: string;
+}
+
+interface Theme extends z.infer<typeof themeSchema> {
+  id: string;
+}
+
+interface Formation extends z.infer<typeof formationSchema> {
+  id: string;
+}
+
+interface Module extends z.infer<typeof moduleSchema> {
+  id: string;
 }
 
 const isVideoUrl = (url?: string | null) => {
-    if (!url) return false;
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    try {
-      const pathname = new URL(url).pathname.split('?')[0];
-      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
-    } catch (e) {
-      return false; // Invalid URL
-    }
+  if (!url) return false;
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+  try {
+    const pathname = new URL(url).pathname.split('?')[0];
+    return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+  } catch (e) {
+    return false; // Invalid URL
+  }
 };
 
 const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
-    if (isVideoUrl(url)) {
-        return (
-            <video src={url} width="64" height="40" className="object-cover rounded-sm bg-muted" muted playsInline />
-        );
-    }
+  if (isVideoUrl(url)) {
     return (
-        <Image src={url} alt={alt} width={64} height={40} className="object-cover rounded-sm" />
+      <video src={url} width="64" height="40" className="object-cover rounded-sm bg-muted" muted playsInline />
     );
+  }
+  return (
+    <Image src={url} alt={alt} width={64} height={40} className="object-cover rounded-sm" />
+  );
 }
+
+import { Switch } from '@/components/ui/switch';
 
 export default function CoursesPage() {
   const { user, isUserLoading } = useUser();
@@ -149,7 +194,7 @@ export default function CoursesPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
   const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null);
-  
+
   const [categoryMediaFile, setCategoryMediaFile] = useState<File | null>(null);
 
   const [isCategoryAddDialogOpen, setIsCategoryAddDialogOpen] = useState(false);
@@ -163,7 +208,7 @@ export default function CoursesPage() {
   const [isThemeDeleteDialogOpen, setIsThemeDeleteDialogOpen] = useState(false);
   const [editingTheme, setThemeToEdit] = useState<Theme | null>(null);
   const [themeToDelete, setThemeToDelete] = useState<Theme | null>(null);
-  
+
   const [isFormationAddDialogOpen, setIsFormationAddDialogOpen] = useState(false);
   const [isFormationEditDialogOpen, setIsFormationEditDialogOpen] = useState(false);
   const [isFormationDeleteDialogOpen, setIsFormationDeleteDialogOpen] = useState(false);
@@ -187,7 +232,7 @@ export default function CoursesPage() {
     if (!firestore || !selectedCategory) return null;
     return query(collection(firestore, 'course_themes'), where('categoryId', '==', selectedCategory.id), orderBy('name', 'asc'));
   }, [firestore, selectedCategory]);
-  
+
   const formationsQuery = useMemoFirebase(() => {
     if (!firestore || !selectedTheme) return null;
     return query(collection(firestore, 'course_formations'), where('themeId', '==', selectedTheme.id), orderBy('name', 'asc'));
@@ -206,7 +251,7 @@ export default function CoursesPage() {
   // Forms
   const addCategoryForm = useForm<z.infer<typeof categorySchema>>({
     resolver: zodResolver(categorySchema),
-    defaultValues: { name: '', description: '', mediaUrl: '' },
+    defaultValues: { name: '', description: '', mediaUrl: '', isOnline: false },
   });
 
   const editCategoryForm = useForm<z.infer<typeof categorySchema>>({
@@ -214,45 +259,51 @@ export default function CoursesPage() {
     defaultValues: {},
   });
 
-  const addThemeForm = useForm<z.infer<Omit<typeof themeSchema, 'categoryId'>>>({
-    resolver: zodResolver(themeSchema.omit({ categoryId: true })),
-    defaultValues: { name: '', description: '' },
+  const themeFormSchema = themeSchema.omit({ categoryId: true });
+  const addThemeForm = useForm<z.infer<typeof themeFormSchema>>({
+    resolver: zodResolver(themeFormSchema),
+    defaultValues: { name: '', description: '', isOnline: false },
   });
 
-  const editThemeForm = useForm<z.infer<Omit<typeof themeSchema, 'categoryId'>>>({
-    resolver: zodResolver(themeSchema.omit({ categoryId: true })),
+  const editThemeForm = useForm<z.infer<typeof themeFormSchema>>({
+    resolver: zodResolver(themeFormSchema),
     defaultValues: {},
   });
-  
-  const addFormationForm = useForm<z.infer<Omit<typeof formationSchema, 'themeId'>>>({
-    resolver: zodResolver(formationSchema.omit({ themeId: true })),
-    defaultValues: { 
-        name: '',
-        formationId: '',
-        objectifPedagogique: '',
-        preRequis: '',
-        publicConcerne: '',
-        methodesMobilisees: '',
-        moyensPedagogiques: '',
-        modalitesEvaluation: '',
-        prixAvecHebergement: '',
-        prixSansHebergement: '',
-        format: '',
+
+  const formationFormSchema = formationSchema.omit({ themeId: true });
+  const addFormationForm = useForm<z.infer<typeof formationFormSchema>>({
+    resolver: zodResolver(formationFormSchema),
+    defaultValues: {
+      name: '',
+      formationId: '',
+      isOnline: false,
+      objectifPedagogique: '',
+      preRequis: '',
+      publicConcerne: '',
+      methodesMobilisees: '',
+      moyensPedagogiques: '',
+      modalitesEvaluation: '',
+      prixAvecHebergement: '',
+      prixSansHebergement: '',
+      pricePerMonth: '',
+      durationMonths: '',
+      format: '',
     },
   });
 
-  const editFormationForm = useForm<z.infer<Omit<typeof formationSchema, 'themeId'>>>({
-    resolver: zodResolver(formationSchema.omit({ themeId: true })),
+  const editFormationForm = useForm<z.infer<typeof formationFormSchema>>({
+    resolver: zodResolver(formationFormSchema),
     defaultValues: {},
   });
-  
-  const addModuleForm = useForm<z.infer<Omit<typeof moduleSchema, 'formationId'>>>({
-    resolver: zodResolver(moduleSchema.omit({ formationId: true })),
+
+  const moduleFormSchema = moduleSchema.omit({ formationId: true });
+  const addModuleForm = useForm<z.infer<typeof moduleFormSchema>>({
+    resolver: zodResolver(moduleFormSchema),
     defaultValues: { name: '', description: '' },
   });
 
-  const editModuleForm = useForm<z.infer<Omit<typeof moduleSchema, 'formationId'>>>({
-    resolver: zodResolver(moduleSchema.omit({ formationId: true })),
+  const editModuleForm = useForm<z.infer<typeof moduleFormSchema>>({
+    resolver: zodResolver(moduleFormSchema),
     defaultValues: {},
   });
 
@@ -289,6 +340,9 @@ export default function CoursesPage() {
         modalitesEvaluation: editingFormation.modalitesEvaluation || '',
         prixAvecHebergement: editingFormation.prixAvecHebergement || '',
         prixSansHebergement: editingFormation.prixSansHebergement || '',
+        pricePerMonth: editingFormation.pricePerMonth || '',
+        durationMonths: editingFormation.durationMonths || '',
+        isOnline: editingFormation.isOnline || false,
         format: editingFormation.format || '',
       });
     }
@@ -307,14 +361,14 @@ export default function CoursesPage() {
       </div>
     );
   }
-  
+
   const handleFileUpload = async (file: File | null): Promise<string | null> => {
     if (!file || !storage || !user) return null;
 
     const fileExtension = file.name.split('.').pop();
     const fileName = `${uuidv4()}.${fileExtension}`;
     const storageRef = ref(storage, `course-assets/${fileName}`);
-    
+
     try {
       const snapshot = await uploadBytes(storageRef, file);
       return await getDownloadURL(snapshot.ref);
@@ -333,14 +387,14 @@ export default function CoursesPage() {
   // Handlers for Category
   const onAddCategorySubmit = async (values: z.infer<typeof categorySchema>) => {
     if (!firestore) return;
-    
+
     let mediaUrl = '';
     if (categoryMediaFile) {
-        mediaUrl = await handleFileUpload(categoryMediaFile) || '';
+      mediaUrl = await handleFileUpload(categoryMediaFile) || '';
     }
 
     const dataToSave = { ...values, mediaUrl };
-    
+
     addDocumentNonBlocking(collection(firestore, 'course_categories'), dataToSave);
     toast({ title: 'Success!', description: 'New category has been added.' });
     addCategoryForm.reset();
@@ -350,7 +404,7 @@ export default function CoursesPage() {
 
   const onEditCategorySubmit = async (values: z.infer<typeof categorySchema>) => {
     if (!firestore || !editingCategory) return;
-    
+
     let mediaUrl = editingCategory.mediaUrl;
     if (categoryMediaFile) {
       if (editingCategory.mediaUrl && storage) {
@@ -384,7 +438,7 @@ export default function CoursesPage() {
 
   const handleDeleteCategory = () => {
     if (!firestore || !categoryToDelete) return;
-    
+
     if (categoryToDelete.mediaUrl && storage) {
       const mediaRef = ref(storage, categoryToDelete.mediaUrl);
       deleteObject(mediaRef).catch(error => console.error("Error deleting media: ", error));
@@ -395,14 +449,14 @@ export default function CoursesPage() {
     deleteDocumentNonBlocking(docRef);
     toast({ title: "Category Deleted", description: "The category has been permanently deleted." });
     setIsCategoryDeleteDialogOpen(false);
-    if(selectedCategory?.id === categoryToDelete.id) {
-        setSelectedCategory(null);
-        setSelectedTheme(null);
-        setSelectedFormation(null);
+    if (selectedCategory?.id === categoryToDelete.id) {
+      setSelectedCategory(null);
+      setSelectedTheme(null);
+      setSelectedFormation(null);
     }
     setCategoryToDelete(null);
   };
-  
+
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);
     setSelectedTheme(null);
@@ -410,7 +464,7 @@ export default function CoursesPage() {
   }
 
   // Handlers for Theme
-  const onAddThemeSubmit = async (values: z.infer<Omit<typeof themeSchema, 'categoryId'>>) => {
+  const onAddThemeSubmit = async (values: z.infer<typeof themeFormSchema>) => {
     if (!firestore || !selectedCategory) return;
     const dataToSave = { ...values, categoryId: selectedCategory.id };
     addDocumentNonBlocking(collection(firestore, 'course_themes'), dataToSave);
@@ -419,7 +473,7 @@ export default function CoursesPage() {
     setIsThemeAddDialogOpen(false);
   };
 
-  const onEditThemeSubmit = async (values: z.infer<Omit<typeof themeSchema, 'categoryId'>>) => {
+  const onEditThemeSubmit = async (values: z.infer<typeof themeFormSchema>) => {
     if (!firestore || !editingTheme) return;
     const docRef = doc(firestore, 'course_themes', editingTheme.id);
     setDocumentNonBlocking(docRef, values, { merge: true });
@@ -427,7 +481,7 @@ export default function CoursesPage() {
     setIsThemeEditDialogOpen(false);
     setThemeToEdit(null);
   };
-  
+
   const openEditThemeDialog = (theme: Theme) => {
     setThemeToEdit(theme);
     setIsThemeEditDialogOpen(true);
@@ -444,9 +498,9 @@ export default function CoursesPage() {
     deleteDocumentNonBlocking(docRef);
     toast({ title: "Theme Deleted", description: "The theme has been permanently deleted." });
     setIsThemeDeleteDialogOpen(false);
-     if(selectedTheme?.id === themeToDelete.id) {
-        setSelectedTheme(null);
-        setSelectedFormation(null);
+    if (selectedTheme?.id === themeToDelete.id) {
+      setSelectedTheme(null);
+      setSelectedFormation(null);
     }
     setThemeToDelete(null);
   };
@@ -457,168 +511,168 @@ export default function CoursesPage() {
   }
 
   // Handlers for Formation
-    const onAddFormationSubmit = async (values: z.infer<Omit<typeof formationSchema, 'themeId'>>) => {
-        if (!firestore || !selectedTheme) return;
-        const dataToSave = { ...values, themeId: selectedTheme.id };
-        addDocumentNonBlocking(collection(firestore, 'course_formations'), dataToSave);
-        toast({ title: 'Success!', description: 'New formation has been added.' });
-        addFormationForm.reset();
-        setIsFormationAddDialogOpen(false);
-    };
+  const onAddFormationSubmit = async (values: z.infer<typeof formationFormSchema>) => {
+    if (!firestore || !selectedTheme) return;
+    const dataToSave = { ...values, themeId: selectedTheme.id };
+    addDocumentNonBlocking(collection(firestore, 'course_formations'), dataToSave);
+    toast({ title: 'Success!', description: 'New formation has been added.' });
+    addFormationForm.reset();
+    setIsFormationAddDialogOpen(false);
+  };
 
-    const onEditFormationSubmit = async (values: z.infer<Omit<typeof formationSchema, 'themeId'>>) => {
-        if (!firestore || !editingFormation) return;
-        const docRef = doc(firestore, 'course_formations', editingFormation.id);
-        setDocumentNonBlocking(docRef, values, { merge: true });
-        toast({ title: 'Success!', description: 'Formation has been updated.' });
-        setIsFormationEditDialogOpen(false);
-        setEditingFormation(null);
-    };
+  const onEditFormationSubmit = async (values: z.infer<typeof formationFormSchema>) => {
+    if (!firestore || !editingFormation) return;
+    const docRef = doc(firestore, 'course_formations', editingFormation.id);
+    setDocumentNonBlocking(docRef, values, { merge: true });
+    toast({ title: 'Success!', description: 'Formation has been updated.' });
+    setIsFormationEditDialogOpen(false);
+    setEditingFormation(null);
+  };
 
-    const openEditFormationDialog = (formation: Formation) => {
-        setEditingFormation(formation);
-        setIsFormationEditDialogOpen(true);
-    };
+  const openEditFormationDialog = (formation: Formation) => {
+    setEditingFormation(formation);
+    setIsFormationEditDialogOpen(true);
+  };
 
-    const openDeleteFormationDialog = (formation: Formation) => {
-        setFormationToDelete(formation);
-        setIsFormationDeleteDialogOpen(true);
-    };
+  const openDeleteFormationDialog = (formation: Formation) => {
+    setFormationToDelete(formation);
+    setIsFormationDeleteDialogOpen(true);
+  };
 
-    const handleDeleteFormation = () => {
-        if (!firestore || !formationToDelete) return;
-        const docRef = doc(firestore, 'course_formations', formationToDelete.id);
-        deleteDocumentNonBlocking(docRef);
-        toast({ title: "Formation Deleted", description: "The formation has been permanently deleted." });
-        setIsFormationDeleteDialogOpen(false);
-        if(selectedFormation?.id === formationToDelete.id) {
-            setSelectedFormation(null);
-        }
-        setFormationToDelete(null);
-    };
+  const handleDeleteFormation = () => {
+    if (!firestore || !formationToDelete) return;
+    const docRef = doc(firestore, 'course_formations', formationToDelete.id);
+    deleteDocumentNonBlocking(docRef);
+    toast({ title: "Formation Deleted", description: "The formation has been permanently deleted." });
+    setIsFormationDeleteDialogOpen(false);
+    if (selectedFormation?.id === formationToDelete.id) {
+      setSelectedFormation(null);
+    }
+    setFormationToDelete(null);
+  };
 
   // Handlers for Module
-    const onAddModuleSubmit = async (values: z.infer<Omit<typeof moduleSchema, 'formationId'>>) => {
-        if (!firestore || !selectedFormation) return;
-        const dataToSave = { ...values, formationId: selectedFormation.id };
-        addDocumentNonBlocking(collection(firestore, 'course_modules'), dataToSave);
-        toast({ title: 'Success!', description: 'New module has been added.' });
-        addModuleForm.reset();
-        setIsModuleAddDialogOpen(false);
-    };
+  const onAddModuleSubmit = async (values: z.infer<typeof moduleFormSchema>) => {
+    if (!firestore || !selectedFormation) return;
+    const dataToSave = { ...values, formationId: selectedFormation.id };
+    addDocumentNonBlocking(collection(firestore, 'course_modules'), dataToSave);
+    toast({ title: 'Success!', description: 'New module has been added.' });
+    addModuleForm.reset();
+    setIsModuleAddDialogOpen(false);
+  };
 
-    const onEditModuleSubmit = async (values: z.infer<Omit<typeof moduleSchema, 'formationId'>>) => {
-        if (!firestore || !editingModule) return;
-        const docRef = doc(firestore, 'course_modules', editingModule.id);
-        setDocumentNonBlocking(docRef, values, { merge: true });
-        toast({ title: 'Success!', description: 'Module has been updated.' });
-        setIsModuleEditDialogOpen(false);
-        setEditingModule(null);
-    };
+  const onEditModuleSubmit = async (values: z.infer<typeof moduleFormSchema>) => {
+    if (!firestore || !editingModule) return;
+    const docRef = doc(firestore, 'course_modules', editingModule.id);
+    setDocumentNonBlocking(docRef, values, { merge: true });
+    toast({ title: 'Success!', description: 'Module has been updated.' });
+    setIsModuleEditDialogOpen(false);
+    setEditingModule(null);
+  };
 
-    const openEditModuleDialog = (module: Module) => {
-        setEditingModule(module);
-        setIsModuleEditDialogOpen(true);
-    };
+  const openEditModuleDialog = (module: Module) => {
+    setEditingModule(module);
+    setIsModuleEditDialogOpen(true);
+  };
 
-    const openDeleteModuleDialog = (module: Module) => {
-        setModuleToDelete(module);
-        setIsModuleDeleteDialogOpen(true);
-    };
+  const openDeleteModuleDialog = (module: Module) => {
+    setModuleToDelete(module);
+    setIsModuleDeleteDialogOpen(true);
+  };
 
-    const handleDeleteModule = () => {
-        if (!firestore || !moduleToDelete) return;
-        const docRef = doc(firestore, 'course_modules', moduleToDelete.id);
-        deleteDocumentNonBlocking(docRef);
-        toast({ title: "Module Deleted", description: "The module has been permanently deleted." });
-        setIsModuleDeleteDialogOpen(false);
-        setModuleToDelete(null);
-    };
+  const handleDeleteModule = () => {
+    if (!firestore || !moduleToDelete) return;
+    const docRef = doc(firestore, 'course_modules', moduleToDelete.id);
+    deleteDocumentNonBlocking(docRef);
+    toast({ title: "Module Deleted", description: "The module has been permanently deleted." });
+    setIsModuleDeleteDialogOpen(false);
+    setModuleToDelete(null);
+  };
 
-    const handleSeedCourses = async () => {
-        if (!firestore) return;
-        toast({ title: "Seeding started...", description: "Please wait while the courses are being added." });
+  const handleSeedCourses = async () => {
+    if (!firestore) return;
+    toast({ title: "Seeding started...", description: "Please wait while the courses are being added." });
 
-        let categoriesMap = new Map<string, string>();
-        let themesMap = new Map<string, string>();
+    let categoriesMap = new Map<string, string>();
+    let themesMap = new Map<string, string>();
 
-        for (const course of courseData) {
-            let categoryId: string;
-            // Handle Category
-            if (categoriesMap.has(course.Category)) {
-                categoryId = categoriesMap.get(course.Category)!;
-            } else {
-                const categoryQuery = query(collection(firestore, 'course_categories'), where('name', '==', course.Category));
-                const categorySnapshot = await getDocs(categoryQuery);
-                if (!categorySnapshot.empty) {
-                    categoryId = categorySnapshot.docs[0].id;
-                } else {
-                    const categoryDoc = await addDocumentNonBlocking(collection(firestore, 'course_categories'), { name: course.Category });
-                    categoryId = categoryDoc!.id;
-                }
-                categoriesMap.set(course.Category, categoryId);
-            }
-
-            let themeId: string;
-            const themeMapKey = `${categoryId}-${course.Theme}`;
-            // Handle Theme
-            if (themesMap.has(themeMapKey)) {
-                themeId = themesMap.get(themeMapKey)!;
-            } else {
-                const themeQuery = query(collection(firestore, 'course_themes'), where('categoryId', '==', categoryId), where('name', '==', course.Theme));
-                const themeSnapshot = await getDocs(themeQuery);
-                if (!themeSnapshot.empty) {
-                    themeId = themeSnapshot.docs[0].id;
-                } else {
-                    const themeDoc = await addDocumentNonBlocking(collection(firestore, 'course_themes'), { name: course.Theme, categoryId: categoryId });
-                    themeId = themeDoc!.id;
-                }
-                themesMap.set(themeMapKey, themeId);
-            }
-
-            // Handle Formation
-            const formationData = {
-                themeId: themeId,
-                name: course.Formation,
-                formationId: course.FormationID,
-                objectifPedagogique: course['Objectif Pédagogique'],
-                preRequis: course['Pré-requis'],
-                publicConcerne: course['Public Concerné'],
-                methodesMobilisees: course['Méthodes Mobilisées'],
-                moyensPedagogiques: course['Moyens Pédagogiques'],
-                modalitesEvaluation: course['Modalités d\'Évaluation'],
-                prixAvecHebergement: course['Prix avec hebergement']?.toString() || '',
-                prixSansHebergement: course['Prix sans hebergement']?.toString() || '',
-                format: course.Format,
-            };
-            const formationDoc = await addDocumentNonBlocking(collection(firestore, 'course_formations'), formationData);
-            const formationId = formationDoc!.id;
-
-            // Handle Modules
-            for (let i = 1; i <= 7; i++) {
-                const moduleKey = `Module ${i}` as keyof typeof course;
-                if (course[moduleKey]) {
-                    const moduleData = {
-                        formationId: formationId,
-                        name: course[moduleKey] as string,
-                        description: `Module ${i} for ${course.Formation}`
-                    };
-                    addDocumentNonBlocking(collection(firestore, 'course_modules'), moduleData);
-                }
-            }
+    for (const course of courseData) {
+      let categoryId: string;
+      // Handle Category
+      if (categoriesMap.has(course.Category)) {
+        categoryId = categoriesMap.get(course.Category)!;
+      } else {
+        const categoryQuery = query(collection(firestore, 'course_categories'), where('name', '==', course.Category));
+        const categorySnapshot = await getDocs(categoryQuery);
+        if (!categorySnapshot.empty) {
+          categoryId = categorySnapshot.docs[0].id;
+        } else {
+          const categoryDoc = await addDocumentNonBlocking(collection(firestore, 'course_categories'), { name: course.Category });
+          categoryId = categoryDoc!.id;
         }
-        toast({ title: "Seeding complete!", description: "All courses have been added to the database." });
-    };
+        categoriesMap.set(course.Category, categoryId);
+      }
+
+      let themeId: string;
+      const themeMapKey = `${categoryId}-${course.Theme}`;
+      // Handle Theme
+      if (themesMap.has(themeMapKey)) {
+        themeId = themesMap.get(themeMapKey)!;
+      } else {
+        const themeQuery = query(collection(firestore, 'course_themes'), where('categoryId', '==', categoryId), where('name', '==', course.Theme));
+        const themeSnapshot = await getDocs(themeQuery);
+        if (!themeSnapshot.empty) {
+          themeId = themeSnapshot.docs[0].id;
+        } else {
+          const themeDoc = await addDocumentNonBlocking(collection(firestore, 'course_themes'), { name: course.Theme, categoryId: categoryId });
+          themeId = themeDoc!.id;
+        }
+        themesMap.set(themeMapKey, themeId);
+      }
+
+      // Handle Formation
+      const formationData = {
+        themeId: themeId,
+        name: course.Formation,
+        formationId: course.FormationID,
+        objectifPedagogique: course['Objectif Pédagogique'],
+        preRequis: course['Pré-requis'],
+        publicConcerne: course['Public Concerné'],
+        methodesMobilisees: course['Méthodes Mobilisées'],
+        moyensPedagogiques: course['Moyens Pédagogiques'],
+        modalitesEvaluation: course['Modalités d\'Évaluation'],
+        prixAvecHebergement: course['Prix avec hebergement']?.toString() || '',
+        prixSansHebergement: course['Prix sans hebergement']?.toString() || '',
+        format: course.Format,
+      };
+      const formationDoc = await addDocumentNonBlocking(collection(firestore, 'course_formations'), formationData);
+      const formationId = formationDoc!.id;
+
+      // Handle Modules
+      for (let i = 1; i <= 7; i++) {
+        const moduleKey = `Module ${i}` as keyof typeof course;
+        if (course[moduleKey]) {
+          const moduleData = {
+            formationId: formationId,
+            name: course[moduleKey] as string,
+            description: `Module ${i} for ${course.Formation}`
+          };
+          addDocumentNonBlocking(collection(firestore, 'course_modules'), moduleData);
+        }
+      }
+    }
+    toast({ title: "Seeding complete!", description: "All courses have been added to the database." });
+  };
 
   return (
     <>
       <div className="container mx-auto px-4 py-12 md:px-6 space-y-8">
         <header className="flex justify-between items-start">
-            <div>
-                <h1 className="text-xl font-bold tracking-tight">Courses Management</h1>
-                <p className="text-sm text-muted-foreground">Manage your academic content hierarchy: Catégories, Thèmes, Formations, and Modules.</p>
-            </div>
-            <Button variant="outline" onClick={handleSeedCourses}>Seed Courses from JSON</Button>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight">Courses Management</h1>
+            <p className="text-sm text-muted-foreground">Manage your academic content hierarchy: Catégories, Thèmes, Formations, and Modules.</p>
+          </div>
+          <Button variant="outline" onClick={handleSeedCourses}>Seed Courses from JSON</Button>
         </header>
 
         <div className="grid gap-8 lg:grid-cols-2">
@@ -653,20 +707,34 @@ export default function CoursesPage() {
                           <FormMessage />
                         </FormItem>
                       )} />
-                      <FormItem>
-                          <FormLabel>Media</FormLabel>
+                      <FormField control={addCategoryForm.control} name="isOnline" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Catégorie en ligne</FormLabel>
+                            <CardDescription>Visible only on Online portal</CardDescription>
+                          </div>
                           <FormControl>
-                          <Input 
-                              type="file" 
-                              accept="image/*,video/*,.mov"
-                              onChange={(e) => {
-                                if (e.target.files?.[0]) {
-                                    setCategoryMediaFile(e.target.files[0]);
-                                }
-                              }}
-                          />
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
-                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormItem>
+                        <FormLabel>Media</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="file"
+                            accept="image/*,video/*,.mov"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                setCategoryMediaFile(e.target.files[0]);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
                       </FormItem>
                       <DialogFooter>
                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
@@ -698,8 +766,8 @@ export default function CoursesPage() {
                       ))
                     ) : categories && categories.length > 0 ? (
                       categories.map((category) => (
-                        <TableRow 
-                          key={category.id} 
+                        <TableRow
+                          key={category.id}
                           onClick={() => handleSelectCategory(category as Category)}
                           className={cn("cursor-pointer", selectedCategory?.id === category.id && "bg-muted/50")}
                         >
@@ -731,7 +799,7 @@ export default function CoursesPage() {
               </ScrollArea>
             </CardContent>
           </Card>
-          
+
           {/* Themes Card */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -740,10 +808,10 @@ export default function CoursesPage() {
                 <CardDescription>Manage topics for {selectedCategory ? `"${selectedCategory.name}"` : 'a selected category'}.</CardDescription>
               </div>
               <Dialog open={isThemeAddDialogOpen} onOpenChange={setIsThemeAddDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" disabled={!selectedCategory}><Plus className="mr-2 h-4 w-4" /> Add Theme</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
+                <DialogTrigger asChild>
+                  <Button size="sm" disabled={!selectedCategory}><Plus className="mr-2 h-4 w-4" /> Add Theme</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
                     <DialogTitle>Add New Theme</DialogTitle>
                     <DialogDescription>For category: {selectedCategory?.name}</DialogDescription>
@@ -764,6 +832,20 @@ export default function CoursesPage() {
                           <FormMessage />
                         </FormItem>
                       )} />
+                      <FormField control={addThemeForm.control} name="isOnline" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Thème en ligne</FormLabel>
+                            <CardDescription>Visible only on Online portal</CardDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )} />
                       <DialogFooter>
                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
                         <Button type="submit" disabled={addThemeForm.formState.isSubmitting}>Save</Button>
@@ -774,71 +856,71 @@ export default function CoursesPage() {
               </Dialog>
             </CardHeader>
             <CardContent>
-             {!selectedCategory ? (
+              {!selectedCategory ? (
                 <div className="h-[400px] flex items-center justify-center">
-                    <p className="text-sm text-muted-foreground text-center">Select a category to manage its themes.</p>
+                  <p className="text-sm text-muted-foreground text-center">Select a category to manage its themes.</p>
                 </div>
-             ) : (
+              ) : (
                 <ScrollArea className="h-[400px]">
-                    <Table>
-                        <TableHeader>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {areThemesLoading ? (
+                        Array.from({ length: 2 }).map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
+                            <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                          </TableRow>
+                        ))
+                      ) : themes && themes.length > 0 ? (
+                        themes.map((theme) => (
+                          <TableRow
+                            key={theme.id}
+                            onClick={() => handleSelectTheme(theme as Theme)}
+                            className={cn("cursor-pointer", selectedTheme?.id === theme.id && "bg-muted/50")}
+                          >
+                            <TableCell className="font-medium py-2">{theme.name}</TableCell>
+                            <TableCell className="text-right py-2">
+                              <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditThemeDialog(theme as Theme); }}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openDeleteThemeDialog(theme as Theme); }}>
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
                         <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                          <TableCell colSpan={2} className="h-24 text-center">No themes found for this category.</TableCell>
                         </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {areThemesLoading ? (
-                            Array.from({ length: 2 }).map((_, i) => (
-                            <TableRow key={i}>
-                                <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
-                                <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
-                            </TableRow>
-                            ))
-                        ) : themes && themes.length > 0 ? (
-                            themes.map((theme) => (
-                            <TableRow 
-                                key={theme.id}
-                                onClick={() => handleSelectTheme(theme as Theme)}
-                                className={cn("cursor-pointer", selectedTheme?.id === theme.id && "bg-muted/50")}
-                            >
-                                <TableCell className="font-medium py-2">{theme.name}</TableCell>
-                                <TableCell className="text-right py-2">
-                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditThemeDialog(theme as Theme);}}>
-                                    <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openDeleteThemeDialog(theme as Theme);}}>
-                                    <Trash2 className="h-4 w-4 text-red-600" />
-                                </Button>
-                                </TableCell>
-                            </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                            <TableCell colSpan={2} className="h-24 text-center">No themes found for this category.</TableCell>
-                            </TableRow>
-                        )}
-                        </TableBody>
-                    </Table>
+                      )}
+                    </TableBody>
+                  </Table>
                 </ScrollArea>
-             )}
+              )}
             </CardContent>
           </Card>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2">
-            {/* Formations Card */}
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle>Formations</CardTitle>
-                    <CardDescription>Manage courses for {selectedTheme ? `"${selectedTheme.name}"` : 'a selected theme'}.</CardDescription>
-                </div>
-                <Dialog open={isFormationAddDialogOpen} onOpenChange={setIsFormationAddDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" disabled={!selectedTheme}><Plus className="mr-2 h-4 w-4" /> Add Formation</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-2xl">
+          {/* Formations Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Formations</CardTitle>
+                <CardDescription>Manage courses for {selectedTheme ? `"${selectedTheme.name}"` : 'a selected theme'}.</CardDescription>
+              </div>
+              <Dialog open={isFormationAddDialogOpen} onOpenChange={setIsFormationAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" disabled={!selectedTheme}><Plus className="mr-2 h-4 w-4" /> Add Formation</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Add New Formation</DialogTitle>
                     <DialogDescription>For theme: {selectedTheme?.name}</DialogDescription>
@@ -852,24 +934,61 @@ export default function CoursesPage() {
                           <FormMessage />
                         </FormItem>
                       )} />
+                      <FormField control={addFormationForm.control} name="isOnline" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 mb-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Formation en ligne (Enterprise)</FormLabel>
+                            <CardDescription>Is this an online-only course for enterprises?</CardDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )} />
+
+                      {addFormationForm.watch('isOnline') ? (
+                        <>
+                          <FormField control={addFormationForm.control} name="pricePerMonth" render={({ field }) => (
+                            <FormItem className="col-span-2 sm:col-span-1">
+                              <FormLabel>Price per Month</FormLabel>
+                              <FormControl><Input placeholder="e.g., 50€" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                          <FormField control={addFormationForm.control} name="durationMonths" render={({ field }) => (
+                            <FormItem className="col-span-2 sm:col-span-1">
+                              <FormLabel>Duration (Months)</FormLabel>
+                              <FormControl><Input placeholder="e.g., 6" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                        </>
+                      ) : (
+                        <>
+                          <FormField control={addFormationForm.control} name="prixAvecHebergement" render={({ field }) => (
+                            <FormItem className="col-span-2 sm:col-span-1">
+                              <FormLabel>Prix avec hebergement</FormLabel>
+                              <FormControl><Input placeholder="e.g., 2500€" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                          <FormField control={addFormationForm.control} name="prixSansHebergement" render={({ field }) => (
+                            <FormItem className="col-span-2 sm:col-span-1">
+                              <FormLabel>Prix sans hebergement</FormLabel>
+                              <FormControl><Input placeholder="e.g., 2000€" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                        </>
+                      )}
+
                       <FormField control={addFormationForm.control} name="formationId" render={({ field }) => (
                         <FormItem className="col-span-2 sm:col-span-1">
                           <FormLabel>Formation ID</FormLabel>
                           <FormControl><Input placeholder="Custom ID" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={addFormationForm.control} name="prixAvecHebergement" render={({ field }) => (
-                        <FormItem className="col-span-2 sm:col-span-1">
-                          <FormLabel>Prix avec hebergement</FormLabel>
-                          <FormControl><Input placeholder="e.g., 2500€" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={addFormationForm.control} name="prixSansHebergement" render={({ field }) => (
-                        <FormItem className="col-span-2 sm:col-span-1">
-                          <FormLabel>Prix sans hebergement</FormLabel>
-                          <FormControl><Input placeholder="e.g., 2000€" {...field} /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )} />
@@ -894,7 +1013,7 @@ export default function CoursesPage() {
                           <FormMessage />
                         </FormItem>
                       )} />
-                       <FormField control={addFormationForm.control} name="publicConcerne" render={({ field }) => (
+                      <FormField control={addFormationForm.control} name="publicConcerne" render={({ field }) => (
                         <FormItem className="col-span-2">
                           <FormLabel>Public Concerné</FormLabel>
                           <FormControl><Textarea {...field} /></FormControl>
@@ -930,150 +1049,150 @@ export default function CoursesPage() {
                   </Form>
                 </DialogContent>
               </Dialog>
-                </CardHeader>
-                <CardContent>
-                {!selectedTheme ? (
-                    <div className="h-[400px] flex items-center justify-center">
-                        <p className="text-sm text-muted-foreground text-center">Select a theme to manage its formations.</p>
-                    </div>
-                ) : (
-                    <ScrollArea className="h-[400px]">
-                        <Table>
-                            <TableHeader>
-                            <TableRow>
-                                <TableHead>ID</TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                            {areFormationsLoading ? (
-                                Array.from({ length: 2 }).map((_, i) => (
-                                <TableRow key={i}>
-                                    <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
-                                    <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
-                                    <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
-                                </TableRow>
-                                ))
-                            ) : formations && formations.length > 0 ? (
-                                formations.map((formation) => (
-                                <TableRow 
-                                    key={formation.id}
-                                    onClick={() => setSelectedFormation(formation as Formation)}
-                                    className={cn("cursor-pointer", selectedFormation?.id === formation.id && "bg-muted/50")}
-                                >
-                                    <TableCell className="font-mono text-xs py-2">{formation.formationId}</TableCell>
-                                    <TableCell className="font-medium py-2">{formation.name}</TableCell>
-                                    <TableCell className="text-right py-2">
-                                    <Button variant="ghost" size="icon" onClick={(e) => {e.stopPropagation(); openEditFormationDialog(formation as Formation)}}>
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={(e) => {e.stopPropagation(); openDeleteFormationDialog(formation as Formation)}}>
-                                        <Trash2 className="h-4 w-4 text-red-600" />
-                                    </Button>
-                                    </TableCell>
-                                </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                <TableCell colSpan={3} className="h-24 text-center">No formations found for this theme.</TableCell>
-                                </TableRow>
-                            )}
-                            </TableBody>
-                        </Table>
-                    </ScrollArea>
-                )}
-                </CardContent>
-            </Card>
-
-            {/* Modules Card */}
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle>Modules</CardTitle>
-                    <CardDescription>Manage learning modules for {selectedFormation ? `"${selectedFormation.name}"` : 'a selected formation'}.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!selectedTheme ? (
+                <div className="h-[400px] flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground text-center">Select a theme to manage its formations.</p>
                 </div>
-                <Dialog open={isModuleAddDialogOpen} onOpenChange={setIsModuleAddDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button size="sm" disabled={!selectedFormation}><Plus className="mr-2 h-4 w-4" /> Add Module</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Add New Module</DialogTitle>
-                            <DialogDescription>For formation: {selectedFormation?.name}</DialogDescription>
-                        </DialogHeader>
-                        <Form {...addModuleForm}>
-                            <form onSubmit={addModuleForm.handleSubmit(onAddModuleSubmit)} className="space-y-4 py-4">
-                            <FormField control={addModuleForm.control} name="name" render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Module Name</FormLabel>
-                                <FormControl><Input placeholder="e.g., Introduction to SEO" {...field} /></FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )} />
-                            <FormField control={addModuleForm.control} name="description" render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Description</FormLabel>
-                                <FormControl><Textarea placeholder="A short description of the module." {...field} /></FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )} />
-                            <DialogFooter>
-                                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                                <Button type="submit" disabled={addModuleForm.formState.isSubmitting}>Save</Button>
-                            </DialogFooter>
-                            </form>
-                        </Form>
-                    </DialogContent>
-                </Dialog>
-                </CardHeader>
-                <CardContent>
-                 {!selectedFormation ? (
-                    <div className="h-[400px] flex items-center justify-center">
-                        <p className="text-sm text-muted-foreground text-center">Select a formation to manage its modules.</p>
-                    </div>
-                 ) : (
-                    <ScrollArea className="h-[400px]">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                            {areModulesLoading ? (
-                                Array.from({ length: 2 }).map((_, i) => (
-                                <TableRow key={i}>
-                                    <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
-                                    <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
-                                </TableRow>
-                                ))
-                            ) : modules && modules.length > 0 ? (
-                                modules.map((module) => (
-                                <TableRow key={module.id}>
-                                    <TableCell className="font-medium py-2">{module.name}</TableCell>
-                                    <TableCell className="text-right py-2">
-                                    <Button variant="ghost" size="icon" onClick={() => openEditModuleDialog(module as Module)}>
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => openDeleteModuleDialog(module as Module)}>
-                                        <Trash2 className="h-4 w-4 text-red-600" />
-                                    </Button>
-                                    </TableCell>
-                                </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                <TableCell colSpan={2} className="h-24 text-center">No modules found for this formation.</TableCell>
-                                </TableRow>
-                            )}
-                            </TableBody>
-                        </Table>
-                    </ScrollArea>
-                 )}
-                </CardContent>
-            </Card>
+              ) : (
+                <ScrollArea className="h-[400px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {areFormationsLoading ? (
+                        Array.from({ length: 2 }).map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="py-2"><Skeleton className="h-5 w-16" /></TableCell>
+                            <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
+                            <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                          </TableRow>
+                        ))
+                      ) : formations && formations.length > 0 ? (
+                        formations.map((formation) => (
+                          <TableRow
+                            key={formation.id}
+                            onClick={() => setSelectedFormation(formation as Formation)}
+                            className={cn("cursor-pointer", selectedFormation?.id === formation.id && "bg-muted/50")}
+                          >
+                            <TableCell className="font-mono text-xs py-2">{formation.formationId}</TableCell>
+                            <TableCell className="font-medium py-2">{formation.name}</TableCell>
+                            <TableCell className="text-right py-2">
+                              <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditFormationDialog(formation as Formation) }}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openDeleteFormationDialog(formation as Formation) }}>
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={3} className="h-24 text-center">No formations found for this theme.</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Modules Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Modules</CardTitle>
+                <CardDescription>Manage learning modules for {selectedFormation ? `"${selectedFormation.name}"` : 'a selected formation'}.</CardDescription>
+              </div>
+              <Dialog open={isModuleAddDialogOpen} onOpenChange={setIsModuleAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" disabled={!selectedFormation}><Plus className="mr-2 h-4 w-4" /> Add Module</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Add New Module</DialogTitle>
+                    <DialogDescription>For formation: {selectedFormation?.name}</DialogDescription>
+                  </DialogHeader>
+                  <Form {...addModuleForm}>
+                    <form onSubmit={addModuleForm.handleSubmit(onAddModuleSubmit)} className="space-y-4 py-4">
+                      <FormField control={addModuleForm.control} name="name" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Module Name</FormLabel>
+                          <FormControl><Input placeholder="e.g., Introduction to SEO" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={addModuleForm.control} name="description" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl><Textarea placeholder="A short description of the module." {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <DialogFooter>
+                        <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                        <Button type="submit" disabled={addModuleForm.formState.isSubmitting}>Save</Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              {!selectedFormation ? (
+                <div className="h-[400px] flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground text-center">Select a formation to manage its modules.</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[400px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {areModulesLoading ? (
+                        Array.from({ length: 2 }).map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="py-2"><Skeleton className="h-5 w-32" /></TableCell>
+                            <TableCell className="text-right py-2"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                          </TableRow>
+                        ))
+                      ) : modules && modules.length > 0 ? (
+                        modules.map((module) => (
+                          <TableRow key={module.id}>
+                            <TableCell className="font-medium py-2">{module.name}</TableCell>
+                            <TableCell className="text-right py-2">
+                              <Button variant="ghost" size="icon" onClick={() => openEditModuleDialog(module as Module)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => openDeleteModuleDialog(module as Module)}>
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={2} className="h-24 text-center">No modules found for this formation.</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
@@ -1099,25 +1218,39 @@ export default function CoursesPage() {
                   <FormMessage />
                 </FormItem>
               )} />
-              <FormItem>
-                  <FormLabel>Media</FormLabel>
-                  {editCategoryForm.watch('mediaUrl') && (
-                    <div className="mb-2">
-                        <MediaPreview url={editCategoryForm.watch('mediaUrl')!} alt={editCategoryForm.watch('name')} />
-                    </div>
-                  )}
+              <FormField control={editCategoryForm.control} name="isOnline" render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Catégorie en ligne</FormLabel>
+                    <CardDescription>Visible only on Online portal</CardDescription>
+                  </div>
                   <FormControl>
-                  <Input 
-                      type="file" 
-                      accept="image/*,video/*,.mov"
-                      onChange={(e) => {
-                        if (e.target.files?.[0]) {
-                            setCategoryMediaFile(e.target.files[0]);
-                        }
-                      }}
-                  />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
-                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormItem>
+                <FormLabel>Media</FormLabel>
+                {editCategoryForm.watch('mediaUrl') && (
+                  <div className="mb-2">
+                    <MediaPreview url={editCategoryForm.watch('mediaUrl')!} alt={editCategoryForm.watch('name')} />
+                  </div>
+                )}
+                <FormControl>
+                  <Input
+                    type="file"
+                    accept="image/*,video/*,.mov"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setCategoryMediaFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
               </FormItem>
               <DialogFooter>
                 <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
@@ -1127,7 +1260,7 @@ export default function CoursesPage() {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Delete Category Alert Dialog */}
       <AlertDialog open={isCategoryDeleteDialogOpen} onOpenChange={setIsCategoryDeleteDialogOpen}>
         <AlertDialogContent>
@@ -1146,7 +1279,7 @@ export default function CoursesPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-       {/* Edit Theme Dialog */}
+      {/* Edit Theme Dialog */}
       <Dialog open={isThemeEditDialogOpen} onOpenChange={setIsThemeEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -1166,6 +1299,20 @@ export default function CoursesPage() {
                   <FormLabel>Description</FormLabel>
                   <FormControl><Textarea {...field} /></FormControl>
                   <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editThemeForm.control} name="isOnline" render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Thème en ligne</FormLabel>
+                    <CardDescription>Visible only on Online portal</CardDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )} />
               <DialogFooter>
@@ -1195,168 +1342,204 @@ export default function CoursesPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-       {/* Edit Formation Dialog */}
-       <Dialog open={isFormationEditDialogOpen} onOpenChange={setIsFormationEditDialogOpen}>
-            <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-                <DialogTitle>Edit Formation: {editingFormation?.name}</DialogTitle>
-            </DialogHeader>
-            <Form {...editFormationForm}>
-                 <form onSubmit={editFormationForm.handleSubmit(onEditFormationSubmit)} className="grid grid-cols-2 gap-4 py-4 max-h-[70vh] overflow-y-auto px-1">
-                      <FormField control={editFormationForm.control} name="name" render={({ field }) => (
-                        <FormItem className="col-span-2 sm:col-span-1">
-                          <FormLabel>Formation Name</FormLabel>
-                          <FormControl><Input {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={editFormationForm.control} name="formationId" render={({ field }) => (
-                        <FormItem className="col-span-2 sm:col-span-1">
-                          <FormLabel>Formation ID</FormLabel>
-                          <FormControl><Input {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={editFormationForm.control} name="prixAvecHebergement" render={({ field }) => (
-                        <FormItem className="col-span-2 sm:col-span-1">
-                          <FormLabel>Prix avec hebergement</FormLabel>
-                          <FormControl><Input {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={editFormationForm.control} name="prixSansHebergement" render={({ field }) => (
-                        <FormItem className="col-span-2 sm:col-span-1">
-                          <FormLabel>Prix sans hebergement</FormLabel>
-                          <FormControl><Input {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={editFormationForm.control} name="format" render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Format</FormLabel>
-                          <FormControl><Input {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={editFormationForm.control} name="objectifPedagogique" render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Objectif Pédagogique</FormLabel>
-                          <FormControl><Textarea {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={editFormationForm.control} name="preRequis" render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Pré-requis</FormLabel>
-                          <FormControl><Textarea {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                       <FormField control={editFormationForm.control} name="publicConcerne" render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Public Concerné</FormLabel>
-                          <FormControl><Textarea {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={editFormationForm.control} name="methodesMobilisees" render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Méthodes Mobilisées</FormLabel>
-                          <FormControl><Textarea {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={editFormationForm.control} name="moyensPedagogiques" render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Moyens Pédagogiques</FormLabel>
-                          <FormControl><Textarea {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <FormField control={editFormationForm.control} name="modalitesEvaluation" render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Modalités d'Évaluation</FormLabel>
-                          <FormControl><Textarea {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                      <DialogFooter className="col-span-2">
-                        <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                        <Button type="submit" disabled={editFormationForm.formState.isSubmitting}>Save Changes</Button>
-                      </DialogFooter>
-                    </form>
-            </Form>
-            </DialogContent>
-        </Dialog>
+      {/* Edit Formation Dialog */}
+      <Dialog open={isFormationEditDialogOpen} onOpenChange={setIsFormationEditDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Formation: {editingFormation?.name}</DialogTitle>
+          </DialogHeader>
+          <Form {...editFormationForm}>
+            <form onSubmit={editFormationForm.handleSubmit(onEditFormationSubmit)} className="grid grid-cols-2 gap-4 py-4 max-h-[70vh] overflow-y-auto px-1">
+              <FormField control={editFormationForm.control} name="name" render={({ field }) => (
+                <FormItem className="col-span-2 sm:col-span-1">
+                  <FormLabel>Formation Name</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editFormationForm.control} name="isOnline" render={({ field }) => (
+                <FormItem className="col-span-2 flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Formation en ligne (Enterprise)</FormLabel>
+                    <CardDescription>Is this an online-only course for enterprises?</CardDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )} />
 
-        {/* Delete Formation Alert Dialog */}
-        <AlertDialog open={isFormationDeleteDialogOpen} onOpenChange={setIsFormationDeleteDialogOpen}>
-            <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                This will permanently delete the formation <span className="font-semibold">{formationToDelete?.name}</span>. This action cannot be undone.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteFormation} className="bg-destructive hover:bg-destructive/90">
-                Delete
-                </AlertDialogAction>
-            </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Edit Module Dialog */}
-        <Dialog open={isModuleEditDialogOpen} onOpenChange={setIsModuleEditDialogOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-                <DialogTitle>Edit Module: {editingModule?.name}</DialogTitle>
-            </DialogHeader>
-            <Form {...editModuleForm}>
-                <form onSubmit={editModuleForm.handleSubmit(onEditModuleSubmit)} className="space-y-4 py-4">
-                <FormField control={editModuleForm.control} name="name" render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Module Name</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
-                    <FormMessage />
+              {editFormationForm.watch('isOnline') ? (
+                <>
+                  <FormField control={editFormationForm.control} name="pricePerMonth" render={({ field }) => (
+                    <FormItem className="col-span-2 sm:col-span-1">
+                      <FormLabel>Price per Month</FormLabel>
+                      <FormControl><Input placeholder="e.g., 50€" {...field} value={field.value || ''} /></FormControl>
+                      <FormMessage />
                     </FormItem>
-                )} />
-                <FormField control={editModuleForm.control} name="description" render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl><Textarea {...field} /></FormControl>
-                    <FormMessage />
+                  )} />
+                  <FormField control={editFormationForm.control} name="durationMonths" render={({ field }) => (
+                    <FormItem className="col-span-2 sm:col-span-1">
+                      <FormLabel>Duration (Months)</FormLabel>
+                      <FormControl><Input placeholder="e.g., 6" {...field} value={field.value || ''} /></FormControl>
+                      <FormMessage />
                     </FormItem>
-                )} />
-                <DialogFooter>
-                    <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                    <Button type="submit" disabled={editModuleForm.formState.isSubmitting}>Save Changes</Button>
-                </DialogFooter>
-                </form>
-            </Form>
-            </DialogContent>
-        </Dialog>
+                  )} />
+                </>
+              ) : (
+                <>
+                  <FormField control={editFormationForm.control} name="prixAvecHebergement" render={({ field }) => (
+                    <FormItem className="col-span-2 sm:col-span-1">
+                      <FormLabel>Prix avec hebergement</FormLabel>
+                      <FormControl><Input {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={editFormationForm.control} name="prixSansHebergement" render={({ field }) => (
+                    <FormItem className="col-span-2 sm:col-span-1">
+                      <FormLabel>Prix sans hebergement</FormLabel>
+                      <FormControl><Input {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </>
+              )}
 
-        {/* Delete Module Alert Dialog */}
-        <AlertDialog open={isModuleDeleteDialogOpen} onOpenChange={setIsModuleDeleteDialogOpen}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                    This will permanently delete the module <span className="font-semibold">{moduleToDelete?.name}</span>. This action cannot be undone.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDeleteModule} className="bg-destructive hover:bg-destructive/90">
-                    Delete
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+              <FormField control={editFormationForm.control} name="formationId" render={({ field }) => (
+                <FormItem className="col-span-2 sm:col-span-1">
+                  <FormLabel>Formation ID</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editFormationForm.control} name="format" render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>Format</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editFormationForm.control} name="objectifPedagogique" render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>Objectif Pédagogique</FormLabel>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editFormationForm.control} name="preRequis" render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>Pré-requis</FormLabel>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editFormationForm.control} name="publicConcerne" render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>Public Concerné</FormLabel>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editFormationForm.control} name="methodesMobilisees" render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>Méthodes Mobilisées</FormLabel>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editFormationForm.control} name="moyensPedagogiques" render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>Moyens Pédagogiques</FormLabel>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editFormationForm.control} name="modalitesEvaluation" render={({ field }) => (
+                <FormItem className="col-span-2">
+                  <FormLabel>Modalités d'Évaluation</FormLabel>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter className="col-span-2">
+                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                <Button type="submit" disabled={editFormationForm.formState.isSubmitting}>Save Changes</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Formation Alert Dialog */}
+      <AlertDialog open={isFormationDeleteDialogOpen} onOpenChange={setIsFormationDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the formation <span className="font-semibold">{formationToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteFormation} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Module Dialog */}
+      <Dialog open={isModuleEditDialogOpen} onOpenChange={setIsModuleEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Module: {editingModule?.name}</DialogTitle>
+          </DialogHeader>
+          <Form {...editModuleForm}>
+            <form onSubmit={editModuleForm.handleSubmit(onEditModuleSubmit)} className="space-y-4 py-4">
+              <FormField control={editModuleForm.control} name="name" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Module Name</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={editModuleForm.control} name="description" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter>
+                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                <Button type="submit" disabled={editModuleForm.formState.isSubmitting}>Save Changes</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Module Alert Dialog */}
+      <AlertDialog open={isModuleDeleteDialogOpen} onOpenChange={setIsModuleDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the module <span className="font-semibold">{moduleToDelete?.name}</span>. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteModule} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
 
-    

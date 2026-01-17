@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,16 +11,22 @@ import Image from 'next/image';
 import { ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
 
 // Interfaces
-interface Category { id: string; name: string; }
-interface Theme { id: string; name: string; categoryId: string; }
-interface Formation { id: string; name: string; formationId: string; themeId: string; publicConcerne?: string; format?: string; }
+interface Category { id: string; name: string; isOnline?: boolean; }
+interface Theme { id: string; name: string; categoryId: string; isOnline?: boolean; }
+interface Formation { id: string; name: string; formationId: string; themeId: string; publicConcerne?: string; format?: string; isOnline?: boolean; pricePerMonth?: string; durationMonths?: string; }
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
 interface Page { id: string; title: string; sections: Section[]; }
-interface CoursesViewProps { formations: Formation[]; themes: Theme[]; categories: Category[]; pageData: Page | null; }
+interface CoursesViewProps {
+    formations: Formation[];
+    themes: Theme[];
+    categories: Category[];
+    pageData: Page | null;
+    mode?: 'standard' | 'online';
+}
 type SortKey = 'formationId' | 'name';
 type SortDirection = 'ascending' | 'descending';
 
-export default function CoursesView({ formations, themes, categories, pageData }: CoursesViewProps) {
+export default function CoursesView({ formations, themes, categories, pageData, mode = 'standard' }: CoursesViewProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const themeIdFromUrl = searchParams.get('themeId');
@@ -35,6 +41,31 @@ export default function CoursesView({ formations, themes, categories, pageData }
         return () => window.removeEventListener('resize', checkIsMobile);
     }, []);
 
+    // Filter available Categories and Themes based on mode
+    // Filter available Categories and Themes based on content presence in the current mode
+    // This ensures that if an Online course is in a "Standard" theme/category, that theme/category still appears in filters.
+    const { availableCategories, availableThemes } = React.useMemo(() => {
+        if (!formations || !themes || !categories) return { availableCategories: [], availableThemes: [] };
+
+        // 1. Get formations for current mode
+        const modeFormations = formations.filter(f => mode === 'online' ? f.isOnline : !f.isOnline);
+
+        // 2. Identify active themes (themes that have at least one formation in this mode)
+        const activeThemeIds = new Set(modeFormations.map(f => f.themeId));
+        const activeThemes = themes.filter(t => activeThemeIds.has(t.id));
+
+        // 3. Identify active categories (categories that have at least one active theme)
+        const activeCategoryIds = new Set(activeThemes.map(t => t.categoryId));
+        // Also include categories explicitly flagged for this mode (optional, but good for empty states if desired, though here we prioritize content)
+        // For now, strictly content-driven prevents "0 results" scenarios.
+        const activeCategories = categories.filter(c => activeCategoryIds.has(c.id));
+
+        return {
+            availableCategories: activeCategories,
+            availableThemes: activeThemes
+        };
+    }, [formations, themes, categories, mode]);
+
     const [selectedCategory, setSelectedCategory] = React.useState<string | null>(categoryIdFromUrl);
     const [selectedTheme, setSelectedTheme] = React.useState<string | null>(themeIdFromUrl);
     const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: SortDirection }>({ key: 'formationId', direction: 'ascending' });
@@ -44,7 +75,8 @@ export default function CoursesView({ formations, themes, categories, pageData }
 
     // Sync URL params and handle loading state
     React.useEffect(() => {
-        const theme = themes?.find(t => t.id === themeIdFromUrl);
+        // Ensure we look in available themes
+        const theme = availableThemes?.find(t => t.id === themeIdFromUrl);
         if (themeIdFromUrl && theme) {
             setSelectedTheme(themeIdFromUrl);
             if (selectedCategory !== theme.categoryId) setSelectedCategory(theme.categoryId);
@@ -52,26 +84,41 @@ export default function CoursesView({ formations, themes, categories, pageData }
             setSelectedCategory(categoryIdFromUrl);
             setSelectedTheme(null);
         } else {
-            setSelectedCategory(null);
-            setSelectedTheme(null);
+            // We don't reset to null here if the user navigates back (unless URL is empty)
+            // But if URL params are missing, we should probably respect that.
+            if (!themeIdFromUrl && !categoryIdFromUrl) {
+                // only reset if they were set from URL previously?
+                // Actually this logic might be running on every render if dependencies change.
+                // safe to leave as is for now or just check if searchParams changed.
+            }
         }
 
         if (formations) {
             setIsLoading(false);
         }
 
-    }, [themeIdFromUrl, categoryIdFromUrl, themes, selectedCategory, formations]);
+    }, [themeIdFromUrl, categoryIdFromUrl, availableThemes, selectedCategory, formations]); // Updated dep from themes to availableThemes
 
     // Filter and sort formations
     const filteredAndSortedFormations = React.useMemo(() => {
         if (!formations) return [];
         let filtered = formations;
 
+        // Filter by mode (Standard vs Online) - Formation Level
+        if (mode === 'online') {
+            filtered = filtered.filter(f => f.isOnline === true);
+        } else {
+            // Standard mode: Exclude online courses (unless they have explicit flag to show everywhere, but simply !isOnline is safe for now)
+            filtered = filtered.filter(f => !f.isOnline);
+        }
+
         if (selectedTheme) {
-            filtered = formations.filter(f => f.themeId === selectedTheme);
+            filtered = filtered.filter(f => f.themeId === selectedTheme);
         } else if (selectedCategory) {
+            // Use all themes to determine category membership, not just availableThemes (which are filtered by mode)
+            // This ensures online formations assigned to 'standard' themes are still visible when filtering by category.
             const themeIdsInCategory = themes?.filter(t => t.categoryId === selectedCategory).map(t => t.id) || [];
-            filtered = formations.filter(f => themeIdsInCategory.includes(f.themeId));
+            filtered = filtered.filter(f => themeIdsInCategory.includes(f.themeId));
         }
 
         return [...filtered].sort((a, b) => {
@@ -82,22 +129,32 @@ export default function CoursesView({ formations, themes, categories, pageData }
             if (valA > valB) return sortConfig.direction === 'ascending' ? 1 : -1;
             return 0;
         });
-    }, [formations, selectedCategory, selectedTheme, themes, sortConfig]);
+    }, [formations, selectedCategory, selectedTheme, availableThemes, sortConfig, mode]);
+
+    const pathname = usePathname();
 
     const handleCategoryChange = (categoryId: string) => {
         const newCategoryId = categoryId === 'all' ? null : categoryId;
         setSelectedCategory(newCategoryId);
         setSelectedTheme(null);
-        if (newCategoryId) router.push(`/courses?categoryId=${newCategoryId}`);
-        else router.push('/courses');
+
+        const params = new URLSearchParams(searchParams.toString());
+        if (newCategoryId) params.set('categoryId', newCategoryId);
+        else params.delete('categoryId');
+        params.delete('themeId'); // Reset theme when category changes
+
+        router.push(`${pathname}?${params.toString()}`);
     };
 
     const handleThemeChange = (themeId: string) => {
         const newThemeId = themeId === 'all' ? null : themeId;
         setSelectedTheme(newThemeId);
-        if (newThemeId) router.push(`/courses?themeId=${newThemeId}`);
-        else if (selectedCategory) router.push(`/courses?categoryId=${selectedCategory}`);
-        else router.push('/courses');
+
+        const params = new URLSearchParams(searchParams.toString());
+        if (newThemeId) params.set('themeId', newThemeId);
+        else params.delete('themeId');
+
+        router.push(`${pathname}?${params.toString()}`);
     };
 
     const handleSort = (key: SortKey) => {
@@ -112,18 +169,18 @@ export default function CoursesView({ formations, themes, categories, pageData }
     };
 
     const filteredThemes = React.useMemo(() => {
-        if (!themes) return [];
-        if (!selectedCategory) return themes;
-        return themes.filter(theme => theme.categoryId === selectedCategory);
-    }, [themes, selectedCategory]);
+        if (!availableThemes) return [];
+        if (!selectedCategory) return availableThemes;
+        return availableThemes.filter(theme => theme.categoryId === selectedCategory);
+    }, [availableThemes, selectedCategory]);
 
     const selectedThemeName = React.useMemo(() => {
-        if (!selectedTheme || !themes) return null;
-        return themes.find(t => t.id === selectedTheme)?.name || null;
-    }, [selectedTheme, themes]);
+        if (!selectedTheme || !availableThemes) return null;
+        return availableThemes.find(t => t.id === selectedTheme)?.name || null;
+    }, [selectedTheme, availableThemes]);
 
     const formationCount = filteredAndSortedFormations?.length || 0;
-    
+
     const dynamicCardTitle = React.useMemo(() => {
         if (isLoading) {
             return "Recherche de formations...";
@@ -169,14 +226,14 @@ export default function CoursesView({ formations, themes, categories, pageData }
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Toutes les catégories</SelectItem>
-                                    {categories?.map(category => (
+                                    {availableCategories?.map(category => (
                                         <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="flex flex-col w-full sm:w-64">
-                            <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!themes || themes.length === 0}>
+                            <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!availableThemes || availableThemes.length === 0}>
                                 <SelectTrigger className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white w-full">
                                     <SelectValue placeholder="Filtrer par thème" />
                                 </SelectTrigger>
@@ -227,11 +284,15 @@ export default function CoursesView({ formations, themes, categories, pageData }
                                 ) : (
                                     filteredAndSortedFormations && filteredAndSortedFormations.length > 0 ? (
                                         filteredAndSortedFormations.map(formation => (
-                                            <TableRow key={formation.id}>
+                                            <TableRow
+                                                key={formation.id}
+                                                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                                                onClick={() => router.push(`/courses/${formation.id}?from=catalog`)}
+                                            >
                                                 <TableCell className="font-mono text-xs py-2 hidden md:table-cell">{formation.formationId}</TableCell>
                                                 <TableCell className="font-medium py-2">{formation.name}</TableCell>
                                                 <TableCell className="text-right py-2">
-                                                    <Button variant={isMobile ? "ghost" : "link"} size={isMobile ? "icon" : "default"} asChild>
+                                                    <Button variant={isMobile ? "ghost" : "link"} size={isMobile ? "icon" : "default"} asChild onClick={(e) => e.stopPropagation()}>
                                                         <Link href={`/courses/${formation.id}?from=catalog`}>
                                                             {isMobile ? <ArrowRight className="h-4 w-4" /> : 'Voir les détails'}
                                                             <span className="sr-only">Voir les détails</span>

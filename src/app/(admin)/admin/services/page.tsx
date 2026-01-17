@@ -70,6 +70,8 @@ const formSchema = z.object({
   mediaUrl: z.string().optional(),
   isPremium: z.boolean().default(false),
   isOptional: z.boolean().default(false),
+  appliesToOnline: z.boolean().default(false),
+  appliesToStandard: z.boolean().default(true),
 });
 
 interface Service extends z.infer<typeof formSchema> {
@@ -77,25 +79,25 @@ interface Service extends z.infer<typeof formSchema> {
 }
 
 const isVideoUrl = (url?: string | null) => {
-    if (!url) return false;
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    try {
-      const pathname = new URL(url).pathname.split('?')[0];
-      return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
-    } catch (e) {
-      return false; // Invalid URL
-    }
+  if (!url) return false;
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+  try {
+    const pathname = new URL(url).pathname.split('?')[0];
+    return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+  } catch (e) {
+    return false; // Invalid URL
+  }
 };
 
 const MediaPreview = ({ url, alt }: { url: string, alt: string }) => {
-    if (isVideoUrl(url)) {
-        return (
-            <video src={url} width="64" height="40" className="object-cover rounded-sm bg-muted" muted playsInline />
-        );
-    }
+  if (isVideoUrl(url)) {
     return (
-        <Image src={url} alt={alt} width={64} height={40} className="object-cover rounded-sm" />
+      <video src={url} width="64" height="40" className="object-cover rounded-sm bg-muted" muted playsInline />
     );
+  }
+  return (
+    <Image src={url} alt={alt} width={64} height={40} className="object-cover rounded-sm" />
+  );
 }
 
 export default function ServicesPage() {
@@ -121,12 +123,14 @@ export default function ServicesPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { 
-      name: '', 
-      description: '', 
+    defaultValues: {
+      name: '',
+      description: '',
       mediaUrl: '',
       isPremium: false,
       isOptional: false,
+      appliesToOnline: false,
+      appliesToStandard: true,
     },
   });
 
@@ -140,7 +144,7 @@ export default function ServicesPage() {
       router.push('/login');
     }
   }, [user, isUserLoading, router]);
-  
+
   useEffect(() => {
     if (editingService) {
       editForm.reset({
@@ -149,6 +153,8 @@ export default function ServicesPage() {
         mediaUrl: editingService.mediaUrl || '',
         isPremium: editingService.isPremium || false,
         isOptional: editingService.isOptional || false,
+        appliesToOnline: editingService.appliesToOnline || false,
+        appliesToStandard: editingService.appliesToStandard !== undefined ? editingService.appliesToStandard : true,
       });
     }
   }, [editingService, editForm]);
@@ -167,7 +173,7 @@ export default function ServicesPage() {
     const fileExtension = file.name.split('.').pop();
     const fileName = `${uuidv4()}.${fileExtension}`;
     const storageRef = ref(storage, `service-assets/${fileName}`);
-    
+
     try {
       const snapshot = await uploadBytes(storageRef, file);
       return await getDownloadURL(snapshot.ref);
@@ -187,12 +193,12 @@ export default function ServicesPage() {
 
     let mediaUrl = '';
     if (mediaFile) {
-        mediaUrl = await handleFileUpload(mediaFile) || '';
+      mediaUrl = await handleFileUpload(mediaFile) || '';
     }
 
     const dataToSave = { ...values, mediaUrl };
     const servicesCollection = collection(firestore, 'services');
-    
+
     addDocumentNonBlocking(servicesCollection, dataToSave);
 
     toast({
@@ -204,7 +210,7 @@ export default function ServicesPage() {
     setMediaFile(null);
     setIsAddDialogOpen(false);
   };
-  
+
   const onEditSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!firestore || !editingService) return;
 
@@ -219,13 +225,13 @@ export default function ServicesPage() {
       }
       mediaUrl = await handleFileUpload(mediaFile) || editingService.mediaUrl;
     }
-    
+
     const docRef = doc(firestore, 'services', editingService.id);
-    const dataToSave = { 
-      ...values, 
+    const dataToSave = {
+      ...values,
       mediaUrl,
     };
-    
+
     setDocumentNonBlocking(docRef, dataToSave, { merge: true });
 
     toast({
@@ -242,7 +248,7 @@ export default function ServicesPage() {
     setServiceToDelete(service);
     setIsDeleteDialogOpen(true);
   };
-  
+
   const openEditDialog = (service: Service) => {
     setEditingService(service);
     setIsEditDialogOpen(true);
@@ -251,7 +257,7 @@ export default function ServicesPage() {
 
   const handleDeleteService = () => {
     if (!firestore || !serviceToDelete) return;
-    
+
     if (serviceToDelete.mediaUrl && storage) {
       const mediaRef = ref(storage, serviceToDelete.mediaUrl);
       deleteObject(mediaRef).catch(error => console.error("Error deleting media: ", error));
@@ -282,109 +288,145 @@ export default function ServicesPage() {
               <CardDescription>A list of all current services.</CardDescription>
             </div>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                    <Button>
-                        <Plus className="h-4 w-4" />
-                        Add Service
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Add New Service</DialogTitle>
-                        <DialogDescription>
-                            Fill out the details for the new service. Click save when you're done.
-                        </DialogDescription>
-                    </DialogHeader>
-                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Service Name</FormLabel>
-                                    <FormControl>
-                                    <Input placeholder="e.g., Web Development" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4" />
+                  Add Service
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add New Service</DialogTitle>
+                  <DialogDescription>
+                    Fill out the details for the new service. Click save when you're done.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4 py-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Service Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Web Development" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="A short description of the service." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormItem>
+                      <FormLabel>Media Asset</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*,video/*,.mov"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              setMediaFile(e.target.files[0]);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                    <FormField
+                      control={form.control}
+                      name="isPremium"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>Premium Service</FormLabel>
+                            <FormMessage />
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
                             />
-                            <FormField
-                                control={form.control}
-                                name="description"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl>
-                                    <Textarea placeholder="A short description of the service." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="isOptional"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>Optional Service</FormLabel>
+                            <FormMessage />
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
                             />
-                            <FormItem>
-                                <FormLabel>Media Asset</FormLabel>
-                                <FormControl>
-                                <Input 
-                                    type="file" 
-                                    accept="image/*,video/*,.mov"
-                                    onChange={(e) => {
-                                      if (e.target.files?.[0]) {
-                                          setMediaFile(e.target.files[0]);
-                                      }
-                                    }}
-                                />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                             <FormField
-                                control={form.control}
-                                name="isPremium"
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                    <div className="space-y-0.5">
-                                      <FormLabel>Premium Service</FormLabel>
-                                      <FormMessage />
-                                    </div>
-                                    <FormControl>
-                                      <Switch
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="isOptional"
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                    <div className="space-y-0.5">
-                                      <FormLabel>Optional Service</FormLabel>
-                                      <FormMessage />
-                                    </div>
-                                    <FormControl>
-                                      <Switch
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                             <DialogFooter>
-                                <DialogClose asChild>
-                                    <Button type="button" variant="outline">Cancel</Button>
-                                </DialogClose>
-                                <Button type="submit" disabled={form.formState.isSubmitting}>
-                                    {form.formState.isSubmitting ? 'Saving...' : 'Save Service'}
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </Form>
-                </DialogContent>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="appliesToOnline"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>Applies to Online</FormLabel>
+                            <FormMessage />
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="appliesToStandard"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>Applies to Standard</FormLabel>
+                            <FormMessage />
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button" variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button type="submit" disabled={form.formState.isSubmitting}>
+                        {form.formState.isSubmitting ? 'Saving...' : 'Save Service'}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
             </Dialog>
           </CardHeader>
           <CardContent>
@@ -416,7 +458,7 @@ export default function ServicesPage() {
                     <TableRow key={service.id}>
                       <TableCell>
                         {service.mediaUrl ? (
-                           <MediaPreview url={service.mediaUrl} alt={service.name} />
+                          <MediaPreview url={service.mediaUrl} alt={service.name} />
                         ) : (
                           <div className="h-10 w-16 bg-muted rounded-sm flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                         )}
@@ -434,13 +476,13 @@ export default function ServicesPage() {
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-sm text-muted-foreground truncate max-w-xs">{service.description}</TableCell>
                       <TableCell className="text-right">
-                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(service as Service)}>
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
+                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(service as Service)}>
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
                         </Button>
-                         <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(service as Service)}>
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                            <span className="sr-only">Delete</span>
+                        <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(service as Service)}>
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                          <span className="sr-only">Delete</span>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -459,82 +501,118 @@ export default function ServicesPage() {
       </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                  <DialogTitle>Edit Service: {editingService?.name}</DialogTitle>
-                  <DialogDescription>
-                    Make changes to the service content below. Click save when you're done.
-                  </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <Form {...editForm}>
-                    <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
-                      <FormField control={editForm.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Service Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                      <FormField control={editForm.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                      <FormItem>
-                          <FormLabel>Media Asset</FormLabel>
-                          <div className="flex items-center gap-4">
-                              {editForm.watch('mediaUrl') && (
-                                  <div className="relative">
-                                      <MediaPreview url={editForm.watch('mediaUrl')!} alt={editForm.watch('name')} />
-                                  </div>
-                              )}
-                              <FormControl className="flex-1">
-                                  <Input type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setMediaFile(e.target.files[0]) } }}/>
-                              </FormControl>
-                          </div>
-                          <FormMessage />
-                      </FormItem>
-                      <FormField
-                        control={editForm.control}
-                        name="isPremium"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                            <div className="space-y-0.5">
-                              <FormLabel>Premium Service</FormLabel>
-                              <FormMessage />
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={editForm.control}
-                        name="isOptional"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                            <div className="space-y-0.5">
-                              <FormLabel>Optional Service</FormLabel>
-                              <FormMessage />
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <DialogFooter className="pt-4">
-                          <DialogClose asChild>
-                              <Button type="button" variant="outline">Cancel</Button>
-                          </DialogClose>
-                          <Button type="submit" disabled={editForm.formState.isSubmitting}>
-                              {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
-                          </Button>
-                      </DialogFooter>
-                    </form>
-                </Form>
-              </div>
-          </DialogContent>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Service: {editingService?.name}</DialogTitle>
+            <DialogDescription>
+              Make changes to the service content below. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Form {...editForm}>
+              <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+                <FormField control={editForm.control} name="name" render={({ field }) => (<FormItem> <FormLabel>Service Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem>)} />
+                <FormField control={editForm.control} name="description" render={({ field }) => (<FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} /></FormControl> <FormMessage /> </FormItem>)} />
+                <FormItem>
+                  <FormLabel>Media Asset</FormLabel>
+                  <div className="flex items-center gap-4">
+                    {editForm.watch('mediaUrl') && (
+                      <div className="relative">
+                        <MediaPreview url={editForm.watch('mediaUrl')!} alt={editForm.watch('name')} />
+                      </div>
+                    )}
+                    <FormControl className="flex-1">
+                      <Input type="file" accept="image/*,video/*,.mov" onChange={(e) => { if (e.target.files?.[0]) { setMediaFile(e.target.files[0]) } }} />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+                <FormField
+                  control={editForm.control}
+                  name="isPremium"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Premium Service</FormLabel>
+                        <FormMessage />
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="isOptional"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Optional Service</FormLabel>
+                        <FormMessage />
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="appliesToOnline"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Applies to Online</FormLabel>
+                        <FormMessage />
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="appliesToStandard"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Applies to Standard</FormLabel>
+                        <FormMessage />
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter className="pt-4">
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline">Cancel</Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={editForm.formState.isSubmitting}>
+                    {editForm.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </div>
+        </DialogContent>
       </Dialog>
-      
+
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

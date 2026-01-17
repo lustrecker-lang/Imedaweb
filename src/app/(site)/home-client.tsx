@@ -13,6 +13,7 @@ import { collection, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -28,9 +29,9 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
 interface Page { id: string; title: string; sections: Section[]; }
 interface Campus { id: string; name: string; slug: string; description?: string; imageUrl?: string; }
-interface Category { id: string; name: string; description?: string; mediaUrl?: string; }
-interface Theme { id: string; name: string; description?: string; categoryId: string; }
-interface Formation { id: string; themeId: string; name: string; formationId: string; }
+interface Category { id: string; name: string; description?: string; mediaUrl?: string; isOnline?: boolean; }
+interface Theme { id: string; name: string; description?: string; categoryId: string; isOnline?: boolean; }
+interface Formation { id: string; themeId: string; name: string; formationId: string; isOnline?: boolean; }
 interface Reference { id: string; name: string; logoUrl: string; }
 interface Kpi { id: string; number: number; title: string; description: string; order: number; }
 interface Article {
@@ -257,15 +258,25 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   };
 
   const categoriesWithThemes = useMemo(() => {
-    return coursesData.categories.map(category => {
-      const categoryThemes = coursesData.themes.filter(theme => theme.categoryId === category.id);
-      const formationCount = coursesData.formations.filter(formation => categoryThemes.some(theme => theme.id === formation.themeId)).length;
-      return {
-        ...category,
-        themes: categoryThemes,
-        formationCount: formationCount
-      };
-    });
+    return coursesData.categories
+      .map(category => {
+        // Filter out themes that are strictly online
+        const categoryThemes = coursesData.themes.filter(theme => theme.categoryId === category.id && !theme.isOnline);
+
+        // Count only standard formations (exclude online)
+        const formationCount = coursesData.formations.filter(formation =>
+          !formation.isOnline &&
+          categoryThemes.some(theme => theme.id === formation.themeId)
+        ).length;
+
+        return {
+          ...category,
+          themes: categoryThemes,
+          formationCount: formationCount
+        };
+      })
+      // Only show categories that have at least one standard formation/theme
+      .filter(category => category.themes.length > 0);
   }, [coursesData.categories, coursesData.themes, coursesData.formations]);
 
 
@@ -656,78 +667,133 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
         </div>
       </section>
 
-      {/* 4. Catalog Download */}
-      {catalogSection && (
-        <section className="py-8 md:py-16">
-          <div className="container">
-            <div className="-mx-4 sm:mx-0">
-              <Card className="overflow-hidden md:rounded-lg">
-                <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-                  <div className="relative aspect-video h-full min-h-[250px] md:min-h-0 order-1 md:order-2">
-                    {catalogSection.imageUrl && (
-                      <Image
-                        src={catalogSection.imageUrl}
-                        alt={catalogSection.title || "Download Catalog"}
-                        fill
-                        className="object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="p-6 md:p-10 text-left order-2 md:order-1">
-                    {hasSubmitted ? (
-                      <div className="flex flex-col items-center justify-center text-center space-y-4">
-                        <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
-                        <h3 className="font-headline font-normal text-2xl">Merci!</h3>
-                        <p className="text-muted-foreground mt-1 text-sm">
-                          Votre téléchargement a commencé.
-                        </p>
-                        <Button variant="outline" onClick={handleResetForm} className="mt-4">
-                          Fermer
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <h3 className="font-headline font-normal text-2xl">
-                          {catalogSection.title}
-                        </h3>
-                        <p className="text-muted-foreground mt-2 text-sm">
-                          {catalogSection.content}
-                        </p>
-                        <div className="grid sm:grid-cols-3 items-start gap-2 mt-6">
-                          <Input
-                            type="email"
-                            placeholder="Votre adresse email"
-                            className="w-full sm:col-span-1"
-                            value={catalogEmail}
-                            onChange={e => setCatalogEmail(e.target.value)}
-                            disabled={isSubmitting}
-                          />
-                          <Input
-                            type="tel"
-                            placeholder="Téléphone/WhatsApp"
-                            className="w-full sm:col-span-1"
-                            value={catalogPhone}
-                            onChange={e => setCatalogPhone(e.target.value)}
-                            disabled={isSubmitting}
-                          />
-                          <Button
-                            className="w-full sm:col-span-1"
-                            disabled={!isEmailValid || isSubmitting}
-                            onClick={handleCatalogSubmit}
-                          >
-                            <Download className="mr-2 h-4 w-4" />
-                            <span className="sm:hidden lg:inline">Télécharger</span>
-                          </Button>
-                        </div>
-                      </>
-                    )}
+      {/* 4. Catalog Download & IMEDA Online Grid */}
+      <section className="py-8 md:py-16">
+        <div className="container">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Left Column: Catalog Download */}
+            {catalogSection && (
+              <Card className="overflow-hidden h-full flex flex-col">
+                <div className="relative h-48 w-full shrink-0">
+                  {catalogSection.imageUrl && (
+                    <Image
+                      src={catalogSection.imageUrl}
+                      alt={catalogSection.title || "Download Catalog"}
+                      fill
+                      className="object-cover"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <h3 className="font-headline font-normal text-2xl">
+                      {catalogSection.title}
+                    </h3>
                   </div>
                 </div>
+
+                <div className="p-6 flex-1 flex flex-col justify-center">
+                  {hasSubmitted ? (
+                    <div className="flex flex-col items-center justify-center text-center space-y-4">
+                      <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
+                      <h3 className="font-headline font-normal text-xl">Merci!</h3>
+                      <p className="text-muted-foreground mt-1 text-sm">
+                        Votre téléchargement a commencé.
+                      </p>
+                      <Button variant="outline" onClick={handleResetForm} className="mt-4 w-full">
+                        Fermer
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="text-muted-foreground text-sm">
+                        {catalogSection.content}
+                      </p>
+                      <div className="space-y-3">
+                        <Input
+                          type="email"
+                          placeholder="Votre adresse email"
+                          value={catalogEmail}
+                          onChange={e => setCatalogEmail(e.target.value)}
+                          disabled={isSubmitting}
+                        />
+                        <Input
+                          type="tel"
+                          placeholder="Téléphone/WhatsApp"
+                          value={catalogPhone}
+                          onChange={e => setCatalogPhone(e.target.value)}
+                          disabled={isSubmitting}
+                        />
+                        <Button
+                          className="w-full"
+                          disabled={!isEmailValid || isSubmitting}
+                          onClick={handleCatalogSubmit}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          <span>Télécharger le Catalogue</span>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </Card>
-            </div>
+            )}
+
+            {/* Right Column: IMEDA Online Search */}
+            <Card className="overflow-hidden h-full flex flex-col">
+              <div className="relative h-48 w-full shrink-0 bg-slate-900">
+                {/* Placeholder image or pattern for Online */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-indigo-900" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white opacity-10">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="2" fill="none" />
+                      <path d="M50 10 L50 90 M10 50 L90 50" stroke="currentColor" strokeWidth="2" />
+                    </svg>
+                  </span>
+                </div>
+
+                <div className="absolute bottom-4 left-4 right-4 text-white">
+                  <h3 className="font-headline font-normal text-2xl">
+                    IMEDA Online
+                  </h3>
+                </div>
+              </div>
+
+              <div className="p-6 flex-1 flex flex-col">
+                <p className="text-muted-foreground text-sm mb-6">
+                  Accédez à nos formations 100% en ligne. Flexibilité totale, diplôme identique.
+                </p>
+
+                <div className="space-y-4 mt-auto">
+                  <Select onValueChange={(val) => {
+                    if (val) router.push(`/online?categoryId=${val}`);
+                  }}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choisir une catégorie..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {coursesData.categories.filter(c => c.isOnline).map(category => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name} ({coursesData.formations.filter(f => f.isOnline && coursesData.themes.find(t => t.id === f.themeId)?.categoryId === category.id).length})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button asChild className="w-full" variant="secondary">
+                    <Link href="/online">
+                      Voir toutes les formations en ligne
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* 5. Excellence Academic (Features) */}
       <section className="py-8 md:py-16">

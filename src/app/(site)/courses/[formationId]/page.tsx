@@ -68,8 +68,8 @@ interface CourseDetailPageContent {
 
 // Dynamic Metadata Generation for SEO using firebase-admin
 // This is a server function that runs once for each request.
-export async function generateMetadata({ params }: { params: { formationId: string } }): Promise<Metadata> {
-  const formationId = params.formationId;
+export async function generateMetadata({ params }: { params: Promise<{ formationId: string }> }): Promise<Metadata> {
+  const { formationId } = await params;
 
   try {
     const formationRef = adminDb.collection('course_formations').doc(formationId);
@@ -129,7 +129,7 @@ async function getCourseDetails(formationId: string) {
     const formationSnap = await formationRef.get();
 
     if (!formationSnap.exists) {
-      return { formation: null, theme: null, modules: [], campuses: [], allServices: [], coursePageContent: null };
+      return { formation: null, theme: undefined, modules: [], campuses: [], allServices: [], coursePageContent: undefined };
     }
 
     const formationData = { id: formationSnap.id, ...formationSnap.data() } as Formation;
@@ -142,10 +142,10 @@ async function getCourseDetails(formationId: string) {
       adminDb.collection('courseDetailPage').doc('main').get()
     ]);
 
-    const theme = themeSnap?.exists ? { id: themeSnap.id, ...themeSnap.data() } as Theme : null;
+    const theme = themeSnap?.exists ? { id: themeSnap.id, ...themeSnap.data() } as Theme : undefined;
     const modules = modulesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Module[];
     const campuses = campusesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Campus[];
-    const coursePageContent = coursePageContentSnap.exists ? coursePageContentSnap.data() as CourseDetailPageContent : null;
+    const coursePageContent = coursePageContentSnap.exists ? coursePageContentSnap.data() as CourseDetailPageContent : undefined;
 
     const allServices = servicesSnap.docs
       .map(doc => ({ id: doc.id, ...doc.data() }) as Service)
@@ -162,7 +162,7 @@ async function getCourseDetails(formationId: string) {
 
   } catch (error) {
     console.error("Error fetching course details:", error);
-    return { formation: null, theme: null, modules: [], campuses: [], allServices: [], coursePageContent: null };
+    return { formation: null, theme: undefined, modules: [], campuses: [], allServices: [], coursePageContent: undefined };
   }
 }
 
@@ -188,8 +188,9 @@ const CourseDetailPageSkeleton = () => {
   );
 }
 
-export default async function FormationDetailPage({ params }: { params: { formationId: string } }) {
-  const courseData = await getCourseDetails(params.formationId);
+export default async function FormationDetailPage({ params }: { params: Promise<{ formationId: string }> }) {
+  const { formationId } = await params;
+  const courseData = await getCourseDetails(formationId);
 
   if (!courseData.formation) {
     notFound();
