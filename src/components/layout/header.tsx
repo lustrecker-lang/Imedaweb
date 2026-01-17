@@ -130,7 +130,7 @@ export function Header({ companyProfile, campuses }: HeaderProps) {
           Contactez-nous
         </Button>
       </SheetTrigger>
-      <SheetContent side="right">
+      <SheetContent side="right" className="w-full sm:max-w-sm overflow-y-auto pb-12">
         <ContactForm onFormSubmit={() => setIsContactSheetOpen(false)} showHeader={true} />
       </SheetContent>
     </Sheet>
