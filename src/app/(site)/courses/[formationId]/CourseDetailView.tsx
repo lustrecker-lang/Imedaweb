@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, Phone, Mail, GraduationCap, Building, Check, ArrowLeft } from 'lucide-react';
-import { CourseInquiryForm } from '@/components/course-inquiry-form';
+import { OnlineCourseForm } from '@/components/online-reservation-form';
 import Image from 'next/image';
 import { addMonths, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -209,9 +209,9 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                 <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b md:hidden">
                     <div className="container px-4 h-12 flex items-center">
                         <Button variant="ghost" size="sm" asChild>
-                            <Link href="/courses">
+                            <Link href={formation.isOnline ? "/online" : "/courses"}>
                                 <ArrowLeft className="mr-2 h-4 w-4" />
-                                Catalogue
+                                {formation.isOnline ? "Formations en Ligne" : "Catalogue"}
                             </Link>
                         </Button>
                     </div>
@@ -249,7 +249,26 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="space-y-8 pt-4">
-                                        {!formation.isOnline && (
+                                        {formation.isOnline ? (
+                                            <div>
+                                                <h3 className="font-normal mb-3">Aperçu de la formation en ligne</h3>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                                    {[
+                                                        { title: "Cours Interactifs", img: "/images/pdpimage1.jpg" },
+                                                        { title: "Experts IMEDA", img: "/images/pdpimage2.jpg" },
+                                                        { title: "Accès 24/7", img: "/images/pdpimage3.jpg" }
+                                                    ].map((item, idx) => (
+                                                        <div key={idx} className="group relative overflow-hidden rounded-lg aspect-w-4 aspect-h-3">
+                                                            <div className="relative w-full h-full min-h-[120px]">
+                                                                <Image src={item.img} alt={item.title} fill className="transition-transform duration-300 group-hover:scale-105 object-cover opacity-80" />
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                                                                <p className="absolute bottom-2 left-3 text-sm font-semibold text-white tracking-tight">{item.title}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
                                             <div>
                                                 <h3 className="font-normal mb-3">Cette formation est disponible dans tous ces campus.</h3>
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -632,7 +651,13 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
 
                     <aside className="sticky top-24 self-start hidden lg:block">
                         <div className="bg-white p-6 rounded-lg border">
-                            <CourseInquiryForm courseName={formation.name} showHeader={false} />
+                            <OnlineCourseForm
+                                courseName={formation.name}
+                                pricePerMonth={formation.pricePerMonth}
+                                durationMonths={formation.durationMonths}
+                                isOnline={formation.isOnline}
+                                showHeader={false}
+                            />
                         </div>
                     </aside>
                 </div>
@@ -645,7 +670,13 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                         </SheetTrigger>
                         <SheetContent side="bottom" className="h-[90vh] flex flex-col">
                             <div className="overflow-y-auto p-2">
-                                <CourseInquiryForm courseName={formation.name} showHeader={true} />
+                                <OnlineCourseForm
+                                    courseName={formation.name}
+                                    pricePerMonth={formation.pricePerMonth}
+                                    durationMonths={formation.durationMonths}
+                                    isOnline={formation.isOnline}
+                                    showHeader={true}
+                                />
                             </div>
                         </SheetContent>
                     </Sheet>

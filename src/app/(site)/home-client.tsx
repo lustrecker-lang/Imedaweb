@@ -137,6 +137,7 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const heroSection = heroData?.sections.find(s => s.id === 'hero');
   const featuresSectionHeader = featuresData?.sections.find(s => s.id === 'features');
   const catalogSection = catalogData?.sections.find(s => s.id === 'catalog-download');
+  const onlineSection = catalogData?.sections.find(s => s.id === 'online-section');
   const heroMediaUrl = heroSection?.imageUrl;
   const isHeroVideo = heroMediaUrl ? isVideoUrl(heroMediaUrl) : false;
 
@@ -742,27 +743,37 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
             {/* Right Column: IMEDA Online Search */}
             <Card className="overflow-hidden h-full flex flex-col">
               <div className="relative h-48 w-full shrink-0 bg-slate-900">
-                {/* Placeholder image or pattern for Online */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-indigo-900" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white opacity-10">
-                    <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="2" fill="none" />
-                      <path d="M50 10 L50 90 M10 50 L90 50" stroke="currentColor" strokeWidth="2" />
-                    </svg>
-                  </span>
-                </div>
+                {onlineSection?.imageUrl ? (
+                  <Image
+                    src={onlineSection.imageUrl}
+                    alt={onlineSection.title || "IMEDA Online"}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-indigo-900" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-white opacity-10">
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="2" fill="none" />
+                          <path d="M50 10 L50 90 M10 50 L90 50" stroke="currentColor" strokeWidth="2" />
+                        </svg>
+                      </span>
+                    </div>
+                  </>
+                )}
 
                 <div className="absolute bottom-4 left-4 right-4 text-white">
                   <h3 className="font-headline font-normal text-2xl">
-                    IMEDA Online
+                    {onlineSection?.title || "IMEDA Online"}
                   </h3>
                 </div>
               </div>
 
               <div className="p-6 flex-1 flex flex-col">
                 <p className="text-muted-foreground text-sm mb-6">
-                  Accédez à nos formations 100% en ligne. Flexibilité totale, diplôme identique.
+                  {onlineSection?.content || "Accédez à nos formations 100% en ligne. Flexibilité totale, diplôme identique."}
                 </p>
 
                 <div className="space-y-4 mt-auto">

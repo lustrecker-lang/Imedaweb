@@ -58,14 +58,14 @@ type Page = z.infer<typeof pageSchema>;
 type Section = z.infer<typeof sectionSchema>;
 
 const ogFormSchema = pageSchema.pick({
-    ogTitle: true,
-    ogDescription: true,
-    ogImage: true,
+  ogTitle: true,
+  ogDescription: true,
+  ogImage: true,
 });
 
 function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: Section; onSectionUpdate: (updatedSection: Section, imageFile: File | null) => void }) {
   const [imageFile, setImageFile] = useState<File | null>(null);
-  
+
   const form = useForm<Section>({
     resolver: zodResolver(sectionSchema),
     defaultValues: section,
@@ -79,11 +79,12 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
     onSectionUpdate(values, imageFile);
     setImageFile(null);
     const fileInput = document.getElementById(`file-input-${section.id}`) as HTMLInputElement;
-    if(fileInput) fileInput.value = '';
+    if (fileInput) fileInput.value = '';
   };
-  
+
   const isHeroSection = section.id === 'hero';
   const isCatalogSection = section.id === 'catalog-download';
+  const isOnlineSection = section.id === 'online-section';
   const currentMediaUrl = form.watch('imageUrl');
   const isVideo = currentMediaUrl?.includes('video');
 
@@ -114,42 +115,42 @@ function SectionForm({ page, section, onSectionUpdate }: { page: Page; section: 
               <FormControl>
                 <Textarea {...field} className="min-h-[120px]" />
               </FormControl>
-               {isRawHTML && <p className="text-xs text-muted-foreground mt-2">This field supports HTML for formatting.</p>}
+              {isRawHTML && <p className="text-xs text-muted-foreground mt-2">This field supports HTML for formatting.</p>}
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{isHeroSection ? 'Background Media' : 'Image'}</FormLabel>
-                {currentMediaUrl && !imageFile && (
-                  <div className="my-2">
-                    {isVideo ? (
-                      <video src={currentMediaUrl} width="100" className="object-contain rounded-md border" controls />
-                    ) : (
-                      <Image src={currentMediaUrl} alt="Current Image" width={100} height={100} className="object-contain rounded-md border" />
-                    )}
-                  </div>
-                )}
-                <FormControl>
-                    <Input 
-                        id={`file-input-${section.id}`}
-                        type="file" 
-                        accept={isHeroSection || isCatalogSection ? "image/*,video/*,.mov" : "image/svg+xml, image/png, image/jpeg, image/webp, image/gif"}
-                        onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                                setImageFile(e.target.files[0]);
-                                field.onChange(URL.createObjectURL(e.target.files[0])); 
-                            }
-                        }}
-                    />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{isHeroSection ? 'Background Media' : 'Image'}</FormLabel>
+              {currentMediaUrl && !imageFile && (
+                <div className="my-2">
+                  {isVideo ? (
+                    <video src={currentMediaUrl} width="100" className="object-contain rounded-md border" controls />
+                  ) : (
+                    <Image src={currentMediaUrl} alt="Current Image" width={100} height={100} className="object-contain rounded-md border" />
+                  )}
+                </div>
+              )}
+              <FormControl>
+                <Input
+                  id={`file-input-${section.id}`}
+                  type="file"
+                  accept={isHeroSection || isCatalogSection || isOnlineSection ? "image/*,video/*,.mov" : "image/svg+xml, image/png, image/jpeg, image/webp, image/gif"}
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      setImageFile(e.target.files[0]);
+                      field.onChange(URL.createObjectURL(e.target.files[0]));
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         <Button type="submit" size="sm" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Saving...' : `Save Section`}
@@ -178,9 +179,9 @@ export default function PageEditor() {
   const ogForm = useForm<z.infer<typeof ogFormSchema>>({
     resolver: zodResolver(ogFormSchema),
     defaultValues: {
-        ogTitle: page?.ogTitle || '',
-        ogDescription: page?.ogDescription || '',
-        ogImage: page?.ogImage || '',
+      ogTitle: page?.ogTitle || '',
+      ogDescription: page?.ogDescription || '',
+      ogImage: page?.ogImage || '',
     },
   });
 
@@ -188,11 +189,11 @@ export default function PageEditor() {
 
   useEffect(() => {
     if (page) {
-        ogForm.reset({
-            ogTitle: page.ogTitle || '',
-            ogDescription: page.ogDescription || '',
-            ogImage: page.ogImage || '',
-        });
+      ogForm.reset({
+        ogTitle: page.ogTitle || '',
+        ogDescription: page.ogDescription || '',
+        ogImage: page.ogImage || '',
+      });
     }
   }, [page, ogForm]);
 
@@ -203,7 +204,7 @@ export default function PageEditor() {
     const fileExtension = file.name.split('.').pop();
     const fileName = `${uuidv4()}.${fileExtension}`;
     const storageRef = ref(storage, `page-assets/${fileName}`);
-    
+
     try {
       const snapshot = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(snapshot.ref);
@@ -229,27 +230,27 @@ export default function PageEditor() {
 
     let ogImageUrl = values.ogImage;
     if (ogImageFile) {
-        ogImageUrl = await handleFileUpload(ogImageFile);
-        if (!ogImageUrl) return;
+      ogImageUrl = await handleFileUpload(ogImageFile);
+      if (!ogImageUrl) return;
     }
 
     const docRef = doc(firestore, 'pages', page.id);
     const dataToSave = {
-        ...page,
-        ogTitle: values.ogTitle || null,
-        ogDescription: values.ogDescription || null,
-        ogImage: ogImageUrl || null,
+      ...page,
+      ogTitle: values.ogTitle || null,
+      ogDescription: values.ogDescription || null,
+      ogImage: ogImageUrl || null,
     };
-    
+
     setDocumentNonBlocking(docRef, dataToSave, { merge: true });
 
     toast({
-        title: 'Social Media Data Saved!',
-        description: 'Open Graph data has been updated.',
+      title: 'Social Media Data Saved!',
+      description: 'Open Graph data has been updated.',
     });
     setOgImageFile(null);
   };
-  
+
 
   const handleSectionUpdate = async (updatedSectionData: Section, imageFile: File | null) => {
     if (!firestore || !page) return;
@@ -257,13 +258,13 @@ export default function PageEditor() {
     let finalSectionData = { ...updatedSectionData };
 
     if (imageFile) {
-        const imageUrl = await handleFileUpload(imageFile);
-        if (!imageUrl) return; // Stop if upload failed
-        finalSectionData.imageUrl = imageUrl;
+      const imageUrl = await handleFileUpload(imageFile);
+      if (!imageUrl) return; // Stop if upload failed
+      finalSectionData.imageUrl = imageUrl;
     }
-    
+
     const updatedSections = page.sections.map(s => s.id === finalSectionData.id ? finalSectionData : s);
-    
+
     const docRef = doc(firestore, 'pages', page.id);
     const dataToSave = { ...page, sections: updatedSections };
 
@@ -279,100 +280,100 @@ export default function PageEditor() {
     <div className="container mx-auto px-4 py-12 md:px-6">
       <header className="mb-8">
         <Button variant="ghost" size="sm" asChild className="mb-4">
-            <Link href="/admin/dashboard">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
-            </Link>
+          <Link href="/admin/dashboard">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Link>
         </Button>
         {isPageLoading ? (
-            <Skeleton className="h-8 w-1/3" />
+          <Skeleton className="h-8 w-1/3" />
         ) : (
-            <h1 className="text-xl font-bold tracking-tight">Editing: {page?.title}</h1>
+          <h1 className="text-xl font-bold tracking-tight">Editing: {page?.title}</h1>
         )}
         <p className="text-sm text-muted-foreground">Manage this page's content sections.</p>
       </header>
-      
+
       {pageId !== 'legal' && (
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Social Media & SEO</CardTitle>
-          <CardDescription>
-            Control how this page appears when shared on social media platforms.
-          </CardDescription>
-        </CardHeader>
-        {isPageLoading ? (
-             <CardContent className="space-y-4">
-                <Skeleton className="h-24 w-full" />
-                <Skeleton className="h-24 w-full" />
-                <Skeleton className="h-24 w-full" />
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Social Media & SEO</CardTitle>
+            <CardDescription>
+              Control how this page appears when shared on social media platforms.
+            </CardDescription>
+          </CardHeader>
+          {isPageLoading ? (
+            <CardContent className="space-y-4">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
             </CardContent>
-        ) : (
+          ) : (
             <Form {...ogForm}>
-                <form onSubmit={ogForm.handleSubmit(handleOgFormSubmit)}>
-                    <CardContent className="space-y-4">
-                        <FormField
-                            control={ogForm.control}
-                            name="ogTitle"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Social Media Title</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="A catchy headline for social media" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={ogForm.control}
-                            name="ogDescription"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Social Media Description</FormLabel>
-                                    <FormControl>
-                                        <Textarea placeholder="A short, compelling summary of the page content" className="min-h-[120px]" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={ogForm.control}
-                            name="ogImage"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Social Media Image</FormLabel>
-                                    {field.value && !ogImageFile && (
-                                      <div className="relative my-2 w-[120px] aspect-video rounded-md overflow-hidden border">
-                                         <Image src={field.value} alt="Current OG Image" fill className="object-cover" />
-                                      </div>
-                                    )}
-                                    <FormControl>
-                                        <Input
-                                            type="file"
-                                            accept="image/png, image/jpeg, image/webp"
-                                            onChange={(e) => {
-                                                if (e.target.files?.[0]) {
-                                                    setOgImageFile(e.target.files[0]);
-                                                    field.onChange(URL.createObjectURL(e.target.files[0]));
-                                                }
-                                            }}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </CardContent>
-                    <CardFooter className="bg-muted/50 border-t py-4">
-                        <Button type="submit" size="sm" disabled={ogForm.formState.isSubmitting}>
-                            {ogForm.formState.isSubmitting ? 'Saving...' : 'Save Social Media Data'}
-                        </Button>
-                    </CardFooter>
-                </form>
+              <form onSubmit={ogForm.handleSubmit(handleOgFormSubmit)}>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={ogForm.control}
+                    name="ogTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Social Media Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="A catchy headline for social media" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={ogForm.control}
+                    name="ogDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Social Media Description</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="A short, compelling summary of the page content" className="min-h-[120px]" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={ogForm.control}
+                    name="ogImage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Social Media Image</FormLabel>
+                        {field.value && !ogImageFile && (
+                          <div className="relative my-2 w-[120px] aspect-video rounded-md overflow-hidden border">
+                            <Image src={field.value} alt="Current OG Image" fill className="object-cover" />
+                          </div>
+                        )}
+                        <FormControl>
+                          <Input
+                            type="file"
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                setOgImageFile(e.target.files[0]);
+                                field.onChange(URL.createObjectURL(e.target.files[0]));
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+                <CardFooter className="bg-muted/50 border-t py-4">
+                  <Button type="submit" size="sm" disabled={ogForm.formState.isSubmitting}>
+                    {ogForm.formState.isSubmitting ? 'Saving...' : 'Save Social Media Data'}
+                  </Button>
+                </CardFooter>
+              </form>
             </Form>
-        )}
-      </Card>
+          )}
+        </Card>
       )}
 
       <Card>
@@ -383,19 +384,19 @@ export default function PageEditor() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-        {isPageLoading ? (
+          {isPageLoading ? (
             <div className="space-y-4">
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
             </div>
-        ) : page ? (
+          ) : page ? (
             <Accordion type="multiple" defaultValue={page.sections.map(s => s.id)} className="w-full">
               {page.sections.map(section => (
                 <AccordionItem key={section.id} value={section.id}>
                   <AccordionTrigger className="text-base font-medium">{section.title} Section</AccordionTrigger>
                   <AccordionContent className="p-4 bg-muted/40 rounded-md border">
-                    <SectionForm 
+                    <SectionForm
                       page={page}
                       section={section}
                       onSectionUpdate={handleSectionUpdate}
@@ -405,7 +406,7 @@ export default function PageEditor() {
               ))}
             </Accordion>
           ) : (
-             <p className="text-sm text-muted-foreground">Could not load page data. It might not exist.</p>
+            <p className="text-sm text-muted-foreground">Could not load page data. It might not exist.</p>
           )}
         </CardContent>
       </Card>
