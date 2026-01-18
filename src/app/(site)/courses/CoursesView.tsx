@@ -33,6 +33,11 @@ export default function CoursesView({ formations, themes, categories, pageData, 
     const categoryIdFromUrl = searchParams.get('categoryId');
     const [isMobile, setIsMobile] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     useEffect(() => {
         const checkIsMobile = () => setIsMobile(window.innerWidth < 768);
@@ -220,30 +225,38 @@ export default function CoursesView({ formations, themes, categories, pageData, 
                     {/* Filters responsive */}
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
                         <div className="flex flex-col w-full sm:w-64">
-                            <Select onValueChange={handleCategoryChange} value={selectedCategory || 'all'}>
-                                <SelectTrigger className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white w-full">
-                                    <SelectValue placeholder="Filtrer par catégorie" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Toutes les catégories</SelectItem>
-                                    {availableCategories?.map(category => (
-                                        <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            {isMounted ? (
+                                <Select onValueChange={handleCategoryChange} value={selectedCategory || 'all'}>
+                                    <SelectTrigger className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white w-full">
+                                        <SelectValue placeholder="Filtrer par catégorie" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Toutes les catégories</SelectItem>
+                                        {availableCategories?.map(category => (
+                                            <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            ) : (
+                                <div className="h-10 w-full rounded-md border border-white/50 bg-white/10" />
+                            )}
                         </div>
                         <div className="flex flex-col w-full sm:w-64">
-                            <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!availableThemes || availableThemes.length === 0}>
-                                <SelectTrigger className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white w-full">
-                                    <SelectValue placeholder="Filtrer par thème" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Tous les thèmes</SelectItem>
-                                    {filteredThemes.map(theme => (
-                                        <SelectItem key={theme.id} value={theme.id}>{theme.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            {isMounted ? (
+                                <Select onValueChange={handleThemeChange} value={selectedTheme || 'all'} disabled={!availableThemes || availableThemes.length === 0}>
+                                    <SelectTrigger className="bg-transparent text-white border-white/50 hover:bg-white/10 hover:text-white w-full">
+                                        <SelectValue placeholder="Filtrer par thème" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Tous les thèmes</SelectItem>
+                                        {filteredThemes.map(theme => (
+                                            <SelectItem key={theme.id} value={theme.id}>{theme.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            ) : (
+                                <div className="h-10 w-full rounded-md border border-white/50 bg-white/10" />
+                            )}
                         </div>
                     </div>
                 </div>

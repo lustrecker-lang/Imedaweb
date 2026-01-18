@@ -1,7 +1,7 @@
 
 "use client";
 
-import * as React from "react";
+import React, { useState, forwardRef, type ElementRef, type ComponentPropsWithoutRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -49,6 +49,8 @@ const navStructure = [
   }
 ];
 
+// ... (existing constants)
+
 interface CompanyProfile {
   name?: string;
   logoUrl?: string;
@@ -68,9 +70,9 @@ interface HeaderProps {
   campuses: Campus[];
 }
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a"> & { description?: string; href: string }
+const ListItem = forwardRef<
+  ElementRef<"a">,
+  ComponentPropsWithoutRef<"a"> & { description?: string; href: string }
 >(({ className, title, description, href, ...props }, ref) => {
   const defaultHref = href || "#";
   return (
@@ -96,8 +98,8 @@ ListItem.displayName = "ListItem";
 
 
 export function Header({ companyProfile, campuses }: HeaderProps) {
-  const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
-  const [isContactSheetOpen, setIsContactSheetOpen] = React.useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
 
   const LogoComponent = () => {
     const fixedWidth = 'w-[96px]';

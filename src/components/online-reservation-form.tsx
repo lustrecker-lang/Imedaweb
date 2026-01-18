@@ -441,7 +441,7 @@ export function OnlineCourseForm({
                                 <FormItem>
                                     <FormLabel>Nom et prénom</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Votre nom complet" {...field} />
+                                        <Input placeholder="Votre nom complet" {...field} suppressHydrationWarning />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -454,7 +454,7 @@ export function OnlineCourseForm({
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="votre.email@exemple.com" {...field} />
+                                        <Input placeholder="votre.email@exemple.com" {...field} suppressHydrationWarning />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -467,7 +467,7 @@ export function OnlineCourseForm({
                                 <FormItem>
                                     <FormLabel>Téléphone/WhatsApp</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Votre numéro" {...field} />
+                                        <Input placeholder="Votre numéro" {...field} suppressHydrationWarning />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

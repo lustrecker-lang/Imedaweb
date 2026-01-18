@@ -203,6 +203,19 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
         )
     };
 
+    const isVideoUrl = (url: string) => {
+        const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+        try {
+            // Handle relative URLs if necessary, though mostly absolute
+            const urlObj = url.startsWith('http') ? new URL(url) : new URL(url, 'http://base.com');
+            const pathname = urlObj.pathname;
+            return videoExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
+        } catch (e) {
+            // Fallback
+            return videoExtensions.some(ext => url.toLowerCase().split('?')[0].endsWith(ext));
+        }
+    };
+
     return (
         <div className="bg-background">
             {isMobile && (
@@ -279,7 +292,18 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                                                             </Link>
                                                             <div className="relative w-full h-full min-h-[120px]">
                                                                 {campus.imageUrl ? (
-                                                                    <Image src={campus.imageUrl} alt={campus.name} fill className="transition-transform duration-300 group-hover:scale-105 object-cover" />
+                                                                    isVideoUrl(campus.imageUrl) ? (
+                                                                        <video
+                                                                            src={campus.imageUrl}
+                                                                            autoPlay
+                                                                            loop
+                                                                            muted
+                                                                            playsInline
+                                                                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                                        />
+                                                                    ) : (
+                                                                        <Image src={campus.imageUrl} alt={campus.name} fill className="transition-transform duration-300 group-hover:scale-105 object-cover" />
+                                                                    )
                                                                 ) : (
                                                                     <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Media</div>
                                                                 )}
@@ -661,7 +685,7 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                         </div>
                     </aside>
                 </div>
-            </main>
+            </main >
             {isMobile && (
                 <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm p-4 border-t lg:hidden pb-[calc(1rem+env(safe-area-inset-bottom))] [clip-path:inset(0_0_calc(-1*env(safe-area-inset-bottom))_0)]">
                     <Sheet open={isEnquirySheetOpen} onOpenChange={setIsEnquirySheetOpen}>
@@ -681,7 +705,8 @@ export default function CourseDetailView({ formation, theme, modules, campuses, 
                         </SheetContent>
                     </Sheet>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

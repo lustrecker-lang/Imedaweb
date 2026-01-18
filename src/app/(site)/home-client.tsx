@@ -114,6 +114,18 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
   const [isSearching, setIsSearching] = useState(false);
   const [mobileTab, setMobileTab] = useState<'browse' | 'search'>('browse');
   const [mobileBrowseTheme, setMobileBrowseTheme] = useState<{ id: string, name: string } | null>(null);
+  const [mobileSelectedCategory, setMobileSelectedCategory] = useState<'international' | 'online' | null>(null);
+  const [navigatingFormationId, setNavigatingFormationId] = useState<string | null>(null);
+
+  // ... (keep existing imports and state)
+
+  // In the JSX map function:
+  /*
+     This tool call is tricky because I need to add state near the top and modify JSX further down.
+     I should probably use multi_replace for this.
+     Let me cancel this and use multi_replace.
+  */
+
   const [catalogEmail, setCatalogEmail] = useState('');
   const [catalogPhone, setCatalogPhone] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false);
@@ -309,7 +321,15 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
               <div className="mt-8 w-full max-w-2xl">
                 <div className="flex flex-col sm:flex-row items-center gap-2 bg-white/20 backdrop-blur-sm p-3 rounded-lg border border-white/30">
                   {isMobile ? (
-                    <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
+                    <Sheet open={isThemeSheetOpen} onOpenChange={(open) => {
+                      setIsThemeSheetOpen(open);
+                      if (!open) {
+                        // Reset all nested states when sheet closes
+                        setMobileSelectedCategory(null);
+                        setMobileBrowseTheme(null);
+                        setMobileTab('browse');
+                      }
+                    }}>
                       <SheetTrigger asChild>
                         <Button
                           variant="outline"
@@ -322,48 +342,36 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                           <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
                         </Button>
                       </SheetTrigger>
-                      <SheetContent side="bottom" className="h-[85vh] flex flex-col p-0 gap-0">
-                        <div className="p-4 border-b border-border/10 bg-background z-10">
-                          <SheetHeader className="mb-4">
+                      <SheetContent side="bottom" className={cn("flex flex-col p-0 gap-0 transition-all duration-300 ease-in-out outlines-none", (mobileTab === 'search' || mobileSelectedCategory || mobileBrowseTheme) ? "h-[85vh]" : "h-auto pb-8")}>
+                        {/* Header */}
+                        <div className="p-4 border-b border-border/10 bg-background z-10 w-full">
+                          <SheetHeader className="flex-row items-center justify-between space-y-0">
                             <SheetTitle className="font-headline text-xl font-normal text-left">
-                              {mobileTab === 'search' ? 'Rechercher' : (mobileBrowseTheme ? mobileBrowseTheme.name : 'Parcourir par Thème')}
+                              {mobileTab === 'search'
+                                ? 'Rechercher'
+                                : mobileBrowseTheme
+                                  ? mobileBrowseTheme.name
+                                  : mobileSelectedCategory
+                                    ? 'Choisir un Thème'
+                                    : 'Trouver une Formation'}
                             </SheetTitle>
+                            {/* Search icon button - placeholder for future search sheet */}
+                            {mobileTab === 'browse' && !mobileBrowseTheme && !mobileSelectedCategory && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                onClick={() => setMobileTab('search')}
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
+                            )}
                           </SheetHeader>
-                          <div className="flex p-1 bg-muted rounded-lg border border-border/10">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setMobileTab('browse');
-                                setMobileBrowseTheme(null);
-                              }}
-                              className={cn(
-                                "flex-1 rounded-md text-sm font-medium transition-all",
-                                mobileTab === 'browse'
-                                  ? "bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
-                                  : "text-muted-foreground hover:bg-transparent hover:text-foreground"
-                              )}
-                            >
-                              Par Thème
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setMobileTab('search')}
-                              className={cn(
-                                "flex-1 rounded-md text-sm font-medium transition-all",
-                                mobileTab === 'search'
-                                  ? "bg-background text-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
-                                  : "text-muted-foreground hover:bg-transparent hover:text-foreground"
-                              )}
-                            >
-                              Par Nom
-                            </Button>
-                          </div>
                         </div>
 
                         {mobileTab === 'browse' ? (
-                          <div className="flex-1 overflow-y-auto">
+                          <div className="flex-1 overflow-y-auto w-full">
+                            {/* Level 3: Formation list (deepest) */}
                             {mobileBrowseTheme ? (
                               <div className="p-4 space-y-2">
                                 <Button
@@ -382,48 +390,104 @@ export function HomeClient({ heroData, referencesData, featuresData, catalogData
                                         key={formation.id}
                                         variant="outline"
                                         className="w-full justify-between h-auto py-3 text-left border-border/10 bg-card/5 hover:bg-card/10"
-                                        onClick={() => handleFormationSelect(formation.id, formation.name || '')}
+                                        onClick={() => {
+                                          setNavigatingFormationId(formation.id);
+                                          handleFormationSelect(formation.id, formation.name || '');
+                                          // Keep sheet open while navigating to prevent flash
+                                          router.push(`/courses/${formation.id}`);
+                                        }}
+                                        disabled={navigatingFormationId !== null}
                                       >
                                         <div className="flex flex-col gap-1 overflow-hidden">
                                           <span className="font-medium truncate">{formation.name}</span>
                                           <span className="text-xs text-muted-foreground">{formation.formationId}</span>
                                         </div>
-                                        <ChevronRight className="h-4 w-4 opacity-30 shrink-0 ml-2" />
+                                        {navigatingFormationId === formation.id ? (
+                                          <Loader2 className="h-4 w-4 animate-spin shrink-0 ml-2" />
+                                        ) : (
+                                          <ChevronRight className="h-4 w-4 opacity-30 shrink-0 ml-2" />
+                                        )}
                                       </Button>
                                     ))}
                                 </div>
                               </div>
-                            ) : (
+                            ) : mobileSelectedCategory ? (
+                              /* Level 2: Theme picker (filtered by category) */
                               <div className="p-4 space-y-3">
-                                {coursesData.themes.map(theme => (
-                                  <Button
-                                    key={theme.id}
-                                    variant="outline"
-                                    className="w-full justify-between h-auto py-4 px-4 text-left border border-border/20 bg-card shadow-sm hover:bg-muted/50 whitespace-normal"
-                                    onClick={() => setMobileBrowseTheme({ id: theme.id, name: theme.name })}
+                                <Button
+                                  variant="ghost"
+                                  className="w-full justify-start pl-0 hover:bg-transparent mb-2 text-muted-foreground hover:text-foreground"
+                                  onClick={() => setMobileSelectedCategory(null)}
+                                >
+                                  <ArrowLeft className="mr-2 h-4 w-4" />
+                                  Retour aux catégories
+                                </Button>
+                                {coursesData.themes
+                                  .filter(theme => mobileSelectedCategory === 'online' ? theme.isOnline : !theme.isOnline)
+                                  .map(theme => (
+                                    <Button
+                                      key={theme.id}
+                                      variant="outline"
+                                      className="w-full justify-between h-auto py-4 px-4 text-left border border-border/20 bg-card shadow-sm hover:bg-muted/50 whitespace-normal"
+                                      onClick={() => setMobileBrowseTheme({ id: theme.id, name: theme.name })}
+                                    >
+                                      <span className="font-medium text-base leading-snug">{theme.name}</span>
+                                      <ChevronRight className="h-4 w-4 opacity-50 shrink-0 ml-3" />
+                                    </Button>
+                                  ))}
+                              </div>
+                            ) : (
+                              /* Level 1: Category selection (initial view) */
+                              <div className="p-4 flex flex-col">
+                                <div className="grid grid-cols-2 gap-4">
+                                  {/* Formation Internationale Card */}
+                                  <button
+                                    onClick={() => setMobileSelectedCategory('international')}
+                                    className="flex flex-col items-center p-3 rounded-xl border border-border/20 bg-card shadow-sm hover:bg-muted/50 hover:border-primary/30 transition-all text-center group"
                                   >
-                                    <span className="font-medium text-base leading-snug">{theme.name}</span>
-                                    <ChevronRight className="h-4 w-4 opacity-50 shrink-0 ml-3" />
-                                  </Button>
-                                ))}
+                                    <div className="w-full aspect-square rounded-md mb-3 overflow-hidden relative">
+                                      <Image src="/images/formationsinternationales.jpg" alt="Formations Internationales" fill className="object-cover" />
+                                    </div>
+                                    <span className="font-medium text-sm leading-tight group-hover:text-primary transition-colors">Formation Internationale</span>
+                                  </button>
+                                  {/* Formation en ligne Card */}
+                                  <button
+                                    onClick={() => setMobileSelectedCategory('online')}
+                                    className="flex flex-col items-center p-3 rounded-xl border border-border/20 bg-card shadow-sm hover:bg-muted/50 hover:border-primary/30 transition-all text-center group"
+                                  >
+                                    <div className="w-full aspect-square rounded-md mb-3 overflow-hidden relative">
+                                      <Image src="/images/formationsenligne.jpg" alt="Formations en Ligne" fill className="object-cover" />
+                                    </div>
+                                    <span className="font-medium text-sm leading-tight group-hover:text-primary transition-colors">Formation en Ligne</span>
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
                         ) : (
                           <Command className="flex-1 w-full" shouldFilter={false}>
-                            <div className="p-4 pb-0">
-                              <CommandInput
-                                placeholder="Tapez un nom de formation ou code..."
-                                value={searchQuery}
-                                onValueChange={(val) => {
-                                  setSearchQuery(val);
-                                  setSelectedItem(null); // Reset selection on typing
-                                }}
-                                className="border rounded-md px-3"
-                              />
+                            <div className="p-4 pb-0 flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 shrink-0"
+                                onClick={() => setMobileTab('browse')}
+                              >
+                                <ArrowLeft className="h-4 w-4" />
+                              </Button>
+                              <div className="flex-1">
+                                <CommandInput
+                                  placeholder="Tapez un nom de formation ou code..."
+                                  value={searchQuery}
+                                  onValueChange={(val) => {
+                                    setSearchQuery(val);
+                                    setSelectedItem(null); // Reset selection on typing
+                                  }}
+                                  className="border rounded-md px-3"
+                                />
+                              </div>
                             </div>
                             <CommandList className="flex-1 max-h-none p-2">
-                              {/* Show recent searches or empty state if no query? For now existing logic */}
                               <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
                                 {searchQuery ? "Aucun résultat trouvé." : "Commencez à taper pour rechercher..."}
                               </CommandEmpty>
