@@ -14,6 +14,7 @@ import { useFirestore, addDocumentNonBlocking } from '@/firebase';
 import { collection, serverTimestamp } from 'firebase/firestore';
 import { z } from 'zod';
 import { PremiumInfoSection } from '@/components/landing/PremiumInfoSection';
+import { OnlineInfoSection } from '@/components/landing/OnlineInfoSection';
 
 // Interfaces (Redefined for Client Safety)
 interface Section { id: string; title: string; content: string; imageUrl?: string; }
@@ -67,8 +68,9 @@ export default function LandingPageView({ landingPage, heroData, referencesData,
     }
 
     // Helper for Hero Image
+    const isOnline = landingPage.cta.targetPLP === 'online';
     const heroSection = heroData?.sections.find(s => s.id === 'hero');
-    const heroImageUrl = heroSection?.imageUrl;
+    const heroImageUrl = isOnline ? '/images/onlinelanding.jpg' : heroSection?.imageUrl;
 
     // Helper to check for video extensions
     const isVideoUrl = (url?: string | null) => {
@@ -164,6 +166,11 @@ export default function LandingPageView({ landingPage, heroData, referencesData,
                 <div className="container px-4 md:px-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <div className="flex flex-col items-start text-left space-y-6">
+                            {isOnline && (
+                                <div className="inline-flex items-center px-3 py-1 text-xs font-semibold bg-primary text-white uppercase tracking-[0.2em]">
+                                    Formation en Ligne
+                                </div>
+                            )}
                             <h1 className="text-4xl font-normal tracking-tighter sm:text-5xl md:text-6xl font-headline">
                                 {landingPage.headline}
                             </h1>
@@ -259,11 +266,15 @@ export default function LandingPageView({ landingPage, heroData, referencesData,
                 </section>
             )}
 
-            {/* 2.5 Premium Information Section */}
-            <PremiumInfoSection
-                ctaHref={ctaHref}
-                leadCaptureSlug={landingPage.slug}
-            />
+            {/* 2.5 Premium Information Section / Online Info Section */}
+            {isOnline ? (
+                <OnlineInfoSection />
+            ) : (
+                <PremiumInfoSection
+                    ctaHref={ctaHref}
+                    leadCaptureSlug={landingPage.slug}
+                />
+            )}
 
             {/* 3. Catalogue Download Section */}
             {catalogSection && (
